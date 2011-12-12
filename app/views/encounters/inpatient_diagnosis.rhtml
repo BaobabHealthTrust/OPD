@@ -1,0 +1,51 @@
+<script type="text/javascript">
+  var tt_cancel_destination = "/encounters/diagnoses_index?patient_id=<%= @patient.id %>"
+</script>
+<script language="javascript" type="text/javascript" src="/javascripts/diagnosis.js"></script>
+<style type="text/css">
+  #space { display:inline; font-size:1.2em; }
+  #helpText0 { width:680px}
+</style>
+ <%= stylesheet_link_tag "diagnosis-style" %>
+<form id='inpatient_diagnosis' action="/encounters/create" method='post'>
+
+  <%= hidden_field_tag "encounter[encounter_type_name]", "DIAGNOSIS" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", session[:datetime] ||=  DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+
+   <input type='text' name='diagnosis_ctrl' tt_onLoad='setNextAttribute();createElements();updateInfoBar();updateMainDiagnosis();$("diagnosis-inputbox").focus()' tt_onUnLoad='hideDiagnosisContainer()' tt_pageStyleClass='NoControls' optional /> 
+   
+   <input type='text' name='confirmatory_evidence_ctrl' tt_onLoad='createConfirmatoryEvidence();' tt_onUnLoad='hideConfirmatoryContainer()' tt_pageStyleClass='NoControls' optional /> 
+
+
+   <%= hidden_field_tag("final_diagnosis", nil, {:id => "final_diagnosis"}) %>
+
+  <%= submit_tag "Finish" %>
+
+</form>
+<div id='subDiagnosisPopUpDiv' class='diagnosisBarDiv'>
+
+<div id='subDiagnosisPopUp' class='diagnosisBar'>
+</div> 
+<div>
+  <button onmousedown='hidePopUp();'><span>Cancel</span></button>
+  </div>
+</div>
+
+<div id='subSubDiagnosisPopUpDiv' class='diagnosisBarDiv'>
+<div id='subSubDiagnosisPopUp' class='diagnosisBar'>
+</div> 
+<div>
+  <button onmousedown='hidePopUp();'><span>Cancel</span></button>
+  </div>
+</div>
+
+<script type='text/javascript'>
+var finalAnswers = [<%= DiagnosisTree.diagnosis_data.to_json %>];
+var finalTests = [<%= DiagnosisTree.confirmatory_evidence.to_json %>];  
+var mainDataArray = [];
+var tempDataArray = [];
+var confirmatoryEvidenceData = {};
+</script>
+

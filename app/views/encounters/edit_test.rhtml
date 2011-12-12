@@ -1,0 +1,88 @@
+<script src="/javascripts/antibiotics.js" type="text/javascript"></script>
+<script type="text/javascript">
+  tt_cancel_destination = '/encounters/show_lab_tests?identifier=<%= params[:identifier].upcase if !params[:identifier].nil? %>';
+
+  var antibiotics = <%= @antibiotic_results.to_json %>;
+  var patient_id = '<%= @patient.id %>';
+  var datetime = '<%= session[:datetime] ||= DateTime.now() %> '
+
+</script>
+
+<% case params[:test].upcase
+when "BLOOD CULTURE" %>
+
+  <%= render :partial => "blood_culture" %>
+  
+<% when "OTHER" %>
+
+  <%= render :partial => "other" %>
+  
+<% when "MOLECULAR" %>
+
+  <%= render :partial => "molecular" %>
+  
+<% when "CSF" %>
+
+  <%= render :partial => "csf" %>
+  
+<% when "MP TEST" %>
+
+  <%= render :partial => "mp_test" %>
+  
+<% when "PCV" %>
+
+  <%= render :partial => "pcv" %>
+
+<% when "MPS" %>
+
+  <%= render :partial => "mp_test" %>
+
+<% when "MALARIA RDT" %>
+
+  <%= render :partial => "malaria_rdt" %>
+
+<% when "RANDOM BLOOD GLUCOSE" %>
+
+  <%= render :partial => "random_blood_glucose" %>
+
+<% when "HAEMOGLOBIN" %>
+
+  <%= render :partial => "haemoglobin" %>
+
+<% when "MCV" %>
+
+  <%= render :partial => "mcv" %>
+
+<% when "WBC" %>
+
+  <%= render :partial => "wbc" %>
+
+<% when "PLATELETS" %>
+
+  <%= render :partial => "platelets" %>
+
+<% when "HIV TEST" %>
+
+  <%= render :partial => "hiv_test" %>
+
+<% when "UREA AND ELECTROLYTES" %>
+
+  <%= render :partial => "urea_and_electrolytes" %>
+
+<% when "CREATININE" %>
+
+  <%= render :partial => "creatinine" %>
+
+<% when "LIVER FUNCTION TESTS" %>
+
+  <%= render :partial => "liver_function_tests" %>
+
+<% when "URINE MICROSCOPY" %>
+
+  <%= render :partial => "urine_microscopy" %>
+
+<% when "STOOL MICROSCOPY" %>
+
+  <%= render :partial => "stool_microscopy" %>
+
+<% end %>

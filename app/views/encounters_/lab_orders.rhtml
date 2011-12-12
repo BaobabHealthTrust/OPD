@@ -1,0 +1,178 @@
+<script>
+    var tt_cancel_destination = "/patients/show/<%= @patient.id%>?auto_load_forms=false"
+    var val_arr = [];
+    var val_in_list = [];
+    var number_of_selected_test = 0;
+
+    function showLabels(){
+		//alert($('lab_orders').value);
+        var ordersArray = tstPageValues[1].split(";")
+        //var ordersArray = val_arr
+
+        var displayText = ""
+        for(var i=0;i<ordersArray.length;i++){
+	        displayText += drawLabel(ordersArray[i])
+        }
+
+        $('tt_page_summary_').innerHTML = '<div id="summary">' + displayText + '</div>' ;
+    }
+
+    function drawLabel(test_type){
+        //TODO Replace below wtih http://barcode-coder.com/en/barcode-jquery-plugin-201.html
+        label = "\
+        <div class='label'>\
+        <span class='labelLine'>\
+        <%= "#{@patient_bean.name} #{@patient_bean.national_id_with_dashes}" %>\
+        </span>\
+        <span class='labelLine reverse'>"+test_type+"</span>\
+        <span class='labelLine'> <del>999999 || |||| | ||||| | | ||||| || | |</del></span>\
+        <%= "#{DateTime.now.strftime("%d%b%y %H:%M")}" %>\
+        </div>\
+        "
+        return label
+    }
+
+    function updateLaborderUrl(mainTest){
+        var url = '/encounters/lab_orders?sample=' + mainTest + '&search_string=';
+        $('lab_orders').setAttribute('ajaxURL', url);
+    }
+
+   /* function updateInfoBar(element){
+        var val = unescape(element.innerHTML)
+        var idx = val_arr.indexOf(val);
+        if (idx == -1){
+          val_arr.push(val);
+          }else{
+          val_arr.splice(idx,1)
+        }
+        //tstInputTarget.value = ""
+        $('final_tests').value = val_arr.join(';');
+    }*/
+
+    function colourfy(){
+        alert('AA');
+    }
+
+//opts_arr[i].setAttribute("onmousedown", "updateInfoBar();updateTouchscreenInputForSelect(this);colourfy();");
+    function updateLabOptions(){
+        opts_arr = document.getElementsByTagName('li');
+        val_in_list = [];
+        for (var i = 0; i < opts_arr.length; i++){
+            for(k = 0; k < val_arr.length; k++){
+                if(opts_arr[i].innerHTML.toString() == val_arr[k].toString()){
+                    val_in_list.push(val_arr[k]);
+                }
+            }
+
+        }
+        tstInputTarget.value = val_in_list.join(';');
+        listSuggestions(tstCurrentPage);
+    }
+  
+    /*function updateNextFinish(){
+        tstTimerFunctionCall = null;
+        number_of_selected_test = tstInputTarget.value.split(';').length;
+
+        if (tstCurrentPage == 0 || tstCurrentPage == 1){
+            if (tstInputTarget.value == ''){
+                //$('nextButton').innerHTML = '<span>Finish</span>';
+                $('nextButton').innerHTML = '<span>Next</span>';
+                if(number_of_selected_test < 2 && tstCurrentPage == 1){
+                    $('nextButton').setAttribute("onmousedown","showMessage('Please select 2 or more tests');");
+                }
+                else{
+                    //$('nextButton').setAttribute("onmousedown","formSubmit()");
+                    $('nextButton').setAttribute("onmousedown","gotoNextPage()");
+                }
+            }
+            else{
+                $('nextButton').innerHTML = '<span>Next</span>';
+                if(number_of_selected_test < 2 && tstCurrentPage == 1){
+                    $('nextButton').setAttribute("onmousedown","showMessage('Please select 2 or more tests');");
+                }
+                else{
+                    $('nextButton').setAttribute("onmousedown","gotoNextPage()");
+                }
+            }
+            setTimeout(updateNextFinish, 500);
+        }
+    }*/
+
+    function validateOptions(){
+        number_of_selected_test = tstInputTarget.value.split(';').length;
+        if(number_of_selected_test < 2){
+            showMessage('Please select 2 or more tests');
+			gotoPage(tstCurrentPage - 1, false);
+        }
+    }
+
+    function formSubmit()
+    {
+        document.getElementById("label_specimens").submit();
+    }
+</script>
+<style>
+  #space { display:inline; font-size:1.2em; }
+  #Unknown { display: none}
+  .label {
+    display: inline-block;
+    margin: 5px;
+    border: 2px dashed black;
+    height: 80px;
+    width: 300px
+  }
+  .label .labelLine {
+    width: 100%;
+    display:block
+
+  }
+  .reverse {
+    background: black;
+    color: white;
+  }
+
+  .tt_controls_main_tests .keyboard{display:none;}
+  #tt_page_main_tests .options{height:550px}
+
+  .tt_controls_select_test .keyboard{display:none;}
+  #tt_page_select_test .options{height:530px}
+</style>
+<form id='label_specimens' action="/encounters/create" method='post'>
+    
+	<%= hidden_field_tag "encounter[encounter_type_name]", "LAB ORDERS" %>
+	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+	<%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+
+	<%# select_tag "main_tests", options_for_select(@select_options['lab_orders'].sort.collect{|k,v| k}.unshift(" ")), %>
+
+	<%= select_tag "main_tests", options_for_select(["Sputum-AAFB", "Sputum-Culture"].unshift(" ")), 
+		{	:helptext => 'Main tests', 
+			:id => 'main_tests',
+			:tt_onUnLoad => 'updateLaborderUrl($("main_tests").value);'}%>
+
+	<%= touch_select_tag "TESTS ORDERED", @patient, options_for_select([]),
+		{	:id => "lab_orders",
+			:tt_onLoad => "$('clearButton').style.display='block'", 
+			:tt_onUnLoad => 'validateOptions();',
+			:multiple => true,
+			:helpText => "Select test" } %>
+
+
+	<label for='showSummary'>Summary </label>
+	<%= text_field_tag :showSummary, nil, 
+		{	:tt_onLoad => "showLabels();$('clearButton').style.display='none'", 
+			:optional => "true", :tt_pageStyleClass => "NoControls" } %>
+
+  <% session_date = session[:datetime].to_date rescue nil                       
+    if session_date %>
+
+    <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+    <% else %>
+      <%= hidden_field_tag "filter[provider]", nil %>
+    <%end%>
+
+	<%= submit_tag "Finish" %>
+
+</form>
