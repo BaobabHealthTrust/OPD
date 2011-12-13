@@ -1947,7 +1947,7 @@ class PatientsController < ApplicationController
     excluded_encounters = ["Registration", "Diabetes history","Complications", #"Diabetes test",
       "General health", "Diabetes treatments", "Diabetes admissions","Hospital admissions",
       "Hypertension management", "Past diabetes medical history"]
-    @encounter_names = @patient.encounters.active.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
+    @encounter_names = @patient.encounters.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
     ignored_concept_id = Concept.find_by_name("NO").id;
 
     @observations = Observation.find(:all, :order => 'obs_datetime DESC', 
@@ -2486,12 +2486,12 @@ class PatientsController < ApplicationController
 		
    
     @past_local_cases = {}    
-    @patient.encounters.past.each{|e| 
-      @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")] = {}      
+    @patient.encounters.each{|e| 
+      @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")] = {} if e.encounter_datetime.to_date < (session[:datetime].to_date rescue Date.today.to_date)   
       }
     
-    @patient.encounters.past.each{|e| 
-      @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")][e.name] = encounter_summary(e) # e.observations.collect{|o| o.answer_string}      
+    @patient.encounters.each{|e| 
+      @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")][e.name] = encounter_summary(e)  if e.encounter_datetime.to_date < (session[:datetime].to_date rescue Date.today.to_date)   
       }
     
     @past_local_cases = @past_local_cases.sort.reverse!
@@ -2528,10 +2528,10 @@ class PatientsController < ApplicationController
       o = "TREATMENT NOT DONE" if encounter.type.name == 'X'
       o = "No prescriptions have been made" if o.blank?
       o
-    elsif name == 'OUTPATIENT DIAGNOSIS'
+    elsif name.upcase.include?('DIAGNOSIS')
       diagnosis_array = []
       encounter.observations.each{|observation|
-        next if observation.obs_group_id != nil || observation.concept.fullname.upcase != 'DIAGNOSIS'
+        next if observation.obs_group_id != nil || !observation.concept.fullname.upcase.include?('DIAGNOSIS')
         observation_string =  observation.answer_string
         child_ob = child_observation(observation)
         while child_ob != nil
@@ -2645,4 +2645,40 @@ class PatientsController < ApplicationController
     
   end
 
+  def influenza_recruitment
+
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    @influenza_data = Array.new()
+    @influenza_concepts = Array.new()
+
+    excluded_concepts = ["INFLUENZA VACCINE IN THE LAST 1 YEAR",
+                         "CURRENTLY (OR IN THE LAST WEEK) TAKING ANTIBIOTICS",
+                         "CURRENT SMOKER","WERE YOU A SMOKER 3 MONTHS AGO",
+                         "PREGNANT?","RDT OR BLOOD SMEAR POSITIVE FOR MALARIA",
+                         "PNEUMOCOCCAL VACCINE","MEASLES VACCINE",
+                         "MUAC LESS THAN 11.5 (CM)","WEIGHT",
+                         "PATIENT CURRENTLY SMOKES","IS PATIENT PREGNANT?"]
+        
+    influenza_data = @patient.encounters.current.all(
+                                        :conditions => ["encounter.encounter_type = ?",EncounterType.find_by_name('INFLUENZA DATA').encounter_type_id],
+                                        :include => [:observations]
+                                      ).map{|encounter| encounter.observations.all}.flatten.compact.map{|obs|
+                                        @influenza_data.push("#{obs.concept.fullname}: #{obs.answer_string}") if !excluded_concepts.include?(obs.to_s.split(':')[0])
+                                      }
+
+    if @influenza_data.length == 0
+     redirect_to :action => 'show', :patient_id => @patient.id and return
+    end
+    render :layout => "multi_touch"
+  end
+  
+  # Influenza method for accessing the influenza view
+  def chronic_conditions
+
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    @person = Person.find(@patient.patient_id)
+
+    @gender = @person.gender
+
+  end
 end
