@@ -3,6 +3,7 @@ production:
  use.user.selected.activities: yes
 
 development:
+ filing.number.limit: 300
  create_from_remote: no
  use.user.selected.activities: yes
 
