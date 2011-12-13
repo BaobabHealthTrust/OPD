@@ -32,7 +32,7 @@
 
 	<%= touch_select_tag "Primary diagnosis", @patient, nil,
 		{	:id => "primary_diagnosis",
-			:ajaxURL => "/encounters/diagnoses_opd?search_string=",
+			:ajaxURL => "/encounters/diagnoses?search_string=",
 		 	:helpText => "Primary Diagnosis" } %>
 
 	<%= touch_select_tag "Detailed primary diagnosis", @patient, nil,
@@ -52,7 +52,7 @@
 	<%= touch_select_tag "Secondary Diagnosis", @patient, nil,
 		{	:id => "secondary_diagnosis",
 	 		:tt_OnUnload => "setTimeout(updateNextFinish, 20)",
-			:ajaxURL => "/encounters/diagnoses_opd?search_string=",
+			:ajaxURL => "/encounters/diagnoses?search_string=",
 		 	:helpText => "Secondary Diagnosis" } %>
 
 	<%= touch_select_tag "Detailed secondary diagnosis", @patient, nil,

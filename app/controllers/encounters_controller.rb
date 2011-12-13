@@ -1299,41 +1299,38 @@ class EncountersController < ApplicationController
     #end
 
   end
-  
-  def diagnoses_opd
-    search_string = (params[:search_string] || '').upcase
-    filter_list = params[:filter_list].split(/, */) rescue []
-    outpatient_diagnosis = ConceptName.find_by_name("QECH EMERGENCY DIAGNOSIS LIST").concept
 
-    diagnosis_concepts = ConceptName.find_by_name("QECH EMERGENCY DIAGNOSIS LIST", :joins => [:concept],
-      :conditions => ["concept.retired = 0"]).concept.concept_answers.collect {|answer|
-      Concept.find(answer.answer_concept) rescue nil
-    }.compact rescue []
-    
-    # raise diagnosis_concepts.to_yaml    
-    
-    # TODO Need to check a global property for which concept set to limit things to
-    if (false)
-      diagnosis_concept_set = ConceptName.find_by_name('MALAWI NATIONAL DIAGNOSIS').concept
-      diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', concept_set.id], :include => [:name])
-    end  
+	def diagnoses
+		search_string = (params[:search_string] || '').upcase
+		filter_list = params[:filter_list].split(/, */) rescue []
 
-    # valid_answers = diagnosis_concepts.map{|concept| ConceptName.find(:last, :conditions => ["concept_id = ? AND concept_name_id IN (?)", concept.id, ConceptNameTagMap.find(:all, :conditions => ["concept_name_tag_id = ?", 404]).collect{|c| c.concept_name_id}]).name rescue nil}
-    #tag_id = ConceptNameTag.find_by_tag("preferred_qech_aetc_opd").concept_name_tag_id
+		diagnosis_concept = CoreService.get_global_property_value("application_diagnosis_concept")
 
-    valid_answers = diagnosis_concepts.map{|concept| 
-      # name = concept.name.name rescue nil
-      name = ConceptName.find(:last, :conditions => ["concept_id = ? AND voided = 0", 
-          concept.id]).name rescue nil
-      (!name.to_s.upcase.match(search_string.to_s.upcase).nil?) ? name : nil rescue ''
-    }.compact
-    previous_answers = []
-    # TODO Need to check global property to find out if we want previous answers or not (right now we)
-    previous_answers = Observation.find_most_common(outpatient_diagnosis, search_string)
+		if diagnosis_concept.blank?
+			diagnosis_concepts = ConceptClass.find_by_name("Diagnosis").concepts rescue []
+		else
+			diagnosis_concepts = ConceptName.find_by_name(diagnosis_concept).concept.concept_answers.collect {|answer|
+			  Concept.find(answer.answer_concept) rescue nil
+			}.compact rescue []
+		end
 
-    @suggested_answers = (previous_answers + valid_answers).sort.uniq  #.reject{|answer| filter_list.include?(answer) }.uniq[0..10]
-    render :text => "<li>" + @suggested_answers.join("</li><li>") + "</li>"
-  end
+		# raise diagnosis_concepts.to_yaml    
+
+		# TODO Need to check a global property for which concept set to limit things to
+		#if (false)
+		#  diagnosis_concept_set = ConceptName.find_by_name('MALAWI NATIONAL DIAGNOSIS').concept
+		#  diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', concept_set.id], :include => [:name])
+		#end  
+
+		valid_answers = diagnosis_concepts.map{|concept| 
+			name = concept.fullname rescue nil
+			(!name.to_s.upcase.match(search_string.to_s.upcase).nil?) ? name : nil rescue ''
+		}.compact
+
+		@suggested_answers = valid_answers.sort.uniq.reject{|answer| filter_list.include?(answer) }.uniq[0..10]
+		@suggested_answers = @suggested_answers - params[:search_filter].split(',') rescue @suggested_answers
+		render :text => "<li>" + @suggested_answers.join("</li><li>") + "</li>"
+	end
 
   def daignosis_details
 				diagnosis = params[:diagnosis_string]
