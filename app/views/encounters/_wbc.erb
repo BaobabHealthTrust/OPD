@@ -16,13 +16,13 @@
     <%= hidden_field_tag("observations[][value_coded_or_text]", "WBC") %>
     <%= hidden_field_tag("observations[][concept_name]", "LAB TEST RESULT") %>
     <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", session[:datetime] ||= DateTime.now()) %>
+    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
 
     <%= hidden_field_tag("observations[][value_coded_or_text]", "#{params[:identifier]}") %>
     <%= hidden_field_tag("observations[][parent_concept_name]", "LAB TEST RESULT") %>
     <%= hidden_field_tag("observations[][concept_name]", "LAB TEST SERIAL NUMBER") %>
     <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", session[:datetime] ||= DateTime.now()) %>
+    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
 
     <label for='field'>WBC Test Result (x1000 cells/mm<sup>3</sup>)</label>
     <% options=default.merge({
@@ -35,6 +35,6 @@
     <%= hidden_field_tag("observations[][parent_concept_name]", "LAB TEST RESULT") %>
     <%= hidden_field_tag("observations[][concept_name]", "WBC") %>
     <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", session[:datetime] ||= DateTime.now()) %>
+    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
 
   </form>
