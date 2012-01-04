@@ -138,9 +138,16 @@ class ApplicationController < ActionController::Base
   # Try to find the next task for the patient at the given location
   def main_next_task(location, patient, session_date = Date.today)
 		task = Task.first rescue Task.new()
-
-		task.encounter_type = 'NONE'
-		task.url = "/patients/show/#{patient.id}"
+		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
+				                             patient.id,EncounterType.find_by_name("OUTPATIENT RECEPTION").id, session_date],
+				                             :order =>'encounter_datetime DESC',:limit => 1)
+		task.encounter_type = 'OUTPATIENT RECEPTION'
+		if encounter_available.blank?  
+			task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
+		else 
+			task.encounter_type = 'NONE'
+			task.url = "/patients/show/#{patient.id}"
+		end 
 				
 		return task
   end

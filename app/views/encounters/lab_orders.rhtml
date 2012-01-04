@@ -23,12 +23,12 @@
 	<%
     tests_to_request = Array.new()
     if @patient_bean.age <15  
-      tests_to_request = concept_set_options("Lab test for peads")
+      tests_to_request = concept_set_options("Lab tests for peads")
     else 
-      tests_to_request = concept_set_options("Lab test for adults")
+      tests_to_request = concept_set_options("Lab tests for adults")
     end
   %>
-    <%= touch_select_tag "REQUESTED LAB TEST SET", @patient, tests_to_request, 
+    <%= touch_select_tag "TESTS ORDERED", @patient, tests_to_request, 
     	{
 		    :multiple => true,
 		    :id => "tests",

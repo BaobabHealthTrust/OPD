@@ -23,7 +23,7 @@
   <%= hidden_field_tag "encounter[encounter_datetime]",  DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
-	<%= touch_select_tag "PROCEDURE DONE", @patient, concept_set_options("Medical Procedure"),
+	<%= touch_select_tag "PROCEDURE DONE", @patient, concept_set_options("Medical Procedures"),
 		{
 			:id => "proc_done",
 			:multiple => true,
@@ -31,7 +31,7 @@
 			:helpText => 'Procedure Done'
 		} %>
 		
-	<%= touch_text_field_tag "PROCEDURE DONE", @patient, nil,
+	<%= touch_text_field_tag "Specific procedure done", @patient, nil,
 		{
 			:id => "proc_other",
     	:condition => "getSelected().match(/OTHER/i)",

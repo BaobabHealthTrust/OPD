@@ -4,10 +4,11 @@ production:
 
 development:
  application_diagnosis_concept: QECH Emergency Diagnosis List
- application_generic_medication: OPD Generic drugs
+ application_generic_medication: Diabetes Medication
  filing.number.limit: 300
  create_from_remote: no
  use.user.selected.activities: false
+ advanced.prescription.interface: true
 
 test: &TEST
  create_from_remote: no
