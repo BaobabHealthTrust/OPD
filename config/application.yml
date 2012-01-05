@@ -9,6 +9,7 @@ development:
  create_from_remote: no
  use.user.selected.activities: false
  advanced.prescription.interface: true
+ auto_set_appointment: false
 
 test: &TEST
  create_from_remote: no
