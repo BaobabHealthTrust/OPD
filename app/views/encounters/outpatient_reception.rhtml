@@ -24,7 +24,15 @@
 			:condition => "($('select').value == 'YES')",
 			:ajaxURL => '/programs/locations?q=',
 			:allowFreeText => false } %>
-			
+
+  <% if !@patient.patient_programs.current.local.map(&:program).map(&:name).include?('OPD Program') %>
+      <%= hidden_field_tag("programs[][patient_program_id]", nil) %>
+      <%= hidden_field_tag("programs[][program_id]", Program.find_by_name('OPD Program').id)%>
+      <%= hidden_field_tag("programs[][location_id]", Location.current_health_center.id) %>
+      <%= hidden_field_tag("programs[][date_enrolled]", session[:datetime] || Date.today) %>
+      <%= hidden_field_tag("programs[][states][][state]", "Following") %>
+  <%end%>
+  			
 		<% if @retrospective %>
 			<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
 			<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>

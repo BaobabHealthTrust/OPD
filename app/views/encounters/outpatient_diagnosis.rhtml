@@ -25,7 +25,7 @@
 
 <form id='outpatient_diagnosis' action="/encounters/create" method='post'>
 
-  <%= hidden_field_tag "encounter[encounter_type_name]", "DIAGNOSIS" %>
+  <%= hidden_field_tag "encounter[encounter_type_name]", "OUTPATIENT DIAGNOSIS" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
@@ -53,6 +53,7 @@
 		{	:id => "secondary_diagnosis",
 	 		:tt_OnUnload => "setTimeout(updateNextFinish, 20)",
 			:ajaxURL => "/encounters/diagnoses?search_string=",
+			:optional => "true",
 		 	:helpText => "Secondary Diagnosis" } %>
 
 	<%= touch_select_tag "Detailed secondary diagnosis", @patient, nil,
