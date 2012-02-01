@@ -1332,11 +1332,40 @@ class PatientsController < ApplicationController
       encs = patient.encounters.find(:all,:conditions =>["DATE(encounter_datetime) = ?",date])
       return nil if encs.blank?
 
-      label.draw_multi_text("Visit: #{encs.first.encounter_datetime.strftime("%d/%b/%Y %H:%M")}", :font_reverse => true)
+      label.draw_multi_text("Visit: #{encs.first.encounter_datetime.strftime("%d/%b/%Y %H:%M")}" +
+    " - #{encs.last.encounter_datetime.strftime("%d/%b/%Y %H:%M")}", :font_reverse => true)
+
       encs.each {|encounter|
-        next if encounter.name.humanize == "Registration"
-        label.draw_multi_text("#{encounter.name.humanize}: #{encounter.to_s}", :font_reverse => false)
+
+          if encounter.name.upcase.include?('TREATMENT')
+            o = encounter.orders.collect{|order| order.to_s if order.order_type_id == OrderType.find_by_name('Drug Order').order_type_id}.join("\n")
+            o = "No prescriptions have been made" if o.blank?
+            o = "TREATMENT NOT DONE" if treatment_not_done(encounter.patient, date)
+            label.draw_multi_text("#{o}", :font_reverse => false)
+
+          elsif encounter.name.upcase.include?("PROCEDURES DONE")
+            procs = ["Procedures: "]
+            procs << encounter.observations.collect{|observation| 
+              observation.answer_string.squish if !observation.concept.fullname.match(/Workstation location/i)
+            }.compact.join("; ")
+            label.draw_multi_text("#{procs}", :font_reverse => false)
+
+          elsif encounter.name.upcase.include?('UPDATE HIV STATUS')            
+            label.draw_multi_text("#{ 'HIV Status: ' + PatientService.patient_hiv_status(patient).to_s }", :font_reverse => false)
+
+          elsif encounter.name.upcase.include?('DIAGNOSIS')
+            obs = ["Diagnoses: "]
+            obs << encounter.observations.collect{|observe|
+              "#{observe.answer_string}".squish rescue nil if observe.concept.fullname.upcase.include?('DIAGNOSIS')}.compact.join("; ")
+            obs
+            label.draw_multi_text("#{obs}", :font_reverse => false)
+          end
+
       }
+
+      label.draw_multi_text("Seen by: #{User.current_user.name rescue ''} at " +
+        " #{Location.current_location.name rescue ''}", :font_reverse => true)
+      
       label.print(1)
     end
   end
@@ -2680,5 +2709,18 @@ class PatientsController < ApplicationController
 
     @gender = @person.gender
 
+  end
+
+  def treatment_not_done(patient, date)
+    self.current_treatment_encounter(patient, date).first.observations.all(
+      :conditions => ["obs.concept_id = ?", ConceptName.find_by_name("TREATMENT").concept_id]).last rescue false
+  end
+
+  def current_treatment_encounter(patient, date, force = false)
+    type = EncounterType.find_by_name('TREATMENT')
+
+    encounter = patient.encounters.find(:all,:conditions =>["encounter_type = ? AND
+                                  DATE(encounter_datetime) = ?", type,date])
+    return encounter
   end
 end
