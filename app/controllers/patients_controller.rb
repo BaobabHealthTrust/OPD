@@ -204,7 +204,7 @@ class PatientsController < ApplicationController
     patient = Patient.find(params[:id])
 
     @links << ["Demographics (Print)","/patients/print_demographics/#{patient.id}"]
-    @links << ["Visit Summary (Print)","/patients/dashboard_print_visit/#{patient.id}"]
+    @links << ["OPD Visit Summary (Print)","/patients/dashboard_print_opd_visit/#{patient.id}"]
     @links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
 
     if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
@@ -268,8 +268,8 @@ class PatientsController < ApplicationController
     print_and_redirect("/patients/national_id_label?patient_id=#{params[:id]}", redirect)  
   end
   
-  def dashboard_print_visit
-    print_and_redirect("/patients/visit_label/?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")
+  def dashboard_print_opd_visit
+    print_and_redirect("/patients/opd_visit_label/?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")
   end
   
   def print_visit
@@ -324,14 +324,14 @@ class PatientsController < ApplicationController
     send_data(label_commands,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{patient.id}#{rand(10000)}.lbl", :disposition => "inline")
   end
  
-  def visit_label
-	session_date = session[:datetime].to_date rescue Date.today
-    print_string = patient_visit_label(@patient, session_date) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
+  def opd_visit_label
+    session_date = session[:datetime].to_date rescue Date.today
+    print_string = opd_patient_visit_label(@patient, session_date) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
 
   def mastercard_record_label
-    print_string = patient_visit_label(@patient, params[:date].to_date)
+    print_string = opd_patient_visit_label(@patient, params[:date].to_date)
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
 
@@ -1318,7 +1318,7 @@ class PatientsController < ApplicationController
     label.print(num)
   end
 
-  def patient_visit_label(patient, date = Date.today)
+  def opd_patient_visit_label(patient, date = Date.today)
     result = Location.current_location.name.match(/outpatient/i).nil?
 
     if result == false
