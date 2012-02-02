@@ -619,6 +619,15 @@ class EncountersController < ApplicationController
 			#raise concept_set('PRESUMED SEVERE HIV CRITERIA IN INFANTS').to_yaml
 		end
 
+		if (params[:encounter_type].upcase rescue '') == "ADMIT_PATIENT"
+			ipd_wards_tag = CoreService.get_global_property_value('ipd.wards.tag')
+			@ipd_wards = []
+			@ipd_wards = LocationTagMap.all.collect { | ltm |
+				[ltm.location.name, ltm.location.name] if ltm.location_tag.name == ipd_wards_tag
+			}
+			@ipd_wards = @ipd_wards.compact		  
+		end
+		
 		redirect_to "/" and return unless @patient
 
 		redirect_to next_task(@patient) and return unless params[:encounter_type]
@@ -1003,6 +1012,14 @@ class EncountersController < ApplicationController
         ['',''],
         ['Pulmonary tuberculosis (PTB)', 'Pulmonary tuberculosis'],
         ['Extrapulmonary tuberculosis (EPTB)', 'Extrapulmonary tuberculosis (EPTB)']
+      ],
+		'discharge_outcomes' => [
+        ['',''],
+        ['Alive (Discharged home)', 'Alive'],
+        ['Dead', 'Dead'],
+        ['Referred (Within Queens)', 'Referred'],
+        ['Transferred (Another health facility)', 'Transferred'],
+        ['Absconded', 'Absconded']
       ]
     }
   end

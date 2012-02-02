@@ -1,55 +1,44 @@
 <style>
-.options{
-    height:11em;
-  }
+  .options{
+      height:11em;
+    }
 </style>
+
 <script>
-var tt_cancel_destination = "/patients/show/<%= @patient.id%>?auto_load_forms=false"
+  var tt_cancel_destination = "/patients/show/<%= @patient.id%>?auto_load_forms=false"
 </script>
-<form id='outcome_form' action="/encounters/create" method='post'>
+
+<form id='outcome' action="/encounters/create" method='post'>
  <% options = {} %>
 
-  <%= hidden_field_tag "encounter[encounter_type_name]", "UPDATE OUTCOME" %>
-  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-  <%= hidden_field_tag "encounter[encounter_datetime]", session[:datetime] ||=  DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+	<%= hidden_field_tag "encounter[encounter_type_name]", "ADMIT PATIENT" %>
+	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+	<%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
-  <%= select_tag("outcome", options_for_select(["", "ADMITTED", "DISCHARGED"]), 
-    {:helpText => 'Select Outcome', :id => "outcome"})%>
-  <%= hidden_field_tag("observations[][concept_name]", "OUTCOME", options) %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", session[:datetime] ||=  DateTime.now()) %>
-  
-  <%= select_tag("observations[][value_coded_or_text]", options_for_select(@admission_wards), 
-    {:helpText => 'Admit to ward', :condition => "__$('outcome').value == 'ADMITTED'"})%>
-  <%= hidden_field_tag("observations[][concept_name]", "ADMIT TO WARD", options) %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", session[:datetime] ||=  DateTime.now()) %>
-  
-  <%= select_tag("observations[][value_coded_or_text]", options_for_select(@facility_outcomes), 
-    {:helpText => 'Select Outcome', :condition => "__$('outcome').value == 'DISCHARGED'", :id => "discharge"})%>
-  <%= hidden_field_tag("observations[][concept_name]", "OUTCOME", options) %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", session[:datetime] ||=  DateTime.now()) %>
-  
-  <label for="refer">Referral Facility?</label>
-  <% options = {
-    :id => "referrer",
-    :field_type => 'text',
-    :helptext =>"Referral Facility if Referred",
-    :condition => "(__$('discharge').value.toUpperCase() == 'TRANSFER OUT')",
-    :allowFreeText => 'true',
-    :ajaxURL => "/encounters/static_locations?category=general&search_string="
-  } %>
-  <%= text_field_tag "observations[][value_coded_or_text]", nil, options %>
-  <%= hidden_field_tag("observations[][concept_name]", "REFERRAL CLINIC IF REFERRED", options) %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", session[:datetime] ||=  DateTime.now()) %>
-  
-  <%= hidden_field_tag("next_url", "/encounters/new/outpatient_diagnosis/?patient_id=#{ @patient.id }") %>
-  <%#= hidden_field_tag("next_url", "prescriptions") %>
+	<%= select_tag("observations[][value_coded_or_text]", options_for_select(@ipd_wards), {:helpText => 'Admit to ward', :tt_requireNextClick => 'false'})%>
+	<%= hidden_field_tag("observations[][value_text]", nil) %>
+	<%= hidden_field_tag("observations[][concept_name]", "ADMIT TO WARD", options) %>
+	<%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+	<%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
 
-  <%= submit_tag "Finish" %>    
+	<% program_id = Program.find_by_name('IPD PROGRAM').id %>
+	<% patient_program_id = @patient.patient_programs.current.local.select{|p| p.program_id == program_id }.last.patient_program_id rescue nil %>
+
+	<%= hidden_field_tag("programs[][patient_program_id]", patient_program_id) %>
+	<%= hidden_field_tag("programs[][program_id]", program_id)%>
+	<%= hidden_field_tag("programs[][location_id]", Location.current_health_center.id) %>
+	<%= hidden_field_tag("programs[][date_enrolled]", session[:datetime] ) %>
+
+	<%= hidden_field_tag("programs[][states][][state]", "Admitted") %>
+
+	<% session_date = session[:datetime].to_date rescue nil                       
+		if session_date %>
+
+		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+		<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+	<% else %>
+		<%= hidden_field_tag "filter[provider]", nil %>
+	<%end%> 
+	<%= submit_tag "Finish" %>    
  </form>
-
-
