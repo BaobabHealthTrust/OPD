@@ -1,5 +1,3 @@
-
-
 <script>
   var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>";
   
@@ -43,156 +41,121 @@
   
 </script>
 
-<%#=render :partial=> "vitals_graphs", :locals=>{:fields=>@patient} %>
-
-
 <form action="/encounters/create/vitals">
+	<%= hidden_field_tag "encounter[encounter_type_name]", "VITALS" %>
+	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+	<%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
-  <%= hidden_field_tag "encounter[encounter_type_name]", "VITALS" %>
-  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+	<%= select_tag "choice", options_for_select(["", "Temperature", 
+		"Respiratory Rate", "Blood Pressure", "Pulse Rate", "Weight", "Height", "Oxygen Saturation"]), 
+		{	:helpText => 'Select Outcome', 
+			:id => "choice", 
+			:multiple => true } %>
 
-  <%= select_tag("choice", options_for_select(["", "TEMPERATURE", 
-        "RESPIRATORY RATE", "BLOOD PRESSURE", "PULSE RATE", "WEIGHT", "HEIGHT", "OXYGEN SATURATION"]), 
-    {:helpText => 'Select Outcome', :id => "choice", :multiple => true})%>
+	<%= touch_text_field_tag "TEMPERATURE (C)", @patient, nil,
+		{	:id => "temperature",
+			:field_type => 'number',
+			:helptext =>"Temperature (<sup>o</sup>C)",
+			:allowFreeText => 'true',
+			:condition => "getSelected().match(/TEMPERATURE/i)",
+			:min => 30,
+			:max => 43,
+			:units => 'Degrees Celcius',  
+			:validationRule => "([0-9]+\\.[0-9])|Unknown$",
+			:validationMessage => "You must enter a decimal between 0 and 9 (for example: 36<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
 
-<%# if ask_temperature %>
-  <label for="temperature">Temperature (<sup>o</sup>C)</label>
-  <%= text_field_tag "observations[][value_numeric]", nil,
-    {:id => "temperature",
-    :field_type => 'number',
-    :helptext =>"Temperature (<sup>o</sup>C)",
-    :allowFreeText => 'true',
-    :condition => "getSelected().match(/TEMPERATURE/)",
-    :min => 30,
-    :max => 43,
-    :units => 'Degrees Celcius',  
-    :validationRule => "([0-9]+\\.[0-9])|Unknown$",
-    :validationMessage => "You must enter a decimal between 0 and 9 (for example: 36<b>.6</b>)",
-    :tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
-  <%= hidden_field_tag("observations[][concept_name]", "TEMPERATURE (C)") %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>    
+	<%= touch_text_field_tag "RESPIRATORY RATE", @patient,  nil,
+		{	:id => "respiratory_rate",
+			:field_type => 'number',
+			:helptext => 'Respiratory Rate (Breaths per Minute)',
+			:min => 8,
+			:max => 65,
+			:condition => "getSelected().match(/RESPIRATORY\sRATE/i)",
+			:absoluteMin => 0,
+			:absoluteMax => 250,
+			:validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
+			:validationMessage => "You must enter a decimal between 0 and 9 (for example: 37<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
 
-  <label for='respiratory_rate'>Respiratory Rate (Breaths per Minute)</label>
-  <%= text_field_tag "observations[][value_numeric]", nil,
-    {:id => "respiratory_rate",
-    :field_type => 'number',
-    :min => 8,
-    :max => 65,
-    :condition => "getSelected().match(/RESPIRATORY\sRATE/)",
-    :absoluteMin => 0,
-    :absoluteMax => 250,
-    :validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
-    :validationMessage => "You must enter a decimal between 0 and 9 (for example: 37<b>.6</b>)",
-    :tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
-  <%= hidden_field_tag("observations[][concept_name]", "RESPIRATORY RATE") %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+	<%= touch_text_field_tag "SYSTOLIC BLOOD PRESSURE", @patient, nil,
+		{	:id => "systolic_blood_pressure",
+			:helptext => "Systolic Blood Pressure (?/Y)",
+			:field_type => "number",
+			:tt_pageStyleClass => "NumbersWithUnknown",
+			:tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100);",
+			:tt_onUnLoad => "clearTimeout(timedEvent);",
+			:condition => "getSelected().match(/BLOOD\sPRESSURE/i)",
+			:absoluteMin => 0,
+			:max => 250 } %>
 
-<%# if ask_blood_pressure %>
+	<%= touch_text_field_tag "DIASTOLIC BLOOD PRESSURE", @patient, nil,
+		{	:id => "diastolic_blood_pressure",
+			:helptext => "Diastolic Blood Pressure",
+			:field_type => "number",
+			:tt_pageStyleClass => "NumbersWithUnknown",
+			:tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100);",
+			:tt_onUnLoad => "clearTimeout(timedEvent);",
+			:condition => "getSelected().match(/BLOOD\sPRESSURE/i)",
+			:absoluteMin => 0,
+			:max => 180 } %>
 
-  <label for='systolic_blood_pressure'>SYSTOLIC BLOOD PRESSURE(?/Y)</label>
-  <%= text_field_tag "observations[][value_numeric]", nil,
-    {:id => "systolic_blood_pressure",
-    :helptext => "Systolic Blood Pressure",
-    :field_type => "number",
-    :tt_pageStyleClass => "NumbersWithUnknown",
-    :tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100);",
-    :tt_onUnLoad => "clearTimeout(timedEvent);",
-    :condition => "getSelected().match(/BLOOD\sPRESSURE/)",
-    :absoluteMin => 0,
-    :max => 250} %>
-  <%= hidden_field_tag("observations[][concept_name]", "SYSTOLIC BLOOD PRESSURE") %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+	<%= touch_text_field_tag "WEIGHT (KG)", @patient, nil,
+		{	:id => "pulse",
+			:helptext => 'Pulse Rate (Beats per Minute)',
+			:field_type => 'number',
+			:min => 50,
+			:max => 120,
+			:condition => "getSelected().match(/PULSE\sRATE/i)",
+			:units => 'bpm',
+			:validationRule => "([0-9]+)|Unknown$",
+			:validationMessage => "You must enter a number between 0 and 9 (for example: 54)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
 
-  <label for='diastolic_blood_pressure'>DIASTOLIC BLOOD PRESSURE (X/?)</label>
-  <%= text_field_tag "observations[][value_numeric]", nil,
-    {:id => "diastolic_blood_pressure",
-    :helptext => "Diastolic Blood Pressure",
-    :field_type => "number",
-    :tt_pageStyleClass => "NumbersWithUnknown",
-    :tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100);",
-    :tt_onUnLoad => "clearTimeout(timedEvent);",
-    :condition => "getSelected().match(/BLOOD\sPRESSURE/)",
-    :absoluteMin => 0,
-    :max => 180} %>
-  <%= hidden_field_tag("observations[][concept_name]", "DIASTOLIC BLOOD PRESSURE") %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]",  DateTime.now()) %>
+	<%= touch_text_field_tag "WEIGHT (KG)", @patient, nil,
+		{	:id => "weight",
+			:field_type => 'number',
+			:helptext => 'Weight (KG)',
+			:min => number_with_precision(@min_weight, :precision => 1),
+			:max => number_with_precision(@max_weight, :precision => 1),
+			:condition => "getSelected().match(/WEIGHT/i)",
+			:absoluteMin => 0,
+			:absoluteMax => 250,
+			:units => 'kg',
+			:validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
+			:validationMessage => "You must enter a number between 0 and 9 (for example: 54<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
 
-<%# end %>
+	<%= touch_text_field_tag "HEIGHT (CM)", @patient, nil,
+		{	:id => "height",
+			:helptext => "Height (CM)",
+			:field_type => 'number',
+			# :min => number_with_precision(@patient.min_height, :precision => 1),
+			# :max => number_with_precision(@patient.max_height, :precision => 1),
+			:condition => "getSelected().match(/HEIGHT/i)",
+			:min => 50,
+			:max => 180,
+			:units => 'cm',
+			:validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
+			:validationMessage => "You must enter a number between 0 and 9 (for example: 154<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
 
-  <label for='pulse'>Pulse Rate (Beats per Minute)</label>
-  <%= text_field_tag "observations[][value_numeric]", nil,
-    {:id => "pulse",
-    :field_type => 'number',
-    :min => 50,
-    :max => 120,
-    :condition => "getSelected().match(/PULSE\sRATE/)",
-    :units => 'bpm',
-    :validationRule => "([0-9]+)|Unknown$",
-    :validationMessage => "You must enter a number between 0 and 9 (for example: 54)",
-    :tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
-  <%= hidden_field_tag("observations[][concept_name]", "WEIGHT (KG)") %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+	<%= text_field_tag "BLOOD OXYGEN SATURATION", nil,
+		{	:id => "oxygen",
+			:helptext => 'Blood Oxygen Saturation (%)',
+			:field_type => 'number',
+			:min => 85,
+			:max => 100,
+			:condition => "getSelected().match(/OXYGEN\sSATURATION/i)",
+			:absoluteMin => 0,
+			:absoluteMax => 250,
+			:validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
+			:validationMessage => "You must enter a number between 0 and 9 (for example: 54<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
 
-  <label for='weight'>Weight (KG)</label>
-  <%= text_field_tag "observations[][value_numeric]", nil,
-    {:id => "weight",
-    :field_type => 'number',
-    :min => number_with_precision(@min_weight, :precision => 1),
-    :max => number_with_precision(@max_weight, :precision => 1),
-    :condition => "getSelected().match(/WEIGHT/)",
-    :absoluteMin => 0,
-    :absoluteMax => 250,
-    :units => 'kg',
-    :validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
-    :validationMessage => "You must enter a number between 0 and 9 (for example: 54<b>.6</b>)",
-    :tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
-  <%= hidden_field_tag("observations[][concept_name]", "WEIGHT (KG)") %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
-
-  <label for='height'>Height (CM)</label>
-  <%= text_field_tag "observations[][value_numeric]", nil,
-    {:id => "height",
-    :field_type => 'number',
-    # :min => number_with_precision(@patient.min_height, :precision => 1),
-    # :max => number_with_precision(@patient.max_height, :precision => 1),
-    :condition => "getSelected().match(/HEIGHT/)",
-    :min => 50,
-    :max => 180,
-    :units => 'cm',
-    :validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
-    :validationMessage => "You must enter a number between 0 and 9 (for example: 154<b>.6</b>)",
-    :tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
-  <%= hidden_field_tag("observations[][concept_name]", "HEIGHT (CM)") %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
-<%# end %> 
-
-  <label for='oxygen'>Blood Oxygen Saturation (%)</label>
-  <%= text_field_tag "observations[][value_numeric]", nil,
-    {:id => "oxygen",
-    :field_type => 'number',
-    :min => 85,
-    :max => 100,
-    :condition => "getSelected().match(/OXYGEN\sSATURATION/)",
-    :absoluteMin => 0,
-    :absoluteMax => 250,
-    :validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
-    :validationMessage => "You must enter a number between 0 and 9 (for example: 54<b>.6</b>)",
-    :tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
-  <%= hidden_field_tag("observations[][concept_name]", "BLOOD OXYGEN SATURATION") %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
-
-  <label for='showSummary'>Summary </label>
-  <%#= text_field_tag :showSummary, nil, { :tt_onLoad => "growthIndicators()", :optional => "true", :tt_pageStyleClass => "NoControls" } %>
+	<label for='showSummary'>Summary </label>
+	<%#= text_field_tag :showSummary, nil, { :tt_onLoad => "growthIndicators()", :optional => "true", :tt_pageStyleClass => "NoControls" } %>
 
 	<% if @retrospective %>
 		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
@@ -201,5 +164,5 @@
 		<%= hidden_field_tag "filter[provider]", nil %>
 	<% end %>
 		
-  <%= submit_tag "Finish" %>    
+	<%= submit_tag "Finish" %>    
 </form>

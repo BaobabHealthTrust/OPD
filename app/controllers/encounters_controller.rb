@@ -1,6 +1,7 @@
 class EncountersController < ApplicationController
   def create(params=params, session=session)
-    #raise params.to_yaml
+   
+ 	#raise params.to_yaml
 	
     if params['encounter']['encounter_type_name'] == 'TB_INITIAL'
       (params[:observations] || []).each do |observation|
@@ -294,8 +295,7 @@ class EncountersController < ApplicationController
          redirect_to  params[:report_url].to_s and return
       end
       
-      encounter_type_name = params['encounter']['encounter_type_name'].upcase rescue ''
-      redirect_to next_task(@patient, encounter_type_name)
+      redirect_to next_task(@patient)
      end
     else
       if params[:voided]

@@ -12,6 +12,7 @@ development:
  use.user.selected.activities: false
  advanced.prescription.interface: true
  auto_set_appointment: false
+ is_referral_centre: false
 
 test: &TEST
  create_from_remote: no

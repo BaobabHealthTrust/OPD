@@ -124,9 +124,9 @@ class ApplicationController < ActionController::Base
   end
 
 
-  def next_task(patient, encounter_type = '')
+  def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
-    task = main_next_task(Location.current_location, patient,session_date, encounter_type)
+    task = main_next_task(Location.current_location, patient,session_date)
     begin
       return task.url if task.present? && task.url.present?
       return "/patients/show/#{patient.id}" 
@@ -136,26 +136,20 @@ class ApplicationController < ActionController::Base
   end
 
   # Try to find the next task for the patient at the given location
-  def main_next_task(location, patient, session_date = Date.today , encounter_type = '')
+  def main_next_task(location, patient, session_date = Date.today)
 		encounter_available = nil
 		task = Task.first rescue Task.new()
 		
-		if encounter_type == 'OUTPATIENT DIAGNOSIS'
-				task.encounter_type = 'OUTPATIENT DIAGNOSIS'
-				task.url = "/encounters/new/vitals?patient_id=#{patient.id}"		
-		else
-			encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
-						                           patient.id,EncounterType.find_by_name("OUTPATIENT RECEPTION").id, session_date],
-						                           :order =>'encounter_datetime DESC',:limit => 1)
-			task.encounter_type = 'OUTPATIENT RECEPTION'
-			if encounter_available.blank?  
-				task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
-			else 
-				task.encounter_type = 'NONE'
-				task.url = "/patients/show/#{patient.id}"
-			end
+		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
+					                           patient.id,EncounterType.find_by_name("OUTPATIENT RECEPTION").id, session_date],
+					                           :order =>'encounter_datetime DESC',:limit => 1)
+		task.encounter_type = 'OUTPATIENT RECEPTION'
+		if encounter_available.blank? && (CoreService.get_global_property_value("is_referral_centre") rescue false) 
+			task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
+		else 
+			task.encounter_type = 'NONE'
+			task.url = "/patients/show/#{patient.id}"
 		end
-				
 		return task
   end
   
