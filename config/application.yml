@@ -8,11 +8,11 @@ development:
  application_generic_medication: Diabetes Medication
  use.filing.number: false
  filing.number.limit: 300
- create_from_remote: no
+ create_from_remote: false
  use.user.selected.activities: false
  advanced.prescription.interface: true
  auto_set_appointment: false
- is_referral_centre: false
+ is_referral_centre: true
  ipd.wards.tag: Ward
 test: &TEST
  create_from_remote: no
