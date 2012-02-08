@@ -157,7 +157,7 @@ class ApplicationController < ActionController::Base
 			end
 		end
 
-		if is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre") rescue false) 
+		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true' rescue false) 
 			task.encounter_type = 'OUTPATIENT RECEPTION'
 			task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
 		end
