@@ -34,41 +34,46 @@ class PatientsController < ApplicationController
 	#			o.concept_id}]).length
 
 	@user = User.find(session[:user_id])
-	@user_privilege = @user.user_roles.collect{|x|x.role.downcase}
+	#@user_privilege = @user.user_roles.collect{|x|x.role.downcase}
+	
+	user_roles = UserRole.find(:all,:conditions =>["user_id = ?", User.current_user.id]).collect{|r|r.role.downcase}
+	inherited_roles = RoleRole.find(:all,:conditions => ["child_role IN (?)", user_roles]).collect{|r|r.parent_role.downcase}
+	user_roles = user_roles + inherited_roles
+	user_roles = user_roles.uniq
 
-	if @user_privilege.include?("superuser")
+	if user_roles.include?("superuser")
 		@super_user = true
 	end
 	
-	if @user_privilege.include?("clinician")
+	if user_roles.include?("clinician")
 		@clinician  = true
 	end
 
-	if @user_privilege.include?("doctor")
+	if user_roles.include?("doctor")
 		@doctor = true
 	end
 
-	if @user_privilege.include?("regstration_clerk")
+	if user_roles.include?("regstration_clerk")
 		@regstration_clerk  = true
 	end
 	
-	if @user_privilege.include?("adults")
+	if user_roles.include?("adults")
 		@adults  = true
 	end
 	
-	if @user_privilege.include?("paediatrics")
+	if user_roles.include?("paediatrics")
 		@paediatrics  = true
 	end
 	
-	if @user_privilege.include?("hmis lab order")
+	if user_roles.include?("hmis lab order")
 		@hmis_lab_order  = true
 	end
 	
-	if @user_privilege.include?("spine clinician")
+	if user_roles.include?("spine clinician")
 		@spine_clinician  = true
 	end
 	
-	if @user_privilege.include?("lab")
+	if user_roles.include?("lab")
 		@lab  = true
 	end
 
