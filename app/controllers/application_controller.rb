@@ -157,6 +157,13 @@ class ApplicationController < ActionController::Base
 			end
 		end
 
+		if is_encounter_available(patient, 'ADMISSION DIAGNOSIS', session_date) || is_encounter_available(patient, 'DISCHARGE DIAGNOSIS', session_date) || is_encounter_available(patient, 'OUTPATIENT DIAGNOSIS', session_date)
+			if !is_encounter_available(patient, 'VITALS', session_date)
+				task.encounter_type = 'VITALS'
+				task.url = "/encounters/new/vitals?patient_id=#{patient.id}"
+			end
+		end
+
 		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true' rescue false) 
 			task.encounter_type = 'OUTPATIENT RECEPTION'
 			task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
