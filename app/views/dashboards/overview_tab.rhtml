@@ -3,30 +3,9 @@
 <script language="javascript" type="text/javascript" src="/javascripts/jquery.flot.js"></script>
 <script src="/javascripts/touchscreenYesNo.js" type="text/javascript"></script>
 <script type="text/javascript">
-  function select(node) {
-    $('#observations').empty().load('/encounters/observations/' + node.attr('encounter'))
-    $('#encounters li.data').removeClass("active");
-    node.addClass("active");
-  }
-
-  function voiding(node) {
-    confirmYesNo("Void this item?", function() {
-      hideConfirmation();
-      $.post('/encounters/void/' + node.parent().attr('encounter'), {}, function(data, status) {
-        if (status == 'success') {
-          document.getElementById('observations').innerHTML = '';
-          node.parent().remove();
-        }
-      })
-    }, function() { hideConfirmation(); });
-  }
 
   jQuery(document).ready(function($) {
-    $('#encounters li.data').click(function() { select($(this)); });
-    $('#encounters li.data div.void').click(function() { voiding($(this)); return false; });
     $('#charts').empty().load('/patients/graph/<%= @patient.id -%>?data=weight_tab');
-    recent = $('#encounters li.data:first');
-    if (recent) select(recent);
   })
 </script>
 <style>
@@ -46,7 +25,7 @@
           <% for prog in @programs do %>
               <li class="data <%= cycle('even', 'odd') %>" program="<%= prog.id %>">
                 <div class="program">
-                  <%=(h prog.program.name.humanize).gsub('Hiv','HIV').gsub('Tb','TB') %> started <%=h prog.date_enrolled.strftime("%b-%Y") rescue 'Unknown' %>
+                  <%=(h prog.program.name.humanize).gsub('Hiv','HIV').gsub('Tb','TB').gsub('Opd','OPD').gsub('Ipd','IPD') %> started <%=h prog.date_enrolled.strftime("%b-%Y") rescue 'Unknown' %>
                   <br /><font class='patient_state'>Current state: <%=h prog.patient_states.last.to_s.humanize.gsub('-art','-ART').gsub('arvs','ARVs') %></font>
                 </div>
               </li>

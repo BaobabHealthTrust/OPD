@@ -2,66 +2,83 @@ class PatientsController < ApplicationController
   before_filter :find_patient, :except => [:void]
   
   def show
-			session[:mastercard_ids] = []
-			session_date = session[:datetime].to_date rescue Date.today
-			@patient_bean = PatientService.get_patient(@patient.person)
-			@encounters = @patient.encounters.find_by_date(session_date)
-			@diabetes_number = DiabetesService.diabetes_number(@patient)
-			@prescriptions = @patient.orders.unfinished.prescriptions.all
-			@programs = @patient.patient_programs.all
-			@alerts = alerts(@patient, session_date) rescue nil
-			
-			if !session[:location].blank?
-				session["category"] = (session[:location] == "Paeds A and E" ? "paeds" : "adults")
-			end
- 			
-			#find the user priviledges
-			@super_user = false
-			@clinician  = false
-			@doctor     = false
-			@regstration_clerk  = false
+	session[:mastercard_ids] = []
+	session_date = session[:datetime].to_date rescue Date.today
+	@patient_bean = PatientService.get_patient(@patient.person)
+	@encounters = @patient.encounters.find_by_date(session_date)
+	@diabetes_number = DiabetesService.diabetes_number(@patient)
+	@prescriptions = @patient.orders.unfinished.prescriptions.all
+	@programs = @patient.patient_programs.all
+	@alerts = alerts(@patient, session_date) rescue nil
+	
+	if !session[:location].blank?
+		session["category"] = (session[:location] == "Paeds A and E" ? "paeds" : "adults")
+	end
+	
+	#find the user priviledges
+	@super_user = false
+	@clinician  = false
+	@doctor     = false
+	@regstration_clerk  = false
 
-			@category = session["category"] rescue ""
+	@category = session["category"] rescue ""
 
-			#@ili = Observation.find(:all, :joins => [:concept => :name], :conditions =>
-			#		["self.concept.fullname = ? AND value_coded IN (?) AND obs.voided = 0", "ILI",
-			#		ConceptName.find(:all, :conditions => ["voided = 0 AND name = ?", "YES"]).collect{|o|
-			#			o.concept_id}]).length
+	#@ili = Observation.find(:all, :joins => [:concept => :name], :conditions =>
+	#		["self.concept.fullname = ? AND value_coded IN (?) AND obs.voided = 0", "ILI",
+	#		ConceptName.find(:all, :conditions => ["voided = 0 AND name = ?", "YES"]).collect{|o|
+	#			o.concept_id}]).length
 
-			#@sari = Observation.find(:all, :joins => [:concept => :name], :conditions =>
-			#		["name = ? AND value_coded IN (?) AND obs.voided = 0", "SARI",
-			#		ConceptName.find(:all, :conditions => ["voided = 0 AND name = ?", "YES"]).collect{|o|
-			#			o.concept_id}]).length
+	#@sari = Observation.find(:all, :joins => [:concept => :name], :conditions =>
+	#		["name = ? AND value_coded IN (?) AND obs.voided = 0", "SARI",
+	#		ConceptName.find(:all, :conditions => ["voided = 0 AND name = ?", "YES"]).collect{|o|
+	#			o.concept_id}]).length
 
-			@user = User.find(session[:user_id])
-			@user_privilege = @user.user_roles.collect{|x|x.role.downcase}
+	@user = User.find(session[:user_id])
+	@user_privilege = @user.user_roles.collect{|x|x.role.downcase}
 
-			if @user_privilege.include?("superuser")
-				@super_user = true
-			elsif @user_privilege.include?("clinician")
-				@clinician  = true
-			elsif @user_privilege.include?("doctor")
-				@doctor     = true
-			elsif @user_privilege.include?("regstration_clerk")
-				@regstration_clerk  = true
-			elsif @user_privilege.include?("adults")
-				@adults  = true
-			elsif @user_privilege.include?("paediatrics")
-				@paediatrics  = true
-			elsif @user_privilege.include?("hmis lab order")
-				@hmis_lab_order  = true
-			elsif @user_privilege.include?("spine clinician")
-				@spine_clinician  = true
-			elsif @user_privilege.include?("lab")
-				@lab  = true
-			end
-		
-			@restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
-			@restricted.each do |restriction|
-      @encounters = restriction.filter_encounters(@encounters)
-      @prescriptions = restriction.filter_orders(@prescriptions)
-      @programs = restriction.filter_programs(@programs)
-    end
+	if @user_privilege.include?("superuser")
+		@super_user = true
+	end
+	
+	if @user_privilege.include?("clinician")
+		@clinician  = true
+	end
+
+	if @user_privilege.include?("doctor")
+		@doctor = true
+	end
+
+	if @user_privilege.include?("regstration_clerk")
+		@regstration_clerk  = true
+	end
+	
+	if @user_privilege.include?("adults")
+		@adults  = true
+	end
+	
+	if @user_privilege.include?("paediatrics")
+		@paediatrics  = true
+	end
+	
+	if @user_privilege.include?("hmis lab order")
+		@hmis_lab_order  = true
+	end
+	
+	if @user_privilege.include?("spine clinician")
+		@spine_clinician  = true
+	end
+	
+	if @user_privilege.include?("lab")
+		@lab  = true
+	end
+
+	@restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
+
+	@restricted.each do |restriction|
+		@encounters = restriction.filter_encounters(@encounters)
+		@prescriptions = restriction.filter_orders(@prescriptions)
+		@programs = restriction.filter_programs(@programs)
+	end
 
     @date = (session[:datetime].to_date rescue Date.today).strftime("%Y-%m-%d")
 
@@ -203,8 +220,7 @@ class PatientsController < ApplicationController
     @links = []
     patient = Patient.find(params[:id])
 
-    @links << ["Demographics (Print)","/patients/print_demographics/#{patient.id}"]
-    @links << ["OPD Visit Summary (Print)","/patients/dashboard_print_opd_visit/#{patient.id}"]
+    @links << ["Visit Summary (Print)","/patients/dashboard_print_opd_visit/#{patient.id}"]
     @links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
 
     if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
@@ -220,7 +236,6 @@ class PatientsController < ApplicationController
     end
 
     @links << ["Recent Lab Orders Label","/patients/recent_lab_orders?patient_id=#{patient.id}"]
-    @links << ["Transfer out label (Print)","/patients/print_transfer_out_label/#{patient.id}"]
 
     render :template => 'dashboards/personal_tab', :layout => false
   end
