@@ -39,7 +39,7 @@
 	<%= touch_select_tag "Detailed primary diagnosis", @patient, nil,
 		{	:id => "primary_diagnosis_details",	 	
 		 	:condition => 'diagnoses_requiring_details.contains($("primary_diagnosis").value.toUpperCase())',
-			:set_ajaxURL_for_suggestions(document.getElementById("primary_diagnosis").value);',
+			:tt_onLoad => 'set_ajaxURL_for_suggestions(document.getElementById("primary_diagnosis").value);',
 		 	:helpText => "Detailed primary diagnosis" } %>
 
 	<%= touch_text_field_tag "Specific primary diagnosis", @patient, nil,
