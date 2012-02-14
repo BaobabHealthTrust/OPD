@@ -5,10 +5,11 @@
   var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
 
 	function updateNextFinish(){
-		if (tstInputTarget.value == '')
+		if (tstInputTarget.value == '') {
 			$('nextButton').innerHTML = '<span>Finish</span>';
-		else
+		} else {
 			$('nextButton').innerHTML = '<span>Next</span>';
+		}
 		setTimeout(updateNextFinish, 500)
 	}
 	
@@ -25,10 +26,10 @@
 
 <form id='outpatient_diagnosis' action="/encounters/create" method='post'>
 
-  <%= hidden_field_tag "encounter[encounter_type_name]", "OUTPATIENT DIAGNOSIS" %>
-  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+	<%= hidden_field_tag "encounter[encounter_type_name]", "OUTPATIENT DIAGNOSIS" %>
+	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+	<%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
 	<%= touch_select_tag "Primary diagnosis", @patient, nil,
 		{	:id => "primary_diagnosis",
@@ -38,20 +39,18 @@
 	<%= touch_select_tag "Detailed primary diagnosis", @patient, nil,
 		{	:id => "primary_diagnosis_details",	 	
 		 	:condition => 'diagnoses_requiring_details.contains($("primary_diagnosis").value.toUpperCase())',
-			:tt_onLoad => 'set_ajaxURL_for_suggestions(document.getElementById("primary_diagnosis").value)',
+			:set_ajaxURL_for_suggestions(document.getElementById("primary_diagnosis").value);',
 		 	:helpText => "Detailed primary diagnosis" } %>
 
 	<%= touch_text_field_tag "Specific primary diagnosis", @patient, nil,
 		{	:id => "specific_diagnosis",
 		 	:condition => 'diagnoses_requiring_specification.contains($("primary_diagnosis").value.toUpperCase())',
-		 	:tt_OnUnload => "setTimeout(updateNextFinish, 20)",
 			:allowFreeText => 'true',
 			:textCase => "upper",
 		 	:helpText => "Specific primary diagnosis" } %>
 		 	 	
 	<%= touch_select_tag "Secondary Diagnosis", @patient, nil,
 		{	:id => "secondary_diagnosis",
-	 		:tt_OnUnload => "setTimeout(updateNextFinish, 20)",
 			:ajaxURL => "/encounters/diagnoses?search_string=",
 			:optional => "true",
 		 	:helpText => "Secondary Diagnosis" } %>
@@ -60,7 +59,6 @@
 		{	:id => "secondary_diagnosis_details",
 		 	:condition => 'diagnoses_requiring_details.contains($("secondary_diagnosis").value.toUpperCase())',
 			:ajaxURL => "/encounters/daignosis_details?search_string=",
-		 	:tt_OnUnload => "setTimeout(updateNextFinish, 20)",
 			:tt_onLoad => 'set_ajaxURL_for_suggestions(document.getElementById("secondary_diagnosis").value)',
 		 	:helpText => "Detailed secondary diagnosis" } %>
 
