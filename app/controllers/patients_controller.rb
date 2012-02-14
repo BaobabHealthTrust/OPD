@@ -2087,7 +2087,7 @@ class PatientsController < ApplicationController
     excluded_encounters = ["Registration", "Diabetes history","Complications", #"Diabetes test",
       "General health", "Diabetes treatments", "Diabetes admissions","Hospital admissions",
       "Hypertension management", "Past diabetes medical history"]
-    @encounter_names = @patient.encounters.active.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
+    @encounter_names = @patient.encounters.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
     ignored_concept_id = Concept.find_by_name("NO").id;
 
     @observations = Observation.find(:all, :order => 'obs_datetime DESC', 
@@ -2190,7 +2190,7 @@ class PatientsController < ApplicationController
     excluded_encounters = ["Registration", "Diabetes history","Complications", #"Diabetes test",
       "General health", "Diabetes treatments", "Diabetes admissions","Hospital admissions",
       "Hypertension management", "Past diabetes medical history"] 
-    @encounter_names = @patient.encounters.active.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
+    @encounter_names = @patient.encounters.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
     ignored_concept_id = Concept.find_by_name("NO").id;
 
     @observations = Observation.find(:all, :order => 'obs_datetime DESC', 
@@ -2248,7 +2248,7 @@ class PatientsController < ApplicationController
     excluded_encounters = ["Registration", "Diabetes history","Complications", #"Diabetes test",
       "General health", "Diabetes treatments", "Diabetes admissions","Hospital admissions",
       "Hypertension management", "Past diabetes medical history"] 
-    @encounter_names = @patient.encounters.active.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
+    @encounter_names = @patient.encounters.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
     ignored_concept_id = Concept.find_by_name("NO").id;
 
     @observations = Observation.find(:all, :order => 'obs_datetime DESC', 
@@ -2742,5 +2742,133 @@ class PatientsController < ApplicationController
     encounter = patient.encounters.find(:all,:conditions =>["encounter_type = ? AND
                                   DATE(encounter_datetime) = ?", type,date])
     return encounter
+  end
+  
+  def influenza_info
+    @patient_id = params[:patient_id]  #--removed as I am only passing the patient_id  || params[:id] || session[:patient_id]
+    @patient = Patient.find(@patient_id) rescue nil
+    @influenza_data = Array.new()
+    excluded_concepts = Array.new()
+    @opd_influenza_data = Array.new()
+
+    excluded_concepts = ["INFLUENZA VACCINE IN THE LAST 1 YEAR",
+                         "CURRENTLY (OR IN THE LAST WEEK) TAKING ANTIBIOTICS",
+                         "CURRENT SMOKER","WERE YOU A SMOKER 3 MONTHS AGO",
+                         "PREGNANT?","RDT OR BLOOD SMEAR POSITIVE FOR MALARIA",
+                         "PNEUMOCOCCAL VACCINE","MEASLES VACCINE",
+                         "MUAC LESS THAN 11.5 (CM)","WEIGHT",
+                         "PATIENT CURRENTLY SMOKES","IS PATIENT PREGNANT?"]
+
+   @influenza_data = @patient.encounters.all(
+                                        :conditions => ["encounter.encounter_type = ?",EncounterType.find_by_name('INFLUENZA DATA').encounter_type_id],
+                                        :include => [:observations]
+                                      ).map{|encounter| encounter.observations.all}.flatten.compact.map{|obs|
+                                        @influenza_data.push("#{obs.concept.fullname.humanize}: #{obs.answer_string} ") if !excluded_concepts.include?(obs.to_s.split(':')[0])
+                                      }
+    if @influenza_data.length == 0
+      @opd_influenza_data << "None"
+    else
+      @opd_influenza_data = @influenza_data.last
+    end
+    @ipd_influenza_data = remote_influenza_info(@patient)
+    
+    render :layout => false
+  end
+  
+  def remote_influenza_info(patient)
+
+		patient_bean = PatientService.get_patient(patient.person)
+		
+    #this gets the influenza info from IPD
+      given_params = {:person => {:patient => { :identifiers => {"National id" => patient_bean.national_id }}}}
+      national_id_params = CGI.unescape(given_params.to_param).split('&').map{|elem| elem.split('=')}
+      mechanize_browser = Mechanize.new
+      demographic_servers = JSON.parse(GlobalProperty.find_by_property("demographic_server_ips_and_local_port").property_value)   rescue []
+
+      result = demographic_servers.map{|demographic_server, local_port|
+       begin
+             
+          output = mechanize_browser.post("http://localhost:local_port/patients/retrieve_	", national_id_params).body
+
+        rescue Timeout::Error
+         return []
+         rescue
+         return []
+       end
+       output if output and output.match(/person/)
+       }.sort{|a,b|b.length <=> a.length}.first
+
+     # result ? JSON.parse(result) : nil
+     
+     result = JSON.parse(output) rescue nil
+
+  end
+  
+  def chronic_conditions_info
+    @patient_id = params[:patient_id]
+    @patient = Patient.find(@patient_id) rescue nil
+    @ipd_chronic_conditions = Array.new()
+
+    @ipd_chronic_conditions = get_remote_chronic_conditions(@patient)
+    #Add None element if no conditions are returned from remote
+
+    if @ipd_chronic_conditions.length == 0
+      @ipd_chronic_conditions << "None"
+    end
+   # raise @ipd_chronic_conditions.to_yaml
+    @opd_chronic_conditions = local_chronic_conditions(@patient_id)
+    if @opd_chronic_conditions.length == 0
+      @opd_chronic_conditions << "None"
+    end
+    render :layout => false
+  end
+  
+  def get_remote_chronic_conditions(patient)
+  
+		patient_bean = PatientService.get_patient(patient.person)
+  
+    #this gets the influenza info from IPD
+      given_params = {:person => {:patient => { :identifiers => {"National id" => patient_bean.national_id }}}}
+      national_id_params = CGI.unescape(given_params.to_param).split('&').map{|elem| elem.split('=')}
+      mechanize_browser = Mechanize.new
+      demographic_servers = JSON.parse(GlobalProperty.find_by_property("demographic_server_ips_and_local_port").property_value)   rescue []
+
+      result = demographic_servers.map{|demographic_server, local_port|
+      begin
+          output = mechanize_browser.post("http://localhost:local_port/patients/remote_chronic_conditions", national_id_params).body
+
+      rescue Timeout::Error
+         return []
+         rescue
+         return []
+      end
+       output if output and output.match(/person/)
+      }.sort{|a,b|b.length <=> a.length}.first
+
+     #result ? JSON.parse(result) : nil
+
+     result = JSON.parse(output) rescue []
+
+  end
+  
+  def local_chronic_conditions(patient_id)
+
+    @patient = Patient.find(patient_id) rescue nil
+    @chronic_conditions = @patient.encounters.all(
+                                        :conditions => ["encounter.encounter_type = ?",EncounterType.find_by_name('CHRONIC CONDITIONS').encounter_type_id],
+                                        :include => [:observations]
+                                      ) rescue []
+   
+    chronic_conditions_array = Array.new
+    
+    if @chronic_conditions.length == 0
+      chronic_conditions_array << "None"
+    else
+      @chronic_conditions.each do |encounter|
+          chronic_conditions_array << encounter.to_s
+      end
+    end
+    return chronic_conditions_array
+    
   end
 end
