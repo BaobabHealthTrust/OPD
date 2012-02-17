@@ -623,9 +623,9 @@ class EncountersController < ApplicationController
 			ipd_wards_tag = CoreService.get_global_property_value('ipd.wards.tag')
 			@ipd_wards = []
 			@ipd_wards = LocationTagMap.all.collect { | ltm |
-				[ltm.location.name, ltm.location.name] if ltm.location_tag.name == ipd_wards_tag
+				[ltm.location.name] if ltm.location_tag.name == ipd_wards_tag
 			}
-			@ipd_wards = @ipd_wards.compact		  
+			@ipd_wards = @ipd_wards.compact.sort		  
 		end
 		
 		redirect_to "/" and return unless @patient
