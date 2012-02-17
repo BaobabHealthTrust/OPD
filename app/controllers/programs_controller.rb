@@ -118,8 +118,7 @@ class ProgramsController < ApplicationController
       if patient_state.save
 		    # Close and save current_active_state if a new state has been created
 		   current_active_state.save
-
-        if patient_state.program_workflow_state.concept.fullname == 'PATIENT TRANSFERRED OUT' 
+        if patient_state.program_workflow_state.concept.fullname.upcase == 'PATIENT TRANSFERRED OUT'
           encounter = Encounter.new(params[:encounter])
           encounter.encounter_datetime = session[:datetime] unless session[:datetime].blank?
           encounter.save
@@ -140,7 +139,7 @@ class ProgramsController < ApplicationController
           observation[:encounter_id] = encounter.id
           observation[:obs_datetime] = encounter.encounter_datetime || Time.now()
           observation[:person_id] ||= encounter.patient_id
-          observation[:value_text] = Location.find(params[:transfer_out_location_id]).name rescue "UNKNOWN"
+          observation[:value_text] = params[:transfer_out_location_id] 
           Observation.create(observation)
         end  
 

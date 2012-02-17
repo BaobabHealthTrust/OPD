@@ -1,38 +1,52 @@
 <script>
-var tt_cancel_destination = "/patients/show/<%= @patient.id%>?auto_load_forms=false"
+	var tt_cancel_destination = "/patients/show/<%= @patient.id%>?auto_load_forms=false"
+
+	function setPatientState() {
+		if($("discharge_outcome").value == "Dead") {
+			$("programs__states__state").value = "Patient Died";
+		} else if ($("discharge_outcome").value == "Alive") {
+			$("programs__states__state").value = "Discharged";
+		} else if ($("discharge_outcome").value == "Referred") {
+			$("programs__states__state").value = "Patient transferred internally";
+		} else if ($("discharge_outcome").value == "Transferred") {
+			$("programs__states__state").value = "Patient transferred out";
+		} else {
+			$("programs__states__state").value = $("discharge_outcome").value;
+		}
+	}
+
 </script>
+
 <style>
   #space { display:inline; font-size:1.2em; }
 </style>
+
 <form id='outcome' action="/encounters/create" method='post'>
     
-  <%= hidden_field_tag "encounter[encounter_type_name]", "DISCHARGE PATIENT" %>
-  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+	<%= hidden_field_tag "encounter[encounter_type_name]", "DISCHARGE PATIENT" %>
+	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+	<%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
-   <% options = {:allowFreeText => 'false', :allowFreeText => 'false', :ajaxURL => "/encounters/diagnoses?search_string=", :textCase => "upper",:condition => "($('select').value == 'option2')" } %>
 
-   <%= select_tag ("observations[][value_coded_or_text]", options_for_select(@select_options['discharge_outcomes']), {:helpText => 'Discharge outcome', :tt_requireNextClick => 'false'})%>
-  <%= hidden_field_tag("observations[][value_text]", nil) %>
-  <%= hidden_field_tag("observations[][concept_name]", "OUTCOME", options) %>
-  <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-  <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+	<%= touch_select_tag "OUTCOME", @patient, options_for_select(@select_options['discharge_outcomes']), 
+		{	:id => 'discharge_outcome',
+			:helpText => 'Discharge outcome',
+			:tt_onUnload => 'setPatientState();', 
+			:tt_requireNextClick => 'false'} %>
 
-   <% options = {
-		:id => "refer", 
-		:field_type => 'text', 
-		:helptext =>"Refer to clinic",
-		:condition => "($('observations__value_coded_or_text').value == 'REFERRED')",
-		:allowFreeText => 'true', 
-		:ajaxURL => "/search/clinics?search_string=", 
-		:textCase => "upper"
-		} %>
-    <%= text_field_tag "observations[][value_text]", nil, options %>
-    <%= hidden_field_tag("observations[][value_coded_or_text]", nil) %>
-    <%= hidden_field_tag("observations[][concept_name]", "REFER TO OTHER CLINIC", options) %>
-    <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+    <%= touch_location_tag "TRANSFER OUT TO", @patient, nil,
+		{	:id => "refer", 
+			:helptext =>"Transfer to clinic",
+			:condition => "($('discharge_outcome').value == 'Transferred')",
+			:allowFreeText => 'true', 
+			:textCase => "upper" } %>
+
+	<%= touch_yes_no_unknown_tag "TRANSFER WITHIN RESPONSIBILITY", @patient, nil,
+		{	:id => "transfer_within_responsibility",
+			:optional => false,
+			:condition => "($('discharge_outcome').value == 'Transferred')",
+			:helpText => "Transfer within responsibility (e.g. District)" } %>
 
 	<% program_id = Program.find_by_name('IPD PROGRAM').id %>
 	<% patient_program_id = @patient.patient_programs.current.local.select{|p| p.program_id == program_id }.last.patient_program_id rescue nil %>
