@@ -10,6 +10,8 @@
 			$("programs__states__state").value = "Patient transferred internally";
 		} else if ($("discharge_outcome").value == "Transferred") {
 			$("programs__states__state").value = "Patient transferred out";
+		} else if ($("discharge_outcome").value == "Home based care") {
+			$("programs__states__state").value = "Discharged";
 		} else {
 			$("programs__states__state").value = $("discharge_outcome").value;
 		}

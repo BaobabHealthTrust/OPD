@@ -1019,7 +1019,8 @@ class EncountersController < ApplicationController
         ['Dead', 'Dead'],
         ['Referred (Within facility)', 'Referred'],
         ['Transferred (Another health facility)', 'Transferred'],
-        ['Absconded', 'Absconded']
+        ['Absconded', 'Absconded'],
+        ['Discharged (Home based care)', 'Home based care']
       ]
     }
   end
