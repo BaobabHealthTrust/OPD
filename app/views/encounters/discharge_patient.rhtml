@@ -23,50 +23,65 @@
   #space { display:inline; font-size:1.2em; }
 </style>
 
-<form id='outcome' action="/encounters/create" method='post'>
-    
-	<%= hidden_field_tag "encounter[encounter_type_name]", "DISCHARGE PATIENT" %>
-	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-	<%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+<% program_id = Program.find_by_name('IPD PROGRAM').id %>
+<% patient_program_id = @patient.patient_programs.current.local.select{|p| p.program_id == program_id }.last.patient_program_id rescue nil %>
+
+<% if patient_program_id.blank? %>
+		<div class="inputPage NoKeyboard" id="page" style="display: block;">
+		<div id="trigger"></div>
+		<div id="infoBar" class="infoBarClass"></div>
+		<label id="helpText" class="helpTextClass" for="">Patient not admitted at this location</label>
+		</div>
+		<div id="buttons" class="buttonsDiv" style="top:456;">
+		<div id="tt_extraButtons"></div>
+		<button onmousedown="window.location=tt_cancel_destination;" id="cancelButton" class="button navButton red"><span>Cancel</span></button>
+	</div>	
+	<script>
+		setTimeout("window.location=tt_cancel_destination;", 5000);
+	</script>
+<%else%>
+	<form id='outcome' action="/encounters/create" method='post'>
+			
+		<%= hidden_field_tag "encounter[encounter_type_name]", "DISCHARGE PATIENT" %>
+		<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+		<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+		<%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
 
-	<%= touch_select_tag "OUTCOME", @patient, options_for_select(@select_options['discharge_outcomes']), 
-		{	:id => 'discharge_outcome',
-			:helpText => 'Discharge outcome',
-			:tt_onUnload => 'setPatientState();', 
-			:tt_requireNextClick => 'false'} %>
+		<%= touch_select_tag "OUTCOME", @patient, options_for_select(@select_options['discharge_outcomes']), 
+			{	:id => 'discharge_outcome',
+				:helpText => 'Discharge outcome',
+				:tt_onUnload => 'setPatientState();', 
+				:tt_requireNextClick => 'false'} %>
 
-    <%= touch_location_tag "TRANSFER OUT TO", @patient, nil,
-		{	:id => "refer", 
-			:helptext =>"Transfer to clinic",
-			:condition => "($('discharge_outcome').value == 'Transferred')",
-			:allowFreeText => 'true', 
-			:textCase => "upper" } %>
+			<%= touch_location_tag "TRANSFER OUT TO", @patient, nil,
+			{	:id => "refer", 
+				:helptext =>"Transfer to clinic",
+				:condition => "($('discharge_outcome').value == 'Transferred')",
+				:allowFreeText => 'true', 
+				:textCase => "upper" } %>
 
-	<%= touch_yes_no_unknown_tag "TRANSFER WITHIN RESPONSIBILITY", @patient, nil,
-		{	:id => "transfer_within_responsibility",
-			:optional => false,
-			:condition => "($('discharge_outcome').value == 'Transferred')",
-			:helpText => "Transfer within responsibility (e.g. District)" } %>
+		<%= touch_yes_no_unknown_tag "TRANSFER WITHIN RESPONSIBILITY", @patient, nil,
+			{	:id => "transfer_within_responsibility",
+				:optional => false,
+				:condition => "($('discharge_outcome').value == 'Transferred')",
+				:helpText => "Transfer within responsibility (e.g. District)" } %>
 
-	<% program_id = Program.find_by_name('IPD PROGRAM').id %>
-	<% patient_program_id = @patient.patient_programs.current.local.select{|p| p.program_id == program_id }.last.patient_program_id rescue nil %>
+		<%= hidden_field_tag("programs[][patient_program_id]", patient_program_id) %>
+		<%= hidden_field_tag("programs[][program_id]", program_id)%>
+		<%= hidden_field_tag("programs[][location_id]", Location.current_health_center.id) %>
+		<%= hidden_field_tag("programs[][date_enrolled]", session[:datetime] ) %>
 
-	<%= hidden_field_tag("programs[][patient_program_id]", patient_program_id) %>
-	<%= hidden_field_tag("programs[][program_id]", program_id)%>
-	<%= hidden_field_tag("programs[][location_id]", Location.current_health_center.id) %>
-	<%= hidden_field_tag("programs[][date_enrolled]", session[:datetime] ) %>
+		<%= hidden_field_tag("programs[][states][][state]", "Discharged") %>
 
-	<%= hidden_field_tag("programs[][states][][state]", "Discharged") %>
+		<% session_date = session[:datetime].to_date rescue nil                       
+				if session_date %>
 
-	<% session_date = session[:datetime].to_date rescue nil                       
-    	if session_date %>
-
-    	<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
-		<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
-    <% else %>
-		<%= hidden_field_tag "filter[provider]", nil %>
-    <%end%> 
-	<%= submit_tag "Finish" %>    
- </form>
+				<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+			<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+			<% else %>
+			<%= hidden_field_tag "filter[provider]", nil %>
+			<%end%> 
+		<%= submit_tag "Finish" %>    
+	 </form>
+<% end %>
