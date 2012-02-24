@@ -32,14 +32,7 @@
               <th colspan=2>Patient Programs Dashboard</th>
             </tr>
             <h1 id='project_name'>
-              <%if User.current_user.activities.include?('Manage Lab Orders') or User.current_user.activities.include?('Manage Lab Results') or
-       User.current_user.activities.include?('Manage Sputum Submissions') or User.current_user.activities.include?('Manage TB Clinic Visits') or
-       User.current_user.activities.include?('Manage TB Reception Visits') or User.current_user.activities.include?('Manage TB Registration Visits') or
-       User.current_user.activities.include?('Manage HIV Status Visits') %>     
-                 <span style="font-size: 55px;">TB-ART</span>                   
-               <%else%>                                                         
-                 BART                                                           
-               <%end%>
+				OPD
             </h1>
 
             <span id='patient_name'><%= @patient_bean.name rescue "" %></span>
