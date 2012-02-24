@@ -33,7 +33,7 @@
   }
 
   jQuery(document).ready(function($) {
-    $('#set_appointment').click(function() { window.parent.location = "/encounter_types/show?encounter_type=Appointment&id=show&patient_id=<%= @patient.id -%>" });
+    /*$('#set_appointment').click(function() { window.parent.location = "/encounter_types/show?encounter_type=Appointment&id=show&patient_id=<%= @patient.id -%>" });*/
   })
 
 
@@ -45,10 +45,10 @@
 
     if(first_dispension.length == 0)
       return
-    */
+    
 
     if (total_dispensed > 0)
-      document.getElementById('set_appointment').style.display='inline';
+      document.getElementById('set_appointment').style.display='inline';*/
   }
 </script>
 
@@ -119,10 +119,6 @@
             <%= submit_tag "Submit", :style => "display:none" %>
           </form>
 
-          <% if @transfer_out_site.blank? %>
-            <button id="set_appointment" class="silver" style="float:right;margin-top:-25px;">
-              <span>Set appointment</span></button>
-          <% end %>
         </div>
       </div>
     </div>
