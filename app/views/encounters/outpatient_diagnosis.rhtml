@@ -7,8 +7,10 @@
 	function updateNextFinish(){
 		if (tstInputTarget.value == '') {
 			$('nextButton').innerHTML = '<span>Finish</span>';
+			$('nextButton').setAttribute("onMouseDown","submit();");
 		} else {
 			$('nextButton').innerHTML = '<span>Next</span>';
+			$('nextButton').setAttribute("onMouseDown", "gotoNextPage()");
 		}
 		setTimeout(updateNextFinish, 500)
 	}
@@ -22,12 +24,9 @@
 	diagnoses_requiring_details = '<%= "#{@diagnoses_requiring_details}" %>';
 	diagnoses_requiring_specification = '<%= "#{@diagnoses_requiring_specification}"%>';
 	
-  function updateNextFinish(){
-    if (tstInputTarget.value == '')
-      $('nextButton').innerHTML = '<span>Finish</span>';
-    else
-      $('nextButton').innerHTML = '<span>Next</span>';
-    setTimeout(updateNextFinish, 500)
+  function submit()
+  {
+      document.forms["outpatient_diagnosis"].submit();
   }
 
 </script>

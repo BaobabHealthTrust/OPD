@@ -1349,6 +1349,7 @@ class PatientsController < ApplicationController
       label.font_horizontal_multiplier = 1
       label.font_vertical_multiplier = 1
       label.left_margin = 50
+      units = {"WEIGHT"=>"kg", "HT"=>"cm"}
       encs = patient.encounters.find(:all,:conditions =>["DATE(encounter_datetime) = ?",date])
       return nil if encs.blank?
 
@@ -1364,24 +1365,47 @@ class PatientsController < ApplicationController
             label.draw_multi_text("#{o}", :font_reverse => false)
 
           elsif encounter.name.upcase.include?("PROCEDURES DONE")
-            procs = ["Procedures: "]
+            procs = ["Procedures - "]
             procs << encounter.observations.collect{|observation| 
               observation.answer_string.squish if !observation.concept.fullname.match(/Workstation location/i)
             }.compact.join("; ")
             label.draw_multi_text("#{procs}", :font_reverse => false)
 
           elsif encounter.name.upcase.include?('UPDATE HIV STATUS')            
-            label.draw_multi_text("#{ 'HIV Status: ' + PatientService.patient_hiv_status(patient).to_s }", :font_reverse => false)
+            label.draw_multi_text("#{ 'HIV Status - ' + PatientService.patient_hiv_status(patient).to_s }", :font_reverse => false)
 
           elsif encounter.name.upcase.include?('DIAGNOSIS')
-            obs = ["Diagnoses: "]
+            obs = ["Diagnoses - "]
             obs << encounter.observations.collect{|observe|
               "#{observe.answer_string}".squish rescue nil if observe.concept.fullname.upcase.include?('DIAGNOSIS')}.compact.join("; ")
             obs
             label.draw_multi_text("#{obs}", :font_reverse => false)
+            
+					elsif encounter.name.upcase.include?("VITALS")
+						string = []
+						encounter.observations.each do |observation|
+							concept_name = observation.concept.concept_names.last.name rescue ''
+							next if concept_name.match(/Workstation location/i)
+							string << observation.to_s(["short", "order"]).squish + units[concept_name.upcase].to_s
+						end
+						label.draw_multi_text("Vitals - " + string.join(', '), :font_reverse => false)
           end
 
       }
+			
+			['OPD PROGRAM','IPD PROGRAM'].each do |program_name|		
+					program_id = Program.find_by_name(program_name).id
+					state = patient.patient_programs.local.select{|p| p.program_id == program_id}.last.patient_states.last rescue nil
+
+					next if state.nil?
+					
+					state_start_date = state.start_date.to_date	
+					state_name = state.program_workflow_state.concept.fullname
+					
+					if ((state_start_date == session[:datetime]) || (state_start_date == Date.today)) && (state_name.upcase != 'FOLLOWING')					
+      			label.draw_multi_text("Outcome - #{state_name}", :font_reverse => false)
+      		end
+			end
 
       label.draw_multi_text("Seen by: #{User.current_user.name rescue ''} at " +
         " #{Location.current_location.name rescue ''}", :font_reverse => true)
