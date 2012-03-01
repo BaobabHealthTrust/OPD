@@ -636,8 +636,10 @@ class EncountersController < ApplicationController
 
 		if params[:encounter_type].upcase == 'ADMISSION DIAGNOSIS' || params[:encounter_type].upcase == 'DISCHARGE DIAGNOSIS' || params[:encounter_type].upcase == 'OUTPATIENT_DIAGNOSIS'
 			if !is_encounter_available(@patient, 'VITALS', session_date)
-				session[:original_encounter] = params[:encounter_type]
-				params[:encounter_type] = 'vitals'
+					if @patient_bean.age <= 14
+							session[:original_encounter] = params[:encounter_type]
+							params[:encounter_type] = 'vitals'					
+					end
 			end
 		end
 		
