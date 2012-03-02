@@ -9,6 +9,7 @@ class Reports::Cohort
     @end_age = end_age
     @type = type
     @outpatient_diagnosis_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+  	@opd_program_id = Program.find_by_name('OPD PROGRAM').id
   end
 
   def specified_period
@@ -245,16 +246,6 @@ class Reports::Cohort
   		concepts = ["PUD", "%ULCER%"]
 			count_patient_with_concept(concepts)
   end
-
-  def opd_deaths
-      @cases = Encounter.find(:all, :joins => [:type, :observations, [:patient => :person]],
-        :conditions => ["encounter_type = ? AND encounter.voided = 0 AND \
-       value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ? \
-         AND DATEDIFF(NOW(), person.birthdate)/365 >= ? AND DATEDIFF(NOW(), person.birthdate)/365 <= ?",
-          @outpatient_diagnosis_id,
-          ConceptName.find(:all, :conditions => ["name = ?", "DEATH ON ARRIVAL"]).collect{|c| c.concept_id},
-          @start_date, @end_date, @start_age, @end_age]).length # rescue 0
-  end
   
   def general
     result = []
@@ -267,6 +258,23 @@ class Reports::Cohort
       result << [diagnosis, cases]
     }
     result.sort_by{|arr| arr.last}.reverse rescue []
+  end
+
+  def opd_deaths
+		 Person.count(:all,
+									:include => {:patient => {:patient_programs=>
+									 						 {:patient_states => {:program_workflow_state =>
+									 						 {:concept => {:concept_names => {}}}}}}},
+									:conditions => ["patient.patient_id IS NOT NULL
+																	 AND patient_state.end_date IS NULL
+																	 AND patient_state.start_date >= ? AND patient_state.start_date <= ?
+																	 AND DATEDIFF(NOW(), person.birthdate)/365 >= ?
+																	 AND DATEDIFF(NOW(), person.birthdate)/365 <= ?
+									                 AND concept_name.name = 'Patient died'
+									                 AND patient_program.program_id = ?",
+									                 @start_date, @end_date, @start_age, @end_age,
+									                 @opd_program_id]
+								)
   end
   
 	def count_patient_with_concept(params_array, start_age=nil, end_age=nil)		
