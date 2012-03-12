@@ -6,6 +6,8 @@
 				display_obs = (h "#{obs.to_s(["short", "order"]).to_s.split(":")[0]}: #{Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name}")
 			elsif  obs.concept_id == ConceptName.find_by_name("Location of ART initiation").concept_id
 				display_obs = (h "#{obs.to_s(["short", "order"]).to_s.split(":")[0]}: #{Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name}")
+			elsif  obs.concept_id == ConceptName.find_by_name("Referral clinic if referred").concept_id
+				display_obs = (h "#{obs.to_s(["short", "order"]).to_s.split(":")[0]}: #{Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name}")
 			elsif obs.concept_id == ConceptName.find_by_name("Transfer to").concept_id
 				display_obs = (h "#{obs.to_s(["short", "order"]).to_s.split(":")[0]}: #{Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name}")
 			elsif obs.concept_id == ConceptName.find_by_name("HTC serial number").concept_id 
