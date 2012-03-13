@@ -738,6 +738,8 @@ EOF
     patient.national_id = get_patient_identifier(person.patient, 'National id')    
 	  patient.national_id_with_dashes = get_national_id_with_dashes(person.patient)
     patient.name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
+    patient.first_name = person.names.first.given_name
+    patient.last_name = person.names.first.family_name
     patient.sex = sex(person)
     patient.age = age(person)
     patient.age_in_months = age_in_months(person)
@@ -747,6 +749,8 @@ EOF
     patient.home_district = person.addresses.first.address2
     patient.traditional_authority = person.addresses.first.county_district
     patient.current_residence = person.addresses.first.city_village
+    patient.cell_phone_number = self.get_attribute(person.patient, 'Cell Phone Number')
+    patient.home_phone_number = self.get_attribute(person.patient, 'Home Phone Number')
     patient.mothers_surname = person.names.first.family_name2
     patient.eid_number = get_patient_identifier(person.patient, 'EID Number') rescue nil
     patient.pre_art_number = get_patient_identifier(person.patient, 'Pre ART Number (Old format)') rescue nil
