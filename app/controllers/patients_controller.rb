@@ -2618,10 +2618,11 @@ class PatientsController < ApplicationController
          
       diagnosis_array.compact.to_s.gsub(/ : $/, "")
 
-    elsif name == 'LAB RESULTS'
+    elsif name == 'LAB ORDERS'
 
-      encounter.observations.collect{|observation|
-       lab_obs_lab_results_string(observation).gsub("LAB TEST SERIAL NUMBER: ", "LAB ID: ") rescue nil
+     x = encounter.observations.collect{|observation|
+     	 next if observation.concept.fullname.upcase == "WORKSTATION LOCATION"
+       lab_obs_lab_results_string(observation).gsub("LAB TEST SERIAL NUMBER: ", "LAB ID: ")
       }.compact.join(",<br /> ")
 		end
 	end		
@@ -2633,12 +2634,12 @@ class PatientsController < ApplicationController
   # Added to filter Chronic Conditions and Influenza Data
   def lab_obs_lab_results_string(observation)
     if observation.answer_concept
-      if !observation.answer_concept.name.name.include?("NO")
-        "#{(observation.concept.name.name == "LAB TEST RESULT" ? "<b>#{observation.answer_concept.name.name rescue nil}</b>" : 
-        "#{observation.concept.name.name}: #{observation.answer_concept.name.name rescue nil}#{observation.value_text rescue nil}#{observation.value_numeric rescue nil}") rescue nil}"
+      if !observation.answer_concept.fullname.include?("NO")
+        "#{(observation.concept.fullname == "LAB TEST RESULT" ? "<b>#{observation.answer_concept.fullname rescue nil}</b>" : 
+        "#{observation.concept.fullname}: #{observation.answer_concept.fullname rescue nil}#{observation.value_text rescue nil}#{observation.value_numeric rescue nil}") rescue nil}"
       end
     else
-      "#{observation.concept.name.name rescue nil}: #{observation.value_text rescue nil}#{observation.value_numeric rescue nil}"
+      "#{observation.concept.fullname rescue nil}: #{observation.value_text rescue 1 }#{observation.value_numeric rescue 2 }"
     end
   end
   
