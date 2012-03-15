@@ -29,13 +29,12 @@
 
 	<%= hidden_field_tag("programs[][states][][state]", "Admitted") %>
 
-	<% session_date = session[:datetime].to_date rescue nil                       
-		if session_date %>
-
+	<% if @retrospective %>
 		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
-		<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+		<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :tt_onload => "$('nextButton').style.display = 'block'", :ajaxURL => '/user/username?username=' %></p>
 	<% else %>
 		<%= hidden_field_tag "filter[provider]", nil %>
-	<%end%> 
+	<% end %>
+	
 	<%= submit_tag "Finish" %>    
  </form>
