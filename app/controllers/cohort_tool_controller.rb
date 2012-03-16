@@ -1135,7 +1135,7 @@ class CohortToolController < ApplicationController
 
     end
     
-    report = Reports::Cohort.new(@start_date, @end_date, @start_age, @end_age, @type)
+    report = Reports::CohortOpd.new(@start_date, @end_date, @start_age, @end_age, @type)
 
     @specified_period = report.specified_period
 

@@ -1,4 +1,4 @@
-class Reports::Cohort
+class Reports::CohortOpd
 
   attr_accessor :start_date, :end_date
 
