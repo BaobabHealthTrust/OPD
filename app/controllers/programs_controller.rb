@@ -94,7 +94,7 @@ class ProgramsController < ApplicationController
     @names = @states.map{|state|
       name = state.concept.concept_names.typed("SHORT").first.name rescue state.concept.fullname
       next if name.blank? 
-      "<li value='#{state.id}'>#{name}</li>" unless name == params[:current_state]
+      "<li value='#{state.id}'>#{name}</li>" unless name == params[:original_state]
     }
     render :text => @names.join('')  
   end

@@ -12,7 +12,7 @@
   function set_workflow_for_states() {
     var workflow_id = <%= @program_workflow_id %>
     var current_state = '<%=@current_state%>'
-    $('touchscreenInput'+tstCurrentPage).setAttribute('ajaxURL', "/programs/states?workflow=" + workflow_id + "&current_state=" + current_state);
+    $('touchscreenInput'+tstCurrentPage).setAttribute('ajaxURL', "/programs/states?workflow=" + workflow_id + "&original_state=" + current_state + "&current_state=" + current_state);
     current_state_input_box = $('touchscreenInput'+tstCurrentPage)
     listSuggestions(tstCurrentPage); 
   }
@@ -72,6 +72,7 @@
        :ajaxURL => "",
        :validationJS =>"validProgram()",
        :validationMessage => "#{@program_name}<br/>is closed<br/>Closed on: #{@program_date_completed}",
+       :tt_pageStyleClass => "NoKeyboard",
        :allowFreeText => false } %>
 
   <% initial_date = "#{session[:datetime].strftime('%Y-%m-%d')}" rescue "#{(Date.today).strftime('%Y-%m-%d')}"%>
