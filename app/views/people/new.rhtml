@@ -160,16 +160,8 @@
   }
 
   function showMsg() {
-    inputBox = $("touchscreenInput" + tstCurrentPage);
-    if (inputBox.value.length == 0)
-      return
-
-    $('nextButton').disabled = true;
-    msg = $('messageBar');
+    msg = $('popupBox');
     msg.innerHTML = "Creating a person<br />Please wait <blink>.....</blink>";
-    msg.style.background = "lightgreen" //yellow";
-    msg.style.borderColor = "lightgreen" //yellow";
-    msg.style.display = "inline";
   }
 
 </script>
