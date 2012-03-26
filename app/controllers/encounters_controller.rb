@@ -716,6 +716,17 @@ class EncountersController < ApplicationController
 				end
 			end
         end
+        
+        if (params[:encounter_type].upcase rescue '') == 'DISCHARGE_PATIENT'
+			@discharge_outcomes = [
+					['',''],
+					['Alive (Discharged home)', 'Alive'],
+					['Dead', 'Dead'],
+					['Referred (Within facility)', 'Referred'],
+					['Transferred (Another health facility)', 'Transferred'],
+					['Absconded', 'Absconded'],
+					['Discharged (Home based care)', 'Home based care']]        
+        end
 
 		if (params[:encounter_type].upcase rescue '') == 'HIV_STAGING'
 			if @patient_bean.age > 14 

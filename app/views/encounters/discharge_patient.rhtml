@@ -48,7 +48,7 @@
 		<%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
 
-		<%= touch_select_tag "OUTCOME", @patient, options_for_select(@select_options['discharge_outcomes']), 
+		<%= touch_select_tag "OUTCOME", @patient, options_for_select(@discharge_outcomes), 
 			{	:id => 'discharge_outcome',
 				:helpText => 'Discharge outcome',
 				:tt_onUnload => 'setPatientState();', 
