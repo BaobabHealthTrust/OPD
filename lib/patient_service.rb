@@ -749,14 +749,16 @@ EOF
     patient.home_district = person.addresses.first.address2
     patient.traditional_authority = person.addresses.first.county_district
     patient.current_residence = person.addresses.first.city_village
-    patient.cell_phone_number = self.get_attribute(person.patient, 'Cell Phone Number')
-    patient.home_phone_number = self.get_attribute(person.patient, 'Home Phone Number')
+    patient.landmark = person.addresses.first.address1
     patient.mothers_surname = person.names.first.family_name2
     patient.eid_number = get_patient_identifier(person.patient, 'EID Number') rescue nil
     patient.pre_art_number = get_patient_identifier(person.patient, 'Pre ART Number (Old format)') rescue nil
     patient.archived_filing_number = get_patient_identifier(person.patient, 'Archived filing number')rescue nil
     patient.filing_number = get_patient_identifier(person.patient, 'Filing Number')
     patient.occupation = get_attribute(person, 'Occupation')
+    patient.cell_phone_number = get_attribute(person, 'Cell phone number')
+    patient.office_phone_number = get_attribute(person, 'Office phone number')
+    patient.home_phone_number = get_attribute(person, 'Home phone number')
     patient.guardian = art_guardian(person.patient) rescue nil 
     patient
   end
