@@ -57,7 +57,8 @@
 						<option value='/patients/programs_dashboard/<%= @patient.id -%>'>Outcomes</option>
 					</select>
 					<select id="navigation_links">
-						<option link="/patients/mastercard_menu?patient_id=<%= @patient.id -%>&source=<%= @source -%>">Mastercard</option>
+						<!--option link="/patients/mastercard_menu?patient_id=<%= @patient.id -%>&source=<%= @source -%>">Mastercard</option -->
+						<option link='/patients/edit_demographics?patient_id=<%= @patient.id -%>'>Edit Demographics</option>						
 						<option link='<%= ((session[:datetime].to_date rescue '') != '' ?
 							"/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
 							<%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>

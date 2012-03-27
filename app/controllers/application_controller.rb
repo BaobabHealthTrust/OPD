@@ -271,6 +271,11 @@ class ApplicationController < ActionController::Base
       User.current = current_user
     end
 
+  def current_user_roles
+    user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role}
+    RoleRole.find(:all,:conditions => ["child_role IN (?)", user_roles]).collect{|r|user_roles << r.parent_role}
+    return user_roles.uniq
+  end
 
 private
 
