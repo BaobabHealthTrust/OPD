@@ -2,13 +2,13 @@ class UserController < ApplicationController
 
   def login
     if request.get?
-      session[:user_id]=nil
+      current_user.person_id=nil
     else
       @user=User.new(params[:user])
       logged_in_user=@user.try_to_login
       if logged_in_user
         reset_session
-        session[:user_id] = logged_in_user.user_id
+        current_user.person_id = logged_in_user.user_id
         session[:ip_address] = request.env['REMOTE_ADDR']         
         location = Location.find(params[:location]) rescue nil        
         location = Location.find_by_name(params[:location_name]) rescue nil unless params[:location_name].blank?
@@ -80,7 +80,7 @@ class UserController < ApplicationController
   end
 
   def index
-    @user=User.find(session[:user_id])
+    @user=User.find(current_user.person_id)
     @firstname=@user.first_name
     @secondName=@user.last_name
        
@@ -207,7 +207,7 @@ class UserController < ApplicationController
   def destroy
    unless request.get?
    @user = User.find(params[:id])
-    if @user.update_attributes(:voided => 1, :void_reason => params[:user][:void_reason],:voided_by => session[:user_id],:date_voided => Time.now.to_s)
+    if @user.update_attributes(:voided => 1, :void_reason => params[:user][:void_reason],:voided_by => current_user.person_id,:date_voided => Time.now.to_s)
       flash[:notice]='User has successfully been removed.'
       redirect_to :action => 'voided_list'
     else

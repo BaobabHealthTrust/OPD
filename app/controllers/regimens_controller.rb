@@ -163,10 +163,10 @@ class RegimensController < ApplicationController
 		if !params[:filter][:provider].blank?
      user_person_id = User.find_by_username(params[:filter][:provider]).person_id
     else
-     user_person_id = User.find_by_user_id(session[:user_id]).person_id
+     user_person_id = User.find_by_user_id(current_user.person_id).person_id
     end
 
-		user_person_id = user_person_id rescue User.find_by_user_id(session[:user_id]).person_id
+		user_person_id = user_person_id rescue User.find_by_user_id(current_user.person_id).person_id
 
 		encounter = PatientService.current_treatment_encounter(@patient, session_date, user_person_id)
 		start_date = session[:datetime] || Time.now

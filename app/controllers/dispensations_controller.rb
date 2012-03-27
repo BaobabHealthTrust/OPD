@@ -39,7 +39,7 @@ class DispensationsController < ApplicationController
     elsif params[:location]
       user_person_id = params[:provider_id]
     else
-      user_person_id = User.find_by_user_id(session[:user_id]).person_id
+      user_person_id = User.find_by_user_id(current_user.person_id).person_id
     end
 
     @encounter = current_dispensation_encounter(@patient, session_date, user_person_id)

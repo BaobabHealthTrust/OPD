@@ -21,7 +21,7 @@
   <%= hidden_field_tag "encounter[encounter_type_name]", "PROCEDURES DONE" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]",  DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
 	<%= touch_select_tag "PROCEDURE DONE", @patient, concept_set_options("Medical Procedures"),
 		{

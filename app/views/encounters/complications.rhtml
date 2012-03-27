@@ -11,7 +11,7 @@
 	<%= hidden_field_tag "encounter[encounter_type_name]", "COMPLICATIONS" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", session[:datetime] ||= DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
   
   <label for='complication_eyes_vision'>EYE COMPLICATIONS: Vision Changes/Blurry Vision</label>
   <% options=default.merge({

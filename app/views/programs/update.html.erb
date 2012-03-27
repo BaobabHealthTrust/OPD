@@ -117,6 +117,6 @@
   <%= hidden_field_tag "encounter[encounter_type_name]", "TRANSFER OUT" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 </form>
 

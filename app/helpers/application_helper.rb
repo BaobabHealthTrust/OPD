@@ -303,6 +303,10 @@ module ApplicationHelper
     return return_date
   end
 
+	def advanced_prescription_interface
+		get_global_property_value("advanced.prescription.interface")  
+	end
+	
   def current_program_location                                                  
     current_user_activities = current_user.activities                      
     if Location.current_location.name.downcase == 'outpatient'                  

@@ -8,7 +8,7 @@ class HeartbeatController < ApplicationController
 #		@location = params[:location] || ""
 		url = params[:url] || ""
     username = params[:username] rescue nil
-    username = User.find(session[:user_id]).username rescue '' unless username
+    username = User.find(current_user.person_id).username rescue '' unless username
     load_average = `uptime | cut -d ":" -f 5 | cut -d "," -f 1`
     debug_string = ""
 

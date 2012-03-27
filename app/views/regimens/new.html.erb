@@ -467,7 +467,7 @@
                 <%= hidden_field_tag "transfer_data[]patient_id", @patient.id %>
                 <%= hidden_field_tag "transfer_data[]location", Location.current_health_center.id %>
 
-                <%= hidden_field_tag "transfer_data[]encounter[provider_id]", session[:user_id] %>
+                <%= hidden_field_tag "transfer_data[]encounter[provider_id]", current_user.person_id %>
                 <%= hidden_field_tag "transfer_data[]encounter[encounter_type_name]", "TRANSFER OUT" %>
                 <%= hidden_field_tag "transfer_data[]encounter[patient_id]", @patient.id %>    
                 <%= hidden_field_tag "transfer_data[]encounter[encounter_datetime]", DateTime.now() %>

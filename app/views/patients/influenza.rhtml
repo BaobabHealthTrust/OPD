@@ -29,7 +29,7 @@
           <%= hidden_field_tag "encounter[encounter_type_name]", "INFLUENZA DATA" %>
           <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
           <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-          <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+          <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
           <label for='vaccine_in_last_1_year'>Influenza vaccine in the last 1 year?</label>
           <%= hidden_field_tag("observations[][concept_name]", "INFLUENZA VACCINE IN THE LAST 1 YEAR") %>
@@ -422,7 +422,7 @@
           <%= hidden_field_tag "encounter[encounter_type_name]", "INFLUENZA DATA" %>
           <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
           <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-          <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+          <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
           <label for='vaccine_in_last_1_year'>Influenza vaccine in the last 1 year?</label>
           <%= hidden_field_tag("observations[][concept_name]", "INFLUENZA VACCINE IN THE LAST 1 YEAR") %>

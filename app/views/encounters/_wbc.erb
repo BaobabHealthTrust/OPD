@@ -11,7 +11,7 @@
     <%= hidden_field_tag "encounter[encounter_type_name]", "LAB RESULTS" %>
     <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
     <%= hidden_field_tag "encounter[encounter_datetime]", session[:datetime] ||= DateTime.now() %>
-    <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+    <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
     <%= hidden_field_tag("observations[][value_coded_or_text]", "WBC") %>
     <%= hidden_field_tag("observations[][concept_name]", "LAB TEST RESULT") %>
