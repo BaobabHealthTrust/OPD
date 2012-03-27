@@ -383,12 +383,11 @@ class Cohort
                                   if ob.concept_id.to_s == date_art_last_taken_concept.to_s
 
                                     unless 4 >= ((ob.visit_date.to_date -
-                                                  ob.date_art_last_taken.to_date) / 7).to_i
+                                                  (ob.date_art_last_taken.to_date rescue ob.visit_date.to_date)) / 7).to_i
                                       patients << ob.patient_id
                                     end
                                   else
-                                    patients << ob.patient_id if ob.value_coded.to_s ==
-                                                                 no_concept.to_s
+                                    patients << ob.patient_id if ob.value_coded.to_s == no_concept.to_s
                                   end
                                 end
     patients

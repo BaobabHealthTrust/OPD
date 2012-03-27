@@ -176,7 +176,7 @@ class UserController < ApplicationController
     #find_by_person_id(params[:id])
     @user = User.find(params[:id])
 
-    username = params[:user]['username'] rescue User.current_user.username
+    username = params[:user]['username'] rescue current_user.username
 
     if username
       @user.update_attributes(:username => username)
@@ -184,7 +184,7 @@ class UserController < ApplicationController
 
     PersonName.find(:all,:conditions =>["voided = 0 AND person_id = ?",@user.person_id]).each do | person_name |
       person_name.voided = 1
-      person_name.voided_by = User.current_user.person_id
+      person_name.voided_by = current_user.person_id
       person_name.date_voided = Time.now()
       person_name.void_reason = 'Edited name'
       person_name.save
@@ -281,15 +281,15 @@ class UserController < ApplicationController
 
   def activities
     # Don't show tasks that have been disabled
-    user_roles = UserRole.find(:all,:conditions =>["user_id = ?", User.current_user.id]).collect{|r|r.role}
+    user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role}
     role_privileges = RolePrivilege.find(:all,:conditions => ["role IN (?)", user_roles])
     @privileges = Privilege.find(:all,:conditions => ["privilege IN (?)", role_privileges.collect{|r|r.privilege}])
 
     #raise @privileges.to_yaml
 
-    @activities = User.current_user.activities.reject{|activity| 
+    @activities = current_user.activities.reject{|activity| 
       CoreService.get_global_property_value("disable_tasks").split(",").include?(activity)
-    } rescue User.current_user.activities
+    } rescue current_user.activities
    
     #raise @privileges.to_yaml
     encounter_privilege_hash = generate_encounter_privilege_map   
@@ -344,7 +344,7 @@ class UserController < ApplicationController
     end
 
     activities = params[:user][:activities]
-    User.current_user.activities = params[:user][:activities]
+    current_user.activities = params[:user][:activities]
     if params[:id]
       session_date = session[:datetime].to_date rescue Date.today
       redirect_to next_task(Patient.find(params[:id]))

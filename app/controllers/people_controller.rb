@@ -28,8 +28,8 @@ class PeopleController < ApplicationController
  "birth_year"=> params[:patient_year] }
 
     #raise person_params.to_yaml
-    if User.current_user.blank?
-      User.current_user = User.find(1)
+    if current_user.blank?
+      current_user = User.find(1)
     end rescue []
 
     if Location.current_location.blank?
@@ -206,10 +206,10 @@ class PeopleController < ApplicationController
       else
 
        tb_session = false
-       if User.current_user.activities.include?('Manage Lab Orders') or User.current_user.activities.include?('Manage Lab Results') or
-        User.current_user.activities.include?('Manage Sputum Submissions') or User.current_user.activities.include?('Manage TB Clinic Visits') or
-         User.current_user.activities.include?('Manage TB Reception Visits') or User.current_user.activities.include?('Manage TB Registration Visits') or
-          User.current_user.activities.include?('Manage HIV Status Visits')
+       if current_user.activities.include?('Manage Lab Orders') or current_user.activities.include?('Manage Lab Results') or
+        current_user.activities.include?('Manage Sputum Submissions') or current_user.activities.include?('Manage TB Clinic Visits') or
+         current_user.activities.include?('Manage TB Reception Visits') or current_user.activities.include?('Manage TB Registration Visits') or
+          current_user.activities.include?('Manage HIV Status Visits')
          tb_session = true
        end
 

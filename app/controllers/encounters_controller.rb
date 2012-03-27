@@ -801,7 +801,7 @@ class EncountersController < ApplicationController
 	end
 
 	def current_user_role
-		@role = User.current_user.user_roles.map{|r|r.role}
+		@role = current_user.user_roles.map{|r|r.role}
 		return @role
 	end
 
@@ -1555,12 +1555,12 @@ class EncountersController < ApplicationController
 			  :patient_id => "2"
 			}
 
-		#raise User.current_user.to_yaml
+		#raise current_user.to_yaml
 		#result = Observation.create(o)
 
 		result = Observation.new(o)
 		result.date_created = Time.now
-		result.creator = User.current_user
+		result.creator = current_user
 		result.save
 		render :text => result.to_yaml
 	end

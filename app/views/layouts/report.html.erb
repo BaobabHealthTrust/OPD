@@ -1,12 +1,15 @@
+<% session[:from_report] = true rescue false %>
+<% session[:report_url] = request.request_uri.to_s rescue nil%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <title><%= @title = "#{controller.controller_name.humanize} #{controller.action_name.humanize}" rescue ""  %></title>
+    
     <script language="javascript">
-      tstUsername = "<%= User.current_user.username unless User.current_user.nil? %>";
-      tstCurrentDate = "<%= Time.now.strftime("%Y/%m/%d") %>";
+      tstUsername = "<%= current_user.username unless current_user.nil? %>";
+      tstCurrentDate = "<%= Time.now.strftime("%Y-%m-%d") %>";
       var tt_cancel_destination = null;
     </script>
     <%= stylesheet_link_tag fancy_or_high_contrast_touch %>
@@ -70,7 +73,7 @@
         clear:both;
       }
 
-      #summary{
+      .summary{
         position:relative;
         float:center;
         width:100%;
@@ -78,24 +81,28 @@
         padding-right:10px;
       }
 
-      #summary td , th{
+      .summary td , th{
         border-style:solid;
         border-width:thin;
         padding:5px;
       }
 
-      #summary tbody{
+      .summary tbody{
         position:relative;
         height:500px;
         overflow:auto;
         overflow-x: hidden;
       }
 
-      #summary>tbody tr {
+      .summary>tbody tr {
         position:relative;
         height:12px;
       }
-
+      .summary>thead tr {
+        position:relative;
+        height:12px;
+      }
+      
     </style>
     
   </head>
@@ -107,7 +114,7 @@
 
       <% if session[:mastercard_ids].length.to_i != 0 %>
          <% session[:mastercard_ids] = session[:mastercard_ids].uniq.sort! rescue ""%>
-        <form action="/patients/mastercard?source=data_cleaning"  method="post" id="myform">
+        <form action="/patients/mastercard?source=data_cleaning&show_mastercard_counter=true&current=1"  method="post" id="myform">
         </form>
       <% end rescue "" %>
 
@@ -115,7 +122,7 @@
           <div id="buttons" class="buttons" style="top:0px">
             <button id="logout" class="red left" style="position :relative; float:right;"><span>Finish</span></button>
             <button id="find" class="green" style="width:200px;" style="position :relative; float:right;"><span>Mastercards</span></button>
-            <% if User.current_user.admin? %>
+            <% if current_user.admin? %>
             <!--button id="staging" class="yellow"><span>Staging</span></button-->
             <% end %>
           </div>          
@@ -123,4 +130,21 @@
       </div>  
     </div>
   </body>
+ 
+<script>
+	for (i=0; i<document.getElementsByTagName("th").length; i++){
+	
+	if (document.getElementsByTagName("td").length > 1) {
+			if (document.getElementsByTagName("th")[i].offsetWidth < document.getElementsByTagName("td")[i].offsetWidth){
+					document.getElementsByTagName("th")[i].style.width = (document.getElementsByTagName("td")[i].offsetWidth) + 'px';
+					document.getElementsByTagName("td")[i].style.width = document.getElementsByTagName("th")[i].style.width;
+			}
+			else{
+					document.getElementsByTagName("td")[i].style.width = (document.getElementsByTagName("th")[i].offsetWidth) + 'px';
+					document.getElementsByTagName("th")[i].style.width = document.getElementsByTagName("td")[i].style.width;
+			}
+		}
+	}
+</script>
+
 </html>

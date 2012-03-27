@@ -181,7 +181,7 @@
      newElement = document.createElement("input");                             
      newElement.setAttribute("name","encounter[provider_id]");                 
      newElement.setAttribute("type","hidden");                                 
-     newElement.value = "<%=User.current_user.id%>";      
+     newElement.value = "<%=current_user.id%>";      
      submitForm.appendChild(newElement);
 
      newElement = document.createElement("input");                             

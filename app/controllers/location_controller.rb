@@ -41,7 +41,7 @@ class LocationController < ApplicationController
         if Location.find_by_name(clinic_name[:clinic_name]) == nil then
             location = Location.new
             location.name = clinic_name[:clinic_name]
-            location.creator  = User.current_user.id.to_s
+            location.creator  = current_user.id.to_s
             location.date_created  = Time.current.strftime("%Y-%m-%d %H:%M:%S")
             location.save rescue (result = false)
 

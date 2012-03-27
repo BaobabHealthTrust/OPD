@@ -33,10 +33,10 @@ class PatientsController < ApplicationController
 	#		ConceptName.find(:all, :conditions => ["voided = 0 AND name = ?", "YES"]).collect{|o|
 	#			o.concept_id}]).length
 
-	@user = User.find(session[:user_id])
+	@user = current_user
 	#@user_privilege = @user.user_roles.collect{|x|x.role.downcase}
 	
-	user_roles = UserRole.find(:all,:conditions =>["user_id = ?", User.current_user.id]).collect{|r|r.role.downcase}
+	user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role.downcase}
 	inherited_roles = RoleRole.find(:all,:conditions => ["child_role IN (?)", user_roles]).collect{|r|r.parent_role.downcase}
 	user_roles = user_roles + inherited_roles
 	user_roles = user_roles.uniq
@@ -113,7 +113,7 @@ class PatientsController < ApplicationController
       :conditions =>["patient_id = ? AND encounter_type IN (?) AND DATE(encounter_datetime) = ?",
         params[:id],encounter_types,session_date],
       :group => 'encounter_type').collect do |rec| 
-        if User.current_user.user_roles.map{|r|r.role}.join(',').match(/Registration|Clerk/i)
+        if current_user.user_roles.map{|r|r.role}.join(',').match(/Registration|Clerk/i)
           next unless rec.observations[0].to_s.match(/Workstation location:   Outpatient/i)
         end
         [ rec.encounter_id , rec.encounter_type_name , rec.c ] 
@@ -237,7 +237,7 @@ class PatientsController < ApplicationController
     end 
 
     if use_user_selected_activities
-      @links << ["Change User Activities","/user/activities/#{User.current_user.id}?patient_id=#{patient.id}"]
+      @links << ["Change User Activities","/user/activities/#{current_user.id}?patient_id=#{patient.id}"]
     end
 
     @links << ["Recent Lab Orders Label","/patients/recent_lab_orders?patient_id=#{patient.id}"]
@@ -555,18 +555,18 @@ class PatientsController < ApplicationController
     if @patient
       t1 = Thread.new{
         Kernel.system "htmldoc --webpage --landscape --linkstyle plain --left 1cm --right 1cm --top 1cm --bottom 1cm -f /tmp/output-" +
-          session[:user_id].to_s + ".pdf http://" + request.env["HTTP_HOST"] + "\"/patients/mastercard_printable?patient_id=" +
+          current_user.user_id.to_s + ".pdf http://" + request.env["HTTP_HOST"] + "\"/patients/mastercard_printable?patient_id=" +
           @patient.id.to_s + "\"\n"
       }
 
       t2 = Thread.new{
         sleep(5)
-        Kernel.system "lpr /tmp/output-" + session[:user_id].to_s + ".pdf\n"
+        Kernel.system "lpr /tmp/output-" + current_user.user_id.to_s + ".pdf\n"
       }
 
       t3 = Thread.new{
         sleep(10)
-        Kernel.system "rm /tmp/output-" + session[:user_id].to_s + ".pdf\n"
+        Kernel.system "rm /tmp/output-" + current_user.user_id.to_s + ".pdf\n"
       }
 
     end
@@ -1407,7 +1407,7 @@ class PatientsController < ApplicationController
       		end
 			end
 
-      label.draw_multi_text("Seen by: #{User.current_user.name rescue ''} at " +
+      label.draw_multi_text("Seen by: #{current_user.name rescue ''} at " +
         " #{Location.current_location.name rescue ''}", :font_reverse => true)
       
       label.print(1)
@@ -1862,7 +1862,7 @@ class PatientsController < ApplicationController
         identifier.voided = 1
         identifier.void_reason = "given another number"
         identifier.date_voided  = Time.now()
-        identifier.voided_by = User.current_user.id
+        identifier.voided_by = current_user.id
         identifier.save
       }
 
@@ -1955,7 +1955,7 @@ class PatientsController < ApplicationController
         current_archive_filing_numbers.each do | filing_number |
           filing_number.voided = 1
           filing_number.void_reason = "patient assign new active filing number"
-          filing_number.voided_by = User.current_user.id
+          filing_number.voided_by = current_user.id
           filing_number.date_voided = Time.now()
           filing_number.save
         end
@@ -1974,7 +1974,7 @@ class PatientsController < ApplicationController
         current_active_filing_numbers.each do | filing_number |
           filing_number.voided = 1
           filing_number.void_reason = "Archived - filing number given to:#{self.id}"
-          filing_number.voided_by = User.current_user.id
+          filing_number.voided_by = current_user.id
           filing_number.date_voided = Time.now()
           filing_number.save
         end
@@ -1998,7 +1998,7 @@ class PatientsController < ApplicationController
     @doctor     = false
     @registration_clerk  = false
 
-    @user = User.find(session[:user_id])
+    @user = current_user
     @user_privilege = @user.user_roles.collect{|x|x.role}
 
     if @user_privilege.first.downcase.include?("superuser")
@@ -2088,7 +2088,7 @@ class PatientsController < ApplicationController
     @doctor     = false
     @registration_clerk  = false
 
-    @user = User.find(session[:user_id])
+    @user = current_user
     @user_privilege = @user.user_roles.collect{|x|x.role}
 
     if @user_privilege.first.downcase.include?("superuser")
@@ -2393,7 +2393,7 @@ class PatientsController < ApplicationController
 
               if o.value_datetime.to_date == params[:appointmentDate].to_date
                 o.update_attributes(:voided => 1, :date_voided => Time.now.to_date,
-                :voided_by => session[:user_id], :void_reason => reason)
+                :voided_by => current_user.user_id, :void_reason => reason)
 
                 @voided = true
               end
@@ -2401,7 +2401,7 @@ class PatientsController < ApplicationController
             
             if @voided == true
               encounter.update_attributes(:voided => 1, :date_voided => Time.now.to_date,
-                :voided_by => session[:user_id], :void_reason => reason)
+                :voided_by => current_user.user_id, :void_reason => reason)
             end
           end
           
@@ -2536,7 +2536,7 @@ class PatientsController < ApplicationController
   end
   
   def complications_label
-    print_string = DiabetesService.complications_label(@patient, session[:user_id]) #rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
+    print_string = DiabetesService.complications_label(@patient, current_user.user_id) #rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
   

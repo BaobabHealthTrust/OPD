@@ -1,30 +1,36 @@
 class SessionsController < ApplicationController
-  skip_before_filter :login_required, :except => [:location, :update]
-  skip_before_filter :location_required
+	skip_before_filter :authenticate_user!, :except => [:location, :update]
+	skip_before_filter :location_required
 
-  def new
-  end
-
-  def create
-    logout_keeping_session!
-    user = User.authenticate(params[:login], params[:password])
-    if user
-      self.current_user = user      
-      redirect_to '/clinic'
-    else
-      note_failed_signin
-      @login = params[:login]
-      render :action => 'new'
-    end
-  end
-
-  # Form for entering the location information
-  def location
-    @login_wards = (CoreService.get_global_property_value('facility.login_wards')).split(',') rescue []
-	if (CoreService.get_global_property_value('select_login_location').to_s == "true" rescue false)
-	    render :template => 'sessions/select_location'
+	def new
 	end
-  end
+
+
+	def create
+		user = User.authenticate(params[:login], params[:password])
+		sign_in(:user, user)
+		authenticate_user!
+
+		if user_signed_in?
+			current_user.reset_authentication_token
+			#my_token = current_user.authentication_token
+			#User.find_for_authentication_token()
+			#self.current_user = user      
+			redirect_to '/clinic'
+		else
+			note_failed_signin
+			@login = params[:login]
+			render :action => 'new'
+		end
+	end
+
+	# Form for entering the location information
+	def location
+		@login_wards = (CoreService.get_global_property_value('facility.login_wards')).split(',') rescue []
+		if (CoreService.get_global_property_value('select_login_location').to_s == "true" rescue false)
+			render :template => 'sessions/select_location'
+		end
+	end
 
 	# Update the session with the location information
 	def update    
@@ -47,22 +53,23 @@ class SessionsController < ApplicationController
 		end
 		self.current_location = location
 		if use_user_selected_activities and not location.name.match(/Outpatient/i)
-			redirect_to "/user/activities/#{User.current_user.id}"
+			redirect_to "/user/activities/#{current_user.id}"
 		else
 			redirect_to '/clinic'
 		end
 	end
 
-  def destroy
-    logout_killing_session!
-    flash[:notice] = "You have been logged out."
-    redirect_back_or_default('/')
-  end
+	def destroy
+		sign_out(current_user)
+		self.current_location = nil
+		flash[:notice] = "You have been logged out."
+		redirect_back_or_default('/')
+	end
 
-protected
-  # Track failed login attempts
-  def note_failed_signin
-    flash[:error] = "Invalid user name or password"
-    logger.warn "Failed login for '#{params[:login]}' from #{request.remote_ip} at #{Time.now.utc}"
-  end
+	protected
+		# Track failed login attempts
+		def note_failed_signin
+			flash[:error] = "Invalid user name or password"
+			logger.warn "Failed login for '#{params[:login]}' from #{request.remote_ip} at #{Time.now.utc}"
+		end
 end

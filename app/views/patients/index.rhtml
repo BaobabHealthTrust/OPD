@@ -66,7 +66,7 @@
 					<select id="links">
 						<option value='/patients/treatment_dashboard/<%= @patient.id -%>'>Treatment</option>
 						<option value='/patients/guardians_dashboard/<%= @patient.id -%>'>Guardians</option>
-						<!--%if User.current_user.activities.include?('Manage Patient Programs')%-->
+						<!--%if current_user.activities.include?('Manage Patient Programs')%-->
 						<option value='/patients/programs_dashboard/<%= @patient.id -%>'>Outcomes</option>
 						<!--%end%-->
 						<option value='/patients/show/<%= @patient.id -%>?source=opd'>OPD</option>

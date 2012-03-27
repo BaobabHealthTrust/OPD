@@ -4,7 +4,7 @@
     <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer ></script>
     <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
     <script language="javascript">
-      tstUsername = "<%= User.current_user rescue "" %>";
+      tstUsername = "<%= current_user rescue "" %>";
       tstCurrentDate = "<%= @date %>";
       tt_cancel_destination = '/logout';
       tt_cancel_show = '/people/search';
@@ -37,7 +37,7 @@
               <%if @location == 'Chronic Cough'%>
                 <option value='/clinic/lab_tab'>Laboratory</option>
               <%end%>
-              <% if User.current_user.admin? %>
+              <% if current_user.admin? %>
                 <option value='/clinic/properties_tab'>Properties</option>
               <%end%>
               <option value='/clinic/administration_tab'>Administration</option>
