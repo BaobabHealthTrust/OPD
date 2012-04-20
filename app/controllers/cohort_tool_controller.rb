@@ -1255,5 +1255,102 @@ class CohortToolController < ApplicationController
     end
     render :layout => "opd_cohort"
   end
+  
+  def opd_menu
+		@report_name = params[:report_name]
+  end
+  
+  def disaggregated_diagnosis
+  	
+			@report_name = params[:report_name]
+			session_date = session[:datetime].to_date rescue Date.today
+			
+			if @report_name.upcase == "diagnosis_by_address".upcase
+				@age_groups=params[:age_groups].map{|g|g.upcase}
+			end
+			
+			@start_date = (params[:start_year] + "-" + params[:start_month] + "-" + params[:start_day]).to_date
+			@end_date = (params[:end_year] + "-" + params[:end_month] + "-" + params[:end_day]).to_date
+						
+			@disaggregated_diagnosis = {}
+			@diagnosis_by_address = {}
+			
+			person_with_diagnosis = Person.find(:all,
+															:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}}}},
+															:conditions => ["patient.patient_id IS NOT NULL AND concept_name.name LIKE ? 
+															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)", '%DIAGNOSIS%',
+															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])
+															
+			person_with_diagnosis.each do |person |
+				
+				patient_bean = PatientService.get_patient(person,session_date)				
+				age = patient_bean.age
+				gender = person.gender
+				
+				person.patient.encounters.each do | encounter |
+					encounter.observations.each do | obs |
+						diagnosis_name = obs.answer_concept.fullname
+						
+						#Disaggregated Diagnosis Report
+						if @report_name.upcase == "disaggregated_diagnosis".upcase
+							
+								@disaggregated_diagnosis[diagnosis_name]={"U5" =>{"M"=> 0, "F"=>0},
+																													"5-14" =>{"M"=> 0, "F"=>0},
+																													">14" =>{"M"=> 0, "F"=>0},
+																													"< 6 MONTHS" =>{"M"=> 0, "F"=>0}
+																													}	if @disaggregated_diagnosis[diagnosis_name].nil?
+																																		
+								if patient_bean.age_in_months.to_i < 6
+											@disaggregated_diagnosis[diagnosis_name]["< 6 MONTHS"][gender]+=1												  
+								elsif patient_bean.age_in_months.to_i >= 6 && age.to_i < 5
+											@disaggregated_diagnosis[diagnosis_name]["U5"][gender]+=1
+								elsif age.to_i <= 14
+											@disaggregated_diagnosis[diagnosis_name]["5-14"][gender]+=1		
+								else
+											@disaggregated_diagnosis[diagnosis_name][">14"][gender]+=1					
+								end
+						end
+						
+						#Diagnosis by Traditional Authority Report
+						if @report_name.upcase == "diagnosis_by_address".upcase
+							
+								if @age_groups.include?("NONE")
+									
+								elsif @age_groups.include?("40 TO < 50")
+									next if !(patient_bean.age >=40 && patient_bean.age < 50)
+									
+								elsif @age_groups.include?("30 TO < 40")
+									next if !(patient_bean.age >=30 && patient_bean.age < 40)	
+																
+								elsif @age_groups.include?("20 TO 30")
+									next if !(patient_bean.age >=20 && patient_bean.age < 30)	
+																	
+								elsif @age_groups.include?("> 14 TO < 20")
+									next if !(patient_bean.age > 14 && patient_bean.age < 20)		
+																
+								elsif @age_groups.include?("5 TO 14")
+									next if !(patient_bean.age >=5 && patient_bean.age <= 14)	
+																	
+								elsif @age_groups.include?("1 TO < 5")
+									next if !(patient_bean.age >=1 && patient_bean.age < 5)
+																	
+								elsif @age_groups.include?("6 MONTHS TO < 1 YR")
+									next if !(patient_bean.age_in_months >=6 && patient_bean.age < 30)
+																		
+								elsif @age_groups.include?("< 6 MONTHS")
+									next if !(patient_bean.age_in_months < 6)								
+								end
+								
+								@diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+								@diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority] = 0 if @diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority].nil?
+								@diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority]+=1
+						end
+					end
+				end
+			end
+			#raise raise @diagnosis_by_address.to_yaml
+			render :layout => 'report'
+  end
+  
 end
 

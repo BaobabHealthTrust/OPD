@@ -111,7 +111,7 @@ class ClinicController < ApplicationController
       ["Cohort","/cohort_tool/cohort_menu"],
       ["Supervision","/clinic/supervision_tab"],
       ["Data Cleaning Tools", "/clinic/data_cleaning_tab"],
-      ["OPD Reports", "/cohort_tool/opd_report_index"]
+      ["OPD Reports", "/clinic/opd_tab"]
     ]
 
     @reports = [
@@ -139,6 +139,15 @@ class ClinicController < ApplicationController
                ] 
     render :layout => false
   end
+
+	def opd_tab
+    @reports = [
+						      ["OPD General", "/cohort_tool/opd_report_index"],
+						      ["Disaggregated Diagnosis", "/cohort_tool/opd_menu?report_name=disaggregated_diagnosis"],
+      						["Diagnosis (By address)", "/cohort_tool/opd_menu?report_name=diagnosis_by_address"]
+               ] 
+    render :layout => false
+	end
 
   def properties_tab
     @settings = [
