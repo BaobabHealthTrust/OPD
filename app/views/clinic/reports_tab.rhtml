@@ -70,7 +70,7 @@
       @reports.sort.reverse.map do | name , path | %>
         <script>
           setInnerHtmlData("<%=count%>","<%=name%>","<%=path%>",
-              "<%= (name.include?("Data Cleaning Tools") || name.include?("Supervision") ? "_self" : "_parent") %>" );
+              "<%= (name.include?("OPD Reports") || name.include?("Data Cleaning Tools") || name.include?("Supervision") ? "_self" : "_parent") %>" );
         </script>
         <%count-=1%>
       <%end%>
