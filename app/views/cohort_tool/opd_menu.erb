@@ -1,0 +1,39 @@
+<style>
+
+	.tt_controls_start_month .keyboard{display:none;}
+	 #tt_page_start_month .options{height:515px;}
+	 #tt_page_start_month .options li{font-size:30px;}
+	 
+	.tt_controls_end_month .keyboard{display:none;}
+	 #tt_page_end_month .options{height:515px;}
+	 #tt_page_end_month .options li{font-size:30px;}
+	 
+	 #tt_page_select_age_group_s .options{height:515px;}
+  
+	.tt_controls_start_day #Unknown { display:none; }
+	.tt_controls_end_day #Unknown { display:none; }
+		
+</style>
+
+<form action="disaggregated_diagnosis" method='post' >
+	
+	<% month_names = month_name_options.gsub('<option value="Unknown">Unknown</option>', '') %>
+  <%= text_field_tag "start_year", nil, {:helpText => 'Start Year', :field_type => 'number', :absoluteMin => "1890", :min => "1940", :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly",:validationJS => "setDOB();" }  %>
+  <%= select_tag "start_month", month_names, {:helpText => 'Start Month',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date'}%>
+  <%= text_field_tag "start_day",  nil, :field_type => 'number', :helpText => "Start Day" ,:validationJS => "validateDOB()",:validationMessage => 'Please enter a valid date'%>
+
+  <%= text_field_tag "end_year", nil, {:helpText => 'End Year', :field_type => 'number', :absoluteMin => "1890", :min => "1940", :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly",:validationJS => "setDOB();" }  %>
+  <%= select_tag "end_month", month_names, {:helpText => 'End Month',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date'}%>
+  <%= text_field_tag "end_day",  nil, :field_type => 'number', :helpText => "End Day" ,:validationJS => "validateDOB()",:validationMessage => 'Please enter a valid date'%>
+
+	<% if @report_name.upcase == "diagnosis_by_address".upcase %>
+		<%= select_tag "age_groups", options_for_select(["", "< 6 months", 
+			"6 months to < 1 yr", "1 to < 5", "5 to 14", "> 14 to < 20", "20 to 30", "30 to < 40", "40 to < 50", "none"]), 
+			{	:helpText => 'Select Age Group (s)', 
+				:id => "age_groups",
+				:multiple => true } %>	
+
+	<% end %>
+
+	<%= hidden_field_tag "report_name", @report_name %>
+</form>
