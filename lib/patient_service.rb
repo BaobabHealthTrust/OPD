@@ -764,7 +764,7 @@ EOF
         :order =>"obs_datetime")
   end
 
-  def self.get_patient(person)
+  def self.get_patient(person, current_date = Date.today)
     patient = PatientBean.new('')
     patient.person_id = person.id
     patient.patient_id = person.patient.id
@@ -774,8 +774,8 @@ EOF
 	  patient.national_id_with_dashes = get_national_id_with_dashes(person.patient)
     patient.name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
     patient.sex = sex(person)
-    patient.age = age(person)
-    patient.age_in_months = age_in_months(person)
+    patient.age = age(person, current_date)
+    patient.age_in_months = age_in_months(person, current_date)
     patient.dead = person.dead
     patient.birth_date = birthdate_formatted(person)
     patient.birthdate_estimated = person.birthdate_estimated
