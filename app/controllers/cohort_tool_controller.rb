@@ -1329,7 +1329,7 @@ class CohortToolController < ApplicationController
 						if @report_name.upcase == "diagnosis_by_address".upcase || @report_name.upcase == "patient_level_data".upcase
 							
 								if @age_groups.include?("NONE")
-									
+									@age_groups = ["NONE"]
 								elsif @age_groups.include?("40 TO < 50")
 									next if !(patient_bean.age >=40 && patient_bean.age < 50)
 									
