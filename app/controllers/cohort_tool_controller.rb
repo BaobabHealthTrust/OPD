@@ -1265,7 +1265,7 @@ class CohortToolController < ApplicationController
 			@report_name = params[:report_name]
 			session_date = session[:datetime].to_date rescue Date.today
 			
-			if @report_name.upcase == "diagnosis_by_address".upcase
+			if @report_name.upcase == "diagnosis_by_address".upcase || @report_name.upcase == "patient_level_data".upcase
 				@age_groups=params[:age_groups].map{|g|g.upcase}
 			end
 			
@@ -1274,6 +1274,7 @@ class CohortToolController < ApplicationController
 						
 			@disaggregated_diagnosis = {}
 			@diagnosis_by_address = {}
+			@patient_level_data = {}
 			
 			person_with_diagnosis = Person.find(:all,
 															:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}}}},
@@ -1281,15 +1282,27 @@ class CohortToolController < ApplicationController
 															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)", '%DIAGNOSIS%',
 															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])
 															
+			person_with_diagnosis = Person.find(:all,
+															:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}, :type=>{}}}},
+															:conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?) 
+															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT", "OUTPATIENT DIAGNOSIS"],
+															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])
+			
 			person_with_diagnosis.each do |person |
 				
 				patient_bean = PatientService.get_patient(person,session_date)				
 				age = patient_bean.age
 				gender = person.gender
+				prescription = ""
 				
 				person.patient.encounters.each do | encounter |
+				
+					prescription = encounter.orders.map{|o| o.instructions }.join(" <br />") if encounter.name.upcase=="TREATMENT"
+					
 					encounter.observations.each do | obs |
-						diagnosis_name = obs.answer_concept.fullname
+					
+						diagnosis_type = obs.concept.fullname rescue ''
+						diagnosis_name = obs.answer_concept.fullname rescue ''
 						
 						#Disaggregated Diagnosis Report
 						if @report_name.upcase == "disaggregated_diagnosis".upcase
@@ -1311,8 +1324,9 @@ class CohortToolController < ApplicationController
 								end
 						end
 						
-						#Diagnosis by Traditional Authority Report
-						if @report_name.upcase == "diagnosis_by_address".upcase
+						#check age boundary
+						
+						if @report_name.upcase == "diagnosis_by_address".upcase || @report_name.upcase == "patient_level_data".upcase
 							
 								if @age_groups.include?("NONE")
 									
@@ -1340,15 +1354,38 @@ class CohortToolController < ApplicationController
 								elsif @age_groups.include?("< 6 MONTHS")
 									next if !(patient_bean.age_in_months < 6)								
 								end
+						end
+						
+						#Diagnosis by Traditional Authority Report
+						if @report_name.upcase == "diagnosis_by_address".upcase
 								
 								@diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
 								@diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority] = 0 if @diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority].nil?
 								@diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority]+=1
 						end
+						
+						#Patient Level Data						
+						if @report_name.upcase == "patient_level_data".upcase
+								visit_date = encounter.encounter_datetime.to_date.to_s
+					
+								next if !((diagnosis_type.upcase == "PRIMARY DIAGNOSIS") ||
+											 (diagnosis_type.upcase == "SECONDARY DIAGNOSIS") || (encounter.name.upcase=="TREATMENT"))	
+								
+								@patient_level_data[visit_date] = {} if @patient_level_data[visit_date].nil?
+								@patient_level_data[visit_date][gender] = {} if @patient_level_data[visit_date][gender].nil?
+								@patient_level_data[visit_date][gender][person.id] = {} if @patient_level_data[visit_date][gender][person.id].nil?
+								@patient_level_data[visit_date][gender][person.id][patient_bean.name] = {} if @patient_level_data[visit_date][gender][person.id][patient_bean.name].nil?
+								@patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate] = {"PRIMARY DIAGNOSIS"=> "",
+																																																					 "SECONDARY DIAGNOSIS"=> "",
+																																																					 "TREATMENT"=> "" } if @patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate].nil?
+
+ 								@patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate][diagnosis_type.upcase] = diagnosis_name
+ 								@patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate]["TREATMENT"] = prescription if (encounter.name.upcase=="TREATMENT" && !prescription.blank?)
+						end
+						
 					end
 				end
 			end
-			#raise raise @diagnosis_by_address.to_yaml
 			render :layout => 'report'
   end
   

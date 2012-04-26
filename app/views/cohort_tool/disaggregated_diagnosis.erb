@@ -30,7 +30,7 @@
 	<h1 align='center' style="position:relative; top:15px;"><u> <%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %> </u></h1>
 	<br > <span style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px; font-size:20px;"> Dates : <u><%= "#{@start_date} to #{@end_date}" %> </u></span>
 
-	<% if @report_name.upcase == "diagnosis_by_address".upcase %>	
+	<% if @report_name.upcase == "diagnosis_by_address".upcase || @report_name.upcase == "patient_level_data".upcase %>	
 		<span style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px; font-size:20px;"> Group (s) : <u><%= "#{@age_groups.join(' , ').to_s} </u>" %> </span>	
 	<% end %>
 
@@ -73,7 +73,28 @@
 						  </th>						  
 						  <th> 
 									<u>	Total </u> <p />
-						  </th>				  
+						  </th>
+						  
+				  <% elsif @report_name.upcase == "patient_level_data".upcase %>
+						  <th> <u>Name</u> <p />
+						  </th>
+						  <th> 
+									<u> Birthdate </u> <p />
+						  </th>						  
+						  <th> 
+									<u>	Gender </u> <p />
+						  </th>
+						  <th> <u> Primary Diagnosis </u> <p />
+						  </th>
+						  <th> 
+									<u> Secondary Diagnosis </u> <p />
+						  </th>						  
+						  <th> 
+									<u>	Treatment </u> <p />
+						  </th>
+						  <th> 
+									<u>	Visit Date </u> <p />
+						  </th>		  		  
 				  <% end %>
 				</thead>
 		</table>
@@ -112,9 +133,44 @@
 											<td width="30%" align="right" > <%= "<span class='basic_span' > #{ total} </span> " %> </td>			      				
 									</tr>
 		      			<% end %>
-		      <% end %>			
+		      <% end %>
+
+				<% elsif @report_name.upcase == "patient_level_data".upcase %>
+					<%
+						primary_diagnosis = "PRIMARY DIAGNOSIS"
+						secondary_diagnosis = "SECONDARY DIAGNOSIS"
+						treatment = "TREATMENT"
+					%>
+					<% @patient_level_data.each do |date,data_hash_by_gender| %>
+
+						<% data_hash_by_gender.each do |gender, data_hash_by_id| %>
+
+							<% data_hash_by_id.each do |id, data_hash_by_name| %>
+
+								<% data_hash_by_name.each do |name, data_hash_by_birthdate| %>
+
+									<% data_hash_by_birthdate.each do |birthdate, data_hash_by_data| %>
+									<tr>
+											<td> <span style="display:block; width:90%;"> <%= "#{name}" %> </span> </td>
+											<td align="center" > <%= "<span > #{birthdate} </span> " %> </td>
+											<td align="right" > <%= "<span class='basic_span' > #{gender} </span> " %> </td>
+											<td align="right" > <%= "<span class='basic_span' > #{data_hash_by_data[primary_diagnosis]} </span> " %> </td>
+											<td align="right" > <%= "<span class='basic_span' > #{data_hash_by_data[secondary_diagnosis]} </span> " %> </td>	     
+											<td align="left" > <%= "<span class='basic_spuan' > #{data_hash_by_data[treatment]} </span> " %> </td>
+											<td align="right" > <%= "<span class='basic_span' > #{date} </span> " %> </td> 				
+									</tr>
+									<% end %>
+
+								<% end %>
+
+							<% end %>
+
+						<% end %>
+						
+					<% end %>
+
 				<% end %>
-		      
+
 		      <script>
 		          insertBlankRow ();
 		      </script>
