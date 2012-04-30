@@ -30,7 +30,7 @@
 	<h1 align='center' style="position:relative; top:15px;"><u> <%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %> </u></h1>
 	<br > <span style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px; font-size:20px;"> Dates : <u><%= "#{@start_date} to #{@end_date}" %> </u></span>
 
-	<% if ["DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase) %>	
+	<% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase) %>	
 		<span style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px; font-size:20px;"> Group (s) : <u><%= "#{@age_groups.join(' , ').to_s} </u>" %> </span>	
 	<% end %>
 
@@ -38,7 +38,7 @@
 		<table class='summary' style="width:auto;">
 				<thead>
 				
-					<% if @report_name.upcase == "disaggregated_diagnosis".upcase %>
+					<% if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS" %>
 				    <tr>
 						  <th> <u>Diagnosis</u> <p />
 						  </th>
@@ -65,7 +65,7 @@
 						  <th style="padding-right:30px;" ><u>Total</u><p /></th>
 				    </tr>
 				    
-				  <% elsif @report_name.upcase == "diagnosis_by_address".upcase %>
+				  <% elsif @report_name.upcase == "DIAGNOSIS_BY_ADDRESS" %>
 						  <th> <u>Diagnosis</u> <p />
 						  </th>
 						  <th> 
@@ -75,7 +75,7 @@
 									<u>	Total </u> <p />
 						  </th>
 						  
-				  <% elsif @report_name.upcase == "patient_level_data".upcase %>
+				  <% elsif @report_name.upcase == "PATIENT_LEVEL_DATA" %>
 						  <th> <u>Name</u> <p />
 						  </th>
 						  <th> 
@@ -100,7 +100,25 @@
 						  </th>
 						  <th> 
 									<u> Total </u> <p />
+						  </th>
+
+				  <% elsif @report_name.upcase == "TOTAL_REGISTERED" %>
+						  <th> <u>Name</u> <p />
+						  </th>
+						  <th> 
+									<u> Birthdate </u> <p />
 						  </th>						  
+						  <th> 
+									<u>	Gender </u> <p />
+						  </th>
+						  <th> <u> Date Registered </u> <p />
+						  </th>
+						  <th> 
+									<u> Address </u> <p />
+						  </th>						  
+						  <th> 
+									<u>	T.A </u> <p />
+						  </th>			  
 				  <% end %>
 				</thead>
 		</table>
@@ -182,6 +200,26 @@
 											<td align="center" > <%= "<span > #{total} </span> " %> </td>				
 									</tr>					
 					<% end %>
+					
+				<% elsif @report_name.upcase == "TOTAL_REGISTERED" %>
+						<%  
+								name=0
+								birthdate=1
+								gender=2
+								date_registered=3
+								address=4
+								t_a=5
+						%>
+						<% @total_registered.each do |record| %>
+						<tr>
+								<td> <span style="display:block; width:90%;"> <%= "#{record[name]}" %> </span> </td>
+								<td align="center" > <%= "<span > #{record[birthdate]} </span> " %> </td>
+								<td> <%= "<span class='basic_span' > #{record[gender]} </span> " %> </td>
+								<td align="right" > <%= "<span class='basic_span' > #{record[date_registered]} </span> " %> </td>
+								<td> <%= "<span class='basic_span' > #{record[address]} </span> " %> </td>	     
+								<td align="left" > <%= "<span class='basic_spuan' > #{record[t_a]} </span> " %> </td>				
+						</tr>
+						<% end %>
 				<% end %>
 
 		      <script>

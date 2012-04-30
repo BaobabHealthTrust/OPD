@@ -1265,7 +1265,7 @@ class CohortToolController < ApplicationController
 			@report_name = params[:report_name]
 			session_date = session[:datetime].to_date rescue Date.today
 			
-			if ["DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
+			if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
 				@age_groups=params[:age_groups].map{|g|g.upcase}
 			end
 			
@@ -1284,15 +1284,15 @@ class CohortToolController < ApplicationController
 															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT", "OUTPATIENT DIAGNOSIS"],
 															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])	
 			
-			person_with_diagnosis.each do |person |
+			person_with_diagnosis.each do |person|
 				
 				patient_bean = PatientService.get_patient(person,session_date)				
 				age = patient_bean.age
 				gender = person.gender
 				prescription = ""
 				
-				#check age boundary				
-				if ["DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
+				#check age boundary
+				if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
 					
 						if @age_groups.include?("NONE")
 							@age_groups = ["NONE"]
@@ -1322,7 +1322,15 @@ class CohortToolController < ApplicationController
 						end
 				end
 				
-				person.patient.encounters.each do | encounter |
+				if @report_name.upcase == "TOTAL_REGISTERED"
+								
+					@total_registered << [patient_bean.name, person.birthdate, patient_bean.sex,
+																person.patient.encounters.find(:first, :order => "encounter_datetime").encounter_datetime.to_date,
+																patient_bean.address, patient_bean.traditional_authority]
+					next
+				end
+				
+				person.patient.encounters.each do | encounter |	
 				
 					prescription = encounter.orders.map{|o| o.instructions }.join(" <br />") if encounter.name.upcase=="TREATMENT"
 					
@@ -1394,6 +1402,7 @@ class CohortToolController < ApplicationController
 					end
 				end
 			end
+			
 			render :layout => 'report'
   end
   
