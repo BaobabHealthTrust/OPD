@@ -1276,12 +1276,13 @@ class CohortToolController < ApplicationController
 			@diagnosis_by_address = {}
 			@patient_level_data = {}
 			@diagnosis_report = Hash.new(0)
+			@total_registered = []
 			
 			person_with_diagnosis = Person.find(:all,
 															:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}, :type=>{}}}},
 															:conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?) 
 															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT", "OUTPATIENT DIAGNOSIS"],
-															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])
+															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])	
 			
 			person_with_diagnosis.each do |person |
 				
@@ -1289,6 +1290,37 @@ class CohortToolController < ApplicationController
 				age = patient_bean.age
 				gender = person.gender
 				prescription = ""
+				
+				#check age boundary				
+				if ["DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
+					
+						if @age_groups.include?("NONE")
+							@age_groups = ["NONE"]
+						elsif @age_groups.include?("40 TO < 50")
+							next if !(patient_bean.age >=40 && patient_bean.age < 50)
+							
+						elsif @age_groups.include?("30 TO < 40")
+							next if !(patient_bean.age >=30 && patient_bean.age < 40)	
+														
+						elsif @age_groups.include?("20 TO 30")
+							next if !(patient_bean.age >=20 && patient_bean.age < 30)	
+															
+						elsif @age_groups.include?("> 14 TO < 20")
+							next if !(patient_bean.age > 14 && patient_bean.age < 20)		
+														
+						elsif @age_groups.include?("5 TO 14")
+							next if !(patient_bean.age >=5 && patient_bean.age <= 14)	
+															
+						elsif @age_groups.include?("1 TO < 5")
+							next if !(patient_bean.age >=1 && patient_bean.age < 5)
+															
+						elsif @age_groups.include?("6 MONTHS TO < 1 YR")
+							next if !(patient_bean.age_in_months >=6 && patient_bean.age < 30)
+																
+						elsif @age_groups.include?("< 6 MONTHS")
+							next if !(patient_bean.age_in_months < 6)								
+						end
+				end
 				
 				person.patient.encounters.each do | encounter |
 				
@@ -1319,38 +1351,6 @@ class CohortToolController < ApplicationController
 											@disaggregated_diagnosis[diagnosis_name]["5-14"][gender]+=1		
 								else
 											@disaggregated_diagnosis[diagnosis_name][">14"][gender]+=1					
-								end
-						end
-						
-						#check age boundary
-						
-						if ["DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
-							
-								if @age_groups.include?("NONE")
-									@age_groups = ["NONE"]
-								elsif @age_groups.include?("40 TO < 50")
-									next if !(patient_bean.age >=40 && patient_bean.age < 50)
-									
-								elsif @age_groups.include?("30 TO < 40")
-									next if !(patient_bean.age >=30 && patient_bean.age < 40)	
-																
-								elsif @age_groups.include?("20 TO 30")
-									next if !(patient_bean.age >=20 && patient_bean.age < 30)	
-																	
-								elsif @age_groups.include?("> 14 TO < 20")
-									next if !(patient_bean.age > 14 && patient_bean.age < 20)		
-																
-								elsif @age_groups.include?("5 TO 14")
-									next if !(patient_bean.age >=5 && patient_bean.age <= 14)	
-																	
-								elsif @age_groups.include?("1 TO < 5")
-									next if !(patient_bean.age >=1 && patient_bean.age < 5)
-																	
-								elsif @age_groups.include?("6 MONTHS TO < 1 YR")
-									next if !(patient_bean.age_in_months >=6 && patient_bean.age < 30)
-																		
-								elsif @age_groups.include?("< 6 MONTHS")
-									next if !(patient_bean.age_in_months < 6)								
 								end
 						end
 						
