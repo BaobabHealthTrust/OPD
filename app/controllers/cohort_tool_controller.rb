@@ -1265,7 +1265,7 @@ class CohortToolController < ApplicationController
 			@report_name = params[:report_name]
 			session_date = session[:datetime].to_date rescue Date.today
 			
-			if @report_name.upcase == "diagnosis_by_address".upcase || @report_name.upcase == "patient_level_data".upcase
+			if ["DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
 				@age_groups=params[:age_groups].map{|g|g.upcase}
 			end
 			
@@ -1275,13 +1275,8 @@ class CohortToolController < ApplicationController
 			@disaggregated_diagnosis = {}
 			@diagnosis_by_address = {}
 			@patient_level_data = {}
+			@diagnosis_report = Hash.new(0)
 			
-			person_with_diagnosis = Person.find(:all,
-															:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}}}},
-															:conditions => ["patient.patient_id IS NOT NULL AND concept_name.name LIKE ? 
-															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)", '%DIAGNOSIS%',
-															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])
-															
 			person_with_diagnosis = Person.find(:all,
 															:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}, :type=>{}}}},
 															:conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?) 
@@ -1303,10 +1298,13 @@ class CohortToolController < ApplicationController
 					
 						diagnosis_type = obs.concept.fullname rescue ''
 						diagnosis_name = obs.answer_concept.fullname rescue ''
-						
+														
 						#Disaggregated Diagnosis Report
-						if @report_name.upcase == "disaggregated_diagnosis".upcase
-							
+						if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS"
+						
+								break if encounter.name.upcase=="TREATMENT"
+								next if obs.answer_concept.blank?
+								
 								@disaggregated_diagnosis[diagnosis_name]={"U5" =>{"M"=> 0, "F"=>0},
 																													"5-14" =>{"M"=> 0, "F"=>0},
 																													">14" =>{"M"=> 0, "F"=>0},
@@ -1326,7 +1324,7 @@ class CohortToolController < ApplicationController
 						
 						#check age boundary
 						
-						if @report_name.upcase == "diagnosis_by_address".upcase || @report_name.upcase == "patient_level_data".upcase
+						if ["DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
 							
 								if @age_groups.include?("NONE")
 									@age_groups = ["NONE"]
@@ -1356,8 +1354,18 @@ class CohortToolController < ApplicationController
 								end
 						end
 						
+						#Diagnosis Report				
+						if @report_name.upcase == "DIAGNOSIS_REPORT"
+							 break if encounter.name.upcase=="TREATMENT"
+							 next if obs.answer_concept.blank?
+							 @diagnosis_report[diagnosis_name]+=1
+						end
+						
 						#Diagnosis by Traditional Authority Report
-						if @report_name.upcase == "diagnosis_by_address".upcase
+						if @report_name.upcase == "DIAGNOSIS_BY_ADDRESS"
+						
+								break if encounter.name.upcase=="TREATMENT"
+								next if obs.answer_concept.blank?
 								
 								@diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
 								@diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority] = 0 if @diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority].nil?
@@ -1365,7 +1373,7 @@ class CohortToolController < ApplicationController
 						end
 						
 						#Patient Level Data						
-						if @report_name.upcase == "patient_level_data".upcase
+						if @report_name.upcase == "PATIENT_LEVEL_DATA"
 								visit_date = encounter.encounter_datetime.to_date.to_s
 					
 								next if !((diagnosis_type.upcase == "PRIMARY DIAGNOSIS") ||
