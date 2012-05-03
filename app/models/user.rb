@@ -10,24 +10,32 @@ class User < ActiveRecord::Base
 	include Openmrs
 
 	before_save :set_password, :before_create
-
+	
+	attr :plain_password
 	#cattr_accessor :current_user
 	attr_accessor :plain_password
-
+	attr_accessor :password_salt
+	attr_accessor :encrypted_password
+	#attr_accessor :secret_question
+	#attr_accessible :encrypted_password
 	# User name attribute for Devise
-	attr_accessible :username, :password
 
 	# Virtual attribute for authenticating by either username or email
 	# This is in addition to a real persisted field like 'username'
 	attr_accessor :login
-	attr_accessible :login
+	attr_accessible :login, :username, :password, :secret_question
 
 	belongs_to :person, :foreign_key => :person_id, :conditions => {:voided => 0}
 	has_many :user_properties, :foreign_key => :user_id # no default scope
 	has_many :user_roles, :foreign_key => :user_id, :dependent => :delete_all # no default scope
 	#has_many :names, :class_name => 'PersonName', :foreign_key => :person_id, :dependent => :destroy, :order => 'person_name.preferred DESC', :conditions => {:voided =>  0}
 
-
+	def set_password
+		# We expect that the default OpenMRS interface is used to create users
+		#self.password = self.encrypted_password
+		self.password = encrypt(self.plain_password, self.salt) if self.plain_password
+	end
+  
 	has_one :activities_property,
 		  :class_name => 'UserProperty',
 		  :foreign_key => :user_id,
@@ -66,6 +74,10 @@ class User < ActiveRecord::Base
 	def try_to_login
 		User.authenticate(self.username, self.password)
 	end
+
+	def password_salt
+		salt
+	end
   
 	# overwrite this method so that we call the encryptor class properly
 	def encrypt_password
@@ -77,6 +89,9 @@ class User < ActiveRecord::Base
 
 	# Because when the database_authenticatable wrote the following method to regenerate the password, which in turn passed incorrect params to the encrypt_password, these overwrite is needed!
 	def password
+		# We expect that the default OpenMRS interface is used to create users
+		#self.password = encrypt(self.plain_password, self.salt) if self.plain_password
+		#raise @password.to_yaml
 		self[:password]
 	end
 
@@ -114,7 +129,7 @@ class User < ActiveRecord::Base
 	def before_create
 		super
 		self.salt = User.random_string(10) if !self.salt?
-		self.password = User.encrypt(self.password,self.salt)
+		self.password = User.encrypt(plain_password, salt) if plain_password
 	end
  
 	def self.random_string(len)
