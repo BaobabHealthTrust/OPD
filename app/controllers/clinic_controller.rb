@@ -147,7 +147,8 @@ class ClinicController < ApplicationController
       						["Diagnosis (By address)", "/cohort_tool/opd_menu?report_name=diagnosis_by_address"],
       						["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"],
       						["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report"],
-      						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered"]
+      						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered"],
+      						["Referrals", "/cohort_tool/opd_menu?report_name=referral"]
                ] 
     render :layout => false
 	end

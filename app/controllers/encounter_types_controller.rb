@@ -27,6 +27,7 @@ class EncounterTypesController < ApplicationController
 
 
     @available_encounter_types = ((@available_encounter_types) - ((@available_encounter_types - roles_for_the_user) + (roles_for_the_user - @available_encounter_types)))
+    #@available_encounter_types << "Referral"
     @available_encounter_types = @available_encounter_types.sort
     
   end

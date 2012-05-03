@@ -1277,12 +1277,26 @@ class CohortToolController < ApplicationController
 			@patient_level_data = {}
 			@diagnosis_report = Hash.new(0)
 			@total_registered = []
+			@referral_locations = Hash.new(0)
+
+			if @report_name.upcase == "REFERRAL"
+						
+				Observation.find(:all, :include=>{:encounter=>{:type=>{}}, :concept=>{:concept_names=>{}}},
+												 :conditions => ["encounter_type.name = ? AND concept_name.name != ?
+												 									AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)",
+												 									"REFERRAL", "Workstation location", @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')]). each do |obs|
+													@referral_locations[Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name]+=1
+				end
+				
+				render :layout => 'report' and return
+			end
 			
 			person_with_diagnosis = Person.find(:all,
 															:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}, :type=>{}}}},
 															:conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?) 
 															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT", "OUTPATIENT DIAGNOSIS"],
 															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])	
+
 			
 			person_with_diagnosis.each do |person|
 				

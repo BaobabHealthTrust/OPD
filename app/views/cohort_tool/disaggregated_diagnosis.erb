@@ -118,7 +118,15 @@
 						  </th>						  
 						  <th> 
 									<u>	T.A </u> <p />
-						  </th>			  
+						  </th>
+
+					<% elsif @report_name.upcase == "REFERRAL" %>  	
+						  <th> <u>Facility</u> <p />
+						  </th>
+						  <th> 
+									<u> Total Referrals </u> <p />
+						  </th>
+						  	  
 				  <% end %>
 				</thead>
 		</table>
@@ -220,6 +228,14 @@
 								<td align="left" > <%= "<span class='basic_spuan' > #{record[t_a]} </span> " %> </td>				
 						</tr>
 						<% end %>
+						
+				<% elsif  @report_name.upcase == "REFERRAL"  %>
+					<% @referral_locations.each do |referral,total| %>
+									<tr>
+											<td width="50%"> <span style="display:block; width:90%;"> <%= "#{referral}" %> </span> </td>
+											<td align="center" > <%= "<span > #{total} </span> " %> </td>				
+									</tr>					
+					<% end %>
 				<% end %>
 
 		      <script>
