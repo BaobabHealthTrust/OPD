@@ -9,7 +9,7 @@
     style.value = "position: absolute; z-index: 100; left: 0px; font-size: 35px;"
     prefix.setAttributeNode(style)
     inputElement.setAttribute("style","text-align:right;width:99%;")
-    prefix.innerHTML = "<%=Location.current_arv_code rescue 'NNO' %>"
+    prefix.innerHTML = "<%= site_prefix + '-ARV' %>"
     inputElement.parentNode.insertBefore(prefix, inputElement)
     style.value+= 'left:30px;'
     prefix.setAttributeNode(style)
@@ -26,7 +26,7 @@
 
 <style>
 
-#date,#star,#abc,#slash,#percent,#comma,#minus,#plus,#decimal {
+#qwerty,#date,#star,#abc,#slash,#percent,#comma,#minus,#plus,#decimal {
   display:none;
 }
 

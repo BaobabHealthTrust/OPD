@@ -1,36 +1,53 @@
 <%= stylesheet_link_tag "set_date" %>
 <script>
   function validateDate() {
-    year = parseFloat(document.getElementsByName('set_year')[0].value)
-    month = parseFloat(document.getElementsByName('set_month')[0].value)
-    day = parseFloat(document.getElementsByName('set_day')[0].value)
-    return dateDiff(year,month,day);
+    year = $('set_year').value;
+    month = $('set_month').value;
+    day = document.getElementsByName('set_day')[1].value;
+
+    set_date = new Date(year + "-" + ("0" + month).slice(-2) + "-" + ("0" + day).slice(-2));
+
+    if (set_date > new Date()) {
+      msgBar = $("messageBar");
+      msgBar.innerHTML = "You must enter an earlier date than <%=Date.today.strftime('%Y-%b-%d')%>"
+      msgBar.style.display = "block";
+      setTimeout("hideMsg();",2000);
+    }else{ 
+      gotoNextPage();
+    }     
   }
 
-  function dateDiff(year,month,day){
-    today = new Date();
-    dateStr = today.getDate();
-    monthStr = today.getMonth() + 1;
-    yearStr = today.getFullYear();
-    today = new Date(parseFloat(yearStr),parseFloat(monthStr),parseFloat(dateStr));
-    set_date = new Date(parseFloat(year),parseFloat(month),parseFloat(day));
-    return (today > set_date)
-  }
+  function hideMsg() { $("messageBar").style.display = "none"; }
 
   <% if @patient_id %>
     var tt_cancel_destination = "/patients/show/<%=@patient_id%>"
   <% else %>
     var tt_cancel_destination = "/clinic"
   <% end %>
+        //:validationMessage => "You must enter an earlier date than #{Date.today.strftime('%Y-%b-%d')}")  %>
+
+  function setAttributes() {
+    $('nextButton').setAttribute("onmousedown","validateDate();");
+  }
+
+  function resetAttributes() {
+    $('nextButton').setAttribute("onmousedown","gotoNextPage()");
+  }
 </script>
 
 <style>
-  .tt_controls_year #char { display:none; }
+  .tt_controls_year #char { display: none; }
+  #qwerty { display: none; }
 </style>
 
 <form action = "/people/set_datetime/<%=@patient_id%>" method = "post">
 
-  <%= text_field_tag(:set_year,nil,{:field_type => 'number', :absoluteMin => "1940", :absoluteMax => Time.now.year, :helpText => 'Year'}) %>
+  <%= text_field_tag(:set_year,nil,
+      {:field_type => 'number', 
+       :absoluteMin => "1940", 
+       :id => "set_year",
+       :absoluteMax => Time.now.year, 
+       :helpText => 'Year'}) %>
 
   <% optionsString = "<option>" "" "</option>"
   1.upto(12){ |number| 
@@ -38,7 +55,7 @@
       }
       optionsString << "<option>" "Unknown" "</option>"
   %>
-  <%= select_tag :set_month, optionsString, {:helpText => 'Month'}%>
+  <%= select_tag :set_month, optionsString, {:helpText => 'Month',:id => "set_month"}%>
 
   <%day=Array.new(31){|d|d + 1 } 
     unknown=Array.new
@@ -46,9 +63,10 @@
     days_with_unknown = day 
     days = [""].concat day%>
     <%= select_tag(:set_day, options_for_select(days), 
-        :field_type => 'number' , :absoluteMax => Date.today.to_s ,:helpText => 'Day' ,
-        :validationJS =>'validateDate()',
-        :validationMessage => "You must enter an earlier date than #{Date.today.strftime('%Y-%b-%d')}")  %>
+        :field_type => 'number' , 
+        :helpText => 'Day' ,
+        :tt_OnUnLoad => "resetAttributes();",
+        :tt_OnLoad => "setAttributes();") %>
 
   <%= submit_tag "Set visit date" %>
 </form>
