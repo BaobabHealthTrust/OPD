@@ -45,24 +45,14 @@ class ClinicController < GenericClinicController
 
   def reports_tab
     @reports = [
-      ["Cohort","/cohort_tool/cohort_menu"],
-      ["Supervision","/clinic/supervision_tab"],
-      ["Data Cleaning Tools", "/clinic/data_cleaning_tab"],
-      ["OPD Reports", "/clinic/opd_tab"]
-    ]
-
-    @reports = [
-      ["Diagnosis","/drug/date_select?goto=/report/age_group_select?type=diagnosis"],
-     # ["Patient Level Data","/drug/date_select?goto=/report/age_group_select?type=patient_level_data"],
-      ["Disaggregated Diagnosis","/drug/date_select?goto=/report/age_group_select?type=disaggregated_diagnosis"],
-      ["Referrals","/drug/date_select?goto=/report/opd?type=referrals"],
-      #["Total Visits","/drug/date_select?goto=/report/age_group_select?type=total_visits"],
-      #["User Stats","/drug/date_select?goto=/report/age_group_select?type=user_stats"],
-      ["User Stats","/"],
-     # ["Total registered","/drug/date_select?goto=/report/age_group_select?type=total_registered"],
-      ["Diagnosis (By address)","/drug/date_select?goto=/report/age_group_select?type=diagnosis_by_address"],
-      ["Diagnosis + demographics","/drug/date_select?goto=/report/age_group_select?type=diagnosis_by_demographics"]
-    ] if Location.current_location.name.match(/Outpatient/i)
+						      ["OPD General", "/cohort_tool/opd_report_index"],
+						      ["Disaggregated Diagnosis", "/cohort_tool/opd_menu?report_name=disaggregated_diagnosis"],
+      						["Diagnosis (By address)", "/cohort_tool/opd_menu?report_name=diagnosis_by_address"],
+      						["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"],
+      						["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report"],
+      						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered"],
+      						["Referrals", "/cohort_tool/opd_menu?report_name=referral"]
+               ] 
     render :layout => false
   end
 
@@ -77,18 +67,6 @@ class ClinicController < GenericClinicController
     render :layout => false
   end
 
-	def opd_tab
-    @reports = [
-						      ["OPD General", "/cohort_tool/opd_report_index"],
-						      ["Disaggregated Diagnosis", "/cohort_tool/opd_menu?report_name=disaggregated_diagnosis"],
-      						["Diagnosis (By address)", "/cohort_tool/opd_menu?report_name=diagnosis_by_address"],
-      						["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"],
-      						["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report"],
-      						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered"],
-      						["Referrals", "/cohort_tool/opd_menu?report_name=referral"]
-               ] 
-    render :layout => false
-	end
 
   def properties_tab
     @settings = [
