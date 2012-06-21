@@ -523,11 +523,13 @@ class GenericEncountersController < ApplicationController
 		search_string = (params[:search_string] || '').upcase
 		filter_list = params[:filter_list].split(/, */) rescue []
 		outpatient_diagnosis = ConceptName.find_by_name("DIAGNOSIS").concept
-		diagnosis_concepts = ConceptClass.find_by_name("Diagnosis", :include => {:concepts => :name}).concepts rescue []    
+		#diagnosis_concepts = ConceptClass.find_by_name("Diagnosis", :include => {:concepts => :name}).concepts rescue []    
 		# TODO Need to check a global property for which concept set to limit things to
 
 		#diagnosis_concept_set = ConceptName.find_by_name('MALAWI NATIONAL DIAGNOSIS').concept This should be used when the concept becames available
-		diagnosis_concept_set = ConceptName.find_by_name('MALAWI ART SYMPTOM SET').concept
+		diagnosis_set = CoreService.get_global_property_value("application_diagnosis_concept")
+		diagnosis_set = "Qech outpatient diagnosis list" if diagnosis_set.blank?
+		diagnosis_concept_set = ConceptName.find_by_name(diagnosis_set).concept
 		diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set.id])
 
 		valid_answers = diagnosis_concepts.map{|concept| 
