@@ -585,8 +585,6 @@ class EncountersController < GenericEncountersController
 		     return false
 	end
 
-  private
-
   def daignosis_details
 				diagnosis = params[:diagnosis_string]
 		   
