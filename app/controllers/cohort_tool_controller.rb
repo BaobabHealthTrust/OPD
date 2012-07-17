@@ -1362,7 +1362,7 @@ class CohortToolController < ApplicationController
 			@total_registered << [patient_bean.name, person.birthdate, patient_bean.sex,
 														person.patient.encounters.find(:first, :order => "encounter_datetime").encounter_datetime.to_date,
 														patient_bean.address, patient_bean.traditional_authority]
-			next
+			return
 		end
 
 		person.patient.encounters.each do | encounter |	
