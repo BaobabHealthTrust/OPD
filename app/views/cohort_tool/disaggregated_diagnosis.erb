@@ -26,8 +26,12 @@
 	}
 
 </style>
+	<% if @report_name.upcase == "REFERRAL" %>
+		<h1 align='center' style="position:relative; top:15px;"><u> <%= "Referal In" %> </u></h1>
+	<% else %>
+		<h1 align='center' style="position:relative; top:15px;"><u> <%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %> </u></h1>
+	<% end %>
 
-	<h1 align='center' style="position:relative; top:15px;"><u> <%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %> </u></h1>
 	<br > <span style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px; font-size:20px;"> Dates : <u><%= "#{@start_date} to #{@end_date}" %> </u></span>
 
 	<% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase) %>	
