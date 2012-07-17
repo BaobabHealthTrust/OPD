@@ -1282,9 +1282,9 @@ class CohortToolController < ApplicationController
 		if @report_name.upcase == "REFERRAL"
 	
 			Observation.find(:all, :include=>{:encounter=>{:type=>{}}, :concept=>{:concept_names=>{}}},
-											 :conditions => ["encounter_type.name = ? AND concept_name.name != ?
+											 :conditions => ["encounter_type.name = ? AND concept_name.name = ?
 											 									AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)",
-											 									"REFERRAL", "Workstation location", @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')]). each do |obs|
+											 									"OUTPATIENT RECEPTION", "Referral clinic if referred", @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')]). each do |obs|
 												@referral_locations[Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name]+=1
 			end
 
