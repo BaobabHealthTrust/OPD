@@ -10,7 +10,6 @@
     <script language="javascript">
       tstUsername = "<%= current_user.username unless current_user.nil? %>";
       tstCurrentDate = "<%= Time.now.strftime("%Y/%m/%d") %>";
-      tstUserKeyboardPref = "<%= qwerty_or_abc_keyboard %>";
 
       function saveUserKeyboardPref(keyboardPref){
         var aUrl = "/user/add_update_property?property=keyboard&property_value=" + keyboardPref;

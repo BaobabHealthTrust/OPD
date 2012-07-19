@@ -4,6 +4,7 @@ class EncountersController < GenericEncountersController
 		@patient = Patient.find(params[:patient_id] || session[:patient_id])
 		@patient_bean = PatientService.get_patient(@patient.person)
 		session_date = session[:datetime].to_date rescue Date.today
+		@session_date = session[:datetime].to_date rescue Date.today
 
 		if session[:datetime]
 			@retrospective = true 
@@ -348,9 +349,14 @@ class EncountersController < GenericEncountersController
 		if (params[:encounter_type].upcase rescue '') == 'HIV_STAGING' and  (CoreService.get_global_property_value('use.extended.staging.questions').to_s == "true" rescue false)
 			render :template => 'encounters/extended_hiv_staging'
 		else
-			render :action => params[:encounter_type] if params[:encounter_type]
+			 if params[:encounter_type].upcase == "INFLUENZA"
+					render :layout => "multi_touch", :action => params[:encounter_type]
+			 else
+					render :action => params[:encounter_type] if params[:encounter_type]
+			 end
+			 	
 		end
-		
+
 	end
 
   def select_options

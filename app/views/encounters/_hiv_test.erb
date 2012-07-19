@@ -10,19 +10,19 @@
 
     <%= hidden_field_tag "encounter[encounter_type_name]", "LAB RESULTS" %>
     <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-    <%= hidden_field_tag "encounter[encounter_datetime]", session[:datetime] ||= DateTime.now() %>
+    <%= hidden_field_tag "encounter[encounter_datetime]", @session_date %>
     <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
     <%= hidden_field_tag("observations[][value_coded_or_text]", "HIV TEST") %>
     <%= hidden_field_tag("observations[][concept_name]", "LAB TEST RESULT") %>
     <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", session[:datetime] ||= DateTime.now()) %>
+    <%= hidden_field_tag("observations[][obs_datetime]", @session_date) %>
 
     <%= hidden_field_tag("observations[][value_coded_or_text]", "#{params[:identifier]}") %>
     <%= hidden_field_tag("observations[][parent_concept_name]", "LAB TEST RESULT") %>
     <%= hidden_field_tag("observations[][concept_name]", "LAB TEST SERIAL NUMBER") %>
     <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", session[:datetime] ||= DateTime.now()) %>
+    <%= hidden_field_tag("observations[][obs_datetime]", @session_date) %>
 
     <label for='hiv_test'>HIV Test Result</label>
     <% options=default.merge({
@@ -37,6 +37,6 @@
     <%= hidden_field_tag("observations[][parent_concept_name]", "LAB TEST RESULT") %>
     <%= hidden_field_tag("observations[][concept_name]", "HIV TEST") %>
     <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
-    <%= hidden_field_tag("observations[][obs_datetime]", session[:datetime] ||= DateTime.now()) %>
+    <%= hidden_field_tag("observations[][obs_datetime]", @session_date) %>
 
   </form>
