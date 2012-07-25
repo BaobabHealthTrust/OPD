@@ -65,7 +65,12 @@
             <li class="data">This patient is not enrolled in any programs</li>
           <% end %>
         </ul>
-        <button id="enroll" class="silver" style="margin-top:10px;"><span>Enroll in program</span></button>
+        
+        <% show_enroll_button = get_global_property_value("show.enroll.in.program.button") rescue "true" %>
+        
+        <% if show_enroll_button.to_s == "true" %>
+        			<button id="enroll" class="silver" style="margin-top:10px;"><span>Enroll in program</span></button>
+        <% end %>
 
       </div>
       <div style="display: table-cell; width: 50%;">
