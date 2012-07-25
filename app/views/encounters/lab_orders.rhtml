@@ -1,5 +1,20 @@
 <script type="text/javascript" language="javascript">
   var tt_cancel_destination = "/patients/show?patient_id=<%= @patient.patient_id %>"
+  
+  function getSelected(){
+    var choices = "";
+
+    for(var o = 0; o < __$('tests').options.length; o++){
+      if(__$('tests').options[o].selected == true){
+        choices += __$('tests').options[o].innerHTML + " ";
+        if(__$('tests').options[o].innerHTML.match(/RADIOLOGY/i)) {
+        	__$('tests').options[o]=null;
+        }
+      }
+    }
+
+    return choices;
+  }
 </script>
 <style type="text/css" media="screen">
   #space { display:inline; font-size:1.2em; }
@@ -37,7 +52,14 @@
     	}
     %>
 
-
+	<%= touch_select_tag "TESTS ORDERED", @patient, tests_to_request = concept_set_options("List of Radiology test"),
+		{
+			:id => "test_rad",
+			:multiple => true,
+    	:condition => "getSelected().match(/RADIOLOGY/i)",
+			:helpText => 'Select Radiology Test'
+		} %>
+		
 		<% if @retrospective %>
 			<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
 			<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
