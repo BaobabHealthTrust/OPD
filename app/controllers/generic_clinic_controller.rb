@@ -108,7 +108,7 @@ class GenericClinicController < ApplicationController
       @ever = Encounter.statistics(@types)
     end
 
-    @user = User.find(current_user.user_id).person.name rescue ""
+    @user = current_user.name  rescue "Me"
 
     if simple_overview
         render :template => 'clinic/overview_simple.rhtml' , :layout => false
