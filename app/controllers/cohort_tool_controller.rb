@@ -1279,91 +1279,108 @@ class CohortToolController < ApplicationController
 		@total_registered = []
 		@referral_locations = Hash.new(0)
 
-		if @report_name.upcase == "REFERRAL"
+		if @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT"
+			report_trasfer_outs_and_refrerrals(@report_name)
+		else
+			person_with_diagnosis = Person.find(:all,
+															:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}, :type=>{}}}},
+															:conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?) 
+															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT", "OUTPATIENT DIAGNOSIS"],
+															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])	
+
+			person_with_diagnosis.each do |person|
 	
-			Observation.find(:all, :include=>{:encounter=>{:type=>{}}, :concept=>{:concept_names=>{}}},
-											 :conditions => ["encounter_type.name = ? AND concept_name.name = ?
-											 									AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)",
-											 									"OUTPATIENT RECEPTION", "Referral clinic if referred", @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')]). each do |obs|
-												@referral_locations[Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name]+=1
-			end
-
-			render :layout => 'report' and return
-		end
-
-		person_with_diagnosis = Person.find(:all,
-														:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}, :type=>{}}}},
-														:conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?) 
-														AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT", "OUTPATIENT DIAGNOSIS"],
-														@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])	
-
-
-		person_with_diagnosis.each do |person|
-	
-			patient_bean = PatientService.get_patient(person,session_date)				
-			age = patient_bean.age
-			gender = person.gender
-			prescription = ""
-	
-			#check age boundary
-			if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
+				patient_bean = PatientService.get_patient(person,session_date)				
+				age = patient_bean.age
+				gender = person.gender
+				prescription = ""
+				
+				#check age boundary
+				if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT", "DISAGGREGATED_DIAGNOSIS"].include?(@report_name.upcase)
 			
-				report = false
+					report = false
+					
+					if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS"
+						report_patient(patient_bean, person)
+						next
+					end
 				
-				if @age_groups.include?("NONE")
-					report = true
-				end
+					if @age_groups.include?("NONE")
+						report = true
+					end
 		
-				if @age_groups.include?("40 TO < 50") && (patient_bean.age >=40 && patient_bean.age < 50)
-					report = true
-				end
+					if @age_groups.include?("40 TO < 50") && (patient_bean.age >=40 && patient_bean.age < 50)
+						report = true
+					end
 		
-				if @age_groups.include?("30 TO < 40") && (patient_bean.age >=30 && patient_bean.age < 40)
-					report = true
-				end
+					if @age_groups.include?("30 TO < 40") && (patient_bean.age >=30 && patient_bean.age < 40)
+						report = true
+					end
 		
-				if @age_groups.include?("20 TO 30") && (patient_bean.age >=20 && patient_bean.age < 30)
-					report = true
-				end
+					if @age_groups.include?("20 TO 30") && (patient_bean.age >=20 && patient_bean.age < 30)
+						report = true
+					end
 		
-				if @age_groups.include?("> 14 TO < 20") && (patient_bean.age > 14 && patient_bean.age < 20)
-					report = true
-				end
+					if @age_groups.include?("> 14 TO < 20") && (patient_bean.age > 14 && patient_bean.age < 20)
+						report = true
+					end
 		
-				if @age_groups.include?("5 TO 14") && (patient_bean.age >=5 && patient_bean.age <= 14)
-					report = true
-				end
+					if @age_groups.include?("5 TO 14") && (patient_bean.age >=5 && patient_bean.age <= 14)
+						report = true
+					end
 		
-				if @age_groups.include?("1 TO < 5") && (patient_bean.age >=1 && patient_bean.age < 5)
-					report = true
-				end
+					if @age_groups.include?("1 TO < 5") && (patient_bean.age >=1 && patient_bean.age < 5)
+						report = true
+					end
 		
-				if @age_groups.include?("6 MONTHS TO < 1 YR") && (patient_bean.age_in_months >=6 && patient_bean.age < 30)
-					report = true
-				end
+					if @age_groups.include?("6 MONTHS TO < 1 YR") && (patient_bean.age_in_months >=6 && patient_bean.age < 30)
+						report = true
+					end
 		
-				if @age_groups.include?("< 6 MONTHS") && (patient_bean.age_in_months < 6)
-					report = true
-				end
-				
-				report_patient(patient_bean, person) if report 
-			end
-		end				
+					if @age_groups.include?("< 6 MONTHS") && (patient_bean.age_in_months < 6)
+						report = true
+					end
 
+					if @report_name.upcase == "TOTAL_REGISTERED"
+							total_registered(patient_bean, person) if report
+					else
+							report_patient(patient_bean, person) if report					
+					end
+
+				end
+			end
+		end
 		render :layout => 'report'
 	end
-  
-	def report_patient(patient_bean, person)
-		age = patient_bean.age
-		gender = person.gender
-		
-		if @report_name.upcase == "TOTAL_REGISTERED"
-				
+
+	def total_registered(patient_bean, person)
+			age = patient_bean.age
+			gender = person.gender
 			@total_registered << [patient_bean.name, person.birthdate, patient_bean.sex,
 														person.patient.encounters.find(:first, :order => "encounter_datetime").encounter_datetime.to_date,
 														patient_bean.address, patient_bean.traditional_authority]
-			return
-		end
+	end
+	
+	def report_trasfer_outs_and_refrerrals(report_name)
+			report_encounter_name = "OUTPATIENT RECEPTION"
+			obs_concept_name = "Referral clinic if referred"
+			
+			if report_name.upcase == "TRANSFER_OUT"
+				report_encounter_name = "TRANSFER OUT"
+				obs_concept_name = "Transfer to"
+			end
+			
+			Observation.find(:all, :include=>{:encounter=>{:type=>{}}, :concept=>{:concept_names=>{}}},
+											 :conditions => ["encounter_type.name = ? AND concept_name.name = ?
+											 									AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)",
+											 									report_encounter_name, obs_concept_name, @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')]). each do |obs|
+												@referral_locations[Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name]+=1
+			end
+	end
+	
+	def report_patient(patient_bean, person)
+		age = patient_bean.age
+		gender = person.gender
 
 		person.patient.encounters.each do | encounter |	
 
@@ -1376,7 +1393,6 @@ class CohortToolController < ApplicationController
 										
 				#Disaggregated Diagnosis Report
 				if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS"
-		
 						break if encounter.name.upcase=="TREATMENT"
 						next if obs.answer_concept.blank?
 				
