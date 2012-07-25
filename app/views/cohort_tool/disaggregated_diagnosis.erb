@@ -26,13 +26,13 @@
 	}
 
 </style>
-	<% if @report_name.upcase == "REFERRAL" %>
-		<h1 align='center' style="position:relative; top:15px;"><u> <%= "Referal In" %> </u></h1>
+	<% if @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT" %>
+		<h1 align='center' style="position:relative; top:15px;"><u> <%= @report_name.upcase == "REFERRAL" ? "Referal In" : "Transfer Out" %> </u></h1>
 	<% else %>
 		<h1 align='center' style="position:relative; top:15px;"><u> <%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %> </u></h1>
 	<% end %>
 
-	<br > <span style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px; font-size:20px;"> Dates : <u><%= "#{@start_date} to #{@end_date}" %> </u></span>
+	<br > <span style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px; font-size:20px;"> Dates : <u><%= "#{@start_date} to #{@end_date}"%></u> <%= "<br> Total Registered: <u>#{@total_registered.length}</u>" if (@report_name.upcase == "TOTAL_REGISTERED") %></span>
 
 	<% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase) %>	
 		<span style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px; font-size:20px;"> Group (s) : <u><%= "#{@age_groups.join(' , ').to_s} </u>" %> </span>	
@@ -124,11 +124,11 @@
 									<u>	T.A </u> <p />
 						  </th>
 
-					<% elsif @report_name.upcase == "REFERRAL" %>  	
+					<% elsif @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT" %>  	
 						  <th> <u>Facility</u> <p />
 						  </th>
 						  <th> 
-									<u> Total Referrals </u> <p />
+									<u> <%= @report_name.upcase == "REFERRAL" ? "Total Referrals" : "Total Transfer Outs" %> </u> <p />
 						  </th>
 						  	  
 				  <% end %>
@@ -233,7 +233,7 @@
 						</tr>
 						<% end %>
 						
-				<% elsif  @report_name.upcase == "REFERRAL"  %>
+				<% elsif  @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT"  %>
 					<% @referral_locations.each do |referral,total| %>
 									<tr>
 											<td width="50%"> <span style="display:block; width:90%;"> <%= "#{referral}" %> </span> </td>
