@@ -56,7 +56,10 @@
 						<option value='/prescriptions/auto?patient_id=<%= @patient.id -%>'>Prescribe</option>
 					<% end %>
 
+        <% show_dispense_button = get_global_property_value("show.dispense.button") rescue "true" %>     
+        <% if show_dispense_button.to_s == "true" %>
 					<option value='/dispensations/new?patient_id=<%= @patient.id -%>'>Dispense</option>
+				<% end %>
 				</select>
 				<input type='submit' value='Finish' />
 			</form>
