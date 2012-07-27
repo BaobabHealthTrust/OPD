@@ -1,3 +1,4 @@
+<script language="javascript" type="text/javascript" src="/javascripts/jquery.js"></script>
 <style>
   .tt_controls_new_state_start_date #num , #Unknown {
     display:none;
@@ -56,8 +57,104 @@
 
     return new Date(intyear,intmonth,intday)
   }
+  
+  
+	function generateExitFromCareForm() {
+    submitForm = document.createElement("FORM");
+    submitForm.setAttribute("type","hidden");
+    submitForm.setAttribute("id","exit_from_care");
+    submitForm.method = "POST";
+    document.body.appendChild(submitForm);
+       
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","encounter[patient_id]")
+    newElement.setAttribute("id","encounter_patient_id");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "<%=@patient.id %>";
+    submitForm.appendChild(newElement);
+    
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","encounter[encounter_type_name]")
+    newElement.setAttribute("id","encounter_encounter_type_name");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "EXIT FROM CARE";
+    submitForm.appendChild(newElement);
 
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","observations[][concept_name]")
+    newElement.setAttribute("id","observations__concept_name");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "Reason for exiting care";
+    submitForm.appendChild(newElement);
 
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","observations[][patient_id]")
+    newElement.setAttribute("id","observations__patient_id");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "<%=@patient.id %>";
+    submitForm.appendChild(newElement);
+
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","observations[][obs_datetime]")
+    newElement.setAttribute("id","observations__obs_datetime");
+    newElement.setAttribute("type","hidden");
+    newElement.value =  "<%= DateTime.now()%>";
+    submitForm.appendChild(newElement);
+    
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","observations[][value_coded_or_text]")
+    newElement.setAttribute("id","observations__value_coded_or_text");
+    newElement.setAttribute("type","hidden");
+    newElement.value = document.getElementById('place_of_death').value;
+    submitForm.appendChild(newElement);
+    
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","encounter[provider_id]")
+    newElement.setAttribute("id","encounter_provider_id");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "<%=current_user.person_id%>";
+    submitForm.appendChild(newElement)
+
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","encounter[encounter_datetime]")
+    newElement.setAttribute("id","encounter_encounter_datetime");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "<%= DateTime.now()%>";
+    submitForm.appendChild(newElement);
+    
+    submitForm.appendChild(newElement);
+    submitForm.action= "/encounters/create";
+	}
+  
+  function prepareExitFromCareForm() {
+  (function($) {
+		//	$(document).ready( function() {
+				generateExitFromCareForm();
+				var form = $('#exit_from_care');
+					$.ajax( {
+						type: "POST",
+						url: form.attr( 'action' ),
+						data: form.serialize(),
+						success: function( response ) {
+						  //console.log( response );
+						}
+					} );
+	//		} ); 
+		})(jQuery);
+  }
+	
+	function submitExitFromCareForm(){
+		if (selectedValue('initial_state').toUpperCase() == "PATIENT DIED") {
+			prepareExitFromCareForm();
+		}
+		document.getElementById('program').submit();
+	}
+	
+	function setFinishButtonToSubmitExitFromCareForm() {
+		if(selectedValue('initial_state').toUpperCase() == 'PATIENT DIED') {
+			document.getElementById('nextButton').setAttribute("onmousedown","submitExitFromCareForm()");
+		}
+	}
 </script>
 <form id='program' action="/programs/update" method = 'post'>
   <%= hidden_field_tag :patient_id, @patient.id %>
@@ -80,7 +177,7 @@
   <%= text_field_tag 'current_date', initial_date,
         {:id => 'current_date',
          :field_type => 'date',
-         :tt_onLoad => "changeNextButtonCaption();",
+         :tt_onLoad => "changeNextButtonCaption()",
          :helpText => "New outcome start date",
          :max => "#{(Date.today).strftime('%Y-%m-%d')}",
          :validationJS =>"validStartDate()",
@@ -89,15 +186,24 @@
 
   <script>
     function resetNextButtonCaption(){
-      $('nextButton').innerHTML = "<span>Next</span>"
+      $('nextButton').innerHTML = "<span>Next</span>";
     }
 
     function changeNextButtonCaption(){
       if(current_state_input_box.value != 'PATIENT TRANSFERRED OUT'){
-        $('nextButton').innerHTML = "<span>Finish</span>"
+        $('nextButton').innerHTML = "<span>Finish</span>";
       }
     }
   </script>
+
+	<%= touch_select_tag "Reason for exiting care", @patient, concept_set_options("Place of Death"),
+		{
+			:id => "place_of_death",
+			:multiple => false,
+    	:condition => "(selectedValue('initial_state').toUpperCase() == 'PATIENT DIED')",
+    	:tt_onLoad => "changeNextButtonCaption();setFinishButtonToSubmitExitFromCareForm()",
+			:helpText => 'Place where death occured'
+		} %>
 
   <%= select_tag 'transfer_out_location_id', nil,
       {:id => 'transfer_out_location_id',
