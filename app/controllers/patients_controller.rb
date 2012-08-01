@@ -592,4 +592,8 @@ class PatientsController < GenericPatientsController
     return chronic_conditions_array
     
   end
+  
+  def print_opd_visit_summary
+     print_and_redirect("/patients/dashboard_print_opd_visit/#{params[:id]}","/patients/show/#{params[:id]}") and return
+ 	end
 end

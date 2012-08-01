@@ -14,6 +14,20 @@
 			tt_cancel_show = "<%= ((@amounts_required != @amount_needed) && (@amount_needed.to_i > 0) ?
 						      "javascript:confirmAction()" : "/patients/show/#{@patient.id}") %>";
 
+			tt_cancel_show = "javascript:printVisitSummary()";
+			
+			function printVisitSummary(){
+				
+				confirmOperation("Print visit summary?", "/patients/print_opd_visit_summary/<%= @patient.id %>");
+				var msg = document.getElementById('tstMessageBar');
+				
+				for(i=0; i<msg.children.length; i++) {
+					if(msg.children[2].innerHTML=="<span>No</span>"){
+						msg.children[2].setAttribute('onmousedown', "javascript: document.location='/patients/show/<%= @patient.id %>'");
+					}
+				}
+			}
+			
 			function confirmAction(){
 
 				confirmOperation("An amount of <%= @amount_needed %> units is still outstanding. Do you still want to ignore it?",
