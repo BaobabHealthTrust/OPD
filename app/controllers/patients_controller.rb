@@ -87,15 +87,12 @@ class PatientsController < GenericPatientsController
 		@date = (session[:datetime].to_date rescue Date.today).strftime("%Y-%m-%d")
 
 		@location = Location.find(session[:location_id]).name rescue ""
-		if @location.downcase == "outpatient" || params[:source]== 'opd'
-			render :template => 'dashboards/opdtreatment_dashboard', :layout => false
-		else
-			@task = main_next_task(Location.current_location,@patient,session_date)
-			@hiv_status = PatientService.patient_hiv_status(@patient)
-			@reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
-			@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
-			render :template => 'patients/index', :layout => false
-		end
+
+		@task = main_next_task(Location.current_location,@patient,session_date)
+		@hiv_status = PatientService.patient_hiv_status(@patient)
+		@reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
+		@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
+		render :template => 'patients/index', :layout => false
   end
 
   def personal

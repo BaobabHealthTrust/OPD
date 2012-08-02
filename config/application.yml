@@ -23,7 +23,7 @@ development:
  show.patient.confirmation: false
  create_from_remote: false
  use.user.selected.activities: false
- advanced.prescription.interface: false
+ advanced.prescription.interface: true
  auto_set_appointment: false
  is_referral_centre: true
  ipd.wards.tag: Ward

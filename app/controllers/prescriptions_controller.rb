@@ -14,7 +14,6 @@ class PrescriptionsController < GenericPrescriptionsController
   end
  
   def advanced_drug_details(drug_info)
-    
     insulin = false
     if (drug_info[0].downcase.include? "insulin") && ((drug_info[0].downcase.include? "lente") ||
           (drug_info[0].downcase.include? "soluble")) || ((drug_info[0].downcase.include? "glibenclamide") && (drug_info[1] == ""))
@@ -48,8 +47,6 @@ class PrescriptionsController < GenericPrescriptionsController
       :conditions => ["drug.name LIKE ? OR (concept_name.name LIKE ? AND COALESCE(drug.dose_strength, 0) = ? " +
           "AND COALESCE(drug.units, '') = ?)", name, "%" + drug_info[0] + "%", drug_info[3], drug_info[4]],
       :group => "concept.concept_id, drug.name, drug.dose_strength")
-
-    # raise drugs.to_yaml
     
     unless(insulin)
 
@@ -69,17 +66,17 @@ class PrescriptionsController < GenericPrescriptionsController
 
         drug_details += [:drug_concept_id => drug.concept_id,
           :drug_name => drug.name, :drug_strength => drug.strength,
-          :drug_formulation => drug.formulation, :drug_prn => 0, :drug_frequency => drug_frequency.name]
+          :drug_formulation => drug.formulation, :drug_prn => 0, :drug_frequency => drug_frequency.name] if drug.formulation.upcase == drug_info[1].upcase
 
       end
 
     else
 
       drugs.each do |drug|
-
+				
         drug_details += [:drug_concept_id => drug.concept_id,
           :drug_name => drug.name, :drug_strength => drug.strength,
-          :drug_formulation => drug.formulation, :drug_prn => 0, :drug_frequency => ""]
+          :drug_formulation => drug.formulation, :drug_prn => 0, :drug_frequency => ""] if drug.formulation.upcase == drug_info[1].upcase
 
       end rescue []
 

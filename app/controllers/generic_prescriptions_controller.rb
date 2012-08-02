@@ -273,9 +273,8 @@ class GenericPrescriptionsController < ApplicationController
                                     prescription[:frequency],
                                     prescription[:strength],
                                     prescription[:units]]
-
+			#raise prescription[:formulation].to_yaml
       drug_info = advanced_drug_details(prescription[:formulation]).first
-
       prescription[:formulation]    = drug_info[:drug_formulation] rescue nil
       prescription[:frequency]      = drug_info[:drug_frequency] rescue nil
       prescription[:prn]            = drug_info[:drug_prn] rescue nil
@@ -351,7 +350,6 @@ class GenericPrescriptionsController < ApplicationController
 
         drug_info = DiabetesService.drug_details(prescription[:formulation], diagnosis_name).first
 
-        # raise drug_info.inspect
 
         prescription[:formulation]    = drug_info[:drug_formulation]
         prescription[:frequency]      = drug_info[:drug_frequency]
