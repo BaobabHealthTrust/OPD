@@ -1363,7 +1363,7 @@ EOF
     if id.length > 7
       id[0..4] + "-" + id[5..8] + "-" + id[9..-1] rescue id
     else
-      "#{s[0..2]}-#{s[3..(s.length-1)]}"
+      "#{id[0..2]}-#{id[3..(id.length-1)]}"
     end
   end
 
