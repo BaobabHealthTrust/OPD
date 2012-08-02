@@ -1360,7 +1360,11 @@ EOF
 
   def self.get_national_id_with_dashes(patient, force = true)
     id = self.get_national_id(patient, force)
-    id[0..4] + "-" + id[5..8] + "-" + id[9..-1] rescue id
+    if id.length > 7
+      id[0..4] + "-" + id[5..8] + "-" + id[9..-1] rescue id
+    else
+      "#{s[0..2]}-#{s[3..(s.length-1)]}"
+    end
   end
 
 end
