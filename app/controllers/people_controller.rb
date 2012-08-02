@@ -25,6 +25,8 @@ class PeopleController < GenericPeopleController
     success = false
     Person.session_datetime = session[:datetime].to_date rescue Date.today
 
+    person = PatientService.create_patient_from_dde(params) if create_from_dde_server
+
     #for now BART2 will use BART1 for patient/person creation until we upgrade BART1 to 2
     #if GlobalProperty.find_by_property('create.from.remote') and property_value == 'yes'
     #then we create person from remote machine
