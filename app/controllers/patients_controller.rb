@@ -203,7 +203,14 @@ class PatientsController < GenericPatientsController
               "#{observe.answer_string}".squish rescue nil if observe.concept.fullname.upcase.include?('DIAGNOSIS')}.compact.join("; ")
             obs
             label.draw_multi_text("#{obs}", :font_reverse => false)
-            
+ 
+          elsif encounter.name.upcase.include?('TRANSFER OUT')
+            obs = ["Referred to facility - "]
+            obs << encounter.observations.collect{|observe|
+              Location.find("#{observe.answer_string}".squish).name rescue nil if observe.concept.fullname.upcase.include?('TRANSFER')}.compact.join("; ")
+            obs
+            label.draw_multi_text("#{obs}", :font_reverse => false)
+                       
 					elsif encounter.name.upcase.include?("VITALS")
 						string = []
 						encounter.observations.each do |observation|
@@ -585,4 +592,8 @@ class PatientsController < GenericPatientsController
     return chronic_conditions_array
     
   end
+  
+  def print_opd_visit_summary
+     print_and_redirect("/patients/dashboard_print_opd_visit/#{params[:id]}","/patients/show/#{params[:id]}") and return
+ 	end
 end

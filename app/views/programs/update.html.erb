@@ -190,7 +190,17 @@
     }
 
     function changeNextButtonCaption(){
-      if(current_state_input_box.value != 'PATIENT TRANSFERRED OUT'){
+      if((current_state_input_box.value.toUpperCase() != 'PATIENT TRANSFERRED OUT') && (current_state_input_box.value.toUpperCase() != 'REFERRED TO ANOTHER FACILITY')){
+        $('nextButton').innerHTML = "<span>Finish</span>";
+      }
+    }
+    
+    function resetNextButtonCaption(){
+      $('nextButton').innerHTML = "<span>Next</span>";
+    }
+
+    function changeNextButtonText(){
+      if((current_state_input_box.value.toUpperCase() == 'REFERRED TO ANOTHER FACILITY')){
         $('nextButton').innerHTML = "<span>Finish</span>";
       }
     }
@@ -208,11 +218,20 @@
   <%= select_tag 'transfer_out_location_id', nil,
       {:id => 'transfer_out_location_id',
        :field_type => 'alpha',
+       :helpText => "Referral out facility",
+       :ajaxURL => '/programs/locations?q=',
+       :tt_onLoad => "changeNextButtonText();",
+       :condition => "current_state_input_box.value.toUpperCase() == 'REFERRED TO ANOTHER FACILITY'",
+       :allowFreeText => true } %>
+
+  <%= select_tag 'transfer_out_location_id', nil,
+      {:id => 'transfer_out_location_id',
+       :field_type => 'alpha',
        :helpText => "Transfer out to location",
        :ajaxURL => '/programs/locations?q=',
        :condition => "current_state_input_box.value.toUpperCase() == 'PATIENT TRANSFERRED OUT'",
        :allowFreeText => true } %>
-
+       
   <%= touch_yes_no_unknown_tag "TRANSFER WITHIN RESPONSIBILITY", @patient, nil,
       {:id => "transfer_within_responsibility",
        :optional => false,
