@@ -1305,7 +1305,7 @@ class CohortToolController < ApplicationController
 						next
 					end
 				
-					if @age_groups.include?("NONE")
+					if @age_groups.include?("ALL")
 						report = true
 					end
 		
