@@ -219,6 +219,14 @@
 	  :tt_pageStyleClass => "azButton",
 	  :tt_requireNextClick => true, :tt_onLoad => "$('nextButton').style.display = 'block';"}%>
 
+<%= text_field_tag "pp[addresses][city_village_a]", params[:city_village_a],
+	 {:tt_onUnLoad => '$("person_addresses_city_village").value = $("pp_addresses_city_village_a").value',
+	  :condition => '$("filter_t_a").value != "Other" && $("person_addresses_city_village").value == "Other"' ,
+	  :ajaxURL => '/person_addresses/village?search_string=',
+	  :allowFreeText => true, :field_type => 'alpha',
+	  :helpText => 'Specify Location/Village',
+	  :tt_pageStyleClass => "azButton",
+	  :tt_requireNextClick => true, :tt_onLoad => "$('nextButton').style.display = 'block';"}%>
 
 <%= text_field_tag "person[addresses][address1]",  params[:address1],
 	{	:id => 'address1',
