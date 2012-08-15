@@ -1285,11 +1285,10 @@ class CohortToolController < ApplicationController
 			person_with_diagnosis = Person.find(:all,
 															:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}, :type=>{}}}},
 															:conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?) 
-															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT", "OUTPATIENT DIAGNOSIS"],
+															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?) AND concept_name.name NOT IN ('Detailed secondary diagnosis','Detailed primary diagnosis')", ["TREATMENT", "OUTPATIENT DIAGNOSIS"],
 															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])	
 
 			person_with_diagnosis.each do |person|
-	
 				patient_bean = PatientService.get_patient(person,session_date)				
 				age = patient_bean.age
 				gender = person.gender
