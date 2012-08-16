@@ -21,41 +21,15 @@ class EncountersController < GenericEncountersController
     }
 
     @diagnosis_type = params[:diagnosis_type]
-        
-		@diagnoses_requiring_specification = [
-				'OTHER',
-				'ABSCESS',
-				'ALL OTHER COMMUNICABLE DISEASES',
-				'ALL OTHER NON-COMMUNICABLE DISEASES',
-				'ALL OTHER SURGICAL CONDITIONS',
-				'GYNAECOLOGICAL DISORDERS',
-				'OPPORTUNISTIC INFECTIONS',
-				'OTHER HEART DISEASES',
-				'OTHER SKIN CONDITION'].join(';')
 
-		  @diagnoses_requiring_details = [
-		    "ABORTION COMPLICATIONS",
-		    "CANCER",
-		    "CANDIDA",
-		    "CHRONIC PSYCHIATRIC DISORDER",
-		    "DIARRHOEA DISEASES",
-		    "FRACTURE",
-		    "GASTROINTESTINAL BLEED",
-		    "MALARIA",
-		    "MENINGITIS",
-		    "MUSCULOSKELETAL PAINS",
-		    "PNEUMONIA",
-		    "POISONING",
-		    "RENAL FAILURE",
-		    "ROAD TRAFFIC ACCIDENT",
-		    "SEXUALLY TRANSMITTED INFECTION",
-		    "SOFT TISSUE INJURY",
-		    "TRAUMATIC CONDITIONS",
-		    "TUBERCULOSIS",
-		    "ULCERS"].join(';')
-		    
-#		    raise @diagnoses_requiring_details.to_yaml
+		diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id
+		diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set_id])	
+    @diagnoses_requiring_specification = diagnosis_concepts.map{|concept| concept.fullname.upcase}.join(';')
     
+		diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring details").concept.id
+		diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set_id])	
+    @diagnoses_requiring_details = diagnosis_concepts.map{|concept| concept.fullname.upcase}.join(';')
+     
 		@current_height = PatientService.get_patient_attribute_value(@patient, "current_height")
 		@min_weight = PatientService.get_patient_attribute_value(@patient, "min_weight")
         @max_weight = PatientService.get_patient_attribute_value(@patient, "max_weight")
