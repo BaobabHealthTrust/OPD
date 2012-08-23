@@ -52,7 +52,7 @@
     	}
     %>
 
-	<%= touch_select_tag "TESTS ORDERED", @patient, tests_to_request = concept_set_options("List of Radiology test"),
+	<%= touch_select_tag "TESTS ORDERED", @patient, tests_to_request = concept_set_options("List of Radiology tests"),
 		{
 			:id => "test_rad",
 			:multiple => true,
