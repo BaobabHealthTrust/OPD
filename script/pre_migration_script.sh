@@ -9,7 +9,7 @@ usage(){
 } 
 
 ENV=$1
-SITE=$2
+#SITE=$2
 
 if [ -z "$ENV" ] ; then
   usage
@@ -26,16 +26,10 @@ USERNAME=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}'][
 PASSWORD=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}']['password']"`
 DATABASE=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}']['database']"`
 
-echo "DROP DATABASE $DATABASE;" | mysql --user=$USERNAME --password=$PASSWORD
-echo "CREATE DATABASE $DATABASE;" | mysql --user=$USERNAME --password=$PASSWORD
+echo "DROP TABLE location_tag_map;" | mysql --user=$USERNAME --password=$PASSWORD $DATABASE
+echo "DROP TABLE location_tag;" | mysql --user=$USERNAME --password=$PASSWORD $DATABASE
 
-mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/schema_opd_additions.sql
-mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/defaults.sql
-mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/malawi_regions.sql
-mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/moh_regimens_only.sql
-mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/user_schema_modifications.sql
-
+#mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/location_tag_and_map_tables_create.sql
 echo "After completing database setup, you are advised to run the following:"
-echo "script/runner -e development|production|test script/update_diagnosis_observations.rb"
 echo "rake test"
 echo "rake cucumber"
