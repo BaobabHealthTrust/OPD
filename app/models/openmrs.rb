@@ -83,13 +83,23 @@ module Openmrs
   end 
   
   def add_location_obs
-    obs = Observation.new()
-    obs.person_id = self.patient_id
-    obs.encounter_id = self.id
-    obs.concept_id = ConceptName.find_by_name("WORKSTATION LOCATION").concept_id
-    obs.value_text = Location.current_location.name
-    obs.obs_datetime = self.encounter_datetime
-    obs.save
+    #raise self.to_yaml
+    if Location.current_location
+      obs = Observation.new()
+      obs.person_id = self.patient_id
+      obs.encounter_id = self.id
+      obs.concept_id = ConceptName.find_by_name("WORKSTATION LOCATION").concept_id
+      obs.value_text = Location.current_location.name
+      obs.obs_datetime = self.encounter_datetime
+      obs.save
+    else
+      obs = Observation.new()
+      obs.person_id = self.patient_id
+      obs.encounter_id = self.id
+      obs.concept_id = ConceptName.find_by_name("WORKSTATION LOCATION").concept_id
+      obs.obs_datetime = self.encounter_datetime
+      obs.save
+    end
   end
    
 end
