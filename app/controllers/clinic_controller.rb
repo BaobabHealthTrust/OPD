@@ -71,16 +71,16 @@ class ClinicController < GenericClinicController
 
   def properties_tab
     @settings = [
-      ["Set Clinic Days","/properties/clinic_days"],
-      ["View Clinic Holidays","/properties/clinic_holidays"],
-      ["Set Clinic Holidays","/properties/set_clinic_holidays"],
-      ["Set Site Code", "/properties/site_code"],
+      #["Set Clinic Days","/properties/clinic_days"],
+      #["View Clinic Holidays","/properties/clinic_holidays"],
+      #["Set Clinic Holidays","/properties/set_clinic_holidays"],
+      #["Set Site Code", "/properties/site_code"],
       ["Manage Roles", "/properties/set_role_privileges"],
-      ["Use Extended Staging Format", "/properties/creation?value=use_extended_staging_format"],
-      ["Use User Selected Task(s)", "/properties/creation?value=use_user_selected_activities"],
-      ["Use Filing Numbers", "/properties/creation?value=use_filing_numbers"],
+      #["Use Extended Staging Format", "/properties/creation?value=use_extended_staging_format"],
+      #["Use User Selected Task(s)", "/properties/creation?value=use_user_selected_activities"],
+      #["Use Filing Numbers", "/properties/creation?value=use_filing_numbers"],
       ["Show Lab Results", "/properties/creation?value=show_lab_results"],
-      ["Set Appointment Limit", "/properties/set_appointment_limit"]
+      #["Set Appointment Limit", "/properties/set_appointment_limit"]
     ]
     render :layout => false
   end

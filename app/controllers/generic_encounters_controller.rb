@@ -1,6 +1,5 @@
 class GenericEncountersController < ApplicationController
   def create(params=params, session=session)
-  
     if params[:change_appointment_date] == "true"
       session_date = session[:datetime].to_date rescue Date.today
       type = EncounterType.find_by_name("APPOINTMENT")                            
@@ -14,7 +13,7 @@ class GenericEncountersController < ApplicationController
       session_date.strftime("%Y-%m-%d 23:59:59")]).encounter
       appointment_encounter.void("Given a new appointment date")
     end
-    	
+        
     if params['encounter']['encounter_type_name'] == 'TB_INITIAL'
       (params[:observations] || []).each do |observation|
         if observation['concept_name'].upcase == 'TRANSFER IN' and observation['value_coded_or_text'] == "YES"

@@ -10,6 +10,7 @@
      document.getElementById('role').value = role;
      selected_roles = [];
      new Ajax.Request("/properties/selected_roles?role=" + role ,{method:'get',onSuccess: function(transport){
+     	
         role_privileges = transport.responseText || "";
         if (role_privileges.length > 0) {
           selected_roles = role_privileges.split(',');
@@ -17,7 +18,8 @@
           for (x = 0 ; x < selected_roles.length ; x++) {
             for (i = 0 ; i < options.length ; i++) {
               if (options[i].getAttribute('tstvalue') == selected_roles[x]) {
-                updateTouchscreenInputForSelect(options[i]);
+              
+                updateTouchscreenInputForSelect($("optionValue" + i));
               }
             }
           }
