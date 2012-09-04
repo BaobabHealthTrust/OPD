@@ -38,15 +38,20 @@
 	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
 	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
-	<% counter = 0%>
+	<%= hidden_field_tag "filter[provider]", "Dummy", {:id => "presenting_complaint_0"} %>
+
+	<% counter = 0
+		presenting_label = "Presenting complaint"	
+	%>
 	<% 5.times do %>
 			<% counter += 1%>
 			<%= touch_select_tag "Presenting complaint", @patient, nil,
 				{	:id => "presenting_complaint_#{counter}",
 					:ajaxURL => "/encounters/presenting_complaints?search_string=",
 					:optional => "true",
-					:tt_onLoad => "setTimeout(updateNextFinish, 20)",
-				 	:helpText => "Presenting complaint" } %>
+				 	:condition => "$('presenting_complaint_#{counter-1}').value != '';",
+					:tt_onLoad => "showCategory('Presenting complaint');",
+				 	:helpText => presenting_label } %>
 
 			<%= touch_select_tag "Detailed additional diagnosis", @patient, nil,
 				{	:id => "detailed_presenting_complaint_#{counter}",
@@ -63,7 +68,19 @@
 					:allowFreeText => 'true',
 					:textCase => "upper",
 				 	:helpText => "Specific presenting complaint" } %>
+			<% presenting_label = "Additional presenting complaint" %>
 	<% end %>
+
+	<%= touch_select_tag "Life threatening condition", @patient, concept_set_options('LIFE THREATENING CONDITION'),
+		{	:id => "life_threatening_conditions",
+			:optional => "true",
+			:multiple => "true",
+		 	:helpText => "Select life threatening conditions" } %>
+
+	<%= touch_select_tag "Triage category", @patient, concept_set_options('TRIAGE CATEGORY'),
+		{	:id => "triage_category",
+		 	:helpText => "Triage category" } %>
+
 
 	<% if @retrospective %>
 		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
