@@ -10,7 +10,7 @@ class ApplicationController < GenericApplicationController
       return "/patients/show/#{patient.id}" 
     end
   end
-
+  # testing pushing to git
   # Try to find the next task for the patient at the given location
 	def main_next_task(location, patient, session_date = Date.today)
 		encounter_available = nil
