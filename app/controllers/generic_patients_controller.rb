@@ -2,6 +2,7 @@ class GenericPatientsController < ApplicationController
 	before_filter :find_patient, :except => [:void]
   
 	def show
+		
 		return_uri = session[:return_uri]
 		if !return_uri.blank?
     		redirect_to return_uri.to_s
@@ -848,6 +849,7 @@ class GenericPatientsController < ApplicationController
   end
 
   def alerts(patient, session_date = Date.today) 
+ 
     # next appt
     # adherence
     # drug auto-expiry
@@ -907,6 +909,10 @@ class GenericPatientsController < ApplicationController
 
     type = EncounterType.find_by_name("DISPENSING")
     patient.encounters.find_last_by_encounter_type(type.id, :order => "encounter_datetime").observations.each do | obs |
+      next if obs.order.blank?
+      if !allowed_hiv_viewer
+      	next if MedicationService.arv(obs.order.drug_order.drug)
+      end
       next if obs.order.blank? and obs.order.auto_expire_date.blank?
       alerts << "Auto expire date: #{obs.order.drug_order.drug.name} #{obs.order.auto_expire_date.to_date.strftime('%d-%b-%Y')}"
     end rescue []
@@ -941,8 +947,14 @@ class GenericPatientsController < ApplicationController
     alerts << "Patient go for CD4 count testing" if cd4_count_datetime(patient) == true
     alerts << "Lab: Patient must order sputum test" if patient_need_sputum_test?(patient.id)
     alerts << "Refer to ART wing" if show_alert_refer_to_ART_wing(patient)
-
-    alerts
+	if allowed_hiv_viewer
+    	alerts
+   	else
+   		alerts.reject! { |item| 
+   			item =~/^HIV/||item =~/^ART/||item =~/^CD4/
+   		}
+ 	alerts
+    end
   end
 
   def cd4_count_datetime(patient)
