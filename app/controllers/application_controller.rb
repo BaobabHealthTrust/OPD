@@ -119,6 +119,12 @@ class ApplicationController < GenericApplicationController
     dispensed_id = Concept.find_by_name('Amount dispensed').concept_id
     arv_regimen_concept_id = Concept.find_by_name('Regimen Category').concept_id
     
+    encounter.orders.each{|order|
+      if ! arv_drugs.include? Concept.find(order.concept_id).fullname
+        return true
+      end  
+    }
+       
     encounter.observations.each {|obs|
       if obs.concept_id == dispensed_id
         return true if arv_drugs.include? Concept.find(Drug.find(obs.value_drug).concept_id).fullname
