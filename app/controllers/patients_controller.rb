@@ -340,7 +340,20 @@ class PatientsController < GenericPatientsController
 	def encounter_summary(encounter)
 		name = encounter.type.name
     if name == 'TREATMENT'
-      o = encounter.orders.collect{|order| order.to_s}.join("\n")
+      if !allowed_hiv_viewer
+         arv_drugs = []
+         concept_set("antiretroviral drugs").each{|concept| arv_drugs << concept.uniq.to_s}
+         o = []
+         encounter.orders.each{|order|
+           if ! arv_drugs.include? Concept.find(order.concept_id).fullname
+             o << order.to_s 
+           end
+         }
+         o.join("\n")
+      else
+         o = encounter.orders.collect{|order| order.to_s}.join("\n")
+      end
+      
       o = "TREATMENT NOT DONE" if encounter.type.name == 'X'
       o = "No prescriptions have been made" if o.blank?
       o
