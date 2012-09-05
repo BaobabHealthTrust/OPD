@@ -39,8 +39,10 @@
 				<%  if @spine_clinician  %>
 					<option value="/patients/influenza_info?patient_id=<%=@patient.patient_id%>"> Influenza </option>
 					<option value="/patients/chronic_conditions_info?patient_id=<%=@patient.patient_id%>"> Chronic Diseases</option>
-				<% end %>					
-				<option value="/patients/hiv?patient_id=<%=@patient.patient_id%>"> HIV Status</option>
+				<% end %>
+				<% if @show_hiv_tab == true %>					
+					<option value="/patients/hiv?patient_id=<%=@patient.patient_id%>"> HIV Status</option>
+				<% end %>
 			</select>
 					
 				<select id="links">

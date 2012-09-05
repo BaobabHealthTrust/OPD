@@ -114,7 +114,13 @@ class PatientsController < GenericPatientsController
 		if user_roles.include?("lab")
 			@lab  = true
 		end
-
+       
+    if ! allowed_hiv_viewer
+      @show_hiv_tab = false
+    else
+      @show_hiv_tab = true
+    end
+   
 		@restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
 
 		@restricted.each do |restriction|
@@ -131,6 +137,7 @@ class PatientsController < GenericPatientsController
 		@hiv_status = PatientService.patient_hiv_status(@patient)
 		@reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
 		@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
+       
 		render :template => 'patients/index', :layout => false
   end
 
@@ -287,17 +294,21 @@ class PatientsController < GenericPatientsController
     #@remote_visit_treatments = @patient.remote_visit_treatments rescue nil
    # @local_diagnoses = PatientService.visit_diagnoses(@patient.id)
    # @local_treatments = @patient.visit_treatments
-
-		
+	 
+	 patient_encounters = @patient.encounters
+	
+	 if !allowed_hiv_viewer
+	   patient_encounters = remove_art_encounters(patient_encounters, 'encounter')
+	 end
    
-    @past_local_cases = {}    
-    @patient.encounters.each{|e| 
+    @past_local_cases = {} 
+    patient_encounters.each{|e| 
       @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")] = {} if e.encounter_datetime.to_date < (session[:datetime].to_date rescue Date.today.to_date)   
-      }
+      } 
     
-    @patient.encounters.each{|e| 
+    patient_encounters.each{|e| 
       @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")][e.name] = encounter_summary(e)  if e.encounter_datetime.to_date < (session[:datetime].to_date rescue Date.today.to_date)   
-      }
+      } rescue nil
     
     @past_local_cases = @past_local_cases.sort.reverse!
     render :layout => false
