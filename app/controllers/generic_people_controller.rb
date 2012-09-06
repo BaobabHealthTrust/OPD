@@ -97,11 +97,11 @@ class GenericPeopleController < ApplicationController
 		@people = PatientService.person_search(params)
 		@patients = []
 
-    unless @people.nil?
+    unless @people.blank?
 			@current_page = @people.paginate(:page => params[:page], :per_page => records_per_page.to_i)
 		end
 
-		@current_page.each do | person |
+		(@current_page || []).each do | person |
 			patient = PatientService.get_patient(person) rescue nil
 			@patients << patient
 		end
