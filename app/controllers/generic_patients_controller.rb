@@ -2,11 +2,13 @@ class GenericPatientsController < ApplicationController
 	before_filter :find_patient, :except => [:void]
   
 	def show
+		
 		return_uri = session[:return_uri]
 		if !return_uri.blank?
     		redirect_to return_uri.to_s
     		return
 		end
+ 		
 		session[:mastercard_ids] = []
 		session_date = session[:datetime].to_date rescue Date.today
 		@patient_bean = PatientService.get_patient(@patient.person)
@@ -90,13 +92,21 @@ class GenericPatientsController < ApplicationController
       :joins => "INNER JOIN encounter e USING (encounter_id)",
       :conditions => ["encounter_type = ? AND e.patient_id = ? AND DATE(encounter_datetime) = ?",
         type.id,@patient.id,session_date])
-
+        
+    if !allowed_hiv_viewer   
+      @prescriptions = remove_art_encounters(@prescriptions, 'prescription')
+    end
+    
     @restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
     @restricted.each do |restriction|
       @prescriptions = restriction.filter_orders(@prescriptions)
     end
-
+ 
     @encounters = @patient.encounters.find_by_date(session_date)
+    
+    if !allowed_hiv_viewer
+     @encounters = remove_art_encounters(@encounters, 'encounter')
+    end
 
     @transfer_out_site = nil
 
@@ -119,8 +129,13 @@ class GenericPatientsController < ApplicationController
     @prescriptions = Order.find(:all,
       :joins => "INNER JOIN encounter e USING (encounter_id)",
       :conditions => ["encounter_type = ? AND e.patient_id = ?",type.id,@patient.id])
-
+            
     @historical = @patient.orders.historical.prescriptions.all
+    
+    if !allowed_hiv_viewer   
+      @historical = remove_art_encounters(@historical, 'prescription')
+    end
+    
     @restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
     @restricted.each do |restriction|
       @historical = restriction.filter_orders(@historical)
@@ -202,6 +217,11 @@ class GenericPatientsController < ApplicationController
 
   def programs
     @programs = @patient.patient_programs.all
+    
+    if ! allowed_hiv_viewer
+      @programs = remove_art_encounters(@programs, 'program')
+    end
+    
     @restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
     @restricted.each do |restriction|
       @programs = restriction.filter_programs(@programs)
@@ -573,14 +593,14 @@ class GenericPatientsController < ApplicationController
       @prescriptions = restriction.filter_orders(@prescriptions)
       @programs = restriction.filter_programs(@programs)
     end
-
+    
     @date = (session[:datetime].to_date rescue Date.today).strftime("%Y-%m-%d")
     @task = main_next_task(Location.current_location,@patient,session_date)
     
     @hiv_status = PatientService.patient_hiv_status(@patient)
     @reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
     @arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
-
+ 
     render :template => 'patients/index', :layout => false
   end
 
@@ -588,8 +608,27 @@ class GenericPatientsController < ApplicationController
     session[:mastercard_ids] = []
     session_date = session[:datetime].to_date rescue Date.today
     @encounters = @patient.encounters.find_by_date(session_date)
-    @prescriptions = @patient.orders.unfinished.prescriptions.all
-    @programs = @patient.patient_programs.all
+     if !allowed_hiv_viewer
+ 	@prescriptions = []
+ 	arv_drug_list = []
+ 	
+ 	concept_set("Antiretroviral drugs").each{|drug| arv_drug_list << drug.uniq.to_s}
+  	@patient.orders.unfinished.prescriptions.all.each{|prescription|
+ 		prescription_drug = Concept.find(prescription.concept_id).fullname
+  		if ! arv_drug_list.include? prescription_drug
+  			@prescriptions << prescription 
+ 		end
+    }
+    else
+    	@prescriptions = @patient.orders.unfinished.prescriptions.all
+    end
+    #@programs = @patient.patient_programs.all
+    if allowed_hiv_viewer
+       @programs = @patient.patient_programs.all
+     else
+     #["name !=","HIV PROGRAM"]
+        @programs = PatientProgram.all(:conditions => ["patient_id = ? AND program_id != ?",@patient.id, hiv_program])
+     end
     @alerts = alerts(@patient, session_date) rescue nil
     # This code is pretty hacky at the moment
     @restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
@@ -605,9 +644,13 @@ class GenericPatientsController < ApplicationController
   def visit_history
     session[:mastercard_ids] = []
     session_date = session[:datetime].to_date rescue Date.today
-	start_date = session_date.strftime('%Y-%m-%d 00:00:00')
-	end_date = session_date.strftime('%Y-%m-%d 23:59:59')
-    @encounters = Encounter.find(:all, 	:conditions => [" patient_id = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", @patient.id, start_date, end_date]) 
+  	start_date = session_date.strftime('%Y-%m-%d 00:00:00')
+  	end_date = session_date.strftime('%Y-%m-%d 23:59:59')
+    @encounters = Encounter.find(:all, 	:conditions => [" patient_id = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", @patient.id, start_date, end_date])
+    
+    if ! allowed_hiv_viewer
+      @encounters = remove_art_encounters(@encounters, 'encounter')
+    end
     
     @creator_name = {}
     @encounters.each do |encounter|
@@ -617,14 +660,20 @@ class GenericPatientsController < ApplicationController
     end
     
     @prescriptions = @patient.orders.unfinished.prescriptions.all
-    @programs = @patient.patient_programs.all
+    #@programs = @patient.patient_programs.all
+    if allowed_hiv_viewer
+       @programs = @patient.patient_programs.all
+     else
+     #["name !=","HIV PROGRAM"]
+        @programs = PatientProgram.all(:conditions => ["patient_id = ? AND program_id != ?",@patient.id, hiv_program])
+     end
     @alerts = alerts(@patient, session_date) rescue nil
     # This code is pretty hacky at the moment
     @restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
     @restricted.each do |restriction|
-      @encounters = restriction.filter_encounters(@encounters)
-      @prescriptions = restriction.filter_orders(@prescriptions)
-      @programs = restriction.filter_programs(@programs)
+    @encounters = restriction.filter_encounters(@encounters)
+    @prescriptions = restriction.filter_orders(@prescriptions)
+    @programs = restriction.filter_programs(@programs)
     end
 
     render :template => 'dashboards/visit_history_tab', :layout => false
@@ -640,8 +689,13 @@ class GenericPatientsController < ApplicationController
   end
 
   def past_visits_summary
-    @previous_visits  = get_previous_encounters(params[:patient_id])
-
+  	
+    @previous_visits = get_previous_encounters(params[:patient_id])
+    
+    if !allowed_hiv_viewer
+      @previous_visits = remove_art_encounters(@previous_visits, 'encounter')
+    end   
+    
     @encounter_dates = @previous_visits.map{|encounter| encounter.encounter_datetime.to_date}.uniq.reverse.first(6) rescue []
 
     @past_encounter_dates = []
@@ -689,6 +743,11 @@ class GenericPatientsController < ApplicationController
   def programs_dashboard
 	  @patient_bean = PatientService.get_patient(@patient.person)
     @reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
+    
+    if ! allowed_hiv_viewer
+      @reason_for_art_eligibility = ""
+    end
+    
     @arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
     render :template => 'dashboards/programs_dashboard', :layout => false
   end
@@ -790,13 +849,14 @@ class GenericPatientsController < ApplicationController
   end
 
   def alerts(patient, session_date = Date.today) 
+ 
     # next appt
     # adherence
     # drug auto-expiry
     # cd4 due
 	patient_bean = PatientService.get_patient(patient.person)
     alerts = []
-
+=begin
     type = EncounterType.find_by_name("APPOINTMENT")
     
     @show_change_app_date = Observation.find(:first,                          
@@ -815,7 +875,7 @@ class GenericPatientsController < ApplicationController
                type.id,patient.id,session_date.strftime("%Y-%m-%d 23:59:59")
                ]).value_datetime.strftime("%a %d %B %Y") rescue nil
     alerts << ('Next appointment: ' + next_appt) unless next_appt.blank?
-
+=end
     encounter_dates = Encounter.find_by_sql("SELECT * FROM encounter WHERE patient_id = #{patient.id} AND encounter_type IN (" +
         ("SELECT encounter_type_id FROM encounter_type WHERE name IN ('VITALS', 'TREATMENT', " +
           "'HIV RECEPTION', 'HIV STAGING', 'HIV CLINIC CONSULTATION', 'DISPENSING')") + ")").collect{|e|
@@ -849,6 +909,10 @@ class GenericPatientsController < ApplicationController
 
     type = EncounterType.find_by_name("DISPENSING")
     patient.encounters.find_last_by_encounter_type(type.id, :order => "encounter_datetime").observations.each do | obs |
+      next if obs.order.blank?
+      if !allowed_hiv_viewer
+      	next if MedicationService.arv(obs.order.drug_order.drug)
+      end
       next if obs.order.blank? and obs.order.auto_expire_date.blank?
       alerts << "Auto expire date: #{obs.order.drug_order.drug.name} #{obs.order.auto_expire_date.to_date.strftime('%d-%b-%Y')}"
     end rescue []
@@ -883,8 +947,14 @@ class GenericPatientsController < ApplicationController
     alerts << "Patient go for CD4 count testing" if cd4_count_datetime(patient) == true
     alerts << "Lab: Patient must order sputum test" if patient_need_sputum_test?(patient.id)
     alerts << "Refer to ART wing" if show_alert_refer_to_ART_wing(patient)
-
-    alerts
+	if allowed_hiv_viewer
+    	alerts
+   	else
+   		alerts.reject! { |item| 
+   			item =~/^HIV/||item =~/^ART/||item =~/^CD4/
+   		}
+ 	alerts
+    end
   end
 
   def cd4_count_datetime(patient)
@@ -2145,7 +2215,7 @@ class GenericPatientsController < ApplicationController
     @encounters   = @patient.encounters.find(:all, :conditions => ['DATE(encounter_datetime) = ?',session_date.to_date])
     excluded_encounters = ["Registration", "Diabetes history","Complications", #"Diabetes test",
       "General health", "Diabetes treatments", "Diabetes admissions","Hospital admissions",
-      "Hypertension management", "Past diabetes medical history"]
+      "Hypertension management", "Past diabetes medical history","Update HIV status"]
     @encounter_names = @patient.encounters.active.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
     ignored_concept_id = Concept.find_by_name("NO").id;
 
@@ -2221,6 +2291,7 @@ class GenericPatientsController < ApplicationController
   end
   
 	def hiv
+		
 		get_recent_screen_complications
 		render :template => 'patients/hiv', :layout => false
 	end
