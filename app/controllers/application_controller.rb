@@ -67,7 +67,8 @@ class ApplicationController < GenericApplicationController
   end 	
   
   def hiv_program
-  	program = PatientProgram.first(:conditions => {:patient_id => @patient.id})
+  	program = PatientProgram.first(:conditions => {:patient_id => @patient.id,
+      :program_id => Program.find_by_name('HIV PROGRAM').id})
   	if program.program.name == "HIV PROGRAM"
   	return program.program_id
   	else
