@@ -1,5 +1,44 @@
 class PatientsController < GenericPatientsController
 
+	def tab_social_history
+    @alcohol = nil
+    @smoke = nil
+    @nutrition = nil
+    
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    
+    @alcohol = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Patient currently consumes alcohol').concept_id]).answer_string rescue nil
+
+    @smokes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Patient currently smokes').concept_id]).answer_string rescue nil
+
+    @nutrition = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Nutrition status').concept_id]).answer_string rescue nil
+  
+    @civil = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Civil status').concept_id]).answer_string.titleize rescue nil
+  
+    @civil_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('Other Civil Status Comment').concept_id]).answer_string rescue nil) if @civil == "Other"
+  
+    @religion = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Religion').concept_id]).answer_string.titleize rescue nil
+  
+    @religion_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
+              @patient.id, EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('Other').concept_id]).answer_string rescue nil) if @religion == "Other"
+  
+    render :layout => false
+  end
+  
   def show
 		session[:mastercard_ids] = []
 		session_date = session[:datetime].to_date rescue Date.today
@@ -65,7 +104,13 @@ class PatientsController < GenericPatientsController
 		if user_roles.include?("lab")
 			@lab  = true
 		end
-
+       
+    if ! allowed_hiv_viewer
+      @show_hiv_tab = false
+    else
+      @show_hiv_tab = true
+    end
+   
 		@restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
 
 		@restricted.each do |restriction|
@@ -82,6 +127,7 @@ class PatientsController < GenericPatientsController
 		@hiv_status = PatientService.patient_hiv_status(@patient)
 		@reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
 		@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
+       
 		render :template => 'patients/index', :layout => false
   end
 
@@ -238,17 +284,21 @@ class PatientsController < GenericPatientsController
     #@remote_visit_treatments = @patient.remote_visit_treatments rescue nil
    # @local_diagnoses = PatientService.visit_diagnoses(@patient.id)
    # @local_treatments = @patient.visit_treatments
-
-		
+	 
+	 patient_encounters = @patient.encounters
+	
+	 if !allowed_hiv_viewer
+	   patient_encounters = remove_art_encounters(patient_encounters, 'encounter')
+	 end
    
-    @past_local_cases = {}    
-    @patient.encounters.each{|e| 
+    @past_local_cases = {} 
+    patient_encounters.each{|e| 
       @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")] = {} if e.encounter_datetime.to_date < (session[:datetime].to_date rescue Date.today.to_date)   
-      }
+      } 
     
-    @patient.encounters.each{|e| 
+    patient_encounters.each{|e| 
       @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")][e.name] = encounter_summary(e)  if e.encounter_datetime.to_date < (session[:datetime].to_date rescue Date.today.to_date)   
-      }
+      } rescue nil
     
     @past_local_cases = @past_local_cases.sort.reverse!
     render :layout => false
@@ -280,7 +330,20 @@ class PatientsController < GenericPatientsController
 	def encounter_summary(encounter)
 		name = encounter.type.name
     if name == 'TREATMENT'
-      o = encounter.orders.collect{|order| order.to_s}.join("\n")
+      if !allowed_hiv_viewer
+         arv_drugs = []
+         concept_set("antiretroviral drugs").each{|concept| arv_drugs << concept.uniq.to_s}
+         o = []
+         encounter.orders.each{|order|
+           if ! arv_drugs.include? Concept.find(order.concept_id).fullname
+             o << order.to_s 
+           end
+         }
+         o.join("\n")
+      else
+         o = encounter.orders.collect{|order| order.to_s}.join("\n")
+      end
+      
       o = "TREATMENT NOT DONE" if encounter.type.name == 'X'
       o = "No prescriptions have been made" if o.blank?
       o
