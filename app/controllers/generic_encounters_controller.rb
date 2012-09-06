@@ -540,9 +540,11 @@ class GenericEncountersController < ApplicationController
 		previous_answers = Observation.find_most_common(outpatient_diagnosis, search_string)
 		@suggested_answers = (previous_answers + valid_answers.sort!).reject{|answer| filter_list.include?(answer) }.uniq[0..10] 
 		@suggested_answers = @suggested_answers - params[:search_filter].split(',') rescue @suggested_answers
+      
 		render :text => "<li></li>" + "<li>" + @suggested_answers.join("</li><li>") + "</li>"
 	end
-
+    
+    
 	def treatment
 		search_string = (params[:search_string] || '').upcase
 		filter_list = params[:filter_list].split(/, */) rescue []
