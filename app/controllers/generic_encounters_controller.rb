@@ -1249,7 +1249,6 @@ class GenericEncountersController < ApplicationController
 
 	def create_obs(encounter , params)
 		# Observation handling
-
 		(params[:observations] || []).each do |observation|
 			# Check to see if any values are part of this observation
 			# This keeps us from saving empty observations

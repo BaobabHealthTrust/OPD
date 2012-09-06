@@ -61,18 +61,8 @@ class PatientsController < GenericPatientsController
 
 		@category = session["category"] rescue ""
 
-		#@ili = Observation.find(:all, :joins => [:concept => :name], :conditions =>
-		#		["self.concept.fullname = ? AND value_coded IN (?) AND obs.voided = 0", "ILI",
-		#		ConceptName.find(:all, :conditions => ["voided = 0 AND name = ?", "YES"]).collect{|o|
-		#			o.concept_id}]).length
-
-		#@sari = Observation.find(:all, :joins => [:concept => :name], :conditions =>
-		#		["name = ? AND value_coded IN (?) AND obs.voided = 0", "SARI",
-		#		ConceptName.find(:all, :conditions => ["voided = 0 AND name = ?", "YES"]).collect{|o|
-		#			o.concept_id}]).length
 
 		@user = current_user
-		#@user_privilege = @user.user_roles.collect{|x|x.role.downcase}
 	
 		user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role.downcase}
 		inherited_roles = RoleRole.find(:all,:conditions => ["child_role IN (?)", user_roles]).collect{|r|r.parent_role.downcase}
@@ -656,4 +646,43 @@ class PatientsController < GenericPatientsController
   def print_opd_visit_summary
      print_and_redirect("/patients/dashboard_print_opd_visit/#{params[:id]}","/patients/show/#{params[:id]}") and return
  	end
+
+  def social_history
+    @alcohol = nil
+    @smoke = nil
+    @nutrition = nil
+    
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    
+    @alcohol = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Patient currently consumes alcohol').concept_id]).answer_string rescue nil
+
+    @smokes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Patient currently smokes').concept_id]).answer_string rescue nil
+
+    @nutrition = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Nutrition status').concept_id]).answer_string rescue nil
+  
+    @civil = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Civil status').concept_id]).answer_string.titleize rescue nil
+  
+    @civil_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('Other Civil Status Comment').concept_id]).answer_string rescue nil) if @civil == "Other"
+  
+    @religion = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+        ConceptName.find_by_name('Religion').concept_id]).answer_string.titleize rescue nil
+  
+    @religion_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
+              @patient.id, EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|e| e.encounter_id},
+          ConceptName.find_by_name('Other').concept_id]).answer_string rescue nil) if @religion == "Other"
+  
+    render :layout => false
+  end
 end

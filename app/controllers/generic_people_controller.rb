@@ -17,9 +17,9 @@ class GenericPeopleController < ApplicationController
 			"cell_phone_number"=> params['cell_phone']['identifier'],
 			"birth_month"=> params[:patient_month],
 			"addresses"=>{ "address2" => params['p_address']['identifier'],
-						"address1" => params['p_address']['identifier'],
-			"city_village"=> params['patientaddress']['city_village'],
-			"county_district"=> params[:birthplace] },
+                     "address1" => params['p_address']['identifier'],
+                     "city_village"=> params['patientaddress']['city_village'],
+                     "county_district"=> params[:birthplace] },
 			"gender" => params['patient']['gender'],
 			"birth_day" => params[:patient_day],
 			"names"=> {"family_name2"=>"Unknown",
@@ -61,8 +61,8 @@ class GenericPeopleController < ApplicationController
 		art_info = art_info_for_remote(national_id)
 		render :text => art_info.to_json
 	end
- 
-	def search
+  
+  def search
 		found_person = nil
 		if params[:identifier]
 			local_results = PatientService.search_by_identifier(params[:identifier])
@@ -74,52 +74,92 @@ class GenericPeopleController < ApplicationController
 			else
 				# TODO - figure out how to write a test for this
 				# This is sloppy - creating something as the result of a GET
-				if create_from_remote        
+				if create_from_remote
 					found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
 					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
 				end
 			end
 			if found_person
-				show_confirmation = CoreService.get_global_property_value('show.patient.confirmation').to_s == "true" rescue false
+
+        patient = DDEService::Patient.new(found_person.patient)
+
+        patient.check_old_national_id(params[:identifier])
 
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
 				else
-					url = ''
-					if show_confirmation
-						url = url_for(:controller => :people, :action => :confirm , :found_person_id =>found_person.id)
-					else
-						url = next_task(found_person.patient)
-					end
+					redirect_to :action => 'confirm', :found_person_id => found_person.id, :relation => params[:relation] and return
+				end
+			end
+		end
+		records_per_page = CoreService.get_global_property_value('records_per_page') || 5
+		@relation = params[:relation]
+		@people = PatientService.person_search(params)
+		@patients = []
 
-					redirect_to url and return
+    unless @people.nil?
+			@current_page = @people.paginate(:page => params[:page], :per_page => records_per_page.to_i)
+		end
+
+		@current_page.each do | person |
+			patient = PatientService.get_patient(person) rescue nil
+			@patients << patient
+		end
+	end
+=begin  
+  def search
+		found_person = nil
+		if params[:identifier]
+			local_results = PatientService.search_by_identifier(params[:identifier])
+
+			if local_results.length > 1
+				@people = PatientService.person_search(params)
+			elsif local_results.length == 1
+				found_person = local_results.first
+			else
+				# TODO - figure out how to write a test for this
+				# This is sloppy - creating something as the result of a GET
+				if create_from_remote
+					found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
+					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
+				end
+			end
+			if found_person
+
+        patient = DDEService::Patient.new(found_person.patient)
+
+        patient.check_old_national_id(params[:identifier])
+
+				if params[:relation]
+					redirect_to search_complete_url(found_person.id, params[:relation]) and return
+				else
+					redirect_to :action => 'confirm', :found_person_id => found_person.id, :relation => params[:relation] and return
 				end
 			end
 		end
 		@relation = params[:relation]
 		@people = PatientService.person_search(params)
 		@patients = []
-		# PatientService#person_search returns person_id if search returns 1 match
-		@people = [Person.find(@people)] if @people.is_a? Fixnum
 		@people.each do | person |
 			patient = PatientService.get_patient(person) rescue nil
 			@patients << patient
 		end
 
 	end
-  
+=end
+
   def search_from_dde
 		found_person = PatientService.person_search_from_dde(params)
     if found_person
       if params[:relation]
         redirect_to search_complete_url(found_person.id, params[:relation]) and return
       else
-        redirect_to :action => 'confirm', 
-          :found_person_id => found_person.id, 
+        redirect_to :action => 'confirm',
+          :found_person_id => found_person.id,
           :relation => params[:relation] and return
       end
     else
-      redirect_to :action => 'search' and return 
+      redirect_to :action => 'search' and return
     end
   end
    
@@ -135,7 +175,7 @@ class GenericPeopleController < ApplicationController
     @transferred_out = @current_hiv_program_state.upcase == "PATIENT TRANSFERRED OUT"? true : nil
     defaulter = Patient.find_by_sql("SELECT current_defaulter(#{@person.patient.patient_id}, '#{session_date}') 
                                      AS defaulter 
-                                     FROM patient_program LIMIT 1")[0].defaulter
+                                     FROM patient_program LIMIT 1")[0].defaulter rescue 0
     @defaulted = defaulter == 0 ? nil : true     
     @task = main_next_task(Location.current_location, @person.patient, session_date.to_date)
 		@arv_number = PatientService.get_patient_identifier(@person, 'ARV Number')
@@ -206,10 +246,10 @@ class GenericPeopleController < ApplicationController
 
 	# This method is just to allow the select box to submit, we could probably do this better
 	def select
-    
     if params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
-			redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
+			redirect_to :controller => :patients, :action => :show, :id => params[:person]
 		else
+		
 			redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
 
 			redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
@@ -331,7 +371,7 @@ class GenericPeopleController < ApplicationController
   # List traditional authority containing the string given in params[:value]
   def traditional_authority
     district_id = District.find_by_name("#{params[:filter_value]}").id
-    traditional_authority_conditions = ["name LIKE (?) AND district_id = ?", "%#{params[:search_string]}%", district_id]
+    traditional_authority_conditions = ["name LIKE (?) AND district_id = ?", "#{params[:search_string]}%", district_id]
 
     traditional_authorities = TraditionalAuthority.find(:all,:conditions => traditional_authority_conditions, :order => 'name')
     traditional_authorities = traditional_authorities.map do |t_a|
@@ -374,7 +414,7 @@ class GenericPeopleController < ApplicationController
     # Villages containing the string given in params[:value]
   def village
     traditional_authority_id = TraditionalAuthority.find_by_name("#{params[:filter_value]}").id
-    village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "%#{params[:search_string]}%", traditional_authority_id]
+    village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "#{params[:search_string]}%", traditional_authority_id]
 
     villages = Village.find(:all,:conditions => village_conditions, :order => 'name')
     villages = villages.map do |v|

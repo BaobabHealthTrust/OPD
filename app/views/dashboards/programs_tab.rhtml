@@ -11,6 +11,7 @@
     $('#states').empty().load('/programs/status/' + node.attr('program'))
     $('#programs li.data').removeClass("active");
     node.addClass("active");
+    showUpdateStateButton(node.attr('parent_program'));
     setUpdateStateButtonPath(node.attr('program'));
   }
 
@@ -36,11 +37,19 @@
     if (recent) select(recent);
   })
 
-<% unless @programs.blank? %>
+    function showUpdateStateButton(parent_program_id) {
+		if(parent_program_id == 1) {
+			$('#status').css("display", "none");
+		} else {
+			$('#status').css("display", "block");
+		}
+    }
+
+<!--% unless @programs.blank? %-->
     function setUpdateStateButtonPath(program_id) {
       $('#status').click(function() { window.parent.location = '/programs/update/' + program_id })
     }
-<% end %>
+<!--% end %-->
 </script>
 
 <style>
@@ -54,9 +63,9 @@
     <div style="display: table-cell; width: 50%;">
 
       <h2>Programs (possibly filtered)</h2>
-      <ul id="programs" class="list" style="width:100%; height: 210px;">
-        <% for program in @programs do %>
-            <li class="data <%= cycle('even', 'odd') %>" program="<%= program.id %>">
+      <ul id="programs" class="list" style="width:100%; height: 210px; border-radius: 15px;">
+        <% 	for program in @programs do %>
+            <li class="data <%= cycle('even', 'odd') %>" program="<%= program.id %>" parent_program="<%= program.program.program_id %>">
               <div class="void"><img src="/images/cancel_flat_small.png"/></div>
               <div class="summary"><%= program.to_s.gsub(/\n/, '<br/>') -%></div>
             </li>
@@ -65,21 +74,16 @@
             <li class="data">This patient is not enrolled in any programs</li>
           <% end %>
         </ul>
-        
-        <% show_enroll_button = get_global_property_value("show.enroll.in.program.button") rescue "true" %>
-        
-        <% if show_enroll_button.to_s == "true" %>
-        			<button id="enroll" class="silver" style="margin-top:10px;"><span>Enroll in program</span></button>
-        <% end %>
+        <button id="enroll" class="silver" style="margin-top:10px;"><span>Enroll in program</span></button>
 
       </div>
       <div style="display: table-cell; width: 50%;">
 
         <h2>Outcomes</h2>
-        <ul id="states" class="list" style="width:100%; height: 210px;">
+        <ul id="states" class="list" style="width:100%; height: 210px; border-radius: 15px;">
         </ul>
         <!-- button id="status" class="silver" style="float:right;margin-top:10px;"><span>New Status</span></button -->
-        <% unless @programs.blank? %>
+        <% if !@programs.blank? %>
           <button id="status" class="silver" style="margin-top:10px;float:right;"><span>Update Outcomes</span></button>
         <% end %>
 
