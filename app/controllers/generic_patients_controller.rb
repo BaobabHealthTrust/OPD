@@ -856,7 +856,7 @@ class GenericPatientsController < ApplicationController
     # cd4 due
 	patient_bean = PatientService.get_patient(patient.person)
     alerts = []
-
+=begin
     type = EncounterType.find_by_name("APPOINTMENT")
     
     @show_change_app_date = Observation.find(:first,                          
@@ -875,7 +875,7 @@ class GenericPatientsController < ApplicationController
                type.id,patient.id,session_date.strftime("%Y-%m-%d 23:59:59")
                ]).value_datetime.strftime("%a %d %B %Y") rescue nil
     alerts << ('Next appointment: ' + next_appt) unless next_appt.blank?
-
+=end
     encounter_dates = Encounter.find_by_sql("SELECT * FROM encounter WHERE patient_id = #{patient.id} AND encounter_type IN (" +
         ("SELECT encounter_type_id FROM encounter_type WHERE name IN ('VITALS', 'TREATMENT', " +
           "'HIV RECEPTION', 'HIV STAGING', 'HIV CLINIC CONSULTATION', 'DISPENSING')") + ")").collect{|e|
