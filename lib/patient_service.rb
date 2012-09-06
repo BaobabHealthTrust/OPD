@@ -1083,6 +1083,15 @@ EOF
        "relation"=>""
       }
 
+
+      passed_national_id = (passed["person"]["patient"]["identifiers"]["National id"])
+                                                                                
+      unless passed_national_id.blank?                                          
+        patient = PatientIdentifier.find(:first,                                
+          :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
+        return [patient.person] unless patient.blank?                           
+      end
+
       return [self.create_from_form(passed["person"])]
     end
     return people
