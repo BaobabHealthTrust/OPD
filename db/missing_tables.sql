@@ -197,10 +197,10 @@ UNLOCK TABLES;
 -- Table structure for table `regimen`
 --
 
-DROP TABLE IF EXISTS `regimen`;
+/*DROP TABLE IF EXISTS `regimen`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `regimen` (
+/*CREATE TABLE `regimen` (
   `regimen_id` int(11) NOT NULL AUTO_INCREMENT,
   `concept_id` int(11) NOT NULL DEFAULT '0',
   `regimen_index` varchar(5) DEFAULT NULL,
@@ -222,10 +222,10 @@ CREATE TABLE `regimen` (
 -- Dumping data for table `regimen`
 --
 
-LOCK TABLES `regimen` WRITE;
+/*LOCK TABLES `regimen` WRITE;
 /*!40000 ALTER TABLE `regimen` DISABLE KEYS */;
 /*!40000 ALTER TABLE `regimen` ENABLE KEYS */;
-UNLOCK TABLES;
+/*UNLOCK TABLES*/
 
 
 DROP TABLE IF EXISTS `regimen_drug_order`;
