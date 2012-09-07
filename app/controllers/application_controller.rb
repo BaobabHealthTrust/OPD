@@ -1,5 +1,5 @@
 class ApplicationController < GenericApplicationController
-
+  helper_method :allowed_hiv_viewer
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
     task = main_next_task(Location.current_location, patient,session_date)
@@ -80,7 +80,8 @@ class ApplicationController < GenericApplicationController
     non_art_encounters = []
     hiv_encounters_list = [ "HIV STAGING", "HIV CLINIC REGISTRATION", 
                             "HIV RECEPTION","HIV CLINIC CONSULTATION",
-                            "EXIT FROM HIV CARE"
+                            "EXIT FROM HIV CARE","ART ADHERENCE",
+							"UPDATE HIV STATUS","ART_FOLLOWUP","ART ENROLLMENT"
                           ]
     if type.to_s.downcase == 'encounter'
       all_encounters.each{|encounter|
