@@ -100,11 +100,11 @@
 					<% if (@reason_for_art_eligibility rescue nil) != nil && (@reason_for_art_eligibility) != "" %>
 						<span value="<%= @reason_for_art_eligibility rescue "" %>">Reason for Starting</span>
 					<% end %>
-
+					<% if allowed_hiv_viewer %>
 					<% if (@arv_number rescue nil) != nil && (@arv_number) != " " %>
 						<span value="<%= @arv_number rescue '' %>">ARV Number</span>
 					<% end %>
-
+					<% end %>
 					<% if (@patient_bean.filing_number rescue nil) != nil && (@patient_bean.filing_number) != " " %>
 						<span value="<%= @patient_bean.filing_number rescue "" %>">Filing Number</span>
 					<% end %>
