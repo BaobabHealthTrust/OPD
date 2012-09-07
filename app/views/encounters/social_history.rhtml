@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # medical_history.rhtml
 
 <script type="text/javascript" language="javascript">
@@ -8,24 +9,43 @@
 </script>
 
 <form action="/encounters/create/social_history" >
+=======
+<script type="text/javascript" language="javascript">
+  var tt_cancel_destination = "/patients/show/<%= @patient.id%>?auto_load_forms=false"
+</script>
+
+<form id='outcome' action="/encounters/create" method='post'>
+>>>>>>> 9791ff3b652bedcc1cb03bbc2f0b0679defed2fa
   <%= hidden_field_tag "encounter[encounter_type_name]", "SOCIAL HISTORY" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+<<<<<<< HEAD
   <%session_date = session[:datetime] || Time.now() %>
+=======
+>>>>>>> 9791ff3b652bedcc1cb03bbc2f0b0679defed2fa
 
   <%= touch_select_tag "Patient currently smokes", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "smoker", :tt_requireNextClick => false,
     :helptext => "Does patient smoke?", 
     :tt_onLoad => "__$('nextButton').style.display='none'; showCategory('Social History');" } %>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> 9791ff3b652bedcc1cb03bbc2f0b0679defed2fa
   <%= touch_select_tag "Patient currently consumes alcohol", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "alcohol", 
     :tt_requireNextClick => false,
     :tt_onLoad => "__$('nextButton').style.display='none';",
     :helptext => "Do you take alcohol?" } %>
+<<<<<<< HEAD
  
  <%= touch_select_tag "Civil status", @patient,
+=======
+
+  <%= touch_select_tag "Civil status", @patient,
+>>>>>>> 9791ff3b652bedcc1cb03bbc2f0b0679defed2fa
     options_for_select([["", ""], ["Single", "Single"], ["Engaged", "Engaged"],
       ["Married", "Married"], ["Separated", "Separated"], ["Divorced", "Divorced"],
       ["Widowed", "Widowed"], ["Other", "Other"]]),
@@ -33,6 +53,7 @@
     :tt_requireNextClick => false,
     :tt_onLoad => "__$('nextButton').style.display='none';",
     :helptext => "Marital status" } %>
+<<<<<<< HEAD
   
   <%= touch_select_tag "Nutrition status", @patient, options_for_select([["", ""], ["Good", "Good"], ["Malnourished", "Malnourished"], ["Obese", "Obese"]]),
     {:id => "nutrition",
@@ -60,6 +81,9 @@
     :condition => "__$('religion').value == 'Other'"
   } %>
   
+=======
+
+>>>>>>> 9791ff3b652bedcc1cb03bbc2f0b0679defed2fa
   <%= touch_text_field_tag "Other civil status comment", @patient, nil,
     {
     :id => "other_civil_status",
@@ -68,5 +92,31 @@
     :condition => "__$('civil_status').value == 'Other'"
   } %>
 
+<<<<<<< HEAD
   <%= submit_tag 'Finish' %>
 </form>
+=======
+  <%= touch_select_tag "Religion", @patient, options_for_select(@religions),
+    {:id => "religion", 
+    :tt_requireNextClick => false,
+    :tt_onLoad => "__$('nextButton').style.display='none';",
+    :helptext => "Religion" } %>
+
+  <%= touch_text_field_tag "Other", @patient, nil,
+    {
+    :id => "other",
+    :helpText => "Specify other religion",
+    :tt_onLoad => "__$('nextButton').style.display='block';",
+    :condition => "__$('religion').value == 'Other'"
+  } %>
+
+	<% if @retrospective %>
+		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+		<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :tt_onload => "$('nextButton').style.display = 'block'", :ajaxURL => '/user/username?username=' %></p>
+	<% else %>
+		<%= hidden_field_tag "filter[provider]", nil %>
+	<% end %>
+	
+	<%= submit_tag "Finish" %>    
+ </form>
+>>>>>>> 9791ff3b652bedcc1cb03bbc2f0b0679defed2fa

@@ -26,15 +26,13 @@ USERNAME=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}'][
 PASSWORD=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}']['password']"`
 DATABASE=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}']['database']"`
 
-echo "DROP DATABASE $DATABASE;" | mysql --user=$USERNAME --password=$PASSWORD
-echo "CREATE DATABASE $DATABASE;" | mysql --user=$USERNAME --password=$PASSWORD
-
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/schema_opd_additions.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/opd_after_migration_defaults.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/openmrs_metadata_1_7.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/malawi_regions.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/moh_regimens_only.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/user_schema_modifications.sql
+mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/missing_tables.sql
 
 echo "After completing database setup, you are advised to run the following:"
 echo "script/runner -e development|production|test script/update_diagnosis_observations.rb"

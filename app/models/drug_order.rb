@@ -103,7 +103,6 @@ class DrugOrder < ActiveRecord::Base
         :patient_id => patient.id,
         :start_date => start_date,
         :auto_expire_date => auto_expire_date,
-        :observation => obs,
         :instructions => instructions)      
       drug_order = DrugOrder.new(
         :drug_inventory_id => drug.id,
