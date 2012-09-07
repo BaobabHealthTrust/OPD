@@ -8,21 +8,39 @@
 </script>
 
 <form action="/encounters/create/social_history" >
+<script type="text/javascript" language="javascript">
+  var tt_cancel_destination = "/patients/show/<%= @patient.id%>?auto_load_forms=false"
+</script>
+
+<form id='outcome' action="/encounters/create" method='post'>
   <%= hidden_field_tag "encounter[encounter_type_name]", "SOCIAL HISTORY" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
   <%session_date = session[:datetime] || Time.now() %>
-
   <%= touch_select_tag "Patient currently smokes", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "smoker", :tt_requireNextClick => false,
     :helptext => "Does patient smoke?", 
     :tt_onLoad => "__$('nextButton').style.display='none'; showCategory('Social History');" } %>
+
   <%= touch_select_tag "Patient currently consumes alcohol", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "alcohol", 
     :tt_requireNextClick => false,
     :tt_onLoad => "__$('nextButton').style.display='none';",
     :helptext => "Do you take alcohol?" } %>
+ 
+ <%= touch_select_tag "Civil status", @patient,
+
+
+  <%= touch_select_tag "Civil status", @patient,
+    options_for_select([["", ""], ["Single", "Single"], ["Engaged", "Engaged"],
+      ["Married", "Married"], ["Separated", "Separated"], ["Divorced", "Divorced"],
+      ["Widowed", "Widowed"], ["Other", "Other"]]),
+    {:id => "civil_status", 
+    :tt_requireNextClick => false,
+    :tt_onLoad => "__$('nextButton').style.display='none';",
+    :helptext => "Marital status" } %>
+  
   <%= touch_select_tag "Nutrition status", @patient, options_for_select([["", ""], ["Good", "Good"], ["Malnourished", "Malnourished"], ["Obese", "Obese"]]),
     {:id => "nutrition",
     :tt_requireNextClick => false,
@@ -48,15 +66,7 @@
     :tt_onLoad => "__$('nextButton').style.display='block';",
     :condition => "__$('religion').value == 'Other'"
   } %>
-  <%= touch_select_tag "Civil status", @patient,
-    options_for_select([["", ""], ["Single", "Single"], ["Engaged", "Engaged"],
-      ["Married", "Married"], ["Separated", "Separated"], ["Divorced", "Divorced"],
-      ["Widowed", "Widowed"], ["Other", "Other"]]),
-    {:id => "civil_status", 
-    :tt_requireNextClick => false,
-    :tt_onLoad => "__$('nextButton').style.display='none';",
-    :helptext => "Marital status" } %>
-
+  
   <%= touch_text_field_tag "Other civil status comment", @patient, nil,
     {
     :id => "other_civil_status",
