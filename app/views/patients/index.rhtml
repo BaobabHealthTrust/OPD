@@ -32,16 +32,13 @@
 					<option value='/patients/overview?patient_id=<%= @patient.id %>'>Overview</option>
 					<option value='/patients/visit_history?patient_id=<%= @patient.id %>'>Current Visit</option>
 					<option value='/patients/past_visits_summary?patient_id=<%= @patient.id %>'>Past Visits</option>
-<<<<<<< HEAD
 					<option value='/patients/tab_social_history?patient_id=<%= @patient.id %>'>Social History</option>
 					<option value="/patients/past_diagnoses?patient_id=<%=@patient.patient_id%>">Medical History</option>
 					<option value='/patients/personal/<%= @patient.id -%>'>Printouts/Other</option>
 
-=======
 					<option value="/patients/past_diagnoses?patient_id=<%= @patient.id%>">Medical History</option>
 					<option value="/patients/personal/<%= @patient.id%>">Printouts/Other</option>
 					<option value="/patients/social_history?patient_id=<%= @patient.id%>">Social History</option>
->>>>>>> 9791ff3b652bedcc1cb03bbc2f0b0679defed2fa
 				<%  if @spine_clinician  %>
 					<option value="/patients/influenza_info?patient_id=<%=@patient.patient_id%>"> Influenza </option>
 					<option value="/patients/chronic_conditions_info?patient_id=<%=@patient.patient_id%>"> Chronic Diseases</option>
