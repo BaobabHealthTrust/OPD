@@ -75,7 +75,7 @@ pos = 1
         people[<%= pos %>]["Mother Surname"] = "<%=h person.mothers_surname -%>";
     <% end %>
 
-    <% if !person.arv_number.blank? %>
+    <% if !person.arv_number.blank?  && allowed_hiv_viewer %>
         people[<%= pos %>]["ARV Number"] = "<%=h person.arv_number rescue "" -%>";
     <% end %>
 
