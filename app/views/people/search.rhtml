@@ -127,8 +127,7 @@ end -%>
       buttondiv = document.getElementById("buttons");
       buttondiv.innerHTML+= "<div id='tt_extraButtons'></div>"
       buttondiv.innerHTML+= "<button class='button navButton' id='newSearch' onmousedown='newSearch();'><span>New search</span></button>"
-      buttondiv.innerHTML+= '<%= will_paginate @current_page, :page_links => false %>'
-
+    /*buttondiv.innerHTML+= '<#%= will_paginate @current_page, :page_links => false %>'*/
 <%end%>
   }
 </script>

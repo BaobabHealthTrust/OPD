@@ -512,8 +512,8 @@ class EncountersController < GenericEncountersController
 		presenting_complaint = ConceptName.find_by_name("PRESENTING COMPLAINT").concept
 		
 
-		complaint_set = CoreService.get_global_property_value("application_diagnosis_concept")
-		complaint_set = "Qech outpatient diagnosis list" if complaint_set.blank?
+		complaint_set = CoreService.get_global_property_value("application_presenting_complaint")
+		complaint_set = "PRESENTING COMPLAINT" if complaint_set.blank?
 		complaint_concept_set = ConceptName.find_by_name(complaint_set).concept
 		complaint_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', complaint_concept_set.id])
 
@@ -541,5 +541,12 @@ class EncountersController < GenericEncountersController
   # Chronic Conditions question set
   def create_chronics
     create_influenza_data
+  end
+  #added this to ensure that we are able to get the detailed diagnosis set
+  def diagnosis_details
+      concept_name = params[:diagnosis_string]
+      options = concept_set(concept_name).flatten.uniq
+      
+      render :text => "<li></li><li>" + options.join("</li><li>") + "</li>"
   end
 end

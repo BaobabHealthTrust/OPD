@@ -68,12 +68,12 @@ helper_method :allowed_hiv_viewer
   
   def hiv_program
   	program = PatientProgram.first(:conditions => {:patient_id => @patient.id,
-      :program_id => Program.find_by_name('HIV PROGRAM').id})
-  	if program.program.name == "HIV PROGRAM"
-  	return program.program_id
-  	else
-  	return false
-  	end
+      :program_id => Program.find_by_name('HIV PROGRAM').id}) rescue nil
+    unless program.nil?
+  	   return program.program_id
+    else
+       return false
+    end
   end
   
   def remove_art_encounters(all_encounters, type)
