@@ -65,14 +65,13 @@ class DrugOrder < ActiveRecord::Base
   
   # prn should be 0 | 1
   def self.write_order(encounter, patient, obs, drug, start_date, auto_expire_date, dose, frequency, prn, instructions = nil, equivalent_daily_dose = nil)
-    user_person_id = encounter.provider_id
-
+    user_person_id = encounter.provider_id 
     #encounter ||= patient.current_treatment_encounter(start_date, user_person_id)
     units = drug.units || 'per dose'
     duration = (auto_expire_date.to_date - start_date.to_date).to_i rescue nil
     equivalent_daily_dose = nil
     drug_order = nil       
-    if (frequency == "VARIABLE")
+    if (frequency.to_s.upcase == "VARIABLE")
       if instructions.blank?
         instructions = "#{drug.name}:"
         instructions += " IN THE MORNING (QAM):#{dose[0]} #{units}" unless dose[0].blank? || dose[0].to_f == 0
