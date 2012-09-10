@@ -541,6 +541,7 @@ class EncountersController < GenericEncountersController
   def create_chronics
     create_influenza_data
   end
+
   #added this to ensure that we are able to get the detailed diagnosis set
   def diagnosis_details
       concept_name = params[:diagnosis_string]
@@ -548,4 +549,13 @@ class EncountersController < GenericEncountersController
       
       render :text => "<li></li><li>" + options.join("</li><li>") + "</li>"
   end
+
+  #added this to ensure that we are able to get the detailed diagnosis set
+  def concept_options
+      concept_name = params[:search_string]
+      options = concept_set(concept_name).flatten.uniq
+      
+      render :text => "<li></li><li>" + options.join("</li><li>") + "</li>"
+  end
+
 end
