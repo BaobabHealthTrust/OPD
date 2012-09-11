@@ -10,7 +10,7 @@ class GenericPrescriptionsController < ApplicationController
   
   def new
     @patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
-    @patient_diagnoses = current_diagnoses(@patient.person.id)
+    @patient_diagnoses = PatientService.current_diagnoses(@patient.person.id)
     @current_weight = PatientService.get_patient_attribute_value(@patient, "current_weight")
 		@current_height = PatientService.get_patient_attribute_value(@patient, "current_height")
   end
@@ -82,7 +82,7 @@ class GenericPrescriptionsController < ApplicationController
   def auto
     @patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
     # Find the next diagnosis that doesn't have a corresponding order
-    @diagnoses = current_diagnoses(@patient.person.id)
+    @diagnoses = PatientService.current_diagnoses(@patient.person.id)
     @prescriptions = @patient.orders.current.prescriptions.all.map(&:obs_id).uniq
     @diagnoses = @diagnoses.reject {|diag| @prescriptions.include?(diag.obs_id) }
     if @diagnoses.empty?
@@ -209,9 +209,10 @@ class GenericPrescriptionsController < ApplicationController
   
   
 	def create_advanced_prescription
-		patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
-		encounter  = MedicationService.current_treatment_encounter(patient)
-
+		@patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
+		@patient_diagnoses = PatientService.current_diagnoses(@patient.person.id)
+		encounter  = MedicationService.current_treatment_encounter(@patient)
+    
 		if params[:prescription].blank?
 			next if params[:formulation].blank?
           	formulation = (params[:formulation] || '').upcase
@@ -226,11 +227,11 @@ class GenericPrescriptionsController < ApplicationController
 			prn = params[:prn].to_i
 
 			if prescription[:type_of_prescription] == "variable"
-				DrugOrder.write_order(encounter, patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
+				DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
 					prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]], 
 					prescription[:type_of_prescription], prn)
 			else
-				DrugOrder.write_order(encounter, patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
+				DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
 					prescription[:frequency], prn)
 			end
 		else
@@ -256,11 +257,11 @@ class GenericPrescriptionsController < ApplicationController
 
 
 				if prescription[:type_of_prescription] == "variable"
-					DrugOrder.write_order(encounter, patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
+					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
 						prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]], 
 						prescription[:type_of_prescription], prn)
 				else
-					DrugOrder.write_order(encounter, patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
+					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
 						prescription[:frequency], prn)
 				end
 

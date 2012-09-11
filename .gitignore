@@ -2,10 +2,10 @@
 *.swp
 *.swo
 config/database.yml
+config/application.yml
 config/settings.yml
 notes
 doc
-development.sql
 development_structure.sql
 schema.rb
 *~
