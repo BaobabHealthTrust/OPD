@@ -12,7 +12,7 @@ url = url[url.index("/"), url.length - url.index("/")]
   tt_cancel_destination = "<%= (!request.referrer.blank? ? "/patients/show/#{@patient.id}" : 
     "/patients/current_visit/?patient_id=#{@patient.patient_id}") %>";
 
-  var generics = <%= @generics.sort.to_json %>;
+  var generic_drugs = <%= @generics.sort.to_json %>;
   var frequencies = <%= @frequencies.to_json %>;
   var diagnosisList = <%= @diagnosis.to_json %>;
   var patient_id = <%= params[:patient_id] rescue "" %>;
@@ -21,6 +21,7 @@ url = url[url.index("/"), url.length - url.index("/")]
 
 </script>
 <script type="text/javascript" src="/touchscreentoolkit/lib/javascripts/generics.js" ></script>
+<script type="text/javascript" src="/touchscreentoolkit/lib/javascripts/opd_generics.js" ></script>
 <script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/dispense.js" defer></script>
 <style type="text/css">
   #space { display:inline; font-size:1.2em; }
