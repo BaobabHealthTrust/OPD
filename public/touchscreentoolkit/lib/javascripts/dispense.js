@@ -1,7 +1,7 @@
-var generics = [];
-var dosages = {};
-var frequencies = [];
-var drugslist = {};
+//var generics = [];
+//var dosages = {};
+//var frequencies = [];
+//var drugslist = {};
 var previous_clicked = null;
 
 var current_concept_id = null;
@@ -20,10 +20,10 @@ function __$(id){
     
 function init(){
     generics = generic_drugs;
-    dosages = drug_dosages;
-    drugslist = drugs;
+    //dosages = drug_dosages;
+    //drugslist = drugs;
    
-    frequencies = {
+    /*frequencies = {
         "OD":"Once a day (OD)",
         "BD":"Twice a day (BD)",
         "TDS":"Three a day (TDS)",  
@@ -38,7 +38,7 @@ function init(){
         "QOD":"Every other day (QOD)", 
         "QPM":"In the evening (QPM)", 
         "QWK":"Once a week (QWK)"
-    }
+    };*/
     
     generateGenerics();
 }
@@ -48,10 +48,10 @@ function generateGenerics(patient_id){
     current_patient_id = patient_id;
     
     generics = generic_drugs;
-    dosages = drug_dosages;
-    drugslist = drugs;
+    //dosages = drug_dosages;
+    //drugslist = drugs;
    
-    frequencies = {
+  /*  frequencies = {
         "OD":"Once a day (OD)",
         "BD":"Twice a day (BD)",
         "TDS":"Three a day (TDS)",  
@@ -66,7 +66,7 @@ function generateGenerics(patient_id){
         "QOD":"Every other day (QOD)", 
         "QPM":"In the evening (QPM)", 
         "QWK":"Once a week (QWK)"
-    }
+    }; */
     
     if(__$("parent_container")){
         __$("content").removeChild(__$("parent_container"));
