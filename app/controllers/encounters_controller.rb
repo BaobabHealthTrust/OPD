@@ -27,6 +27,7 @@ class EncountersController < GenericEncountersController
 		@max_weight = PatientService.get_patient_attribute_value(@patient, "max_weight")
 		@min_height = PatientService.get_patient_attribute_value(@patient, "min_height")
 		@max_height = PatientService.get_patient_attribute_value(@patient, "max_height")
+		@select_options = select_options
 
 =begin
         @given_arvs_before = given_arvs_before(@patient)
