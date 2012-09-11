@@ -16,7 +16,6 @@
 
 	<%= touch_select_tag "Source of drinking water", @patient, concept_set_options('SOURCE OF DRINKING WATER'),
 		{	:id => "drinking_water",
-			:tt_onLoad => "showCategory('Social Determinants');", 
 		 	:helpText => "What is the child's source of drinking water?" } %>
 
 	<%= touch_select_tag "Sanitation", @patient, concept_set_options('SANITATION'),

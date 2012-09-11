@@ -11,7 +11,7 @@
   <%= touch_select_tag "Patient currently smokes", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "smoker", :tt_requireNextClick => false,
     :helptext => "Does patient smoke?", 
-    :tt_onLoad => "__$('nextButton').style.display='none'; showCategory('Social History');" } %>
+    :tt_onLoad => "__$('nextButton').style.display='none';" } %>
 
   <%= touch_select_tag "Patient currently consumes alcohol", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "alcohol", 

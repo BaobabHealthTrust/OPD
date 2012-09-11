@@ -50,7 +50,6 @@
 					:ajaxURL => "/encounters/presenting_complaints?search_string=",
 					:optional => "true",
 				 	:condition => "$('presenting_complaint_#{counter-1}').value != '';",
-					:tt_onLoad => "showCategory('Presenting complaints');",
 				 	:helpText => presenting_label } %>
 
 			<%= touch_select_tag "Detailed additional diagnosis", @patient, nil,

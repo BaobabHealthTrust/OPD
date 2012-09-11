@@ -15,7 +15,6 @@
    
   <%= touch_yes_no_tag "IS PATIENT REFERRED?", @patient, nil,
       {:id => "select",
-		:tt_onLoad => "showCategory('Outpatient reception');", 
        	:helpText => "Is the Patient a Referral Case From Another Health Facility?" } %>
        
 <%= touch_location_tag 'REFERRAL CLINIC IF REFERRED', @patient, nil,
