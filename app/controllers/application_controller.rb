@@ -61,5 +61,80 @@ class ApplicationController < GenericApplicationController
 
 		return is_available	
 	end
-	
+	def allowed_hiv_viewer
+	 allowed = current_user_roles.include?("Doctor" || "Nurse" || "Superuser") rescue nil 
+	 return allowed
+  end 	
+  
+  def hiv_program
+  	program = PatientProgram.first(:conditions => {:patient_id => @patient.id,
+      :program_id => Program.find_by_name('HIV PROGRAM').id})
+  	if program.program.name == "HIV PROGRAM"
+  	return program.program_id
+  	else
+  	return false
+  	end
+  end
+  
+  def remove_art_encounters(all_encounters, type)
+    non_art_encounters = []
+    hiv_encounters_list = [ "HIV STAGING", "HIV CLINIC REGISTRATION", 
+                            "HIV RECEPTION","HIV CLINIC CONSULTATION",
+                            "EXIT FROM HIV CARE"
+                          ]
+    if type.to_s.downcase == 'encounter'
+      all_encounters.each{|encounter|
+        if ! hiv_encounters_list.include? EncounterType.find(encounter.encounter_type).name.to_s.upcase
+          if encounter.encounter_type == EncounterType.find_by_name("Treatment").id || encounter.encounter_type == EncounterType.find_by_name("dispensing").id
+            non_art_encounters << encounter if check_for_arvs_presence(encounter) != true       
+          else
+            non_art_encounters<< encounter
+          end
+        end
+      }
+    elsif type.to_s.downcase == 'prescription'
+      arv_drugs = []
+      concept_set("antiretroviral drugs").each{|concept| arv_drugs << concept.uniq.to_s}
+      
+      all_encounters.each{|prescription|
+        if ! arv_drugs.include? Concept.find(prescription.concept_id).fullname
+          non_art_encounters << prescription
+        end
+      }
+    elsif type.to_s.downcase == 'program'
+      hiv_program_id = Program.find_by_name('HIV program').id
+      all_encounters.each{|program|
+        if program.program_id != hiv_program_id
+          non_art_encounters << program
+        end
+      }
+    end
+    
+    return non_art_encounters
+    
+  end
+  
+  def check_for_arvs_presence(encounter)
+    arv_drugs = []
+    concept_set("antiretroviral drugs").each{|concept| arv_drugs << concept.uniq.to_s}
+    dispensed_id = Concept.find_by_name('Amount dispensed').concept_id
+    arv_regimen_concept_id = Concept.find_by_name('Regimen Category').concept_id
+    
+    encounter.orders.each{|order|
+      if ! arv_drugs.include? Concept.find(order.concept_id).fullname
+        return true
+      end  
+    }
+       
+    encounter.observations.each {|obs|
+      if obs.concept_id == dispensed_id
+        return true if arv_drugs.include? Concept.find(Drug.find(obs.value_drug).concept_id).fullname
+      elsif obs.concept_id == arv_regimen_concept_id
+        return true
+      end
+    }
+
+    return false
+  end
+  
 end

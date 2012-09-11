@@ -37,7 +37,7 @@
 <div id="tab">
   <div class="panel" style="width:480px;float:left">
     <h2>Programs (possibly filtered)</h2>
-    <ul id="programs" class="list" style="height:450px;width:100%;">
+    <ul id="programs" class="list" style="height:450px;width:100%; border-radius: 15px;">
       <% for program in @programs do %>
         <li class="data <%= cycle('even', 'odd') %>" program="<%= program.id %>">
           <div class="void"><img src="/images/cancel_flat_small.png"/></div>
@@ -52,7 +52,7 @@
   </div>
   <div class="panel" style="width:480px">
     <h2>Status</h2>
-    <ul id="states" class="list" style="height:450px;width:100%;">
+    <ul id="states" class="list" style="height:450px;width:100%; border-radius: 15px;">
     </ul>
     <!-- button id="status" class="silver" style="float:right;margin-top:10px;"><span>New Status</span></button -->    
       <% unless @programs.blank? %>
