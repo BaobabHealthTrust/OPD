@@ -51,6 +51,7 @@
 		<%= touch_select_tag "OUTCOME", @patient, options_for_select(@discharge_outcomes), 
 			{	:id => 'discharge_outcome',
 				:helpText => 'Discharge outcome',
+				:tt_onLoad => "showCategory('Discharge patient');", 
 				:tt_onUnload => 'setPatientState();', 
 				:tt_requireNextClick => 'false'} %>
 

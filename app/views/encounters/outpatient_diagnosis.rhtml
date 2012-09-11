@@ -41,6 +41,7 @@
 	<%= touch_select_tag "Primary diagnosis", @patient, nil,
 		{	:id => "primary_diagnosis",
 			:ajaxURL => "/encounters/diagnoses?search_string=",
+			:tt_onLoad => "showCategory('Outpatient Diagnosis');", 
 		 	:helpText => "Primary Diagnosis" } %>
 
 	<%= touch_select_tag "Detailed primary diagnosis", @patient, nil,

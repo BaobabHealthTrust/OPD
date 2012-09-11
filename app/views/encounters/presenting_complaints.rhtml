@@ -33,7 +33,7 @@
 
 <form id='presenting_complaints' action="/encounters/create" method='post'>
 
-	<%= hidden_field_tag "encounter[encounter_type_name]", "PRESENTING COMPLAINT" %>
+	<%= hidden_field_tag "encounter[encounter_type_name]", "PRESENTING COMPLAINTS" %>
 	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
 	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
 	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
@@ -50,7 +50,7 @@
 					:ajaxURL => "/encounters/presenting_complaints?search_string=",
 					:optional => "true",
 				 	:condition => "$('presenting_complaint_#{counter-1}').value != '';",
-					:tt_onLoad => "showCategory('Presenting complaint');",
+					:tt_onLoad => "showCategory('Presenting complaints');",
 				 	:helpText => presenting_label } %>
 
 			<%= touch_select_tag "Detailed additional diagnosis", @patient, nil,

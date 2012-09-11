@@ -51,6 +51,7 @@
 		"Respiratory Rate", "Blood Pressure", "Pulse Rate", "Weight", "Height", "Oxygen Saturation"]), 
 		{	:helpText => 'Select vital signs', 
 			:id => "choice", 
+			:tt_onLoad => "showCategory('Vitals');", 
 			:multiple => true } %>
 
 	<%= touch_text_field_tag "TEMPERATURE (C)", @patient, nil,

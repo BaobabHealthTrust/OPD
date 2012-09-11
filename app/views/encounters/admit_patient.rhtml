@@ -16,7 +16,7 @@
 
 	<%= touch_select_tag "ADMIT TO WARD", @patient, options_for_select(@ipd_wards),
 		{	:helpText => "Admit to ward", 
-			:tt_onload => "$('nextButton').style.display = 'none'",
+			:tt_onload => "$('nextButton').style.display = 'none'; showCategory('Admit patient');",
 			:tt_requireNextClick => "false" } %>
 
 	<% program_id = Program.find_by_name('IPD PROGRAM').id %>
