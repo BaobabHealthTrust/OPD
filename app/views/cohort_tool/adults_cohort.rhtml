@@ -1,6 +1,11 @@
 <!--html>
   <head>
     <title>Queen Elizabeth OPD Routine Report</title-->
+    <%= javascript_include_tag 'jquery' %>
+    <%= stylesheet_link_tag 'extra_buttons' %>
+	<%=javascript_include_tag "jquery_data_table" %>
+	<%=javascript_include_tag "jquery.dataTables.min" %>
+	<%=javascript_include_tag "jquery.table2CSV.min" %>
 <script type="text/javascript">
   tt_cancel_destination = '/people';
 </script>
@@ -95,7 +100,7 @@
   %>
 
     <div id="divDisplay" style="width:100%; height:360px; overflow:auto;">
-      <table cellspacing="2" cellpadding="0" width="100%">
+      <table cellspacing="2" cellpadding="0" width="100%" id = "data_table">
 
         <% element.each{|el|
           i += 1
@@ -143,11 +148,17 @@
   <button onclick="window.location = '/cohort';" class="button navButton red"
           id="cancelButton" style="position: absolute; z-index: 100; "><span>Cancel</span></button>
   -->
-  <button onclick="window.location = '/cohort';" class="button navButton gray"
+
+  <button onclick="window.location = '/cohort_tool/opd_report_index';" class="button navButton gray"
           id="backButton" ><span>Back</span></button>
 
   <button onclick="document.getElementById('frmPost').submit();" class="button navButton blue"
           id="previewButton" ><span>Print Preview</span></button>
+	<% if allowed_hiv_viewer %> 
+			<button id="print" class="button navButton blue"  
+			onClick="$('#data_table').table2CSV({header:['No','Data Element','Range A','Range B','Value','Comment']})">
+			<span>Export</span></button> 
+<% end %>
   <form id="frmPost" method="post" action="/cohort/print/print_adults_cohort">
     <%
     params.each{|p| %>
