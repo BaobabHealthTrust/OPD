@@ -1,0 +1,41 @@
+<%= javascript_include_tag "jquery" %>
+<%= javascript_include_tag 'utils' %>
+
+<script>
+  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
+</script>
+
+<form id='social_determinants' action="/encounters/create" method='post'>
+
+	<%= hidden_field_tag "encounter[encounter_type_name]", "SOCIAL DETERMINANTS" %>
+	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+
+	<%= hidden_field_tag "filter[provider]", "Dummy", {:id => "presenting_complaint_0"} %>
+
+	<%= touch_select_tag "Source of drinking water", @patient, concept_set_options('SOURCE OF DRINKING WATER'),
+		{	:id => "drinking_water",
+		 	:helpText => "What is the child's source of drinking water?" } %>
+
+	<%= touch_select_tag "Sanitation", @patient, concept_set_options('SANITATION'),
+		{	:id => "sanitation",
+		 	:helpText => "What type of sanitation does the child use?" } %>
+
+	<%= touch_numeric_tag "Number of people sharing a bedroom", @patient, nil,
+		{	:id => "number_of_people",
+		 	:helpText => "How many people sleep in the same bedroom as the child?" } %>
+
+	<%= touch_select_tag "Highest level of education for guardian", @patient, concept_set_options('EDUCATION LEVEL'),
+		{	:id => "education_level",
+		 	:helpText => "What is the highest education level for mother/guardian?" } %>
+
+	<% if @retrospective %>
+		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+		<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+	<% else %>
+		<%= hidden_field_tag "filter[provider]", nil %>
+	<% end %>
+
+  <%= submit_tag "Finish" %>
+</form>

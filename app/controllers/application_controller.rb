@@ -2,7 +2,7 @@ class ApplicationController < GenericApplicationController
 
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
-    task = main_next_task(Location.current_location, patient,session_date)
+    task = main_next_task(Location.current_location, patient, session_date)
     begin
       return task.url if task.present? && task.url.present?
       return "/patients/show/#{patient.id}" 
@@ -33,15 +33,35 @@ class ApplicationController < GenericApplicationController
 			end
 		end
 
+		patient_bean = PatientService.get_patient((Patient.find(patient.patient_id)).person)
+
 		if !session[:original_encounter].blank?
-			task.encounter_type = session[:original_encounter]
-			task.url = "/encounters/new/#{task.encounter_type}?patient_id=#{patient.id}"
-			session[:original_encounter] = nil
+			if (session[:original_encounter].upcase == 'ADMISSION DIAGNOSIS' || session[:original_encounter].upcase == 'DISCHARGE DIAGNOSIS' || session[:original_encounter].upcase == 'OUTPATIENT_DIAGNOSIS') && !is_encounter_available(patient, 'PRESENTING COMPLAINTS', session_date)
+				task.encounter_type = 'PRESENTING COMPLAINTS'
+				task.url = "/encounters/new/presenting_complaints?patient_id=#{patient.id}"
+			else
+				task.encounter_type = session[:original_encounter]
+				task.url = "/encounters/new/#{task.encounter_type}?patient_id=#{patient.id}"
+			end
 		end
 
-		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true' rescue false) 
+		if !encounter_available_ever(patient, 'SOCIAL HISTORY') && patient_bean.age > 14 
+			task.encounter_type = 'SOCIAL HISTORY'
+			task.url = "/encounters/new/social_history?patient_id=#{patient.id}"
+		end
+
+		if !encounter_available_ever(patient, 'SOCIAL DETERMINANTS') && patient_bean.age <= 14 
+			task.encounter_type = 'SOCIAL DETERMINANTS'
+			task.url = "/encounters/new/social_determinants?patient_id=#{patient.id}"
+		end
+
+		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true') 
 			task.encounter_type = 'OUTPATIENT RECEPTION'
 			task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
+		end
+
+		if task.encounter_type == session[:original_encounter]
+			session[:original_encounter] = nil
 		end
 
 		return task
@@ -51,8 +71,24 @@ class ApplicationController < GenericApplicationController
 		is_vailable = false
 
 		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
-						                           patient.id,EncounterType.find_by_name(encounter_type).id, session_date],
-						                           :order =>'encounter_datetime DESC',:limit => 1)
+						                           patient.id, EncounterType.find_by_name(encounter_type).id, session_date],
+						                           :order =>'encounter_datetime DESC', :limit => 1)
+		if encounter_available.blank?
+			is_available = false
+		else
+			is_available = true
+		end
+
+
+		return is_available	
+	end
+
+	def encounter_available_ever(patient, encounter_type)
+		is_vailable = false
+
+		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ?",
+						                           patient.id, EncounterType.find_by_name(encounter_type).id],
+						                           :order =>'encounter_datetime DESC', :limit => 1)
 		if encounter_available.blank?
 			is_available = false
 		else
@@ -61,6 +97,7 @@ class ApplicationController < GenericApplicationController
 
 		return is_available	
 	end
+
 	def allowed_hiv_viewer
 	 allowed = current_user_roles.include?("Doctor" || "Nurse" || "Superuser") rescue nil 
 	 return allowed
