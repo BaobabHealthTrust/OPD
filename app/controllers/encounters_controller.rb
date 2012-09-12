@@ -6,7 +6,7 @@ class EncountersController < GenericEncountersController
         encounter.encounter_type = EncounterType.find_by_name(params['encounter']['encounter_type_name']).id
         encounter.patient_id = params['encounter']['patient_id']                                                                  
         encounter.encounter_datetime = params['encounter']['encounter_datetime']  
-        user_person_id = User.find_by_user_id(params['encounter']['provider_id']).person_id
+        user_person_id = User.find_by_user_id(params['encounter']['provider_id']).person_id rescue current_user.person_id
         encounter.provider_id = user_person_id
         encounter.save  
     
