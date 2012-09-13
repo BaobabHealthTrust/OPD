@@ -38,8 +38,8 @@
 
   <%= touch_select_tag "Religion", @patient, options_for_select(@religions),
     {:id => "religion", 
-    :tt_requireNextClick => false,
-    :tt_onLoad => "__$('nextButton').style.display='none';",
+    :tt_requireNextClick => "true",
+    :tt_onLoad => "__$('nextButton').style.display='block';",
     :helptext => "Religion" } %>
 
   <%= touch_text_field_tag "Other", @patient, nil,

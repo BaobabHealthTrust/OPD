@@ -249,7 +249,8 @@ class GenericPrescriptionsController < ApplicationController
 					return
 				end
 
-				start_date = session[:datetime].to_date rescue Time.now
+				start_date = session[:datetime].to_date rescue nil
+        start_date = Time.now() if start_date.blank?
 
 				auto_expire_date = start_date + prescription[:duration].to_i.days
 				prn = prescription[:prn]
@@ -267,6 +268,11 @@ class GenericPrescriptionsController < ApplicationController
 			}
 		end
 
-		redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
+		if(@patient)
+			redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
+		else
+			redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
+		end
+
 	end
 end
