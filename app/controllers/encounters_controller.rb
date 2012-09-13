@@ -619,10 +619,10 @@ class EncountersController < GenericEncountersController
 				session[:original_encounter] = params[:encounter_type]
 				params[:encounter_type] = 'vitals'					
 			else
-				if !is_encounter_available(@patient, 'PRESENTING COMPLAINTS', session_date)
-					session[:original_encounter] = params[:encounter_type]
-					params[:encounter_type] = 'presenting_complaints'					
-				end
+				#if !is_encounter_available(@patient, 'PRESENTING COMPLAINTS', session_date)
+				#	session[:original_encounter] = params[:encounter_type]
+				#	params[:encounter_type] = 'presenting_complaints'					
+				#end
 			end
 		end
 		
