@@ -15,15 +15,15 @@
    
   <%= touch_yes_no_tag "IS PATIENT REFERRED?", @patient, nil,
       {:id => "select",
-       :helpText => "Is the Patient a Referral Case From Another Health Facility?" } %>
+       	:helpText => "Is the Patient a Referral Case From Another Health Facility?" } %>
        
 <%= touch_location_tag 'REFERRAL CLINIC IF REFERRED', @patient, nil,
-    { :id => 'location_id',
-			:field_type => 'alpha',
-			:helpText => "Referral Facility if Referred",
-			:condition => "($('select').value == 'YES')",
-			:ajaxURL => '/programs/locations?q=',
-			:allowFreeText => false } %>
+	{ :id => 'location_id',
+		:field_type => 'alpha',
+		:helpText => "Referral Facility if Referred",
+		:condition => "($('select').value == 'YES')",
+		:ajaxURL => '/programs/locations?q=',
+		:allowFreeText => false } %>
 
   <% if !@patient.patient_programs.current.local.map(&:program).map(&:name).include?('OPD Program') %>
       <%= hidden_field_tag("programs[][patient_program_id]", nil) %>

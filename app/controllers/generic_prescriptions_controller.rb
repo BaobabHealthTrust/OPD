@@ -10,7 +10,7 @@ class GenericPrescriptionsController < ApplicationController
   
   def new
     @patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
-    @patient_diagnoses = current_diagnoses(@patient.person.id)
+    @patient_diagnoses = PatientService.current_diagnoses(@patient.person.id)
     @current_weight = PatientService.get_patient_attribute_value(@patient, "current_weight")
 		@current_height = PatientService.get_patient_attribute_value(@patient, "current_height")
   end
@@ -82,7 +82,7 @@ class GenericPrescriptionsController < ApplicationController
   def auto
     @patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
     # Find the next diagnosis that doesn't have a corresponding order
-    @diagnoses = current_diagnoses(@patient.person.id)
+    @diagnoses = PatientService.current_diagnoses(@patient.person.id)
     @prescriptions = @patient.orders.current.prescriptions.all.map(&:obs_id).uniq
     @diagnoses = @diagnoses.reject {|diag| @prescriptions.include?(diag.obs_id) }
     if @diagnoses.empty?
@@ -192,16 +192,26 @@ class GenericPrescriptionsController < ApplicationController
 	def generic_advanced_prescription
 		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
 		@generics = MedicationService.generic
-		@frequencies = MedicationService.frequencies
+		@frequencies = MedicationService.fully_specified_frequencies	
+		@formulations = {}
+		@generics.each { | generic |
+			drugs = Drug.find(:all,	:conditions => ["concept_id = ?", generic[1]])
+			drug_formulations = {}			
+			drugs.each { | drug |
+				drug_formulations[drug.name] = [drug.dose_strength, drug.units]
+			}
+			@formulations[generic[1]] = drug_formulations			
+		}
+
 		@diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []
 		render :layout => 'application'
 	end
   
   
 	def create_advanced_prescription
-		patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
-		encounter  = MedicationService.current_treatment_encounter(patient)
-
+		@patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
+		encounter  = MedicationService.current_treatment_encounter(@patient)
+    
 		if params[:prescription].blank?
 			next if params[:formulation].blank?
           	formulation = (params[:formulation] || '').upcase
@@ -216,11 +226,11 @@ class GenericPrescriptionsController < ApplicationController
 			prn = params[:prn].to_i
 
 			if prescription[:type_of_prescription] == "variable"
-				DrugOrder.write_order(encounter, patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
+				DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
 					prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]], 
 					prescription[:type_of_prescription], prn)
 			else
-				DrugOrder.write_order(encounter, patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
+				DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
 					prescription[:frequency], prn)
 			end
 		else
@@ -239,26 +249,27 @@ class GenericPrescriptionsController < ApplicationController
 					return
 				end
 
-				start_date = session[:datetime].to_date rescue Time.now
+				start_date = session[:datetime].to_date rescue nil
+        start_date = Time.now() if start_date.blank?
 
 				auto_expire_date = start_date + prescription[:duration].to_i.days
 				prn = prescription[:prn]
 
 
 				if prescription[:type_of_prescription] == "variable"
-					DrugOrder.write_order(encounter, patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
+					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
 						prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]], 
 						prescription[:type_of_prescription], prn)
 				else
-					DrugOrder.write_order(encounter, patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
+					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
 						prescription[:frequency], prn)
 				end
 
 			}
 		end
 
-		if(patient)
-			redirect_to "/patients/treatment_dashboard/#{patient.id}" and return
+		if(@patient)
+			redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
 		else
 			redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
 		end
