@@ -177,14 +177,12 @@
         end
       %>
       </select>
-
-
-      <select id="selWeek" name="selWeek" helpText="Select Week:" field_type="number"
+		<select id="selWeek" name="selWeek" helpText="Select Week:" field_type="number"
               condition="$('selSelect').value == 'week'" tt_pageStyleClass="NumbersOnly">
-        <option></option>
-        <% (1..52).each do |w| %>
-          <option value="<%= w %>">Week <%= w %></option>
-        <% end %>
+		<option>This Week</option>
+		<option>Last Week</option>
+		<option>This Month</option>
+		<option>All Dates</option>
       </select>
 
       <input type="text" field_type="date" id="start_date" name="start_date" value="" helpText="Select Start Date:"
