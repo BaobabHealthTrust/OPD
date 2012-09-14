@@ -525,5 +525,6 @@ class EncountersController < GenericEncountersController
 		  end 	   
         end	
 	create(received_params)
+    #push test
  end 
 end
