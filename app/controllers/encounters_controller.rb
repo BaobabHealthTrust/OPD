@@ -984,16 +984,16 @@ class EncountersController < GenericEncountersController
       render :text => "<li></li><li>" + options.join("</li><li>") + "</li>"
   end
   def life_threatening_condition  
-
-        search_string = (params[:search_string] || '').upcase
+    search_string = (params[:search_string] || '').upcase
     
     aconcept_set = []
         
-        common_answers = Observation.find_most_common(ConceptName.find_by_name("Life threatening condition").concept, search_string)
+    common_answers = Observation.find_most_common(ConceptName.find_by_name("Life threatening condition").concept, search_string)
     concept_set("Life threatening condition").each{|concept| aconcept_set << concept.uniq.to_s rescue "test"}  
-        set = (common_answers + aconcept_set.sort).uniq             
-      set.map!{|cc| cc.upcase.include?(search_string)? cc : nil}        
-             
+    set = (common_answers + aconcept_set.sort).uniq             
+    set.map!{|cc| cc.upcase.include?(search_string)? cc : nil}        
+    
+    set = set.sort rescue []
            
     render :text => "<li></li>" + "<li>" + set.join("</li><li>") + "</li>"
 
@@ -1009,6 +1009,7 @@ class EncountersController < GenericEncountersController
         set = (common_answers + aconcept_set.sort).uniq             
       set.map!{|cc| cc.upcase.include?(search_string)? cc : nil}        
              
+    set = set.sort rescue []
            
     render :text => "<li></li>" + "<li>" + set.join("</li><li>") + "</li>"
  end

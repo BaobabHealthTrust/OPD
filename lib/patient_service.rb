@@ -253,40 +253,24 @@ module PatientService
         "identifier"=>"#{new_params[:addresses][:county_district]}"}
     }
 
-
-    servers = GlobalProperty.find(:first, :conditions => {:property => "remote_servers.parent"}).property_value.split(/,/) rescue nil
-
+    servers = GlobalProperty.find(:first, 
+      :conditions => {:property => "remote_servers.parent"}).property_value.split(/,/) rescue nil
     server_address_and_port = servers.to_s.split(':')
-
     server_address = server_address_and_port.first
     server_port = server_address_and_port.second
+    login = GlobalProperty.find(:first, 
+      :conditions => {:property => "remote_bart.username"}).property_value.split(/,/) rescue ''
+    password = GlobalProperty.find(:first, 
+      :conditions => {:property => "remote_bart.password"}).property_value.split(/,/) rescue ''
 
-    return nil if servers.blank?
-
-    wget_base_command = "wget --quiet --load-cookies=cookie.txt --quiet --cookies=on --keep-session-cookies --save-cookies=cookie.txt"
-
-    login = GlobalProperty.find(:first, :conditions => {:property => "remote_bart.username"}).property_value.split(/,/) rescue ''
-    password = GlobalProperty.find(:first, :conditions => {:property => "remote_bart.password"}).property_value.split(/,/) rescue ''
-    location = GlobalProperty.find(:first, :conditions => {:property => "remote_bart.location"}).property_value.split(/,/) rescue nil
-    machine = GlobalProperty.find(:first, :conditions => {:property => "remote_machine.account_name"}).property_value.split(/,/) rescue ''
-    post_data = known_demographics
-    post_data["_method"]="put"
-
-    local_demographic_lookup_steps = [ 
-      "#{wget_base_command} -O /dev/null --post-data=\"login=#{login}&password=#{password}\" \"http://localhost/session\"",
-      "#{wget_base_command} -O /dev/null --post-data=\"_method=put&location=#{location}\" \"http://localhost/session\"",
-      "#{wget_base_command} -O - --post-data=\"#{post_data.to_param}\" \"http://localhost/patient/create_remote\""
-    ]
+    uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/patient/create_remote"                          
+    output = RestClient.post(uri,known_demographics)      
 
     results = []
-    servers.each{|server|
-      command = "ssh #{machine}@#{server_address} '#{local_demographic_lookup_steps.join(";\n")}'"
-      output = `#{command}`
-      results.push output if output and output.match(/person/)
-    }
+    results.push output if output and output.match(/person/)
     result = results.sort{|a,b|b.length <=> a.length}.first
-
     result ? person = JSON.parse(result) : nil
+
     begin
       person["person"]["addresses"]["address1"] = "#{new_params[:addresses][:address1]}"
       person["person"]["names"]["middle_name"] = "#{new_params[:names][:middle_name]}"
@@ -300,21 +284,18 @@ module PatientService
       person["person"]["attributes"].delete("office_phone_number")
     rescue
     end   
-    person
+
+    return person
   end
   
   def self.find_remote_person(known_demographics)
-
     servers = GlobalProperty.find(:first, :conditions => {:property => "remote_servers.parent"}).property_value.split(/,/) rescue nil
-
     server_address_and_port = servers.to_s.split(':')
-
     server_address = server_address_and_port.first
     server_port = server_address_and_port.second
 
     return nil if servers.blank?
 
-    wget_base_command = "wget --quiet --load-cookies=cookie.txt --quiet --cookies=on --keep-session-cookies --save-cookies=cookie.txt"
     # use ssh to establish a secure connection then query the localhost
     # use wget to login (using cookies and sessions) and set the location
     # then pull down the demographics
@@ -322,29 +303,20 @@ module PatientService
 
     login = GlobalProperty.find(:first, :conditions => {:property => "remote_bart.username"}).property_value.split(/,/) rescue ""
     password = GlobalProperty.find(:first, :conditions => {:property => "remote_bart.password"}).property_value.split(/,/) rescue ""
-    location = GlobalProperty.find(:first, :conditions => {:property => "remote_bart.location"}).property_value.split(/,/) rescue nil
-    machine = GlobalProperty.find(:first, :conditions => {:property => "remote_machine.account_name"}).property_value.split(/,/) rescue ''
 
-    post_data = known_demographics
-    post_data["_method"]="put"
-
-    local_demographic_lookup_steps = [ 
-      "#{wget_base_command} -O /dev/null --post-data=\"login=#{login}&password=#{password}\" \"http://localhost/session\"",
-      "#{wget_base_command} -O /dev/null --post-data=\"_method=put&location=#{location}\" \"http://localhost/session\"",
-      "#{wget_base_command} -O - --post-data=\"#{post_data.to_param}\" \"http://localhost/people/demographics\""
-    ]
-
-    results = []
-    servers.each{|server|
-      command = "ssh #{machine}@#{server_address} '#{local_demographic_lookup_steps.join(";\n")}'"
-      output = `#{command}`
-      results.push output if output and output.match /person/
-    }
     # TODO need better logic here to select the best result or merge them
     # Currently returning the longest result - assuming that it has the most information
     # Can't return multiple results because there will be redundant data from sites
+
+
+    uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/demographics"                          
+    output = RestClient.post(uri,known_demographics)      
+
+    results = []
+    results.push output if output and output.match(/person/)
     result = results.sort{|a,b|b.length <=> a.length}.first
     result ? person = JSON.parse(result) : nil
+
     #Stupid hack to structure the hash for openmrs 1.7
     person["person"]["occupation"] = person["person"]["attributes"]["occupation"]
     person["person"]["cell_phone_number"] = person["person"]["attributes"]["cell_phone_number"]

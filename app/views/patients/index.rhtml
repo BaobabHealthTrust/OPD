@@ -47,7 +47,7 @@
 				<select id="links">
 						<!-- option value='/encounters/new/outpatient_diagnosis?diagnosis_type=PRIMARY DIAGNOSIS&patient_id=<%= @patient.id -%>&diagnosis=true'>
 						<%= (@category.downcase == "adults" ? "Emergency" : "OPD" rescue 'Emergency') %> Diagnosis</option -->
-						<option value='/encounters/new/vitals?patient_id=<%= @patient.id %>'>Vitals</option>
+						<option value='/encounters/new/vitals?patient_id=<%= @patient.id %>'>Triage</option>
 						<option value='/encounters/new/presenting_complaints?patient_id=<%= @patient.id %>'>Presenting complaints</option>
 						<option value='/encounters/new/outpatient_diagnosis?patient_id=<%= @patient.id %>'>Diagnosis</option>
 						<option value='/patients/treatment_dashboard/<%= @patient.id %>'>Treatment</option>
