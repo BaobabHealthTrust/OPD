@@ -36,9 +36,6 @@
 					<option value="/patients/past_diagnoses?patient_id=<%=@patient.patient_id%>">Medical History</option>
 					<option value='/patients/personal/<%= @patient.id -%>'>Printouts/Other</option>
 
-					<option value="/patients/past_diagnoses?patient_id=<%= @patient.id%>">Medical History</option>
-					<option value="/patients/personal/<%= @patient.id%>">Printouts/Other</option>
-					<option value="/patients/social_history?patient_id=<%= @patient.id%>">Social History</option>
 				<%  if @spine_clinician  %>
 					<option value="/patients/influenza_info?patient_id=<%=@patient.patient_id%>"> Influenza </option>
 					<option value="/patients/chronic_conditions_info?patient_id=<%=@patient.patient_id%>"> Chronic Diseases</option>
