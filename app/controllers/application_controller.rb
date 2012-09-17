@@ -1,6 +1,5 @@
 class ApplicationController < GenericApplicationController
 helper_method :allowed_hiv_viewer
-####
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
     task = main_next_task(Location.current_location, patient,session_date)

@@ -1,65 +1,181 @@
-<script >
-    </script>
+<html>
+<head>
     <%= javascript_include_tag "prototype" %>
     <%= javascript_include_tag 'jquery' %>
     <%= stylesheet_link_tag 'extra_buttons' %>
-	<%= javascript_include_tag 'jquery.dataTables.min.js' %>
 	<%= javascript_include_tag 'jquery_data_table.js' %>
-
-	<link ref="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.3/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
-	
-	<script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/multiTouch.js"></script>
-	<script type="text/javascript" charset="utf8" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.3/jquery.dataTables.min.js"></script>
+	<%= stylesheet_link_tag 'jquery.dataTables' %>
+	<script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
 <script>
-    jQuery(document).ready(function($) {
-     $('#table_id').dataTable({
-     "bAutoWidth": false,
-     "bPaginate": true,
-     "bFilter": true,
-     "bProcessing": true
-     });
-     //document.getElementById('search').setAttribute("onclick","showKeyboard();"); 
-    // $('#table_id_filter label input:text')[0].setAttribute("id","search");
-     //$("#search").setAttribute("onclick","showKeyboard('search')");
-     //$('#table_id_filter label input:text')[0].setAttribute("onclick","showKeyboard();");
-      document.getElementById("find").innerHTML = "<span>Back</span>";
-      document.getElementById("find").style.cssFloat = "left";
+		jQuery(document).ready(function($) {
+	 	$('#table_id').dataTable({
+		"bAutoWidth": false,
+		"sScrollY": "310px",
+		"bPaginate": true,
+		"bFilter": true,
+		"bProcessing": true
+		//"sPaginationType": "full_numbers"
+		//"sPageButton": "paginate_button",
+
+		//"bInfo":false
+     	});
+     	document.getElementById('table_id_paginate').style.visibility = 'hidden';//removing the div that shows next and previous buttons
+     	search_box = $('#table_id').dataTable()
+     	search = document.getElementsByTagName("input")[0];
+ 	 	search.setAttribute("id","search");
+ 	 	document.getElementById('search').setAttribute("onclick","showKeyboard();");
+     	document.getElementById("find").innerHTML = "<span>Back</span>";
+     	document.getElementById("find").style.cssFloat = "left";
       
-        $('#find').click(function() {
-              window.location = '/cohort_tool/opd_menu?report_name=<%=@report_name%>'; // /report/data_cleaning';
-          })
-     })
+     	$('#find').click(function() {
+      		window.location = '/cohort_tool/opd_menu?report_name=<%=@report_name%>'; // /report/data_cleaning';
+      	})
+          
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+		keyboard = document.getElementsByClassName("keypad")[0]
+		function getCharButtonSetID(character,id){
+			return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' +"<span style='width:32px'>"+character+"</span>"+ "</button>";
+		}
+		function getButtonString(id,string){
+			return "<button \
+			onMouseDown='press(this.id);' \
+			class='keyboardButton' \
+			id='"+id+"'>"+
+			string +
+			"</button>";
+		}
+
+		function getButtons(chars){
+			var buttonLine = "";
+			for(var i=0; i<chars.length; i++){
+			character = chars.substring(i,i+1)
+			buttonLine += getCharButtonSetID(character,character)
+			}
+			return buttonLine;
+		}
+
+		showAlphaKeypad();
+
+		function showAlphaKeypad(){
+			document.getElementById("keypad").style.height = "280";
+			keyboard.innerHTML = getButtons("QWERTYUIOP") + "</br>"
+			keyboard.innerHTML+= getButtons("ASDFGHJKL:") + "</br>"
+			keyboard.innerHTML+= getButtons("ZXCVBNM,.?")
+			keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>') 
+			keyboard.innerHTML+= getButtonString('Space','<span>Space</span>') 
+			keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>') 
+			//keyboard.innerHTML+= getButtonString('num','<span>Num</span>') 
+		}
+ 
+		function showNumericKeypad(){
+			document.getElementById("keypad").style.height = "145";
+			keyboard.innerHTML = getButtons("123") 
+			keyboard.innerHTML+= getButtons("456") 
+			keyboard.innerHTML+= getButtons("7890") 
+			keyboard.innerHTML+= getButtonString('space','<span>Space</span>') 
+			keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>') 
+			keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>') 
+			keyboard.innerHTML+= getButtonString('abc','<span>abc</span>') 
+			keyboard.innerHTML+= getButtonString('dash','<span>-</span>') 
+			keyboard.innerHTML+= getButtonString('slash','<span>/</span>') 
+		}
+		
+		data_table_length =document.getElementsByName('table_id_length')[0];
+		data_table_length.setAttribute("style","font-size:20px;");
+
+		table_length = document.getElementById("table_id_length");
+		table_length.setAttribute("style","width:100px;");
+
+		})
 </script>
-<script>
-</script> 
-
-		<script>
-		          //insertBlankRow ();
-		       function setId(){
-		       var div = document.createElement("div");
-		       div.id = "divScroller";
-		       document.getElementById("table_id_filter").appendChild(div);
-		       document.getElementById("table_id_filter").getElementsByTagName("input")[0].id = "search";	
-		       //search = document.getElementById("search")
-		      //search.setAttribute("onClick",showKeyboard('search'))	          	
-		          }
-		        setTimeout("setId()", 500);
-		 </script>
-
 
 <script>
-   function setAttribute(){
-   	var x = document.getElementById("search") 
-   	x.setAttribute("onClick",showKeyboard("search"))
+	
+ function showKeyboard(){
+   key = document.getElementById("keypad")
+   if(key.style.display == 'none' || key.style.display == ""){
+    key.style.display = "inline";
+    return
    }
-   setTimeout("setAttribute()", 500);
+
+    key.style.display = "none";
+ }
+
+  function press(pressedChar){
+    switch (pressedChar) {
+      case 'backspace':
+        search.value = search.value.substring(0,search.value.length-1);
+        search_box.fnFilter(search.value)
+        return;
+      case 'Space':
+        search.value+= " "
+        search_box.fnFilter(search.value)
+        return
+      case 'clear':
+        search.value = ""
+        search_box.fnFilter(search.value)
+        return
+      case 'num':
+        showNumericKeypad();
+        return
+      case 'slash':
+        search.value+= "/"
+        search_box.fnFilter(search.value)
+        return
+      case 'dash':
+        search.value+= "-"
+        search_box.fnFilter(search.value)
+        return
+      case 'abc':
+        showAlphaKeypad();
+        return
+    }
+    search.value+= pressedChar
+    search_box.fnFilter(search.value)
+  }
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 </script>
-
-
-
 
 <style>
 
+#backspace{
+	position:absolute;
+	left:100px;
+	bottom:2px;
+}
+
+#Space{
+	position:absolute;
+	left:220px;
+	bottom:2px;
+	width:200px;
+}
+
+#clear{
+	position:absolute;
+	left:470px;
+	bottom:2px;
+}
+
+#keypad{
+	background-color: #FFFFFF;
+	border: 2px solid #9999FF;
+	border-radius: 15px 15px 15px 15px;
+	padding: 5px;
+ 	position:absolute;
+ 	width:670px;
+ 	right:510px;
+ 	height:260px;
+ 	display:none;
+	right:4px;
+	top:270px;
+}
+</style>
+
+<style>
+	div {
+	-moz-user-select: none;
+	}
 	.basic_span {
 		position:relative;
 		width:50%;
@@ -75,19 +191,34 @@
     	width: 100%;
     }
     
-    #table_id_filter {
-    	float:right;
-    	margin-top:-25px;
+    #table_id_filter{
+    	position:absolute;
+    	top:60px;
+    	left:1120px;
+    	margin-top:-40px;
     }
+    
     #table_id_filter input{
     	padding:0.5em;
-    	margin-top:-23px;
     }
+
+
     .dataTables_length select {
    		font-size: 25px;
 	}
+	.horizontal_line hr{
+	 	position:absolute;
+	 	bottom:94px;
+	}
+	#table_id_info{
+	 	position:fixed;
+	 	left:750px;
+	 	font-weight:bold;
+	 	top:723px;
+	}
 </style>
-	<%# raise @current_location_name.to_yaml %>
+</head>
+<body >
 	<%= image_tag(@logo, :class => "logo")%>
 	<br /><b style="margin-left:75px"><%= @current_location_name %></b><br />
 	<% if @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT" %>
@@ -304,24 +435,26 @@
 									</tr>					
 					<% end %>
 				<% end %>
-
-		       
-		      <style type="text/css">
-		      	function mykeyboard(){
-		      	document.getElementById("search").click(function(){
-      		   showKeyboard("search")
-      			})
-		      	}
-		      	  setTimeout("mykeyboard()", 500);
-		      	#divMenu {
-		      		margin-left: 700px;
-		      		top: 200px;
-		      	}
-		      </style>
-		
 		  <tbody>
-		 
 	</table>
-	
 </div>
+	<div class="horizontal_line">
+		<hr width="100%" color="gray">
+	</div>
+	
+
+
+
+
+<div id="keypad">
+ <span class="keypad">
+ </span>
+ </center>
+
+</div>
+
+</body>
+
+</body>
+</html>
 
