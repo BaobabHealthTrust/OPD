@@ -1,6 +1,5 @@
 class GenericEncountersController < ApplicationController
   def create(params=params, session=session)
-  
     if params[:change_appointment_date] == "true"
       session_date = session[:datetime].to_date rescue Date.today
       type = EncounterType.find_by_name("APPOINTMENT")                            
@@ -14,7 +13,7 @@ class GenericEncountersController < ApplicationController
       session_date.strftime("%Y-%m-%d 23:59:59")]).encounter
       appointment_encounter.void("Given a new appointment date")
     end
-    	
+        
     if params['encounter']['encounter_type_name'] == 'TB_INITIAL'
       (params[:observations] || []).each do |observation|
         if observation['concept_name'].upcase == 'TRANSFER IN' and observation['value_coded_or_text'] == "YES"
@@ -541,9 +540,11 @@ class GenericEncountersController < ApplicationController
 		previous_answers = Observation.find_most_common(outpatient_diagnosis, search_string)
 		@suggested_answers = (previous_answers + valid_answers.sort!).reject{|answer| filter_list.include?(answer) }.uniq[0..10] 
 		@suggested_answers = @suggested_answers - params[:search_filter].split(',') rescue @suggested_answers
+      
 		render :text => "<li></li>" + "<li>" + @suggested_answers.join("</li><li>") + "</li>"
 	end
-
+    
+    
 	def treatment
 		search_string = (params[:search_string] || '').upcase
 		filter_list = params[:filter_list].split(/, */) rescue []

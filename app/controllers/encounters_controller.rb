@@ -515,6 +515,7 @@ class EncountersController < GenericEncountersController
       #return encounter.id.to_s  # support non-RESTful creation of encounters
     end
   end
+
 	def new
 	
 		@patient = Patient.find(params[:patient_id] || session[:patient_id])

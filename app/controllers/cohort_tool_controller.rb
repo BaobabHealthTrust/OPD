@@ -1094,6 +1094,7 @@ class CohortToolController < ApplicationController
   end
   
   def opd_cohort
+  	@report_type = params[:selType]
     @start_date = nil
     @end_date = nil
     @start_age = params[:startAge]
@@ -1238,7 +1239,7 @@ class CohortToolController < ApplicationController
     @pud = report.pud
 
     @gastritis = report.gastritis
-
+	@current_location_name = Location.current_health_center.name
     if @type == "diagnoses" || @type == "diagnoses_adults" || @type == "diagnoses_paeds"
       @general = report.general
     end
@@ -1246,11 +1247,11 @@ class CohortToolController < ApplicationController
     if params[:selType]
       case params[:selType]
       when "adults"
-        render :layout => "opd_cohort", :action => "adults_cohort" and return
+        render :layout => "report", :action => "adults_cohort" and return
       when "paeds"
-        render :layout => "opd_cohort", :action => "paeds_cohort" and return
+        render :layout => "report", :action => "paeds_cohort" and return
       else
-        render :layout => "opd_cohort", :action => "general_cohort" and return
+        render :layout => "report", :action => "general_cohort" and return
       end
     end
     render :layout => "opd_cohort"
@@ -1270,8 +1271,9 @@ class CohortToolController < ApplicationController
 		end
 
 		@start_date = (params[:start_year] + "-" + params[:start_month] + "-" + params[:start_day]).to_date
+		@formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
 		@end_date = (params[:end_year] + "-" + params[:end_month] + "-" + params[:end_day]).to_date
-	
+		@formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
 		@disaggregated_diagnosis = {}
 		@diagnosis_by_address = {}
 		@patient_level_data = {}
@@ -1349,6 +1351,8 @@ class CohortToolController < ApplicationController
 				end
 			end
 		end
+		@logo = CoreService.get_global_property_value("logo").to_s
+		@current_location_name = Location.current_health_center.name
 		render :layout => 'report'
 	end
 
@@ -1453,7 +1457,5 @@ class CohortToolController < ApplicationController
 		end
 
 	end
-  
-  
 end
 
