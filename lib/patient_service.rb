@@ -264,9 +264,9 @@ module PatientService
       :conditions => {:property => "remote_bart.password"}).property_value.split(/,/) rescue ''
 
     if server_port.blank?
-      uri = "http://#{login.first}:#{password.first}@#{server_address}/people/demographics"                          
+      uri = "http://#{login.first}:#{password.first}@#{server_address}/patient/create_remote"                          
     else
-      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/demographics"                          
+      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/patient/create_remote"                          
     end
     output = RestClient.post(uri,known_demographics)      
 
@@ -324,6 +324,8 @@ module PatientService
     results.push output if output and output.match(/person/)
     result = results.sort{|a,b|b.length <=> a.length}.first
     result ? person = JSON.parse(result) : nil
+
+    return {} if person.blank?
 
     #Stupid hack to structure the hash for openmrs 1.7
     person["person"]["occupation"] = person["person"]["attributes"]["occupation"]
@@ -904,6 +906,8 @@ EOF
 	end
   
 	def self.create_from_form(params)
+    return nil if params.blank?
+
 		address_params = params["addresses"]
 		names_params = params["names"]
 		patient_params = params["patient"]
