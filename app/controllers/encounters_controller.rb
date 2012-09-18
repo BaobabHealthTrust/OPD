@@ -1,4 +1,5 @@
 class EncountersController < GenericEncountersController
+<<<<<<< HEAD
   
   def create(params=params, session=session)
     if params['encounter']['encounter_type_name'] == 'PRESENTING COMPLAINTS'
@@ -516,6 +517,8 @@ class EncountersController < GenericEncountersController
     end
   end
 
+=======
+>>>>>>> master
 	def new
 	
 		@patient = Patient.find(params[:patient_id] || session[:patient_id])
@@ -1014,5 +1017,36 @@ class EncountersController < GenericEncountersController
            
     render :text => "<li></li>" + "<li>" + set.join("</li><li>") + "</li>"
  end
- 
+ def create_complaints
+		received_params = params	    
+        params[:complaints].each do |complaint|
+		  if !complaint.blank?
+		      multiple = complaint.match(/[:]/)      
+		      unless multiple.nil?
+		         multiple_array = complaint.split(":")
+				 parent_obs = {"patient_id" => params['encounter']['patient_id'], 
+								"concept_name" => "presenting complaint".upcase,
+           						"value_coded_or_text" => "#{multiple_array[0]}",
+								"obs_datetime" => params['encounter']['encounter_datetime']}.with_indifferent_access
+				received_params[:observations] << parent_obs			
+                  
+				child_obs = {"patient_id" => params['encounter']['patient_id'], 
+								"concept_name" => "#{multiple_array[0]}",
+                                "value_coded_or_text" => "#{multiple_array[1]}",
+								"obs_datetime" => params['encounter']['encounter_datetime'],
+								"parent_concept_name" => "#{multiple_array[0]}"}.with_indifferent_access
+				received_params[:observations] << child_obs
+		      else
+		         obs = {"patient_id" => params['encounter']['patient_id'], 
+						"concept_name" => 'Presenting Complaint'.upcase,
+						"value_coded_or_text" => complaint,
+						"obs_datetime" => params['encounter']['encounter_datetime']}
+		       	received_params[:observations] << obs			
+		      end 
+		  end 	   
+        end	
+	create(received_params)
+    #push test
+ #by K kapundi
+ end 
 end

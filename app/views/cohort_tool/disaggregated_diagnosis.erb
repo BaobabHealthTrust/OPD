@@ -3,6 +3,7 @@
     <%= javascript_include_tag "prototype" %>
     <%= javascript_include_tag 'jquery' %>
     <%= stylesheet_link_tag 'extra_buttons' %>
+<<<<<<< HEAD
 	<%= javascript_include_tag 'jquery_data_table.js' %>
 	<%= stylesheet_link_tag 'jquery.dataTables' %>
 	<script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
@@ -98,6 +99,24 @@
 		<% end %>
 
 		})
+=======
+	<%=javascript_include_tag "jquery_data_table" %>
+	<%=javascript_include_tag "jquery.dataTables.min" %>
+	<%=javascript_include_tag "jquery.table2CSV.min" %>
+	
+<script>
+    jQuery(document).ready(function($) {
+      document.getElementById("find").innerHTML = "<span>Back</span>";
+      document.getElementById("find").style.cssFloat = "left";
+        $('#find').click(function() {		
+              window.location = '/cohort_tool/opd_menu?report_name=<%=@report_name%>'; // /report/data_cleaning';
+          })
+     })
+  $(document).ready(function () {
+	$('#data_table').dataTable({
+			})
+	})
+>>>>>>> master
 </script>
 
 <script>
@@ -148,6 +167,7 @@
 </script>
 
 <style>
+<<<<<<< HEAD
 
 #backspace{
 	position:absolute;
@@ -187,6 +207,8 @@
 	div {
 -moz-user-select: none;
 	}
+=======
+>>>>>>> master
 	.basic_span {
 		position:relative;
 		width:50%;
@@ -198,6 +220,7 @@
 		float:left
 	}
 
+<<<<<<< HEAD
 	#table_id {
     	width: 100%;
     }
@@ -236,6 +259,15 @@
 		<b style="position:relative; top:0px;margin-left:75px"><%= @report_name.upcase == "REFERRAL" ? "Referal In" : "Transfer Out" %></b><br />
 	<% else %>
 		<b style="position:relative; top:0px;margin-left:75px"><%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %></b><br />
+=======
+</style> 
+
+						<h1 align='center' style="position:relative; top:15px;"><%= image_tag(@logo) %></h1>
+	<% if @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT" %>
+		<h1 align='center' style="position:relative; top:15px;"><%= @location %> : <u> <%= @report_name.upcase == "REFERRAL" ? "Referal In" : "Transfer Out" %> </u></h1>
+	<% else %>
+		<h1 align='center' style="position:relative; top:15px;"><%= @location %> : <u><%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %> </u></h1>
+>>>>>>> master
 	<% end %>
 
 	 <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Dates : <%= "#{@formated_start_date} to #{@formated_end_date}"%> <%= "<br> Total Registered: #{@total_registered.length}" if (@report_name.upcase == "TOTAL_REGISTERED") %></b>
@@ -243,32 +275,41 @@
 	<% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase) %>	
 		<b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Group (s) : <%= "#{@age_groups.join(' , ').to_s}" %> </b><br /><br />
 	<% end %>
+<<<<<<< HEAD
 
 	<div>
 		<table  id="table_id" class="display" >
+=======
+	<div style="position:relative; width:95%; overflow-y:scroll; height:340px; left:20px">
+		<table id="data_table" name="data_table" width="98%">
+>>>>>>> master
 				<thead>
-				
+					
 					<% if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS" %>
 				    <tr>
+<<<<<<< HEAD
 						  <th  align="left"> Diagnosis <p />
+=======
+						  <th > <u>Diagnosis</u> <p />
+>>>>>>> master
 						  </th>
-						  <th> 
+						  <th colspan = "2"> 
 									<span><u>< 6 Months </u></span> <br />
 									<span class="basic_span"> M </span><span class="basic_span" > F </span>
 						  </th>						  
-						  <th> 
+						  <th colspan = "2"> 
 									<span><u>	6 Months to < 5</u></span> <br />
 									<span class="basic_span"> M </span><span class="basic_span" > F </span>
-						  </th>						  
-						  <th>
+						  </th >						  
+						  <th colspan = "2">
 									<span><u> 5 to 14 </u></span> <br />
 									<span class="basic_span"> M </span><span class="basic_span" > F </span>
 						  </th>						  
-						  <th>
+						  <th colspan = "2">
 									<span><u> > 14 <u/></span> <br />
 									<span class="basic_span"> M </span><span class="basic_span" > F </span>
 						  </th>
-						  <th>
+						  <th colspan = "2">
 									<span> <u>Total by gender</u></span> <br />
 									<span class="basic_span"> M </span><span class="basic_span" > F </span>
 						  </th>
@@ -315,7 +356,6 @@
 						  <th> 
 									 Total  <p />
 						  </th>
-
 				  <% elsif @report_name.upcase == "TOTAL_REGISTERED" %>
 						  <th> <u>Name</u> <p />
 						  </th>
@@ -343,24 +383,47 @@
 						  	  
 				  <% end %>
 				</thead>
+<<<<<<< HEAD
 		  <tbody>
+=======
+		 		 <tbody>
+>>>>>>> master
 
 				<% if @report_name.upcase == "disaggregated_diagnosis".upcase %>
 		      <% @disaggregated_diagnosis.each do |key,value| %>
 		      	<tr>
-		      			<td width="300px"> <span style="display:block; width:90%;"> <%= key.to_s %> </span> </td>
+		      			<td > <span style="display:block; width:90%;"> <%= key.to_s %> </span> </td>
 
+<<<<<<< HEAD
 		      			<td align="left" > <%= "<span class='basic_span' > #{value["< 6 MONTHS"]["M"]} </span> <span class='basic_span'> #{value["< 6 MONTHS"]["F"]}" %> </span> </td>
 
 		      			<td align="left" > <%= "<span class='basic_span' > #{value["U5"]["M"]} </span> <span class='basic_span'> #{value["U5"]["F"]}" %> </span> </td>
 		      			<td align="left" > <%= "<span class='basic_span'> #{value["5-14"]["M"]} </span> <span class='basic_span'> #{value["5-14"]["F"]}" %> </span> </td>
 		      			<td align="left" > <%= "<span class='basic_span'> #{value[">14"]["M"]}  </span> <span class='basic_span'> #{value[">14"]["F"]}" %> </span> </td>
+=======
+		      			<td align="center" ><%= "<span class='basic_span' > #{value["< 6 MONTHS"]["M"]}</span>" %>
+								</td>						
+						<td align="center"><%= "<span class='basic_span'> #{value["< 6 MONTHS"]["F"]}  </span>" %> </td>
+
+		      			<td align="center" > <%= "<span class='basic_span' > #{value["U5"]["M"]} </span>" %></td>
+						<td align="center"><%= "<span class='basic_span'> #{value["U5"]["F"]} </span> " %> </td>
+		      			<td align="center" > <%= "<span class='basic_span'> #{value["5-14"]["M"]} </span>" %></td>
+						<td align="center"> <%= "<span class='basic_span'> #{value["5-14"]["F"]}" %> </span> </td>
+		      			<td align="center" > <%= "<span class='basic_span'> #{value[">14"]["M"]}  </span>" %></td>
+						<td align="center"> <%= "<span class='basic_span'> #{value[">14"]["F"]}" %> </span> </td>
+>>>>>>> master
 		      			<% 
 		      				 m_total = value[">14"]["M"] + value["5-14"]["M"] + value["U5"]["M"]
 		      				 f_total = value["U5"]["F"]+value["5-14"]["F"]+value[">14"]["F"]
 		      			%>
+<<<<<<< HEAD
 		      			<td align="left" > <%= "<span class='basic_span'> #{m_total}  </span> <span class='basic_span'> #{f_total}" %> </td>
 		      			<td align="left" style="padding-right:30px; width:130px;" > <%= "#{m_total+f_total}" %> </td>
+=======
+		      			<td align="center" > <%= "<span class='basic_span'> #{m_total}  </span>" %></td>
+						<td align="center"> <%= "<span class='basic_span'> #{f_total} </span>" %> </td>
+		      			<td align="right" style="padding-right:30px; width:130px;" > <%= "#{m_total+f_total}" %> </td>
+>>>>>>> master
 		      	</tr>
 		      <% end %>
 		      
@@ -446,6 +509,7 @@
 									</tr>					
 					<% end %>
 				<% end %>
+<<<<<<< HEAD
 		  <tbody>
 	</table>
 </div>
@@ -469,3 +533,12 @@
 </body>
 </html>
 
+=======
+				
+		      <script>
+		          //insertBlankRow ();
+		      </script>
+		  <tbody>
+	</table>
+</div>
+>>>>>>> master
