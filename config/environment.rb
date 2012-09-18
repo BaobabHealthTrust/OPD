@@ -13,6 +13,7 @@ Rails::Initializer.run do |config|
 	# config.time_zone = 'UTC'
 	config.gem 'warden'
 	config.gem 'devise'
+	config.gem 'fastercsv'
   config.gem 'will_paginate', :version => '~> 2.3.16'  
 	config.action_controller.session = {
 		:session_key => 'bart_session',

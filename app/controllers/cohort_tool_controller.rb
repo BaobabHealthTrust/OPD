@@ -1242,7 +1242,7 @@ class CohortToolController < ApplicationController
     if @type == "diagnoses" || @type == "diagnoses_adults" || @type == "diagnoses_paeds"
       @general = report.general
     end
-
+	
     if params[:selType]
       case params[:selType]
       when "adults"
@@ -1264,7 +1264,8 @@ class CohortToolController < ApplicationController
   	
 		@report_name = params[:report_name]
 		session_date = session[:datetime].to_date rescue Date.today
-
+		@logo = CoreService.get_global_property_value('logo').to_s
+		@location =Location.current_health_center.name
 		if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
 			@age_groups=params[:age_groups].map{|g|g.upcase}
 		end

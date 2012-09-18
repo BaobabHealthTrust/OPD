@@ -3,11 +3,11 @@
 		<%= javascript_include_tag "jquery" %>
 		<%= javascript_include_tag 'utils' %>
         
-        <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
-<script language="javascript">            
-            tt_cancel_destination = '/patients/show/<%= @patient.patient_id %>';
-            tt_cancel_show =  '/patients/show/<%= @patient.patient_id %>';
-            var hash_str = "|";             
+    <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
+    <script language="javascript">            
+    tt_cancel_destination = '/patients/show/<%= @patient.patient_id %>';
+    tt_cancel_show =  '/patients/show/<%= @patient.patient_id %>';
+    var hash_str = "|";             
  	
 	 
 </script>
@@ -25,11 +25,12 @@
 
 	</style>
 
+	
     </head>
     <body>
              
             <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
-               <form  action="/encounters/create" method="post">
+               <form  action="/encounters/create_complaints" method="post">
                     <%= hidden_field_tag "encounter[encounter_type_name]", "PRESENTING COMPLAINTS" %>
 	                <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
 	                <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
@@ -45,22 +46,20 @@
 		                                <option></option>
                                         <%complaints_set = concept_set('presenting complaint')%>
                                         <%if complaints_set%>
-	 										<%complaints_set.sort.each do |concept|%>
-                      <% if !(concept_set('presenting complaints requiring specification').include? concept)%>                           
+	 										<%complaints_set.sort.each do |concept|%>                           
                                                <%if concept_set(concept).size > 0 %>
 						                        	<optgroup id ="<%=concept%>" label="<%=concept%>">
 			                                     	<%complaint_sub_set = concept_set(concept)%>
 													<%if complaint_sub_set %>
 														<%complaint_sub_set.sort.each do |value|%>
-							                        <option id ="<%=value%>" value="<%=concept%>:<%=value%>"><%=value%></option>	
+		 <option id ="<%=value%>$<%=concept%>" value="<%=concept%>:<%=value%>"><%=value%> <%= '('%><%= concept %><%= ')'%></option>	
 					                                	<%end%>	   
 			                                    	<%end%>                                 
 				                             		</optgroup>
                                                 <%else%>
 													<option id ="<%=concept%>"><%=concept%></option>	
                                                 <%end%>
-	                                        <%end%>
-                                     	<%end%>
+	                                        <%end%>                                     	
 									<%end%>
 		                            </select>
                             </td>
