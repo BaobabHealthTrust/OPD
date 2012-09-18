@@ -263,7 +263,11 @@ module PatientService
     password = GlobalProperty.find(:first, 
       :conditions => {:property => "remote_bart.password"}).property_value.split(/,/) rescue ''
 
-    uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/patient/create_remote"                          
+    if server_port.blank?
+      uri = "http://#{login.first}:#{password.first}@#{server_address}/people/demographics"                          
+    else
+      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/demographics"                          
+    end
     output = RestClient.post(uri,known_demographics)      
 
     results = []
@@ -308,8 +312,12 @@ module PatientService
     # Currently returning the longest result - assuming that it has the most information
     # Can't return multiple results because there will be redundant data from sites
 
+    if server_port.blank?
+      uri = "http://#{login.first}:#{password.first}@#{server_address}/people/demographics"                          
+    else
+      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/demographics"                          
+    end
 
-    uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/demographics"                          
     output = RestClient.post(uri,known_demographics)      
 
     results = []
