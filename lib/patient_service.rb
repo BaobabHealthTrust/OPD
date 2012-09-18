@@ -264,9 +264,9 @@ module PatientService
       :conditions => {:property => "remote_bart.password"}).property_value.split(/,/) rescue ''
 
     if server_port.blank?
-      uri = "http://#{login.first}:#{password.first}@#{server_address}/people/demographics"                          
+      uri = "http://#{login.first}:#{password.first}@#{server_address}/patient/create_remote"                          
     else
-      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/demographics"                          
+      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/patient/create_remote"                          
     end
     output = RestClient.post(uri,known_demographics)      
 
