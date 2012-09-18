@@ -1094,6 +1094,7 @@ class CohortToolController < ApplicationController
   end
   
   def opd_cohort
+  	@report_type = params[:selType]
     @start_date = nil
     @end_date = nil
     @start_age = params[:startAge]
@@ -1238,7 +1239,7 @@ class CohortToolController < ApplicationController
     @pud = report.pud
 
     @gastritis = report.gastritis
-
+	@current_location_name = Location.current_health_center.name
     if @type == "diagnoses" || @type == "diagnoses_adults" || @type == "diagnoses_paeds"
       @general = report.general
     end
@@ -1246,11 +1247,11 @@ class CohortToolController < ApplicationController
     if params[:selType]
       case params[:selType]
       when "adults"
-        render :layout => "opd_cohort", :action => "adults_cohort" and return
+        render :layout => "report", :action => "adults_cohort" and return
       when "paeds"
-        render :layout => "opd_cohort", :action => "paeds_cohort" and return
+        render :layout => "report", :action => "paeds_cohort" and return
       else
-        render :layout => "opd_cohort", :action => "general_cohort" and return
+        render :layout => "report", :action => "general_cohort" and return
       end
     end
     render :layout => "opd_cohort"

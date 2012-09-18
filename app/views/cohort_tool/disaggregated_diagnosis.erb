@@ -86,6 +86,17 @@
 		table_length = document.getElementById("table_id_length");
 		table_length.setAttribute("style","width:100px;");
 
+		
+		<%if @disaggregated_diagnosis.length > 100 %>
+  		var elements = <%=@disaggregated_diagnosis.length%>
+		var x = 200
+		while(x < elements){
+			data_table_length.innerHTML+="<option value='" + x + "'>" + x + "</option>";
+			x+=100
+		}
+		data_table_length.innerHTML+="<option value='" + x + "'>" + x + "</option>";
+		<% end %>
+
 		})
 </script>
 
@@ -174,7 +185,7 @@
 
 <style>
 	div {
-	-moz-user-select: none;
+-moz-user-select: none;
 	}
 	.basic_span {
 		position:relative;
@@ -194,7 +205,7 @@
     #table_id_filter{
     	position:absolute;
     	top:60px;
-    	left:1120px;
+    	left:970px;
     	margin-top:-40px;
     }
     
@@ -214,7 +225,7 @@
 	 	position:fixed;
 	 	left:750px;
 	 	font-weight:bold;
-	 	top:723px;
+	 	top:675px;
 	}
 </style>
 </head>
