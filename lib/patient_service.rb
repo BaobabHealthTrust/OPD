@@ -906,6 +906,8 @@ EOF
 	end
   
 	def self.create_from_form(params)
+    return nil if params.blank?
+
 		address_params = params["addresses"]
 		names_params = params["names"]
 		patient_params = params["patient"]
