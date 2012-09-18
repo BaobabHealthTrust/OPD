@@ -317,6 +317,8 @@ module PatientService
     result = results.sort{|a,b|b.length <=> a.length}.first
     result ? person = JSON.parse(result) : nil
 
+    return {} if person.blank?
+
     #Stupid hack to structure the hash for openmrs 1.7
     person["person"]["occupation"] = person["person"]["attributes"]["occupation"]
     person["person"]["cell_phone_number"] = person["person"]["attributes"]["cell_phone_number"]
