@@ -28,103 +28,10 @@ class EncountersController < GenericEncountersController
 		@max_weight = PatientService.get_patient_attribute_value(@patient, "max_weight")
 		@min_height = PatientService.get_patient_attribute_value(@patient, "min_height")
 		@max_height = PatientService.get_patient_attribute_value(@patient, "max_height")
-
-=begin
-        @given_arvs_before = given_arvs_before(@patient)
-        @current_encounters = @patient.encounters.find_by_date(session_date)   
-        @previous_tb_visit = previous_tb_visit(@patient.id)
-        @is_patient_pregnant_value = nil
-        @is_patient_breast_feeding_value = nil
-        @currently_using_family_planning_methods = nil
-        @transfer_in_TB_registration_number = get_todays_observation_answer_for_encounter(@patient.id, "TB_INITIAL", "TB registration number")
-        @referred_to_htc = nil
-        @family_planning_methods = []
-
-
-		@given_lab_results = Encounter.find(:last,
-			:order => "encounter_datetime DESC,date_created DESC",
-			:conditions =>["encounter_type = ? and patient_id = ?",
-				EncounterType.find_by_name("GIVE LAB RESULTS").id,@patient.id]).observations.map{|o|
-				o.answer_string if o.to_s.include?("Laboratory results given to patient")} rescue nil
-
-		@transfer_to = Encounter.find(:last,:conditions =>["encounter_type = ? and patient_id = ?",
-			EncounterType.find_by_name("TB VISIT").id,@patient.id]).observations.map{|o|
-				o.answer_string if o.to_s.include?("Transfer out to")} rescue nil
-
-		@recent_sputum_results = PatientService.recent_sputum_results(@patient.id) rescue nil
-    	@recent_sputum_submissions = PatientService.recent_sputum_submissions(@patient_id) rescue nil
-		@continue_treatment_at_site = []
-		Encounter.find(:last,:conditions =>["encounter_type = ? and patient_id = ? AND DATE(encounter_datetime) = ?",
-		EncounterType.find_by_name("TB CLINIC VISIT").id,
-		@patient.id,session_date.to_date]).observations.map{|o| @continue_treatment_at_site << o.answer_string if o.to_s.include?("Continue treatment")} rescue nil
-
-		@patient_has_closed_TB_program_at_current_location = PatientProgram.find(:all,:conditions =>
-			["voided = 0 AND patient_id = ? AND location_id = ? AND (program_id = ? OR program_id = ?)", @patient.id, Location.current_health_center.id, Program.find_by_name('TB PROGRAM').id, Program.find_by_name('MDR-TB PROGRAM').id]).last.closed? rescue true
-
-		
 		@select_options = select_options
-		@months_since_last_hiv_test = PatientService.months_since_last_hiv_test(@patient.id)
-		@current_user_role = self.current_user_role
-		@tb_patient = is_tb_patient(@patient)
-		@art_patient = PatientService.art_patient?(@patient)
-		@recent_lab_results = patient_recent_lab_results(@patient.id)
-		@number_of_days_to_add_to_next_appointment_date = number_of_days_to_add_to_next_appointment_date(@patient, session[:datetime] || Date.today)
-		@drug_given_before = PatientService.drug_given_before(@patient, session[:datetime])
 
-		use_regimen_short_names = CoreService.get_global_property_value("use_regimen_short_names") rescue "false"
-		show_other_regimen = ("show_other_regimen") rescue 'false'
+		@select_options = select_options
 
-		@answer_array = arv_regimen_answers(:patient => @patient,
-			:use_short_names    => use_regimen_short_names == "true",
-			:show_other_regimen => show_other_regimen      == "true")
-
-		hiv_program = Program.find_by_name('HIV Program')
-		@answer_array = MedicationService.regimen_options(hiv_program.regimens, @patient_bean.age)
-		@answer_array += [['Other', 'Other'], ['Unknown', 'Unknown']]
-
-		@hiv_status = PatientService.patient_hiv_status(@patient)
-		@hiv_test_date = PatientService.hiv_test_date(@patient.id)
-#raise @hiv_test_date.to_s
-		@lab_activities = lab_activities
-		# @tb_classification = [["Pulmonary TB","PULMONARY TB"],["Extra Pulmonary TB","EXTRA PULMONARY TB"]]
-		@tb_patient_category = [["New","NEW"], ["Relapse","RELAPSE"], ["Retreatment after default","RETREATMENT AFTER DEFAULT"], ["Fail","FAIL"], ["Other","OTHER"]]
-		@sputum_visual_appearance = [['Muco-purulent','MUCO-PURULENT'],['Blood-stained','BLOOD-STAINED'],['Saliva','SALIVA']]
-
-		@sputum_results = [['Negative', 'NEGATIVE'], ['Scanty', 'SCANTY'], ['1+', 'Weakly positive'], ['2+', 'Moderately positive'], ['3+', 'Strongly positive']]
-
-		@sputum_orders = Hash.new()
-		@sputum_submission_waiting_results = Hash.new()
-		@sputum_results_not_given = Hash.new()
-		@art_first_visit = is_first_art_visit(@patient.id)
-		@tb_first_registration = is_first_tb_registration(@patient.id)
-		@tb_programs_state = uncompleted_tb_programs_status(@patient)
-
-
-
-
-
-
-		@had_tb_treatment_before = ever_received_tb_treatment(@patient.id)
-		@any_previous_tb_programs = any_previous_tb_programs(@patient.id)
-
-		PatientService.sputum_orders_without_submission(@patient.id).each { | order | 
-			@sputum_orders[order.accession_number] = Concept.find(order.value_coded).fullname rescue order.value_text
-		}
-		
-		sputum_submissons_with_no_results(@patient.id).each{|order| @sputum_submission_waiting_results[order.accession_number] = Concept.find(order.value_coded).fullname rescue order.value_text}
-		sputum_results_not_given(@patient.id).each{|order| @sputum_results_not_given[order.accession_number] = Concept.find(order.value_coded).fullname rescue order.value_text}
-
-		@tb_status = recent_lab_results(@patient.id, session_date)
-    	# use @patient_tb_status  for the tb_status moved from the patient model
-    	@patient_tb_status = PatientService.patient_tb_status(@patient)
-		@patient_is_transfer_in = is_transfer_in(@patient)
-		@patient_transfer_in_date = get_transfer_in_date(@patient)
-		@patient_is_child_bearing_female = is_child_bearing_female(@patient)
-    	@cell_number = @patient.person.person_attributes.find_by_person_attribute_type_id(PersonAttributeType.find_by_name("Cell Phone Number").id).value rescue ''
-
-    	@tb_symptoms = []
-=end
-		
         if  ['OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id
 			diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set_id])	
@@ -135,7 +42,7 @@ class EncountersController < GenericEncountersController
 			@diagnoses_requiring_details = diagnosis_concepts.map{|concept| concept.fullname.upcase}.join(';')
         end
         
-        if (params[:encounter_type].upcase rescue '') == 'PRESENTING_COMPLAINT'
+        if (params[:encounter_type].upcase rescue '') == 'PRESENTING_COMPLAINTS'
 			complaint_concept_set_id = ConceptName.find_by_name("Presenting complaints requiring specification").concept.id
 			complaint_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', complaint_concept_set_id])
 			@complaints_requiring_specification = complaint_concepts.map{|concept| concept.fullname.upcase}.join(';')
@@ -193,11 +100,14 @@ class EncountersController < GenericEncountersController
 
 
 		if params[:encounter_type].upcase == 'ADMISSION DIAGNOSIS' || params[:encounter_type].upcase == 'DISCHARGE DIAGNOSIS' || params[:encounter_type].upcase == 'OUTPATIENT_DIAGNOSIS'
-			if !is_encounter_available(@patient, 'VITALS', session_date)
-					if @patient_bean.age <= 14
-							session[:original_encounter] = params[:encounter_type]
-							params[:encounter_type] = 'vitals'					
-					end
+			if !is_encounter_available(@patient, 'VITALS', session_date) && @patient_bean.age <= 14
+				session[:original_encounter] = params[:encounter_type]
+				params[:encounter_type] = 'vitals'					
+			else
+				#if !is_encounter_available(@patient, 'PRESENTING COMPLAINTS', session_date)
+				#	session[:original_encounter] = params[:encounter_type]
+				#	params[:encounter_type] = 'presenting_complaints'					
+				#end
 			end
 		end
 		
@@ -542,6 +452,7 @@ class EncountersController < GenericEncountersController
   def create_chronics
     create_influenza_data
   end
+
   #added this to ensure that we are able to get the detailed diagnosis set
   def diagnosis_details
       concept_name = params[:diagnosis_string]
@@ -549,4 +460,74 @@ class EncountersController < GenericEncountersController
       
       render :text => "<li></li><li>" + options.join("</li><li>") + "</li>"
   end
+
+  #added this to ensure that we are able to get the detailed diagnosis set
+  def concept_options
+      concept_name = params[:search_string]
+      options = concept_set(concept_name).flatten.uniq
+      
+      render :text => "<li></li><li>" + options.join("</li><li>") + "</li>"
+  end
+  def life_threatening_condition  
+    search_string = (params[:search_string] || '').upcase
+    
+    aconcept_set = []
+        
+    common_answers = Observation.find_most_common(ConceptName.find_by_name("Life threatening condition").concept, search_string)
+    concept_set("Life threatening condition").each{|concept| aconcept_set << concept.uniq.to_s rescue "test"}  
+    set = (common_answers + aconcept_set.sort).uniq             
+    set.map!{|cc| cc.upcase.include?(search_string)? cc : nil}        
+    
+    set = set.sort rescue []
+           
+    render :text => "<li></li>" + "<li>" + set.join("</li><li>") + "</li>"
+
+ end
+
+ def triage_category
+
+    search_string = (params[:search_string] || '').upcase   
+    aconcept_set = []        
+
+        common_answers = Observation.find_most_common(ConceptName.find_by_name("Triage category").concept, search_string)
+    concept_set("Triage category").each{|concept| aconcept_set << concept.uniq.to_s rescue "test"}  
+        set = (common_answers + aconcept_set.sort).uniq             
+      set.map!{|cc| cc.upcase.include?(search_string)? cc : nil}        
+             
+    set = set.sort rescue []
+           
+    render :text => "<li></li>" + "<li>" + set.join("</li><li>") + "</li>"
+ end
+ def create_complaints
+		received_params = params	    
+        params[:complaints].each do |complaint|
+		  if !complaint.blank?
+		      multiple = complaint.match(/[:]/)      
+		      unless multiple.nil?
+		         multiple_array = complaint.split(":")
+				 parent_obs = {"patient_id" => params['encounter']['patient_id'], 
+								"concept_name" => "presenting complaint".upcase,
+           						"value_coded_or_text" => "#{multiple_array[0]}",
+								"obs_datetime" => params['encounter']['encounter_datetime']}.with_indifferent_access
+				received_params[:observations] << parent_obs			
+                  
+				child_obs = {"patient_id" => params['encounter']['patient_id'], 
+								"concept_name" => "#{multiple_array[0]}",
+                                "value_coded_or_text" => "#{multiple_array[1]}",
+								"obs_datetime" => params['encounter']['encounter_datetime'],
+								"parent_concept_name" => "#{multiple_array[0]}"}.with_indifferent_access
+				received_params[:observations] << child_obs
+		      else
+		         obs = {"patient_id" => params['encounter']['patient_id'], 
+						"concept_name" => 'Presenting Complaint'.upcase,
+						"value_coded_or_text" => complaint,
+						"obs_datetime" => params['encounter']['encounter_datetime']}
+		       	received_params[:observations] << obs			
+		      end 
+		  end 	   
+        end	
+	create(received_params)
+    #push test
+ #by K kapundi
+ end 
 end

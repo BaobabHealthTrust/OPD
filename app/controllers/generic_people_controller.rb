@@ -76,7 +76,7 @@ class GenericPeopleController < ApplicationController
 				# This is sloppy - creating something as the result of a GET
 				if create_from_remote
 					found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
-					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
+					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.blank?
 				end
 			end
 			if found_person
@@ -248,7 +248,7 @@ class GenericPeopleController < ApplicationController
 	# This method is just to allow the select box to submit, we could probably do this better
 	def select
     if params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
-			redirect_to :controller => :patients, :action => :show, :id => params[:person]
+			redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
 		else
 		
 			redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'

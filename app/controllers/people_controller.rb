@@ -38,7 +38,8 @@ class PeopleController < GenericPeopleController
 
       if !person.blank?
         success = true
-        person.patient.remote_national_id
+        #person.patient.remote_national_id 
+        PatientService.get_remote_national_id(person.patient)
       end
     else
       success = true
