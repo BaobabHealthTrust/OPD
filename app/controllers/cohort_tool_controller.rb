@@ -1107,13 +1107,30 @@ class CohortToolController < ApplicationController
       @end_date = params[:day]
 
     when "week"
-      
+     if params[:selWeek] != ""
+		if params[:selWeek] == "mon"
+		  @start_date = "#{params[:selYear]}-#{Date.today.month.to_s}-01".to_date
+		  @end_date = Date.today
+		elsif params[:selWeek] == "lmon"
+		  lmon = Date.today.month - 1
+		  lmon_days = days_in_month(lmon).to_s	
+		  @start_date = "#{params[:selYear]}-#{lmon}-01".to_date
+		  @end_date = "#{params[:selYear]}-#{lmon}-#{lmon_days}".to_date 
+		elsif params[:selWeek] == "all"
+		  mon = Date.today.month
+		  mon_days = days_in_month(mon).to_s
+		  @start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
+      	  @end_date = Date.today 
+		else
       @start_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) - 
         ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
-      
       @end_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) +
         6 - ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
-
+		end
+      else
+ 		@start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
+     	@end_date = ("#{params[:selYear]}-12-31").to_date.strftime("%Y-%m-%d")
+	  end	
     when "month"
       @start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date.strftime("%Y-%m-%d")
       
@@ -1262,8 +1279,8 @@ class CohortToolController < ApplicationController
   end
   
 	def disaggregated_diagnosis
-  	
 		@report_name = params[:report_name]
+		#raise @report_name.to_yaml
 		session_date = session[:datetime].to_date rescue Date.today
 		@logo = CoreService.get_global_property_value('logo').to_s
 		@location =Location.current_health_center.name
