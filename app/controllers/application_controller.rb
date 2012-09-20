@@ -1,5 +1,6 @@
 class ApplicationController < GenericApplicationController
-  helper_method :allowed_hiv_viewer
+COMMON_YEAR_DAYS_IN_MONTH = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+helper_method :allowed_hiv_viewer
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
     task = main_next_task(Location.current_location, patient, session_date)
@@ -118,7 +119,8 @@ class ApplicationController < GenericApplicationController
     hiv_encounters_list = [ "HIV STAGING", "HIV CLINIC REGISTRATION", 
                             "HIV RECEPTION","HIV CLINIC CONSULTATION",
                             "EXIT FROM HIV CARE","ART ADHERENCE",
-							"UPDATE HIV STATUS","ART_FOLLOWUP","ART ENROLLMENT"
+                            "ART_FOLLOWUP","ART ENROLLMENT",
+                            "UPDATE HIV STATUS","APPOINTMENT"
                           ]
     if type.to_s.downcase == 'encounter'
       all_encounters.each{|encounter|
@@ -150,6 +152,11 @@ class ApplicationController < GenericApplicationController
     
     return non_art_encounters
     
+  end
+  
+  def days_in_month(month, year = Time.now.year)
+   	return 29 if month == 2 && Date.gregorian_leap?(year)
+   	COMMON_YEAR_DAYS_IN_MONTH[month]
   end
   
   def check_for_arvs_presence(encounter)

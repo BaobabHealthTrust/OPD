@@ -1,0 +1,98 @@
+<html>
+	<head>
+		<title>Patient Dashboard</title>
+		<script type="text/javascript" language="javascript"
+			src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer  >
+		</script>
+		<meta http-equiv='content-type' content='text/html;charset=UTF-8' />
+		<script language="javascript">
+			tstUsername = "";
+			tstCurrentDate = "<%= @date %>";
+			//tt_cancel_destination = '/clinic';
+			tt_cancel_show = '/clinic';
+		</script>
+	</head>
+	<body>
+		<div id='content'>
+			<div id='description' style='color:#777;position:absolute;margin-top:-100px;'></div>
+			<form id = 'dashboard' action='/clinic'>
+			    <div id='project_name'>
+			         OPD
+			    </div>
+			    <span id='patient_name'><%= @patient_bean.name rescue "" %></span>
+			    <span id='patient_id'><%= @patient_bean.national_id_with_dashes rescue "" %></span>
+			    <span id='patient_residence'><%= @patient_bean.current_residence rescue "" %></span>
+			    <span id='patient_age'><%= @patient_bean.age rescue "" %></span>
+			    <span id='patient_gender'><%= @patient_bean.sex rescue "" %></span>
+
+			    <div id="patient_card">
+			    </div>
+
+			    <select id="tabs">
+					<option value='/patients/overview?patient_id=<%= @patient.id %>'>Overview</option>
+					<option value='/patients/visit_history?patient_id=<%= @patient.id %>'>Current Visit</option>
+					<option value='/patients/past_visits_summary?patient_id=<%= @patient.id %>'>Past Visits</option>
+					<option value='/patients/tab_social_history?patient_id=<%= @patient.id %>'>Social History</option>
+					<option value="/patients/past_diagnoses?patient_id=<%=@patient.patient_id%>">Medical History</option>
+					<option value='/patients/personal/<%= @patient.id -%>'>Printouts/Other</option>
+
+				<%  if @spine_clinician  %>
+					<option value="/patients/influenza_info?patient_id=<%=@patient.patient_id%>"> Influenza </option>
+					<option value="/patients/chronic_conditions_info?patient_id=<%=@patient.patient_id%>"> Chronic Diseases</option>
+				<% end %>
+				<% if @show_hiv_tab == true %>					
+					<option value="/patients/hiv?patient_id=<%=@patient.patient_id%>"> HIV Status</option>
+				<% end %>
+			</select>
+					
+				<select id="links">
+						<!-- option value='/encounters/new/outpatient_diagnosis?diagnosis_type=PRIMARY DIAGNOSIS&patient_id=<%= @patient.id -%>&diagnosis=true'>
+						<%= (@category.downcase == "adults" ? "Emergency" : "OPD" rescue 'Emergency') %> Diagnosis</option -->
+						<option value='/encounters/new/vitals?patient_id=<%= @patient.id %>'>Vitals</option>
+						<option value='/encounters/new/outpatient_diagnosis?patient_id=<%= @patient.id %>'>Diagnosis</option>
+						<option value='/patients/treatment_dashboard/<%= @patient.id %>'>Treatment</option>
+						<option value='/patients/programs_dashboard/<%= @patient.id %>'>Update Outcome</option>
+						<%  if @spine_clinician  %>
+							<option value="/encounters/new/influenza_data?patient_id=<%=@patient.patient_id%>"> Influenza </option>
+							<option value="/encounters/new/chronic_conditions?patient_id=<%=@patient.patient_id%>"> Chronic Conditions</option>
+						<% end %>							
+				 </select>
+
+				<% if @patient.person.dead == 1%>
+					<select id="links">
+						<option value='/patients/programs_dashboard/<%= @patient.id -%>'>Outcomes</option>
+					</select>
+					<select id="navigation_links">
+						<!--option link="/patients/mastercard_menu?patient_id=<%= @patient.id -%>&source=<%= @source -%>">Mastercard</option -->
+						<option link='/patients/edit_demographics?patient_id=<%= @patient.id -%>'>Edit Demographics</option>						
+						<option link='<%= ((session[:datetime].to_date rescue '') != '' ?
+							"/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
+							<%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
+					</select>
+				<% else %>
+					<select id="links">
+						<option value='/patients/treatment_dashboard/<%= @patient.id -%>'>Treatment</option>
+						<option value='/patients/guardians_dashboard/<%= @patient.id -%>'>Guardians</option>
+						<!--%if current_user.activities.include?('Manage Patient Programs')%-->
+						<option value='/patients/programs_dashboard/<%= @patient.id -%>'>Outcomes</option>
+						<!--%end%-->
+						<option value='/patients/show/<%= @patient.id -%>?source=opd'>OPD</option>
+					</select>
+			
+					<select id="navigation_links">
+						<option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Tasks</option>
+						<!-- option link="/patients/mastercard_menu?patient_id=<%= @patient.id -%>&source=<%= @source -%>">Mastercard</option -->
+						<% if show_lab_results %>
+						<option link="/lab/results/<%=@patient.id -%>">Lab results</option>
+						<%end%>
+						<option link='<%= ((session[:datetime].to_date rescue '') != '' ?
+						"/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
+						<%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
+						<option link='/patients/edit_demographics?patient_id=<%= @patient.id -%>'>Edit Demographics</option>
+					</select>
+				<% end %>
+			</form>
+		</div>
+	</body>
+</html>
+

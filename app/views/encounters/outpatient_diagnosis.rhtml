@@ -49,12 +49,14 @@
 			:tt_onLoad => 'set_ajaxURL_for_suggestions(document.getElementById("primary_diagnosis").value);',
 		 	:helpText => "Detailed primary diagnosis" } %>
 
-	<%= touch_text_field_tag "Specific primary diagnosis", @patient, nil,
-		{	:id => "specific_diagnosis",
-		 	:condition => 'diagnoses_requiring_specification.contains($("primary_diagnosis").value.toUpperCase())',
-			:allowFreeText => 'true',
-			:textCase => "upper",
-		 	:helpText => "Specific primary diagnosis" } %>
+  <%= touch_text_area_tag("Specific primary diagnosis", @patient, nil,          
+      { :optional => true,
+        :id => "specific_diagnosis",
+        :helpText => "Specific primary diagnosis",
+		 	  :condition => 'diagnoses_requiring_specification.contains($("primary_diagnosis").value.toUpperCase())'})
+    %>
+
+
 		 	 	
 	<%= touch_select_tag "Secondary Diagnosis", @patient, nil,
 		{	:id => "secondary_diagnosis",
@@ -68,12 +70,14 @@
 			:tt_onLoad => 'set_ajaxURL_for_suggestions(document.getElementById("secondary_diagnosis").value)',
 		 	:helpText => "Detailed secondary diagnosis" } %>
 
-	<%= touch_text_field_tag "Specific secondary diagnosis", @patient, nil,
-		{	:id => "sec_specific_diagnosis",
-		 	:condition => 'diagnoses_requiring_specification.contains($("secondary_diagnosis").value.toUpperCase())',
-			:allowFreeText => 'true',
-			:textCase => "upper",
-		 	:helpText => "Specific secondary diagnosis" } %>
+  
+   <%= touch_text_area_tag("Specific secondary diagnosis", @patient, nil,        
+      { :optional => true,                                                      
+        :id => "sec_specific_diagnosis" ,                                       
+        :helpText => "Specific secondary diagnosis",                            
+        :condition => 'diagnoses_requiring_specification.contains($("secondary_diagnosis").value.toUpperCase())'})
+    %>
+
 
 	<% counter = 0%>
 	<% 4.times do %>

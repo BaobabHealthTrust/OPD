@@ -76,7 +76,7 @@ class GenericPeopleController < ApplicationController
 				# This is sloppy - creating something as the result of a GET
 				if create_from_remote
 					found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
-					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
+					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.blank?
 				end
 			end
 			if found_person

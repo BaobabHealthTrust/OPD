@@ -1,0 +1,79 @@
+# medical_history.rhtml
+
+<script type="text/javascript" language="javascript">
+  <!--
+  tt_cancel_show = "/patients/show/<%= @patient.id %>";
+  tt_cancel_destination = "/patients/show/<%= @patient.id %>";
+  //-->
+</script>
+
+<form action="/encounters/create/social_history" >
+<script type="text/javascript" language="javascript">
+  var tt_cancel_destination = "/patients/show/<%= @patient.id%>?auto_load_forms=false"
+</script>
+
+<form id='outcome' action="/encounters/create" method='post'>
+  <%= hidden_field_tag "encounter[encounter_type_name]", "SOCIAL HISTORY" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%session_date = session[:datetime] || Time.now() %>
+  <%= touch_select_tag "Patient currently smokes", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "smoker", :tt_requireNextClick => false,
+    :helptext => "Does patient smoke?", 
+    :tt_onLoad => "__$('nextButton').style.display='none'; showCategory('Social History');" } %>
+
+  <%= touch_select_tag "Patient currently consumes alcohol", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
+    {:id => "alcohol", 
+    :tt_requireNextClick => false,
+    :tt_onLoad => "__$('nextButton').style.display='none';",
+    :helptext => "Do you take alcohol?" } %>
+ 
+ <%= touch_select_tag "Civil status", @patient,
+
+
+  <%= touch_select_tag "Civil status", @patient,
+    options_for_select([["", ""], ["Single", "Single"], ["Engaged", "Engaged"],
+      ["Married", "Married"], ["Separated", "Separated"], ["Divorced", "Divorced"],
+      ["Widowed", "Widowed"], ["Other", "Other"]]),
+    {:id => "civil_status", 
+    :tt_requireNextClick => false,
+    :tt_onLoad => "__$('nextButton').style.display='none';",
+    :helptext => "Marital status" } %>
+  
+  <%= touch_select_tag "Nutrition status", @patient, options_for_select([["", ""], ["Good", "Good"], ["Malnourished", "Malnourished"], ["Obese", "Obese"]]),
+    {:id => "nutrition",
+    :tt_requireNextClick => false,
+    :helptext => "Nutrition status" } %>
+
+<%= touch_select_tag "Religion", @patient,
+  options_for_select([["", ""],
+  ["Jehovah's Witness", "Jehovahs Witness"],
+  ["Roman Catholic", "Roman Catholic"],
+  ["Presbyterian (C.C.A.P.)", "Presbyterian (C.C.A.P.)"],
+  ["Seventh Day Adventist", "Seventh Day Adventist"],
+  ["Baptist", "Baptist"],
+  ["Moslem", "Moslem"],
+  ["Other", "Other"]]),
+  {:id => "religion",
+  :tt_requireNextClick => false,
+  :helptext => "Religion" } %>
+
+ <%= touch_text_field_tag "Other", @patient, nil,
+    {
+    :id => "other",
+    :helpText => "Specify other religion",
+    :tt_onLoad => "__$('nextButton').style.display='block';",
+    :condition => "__$('religion').value == 'Other'"
+  } %>
+  
+  <%= touch_text_field_tag "Other civil status comment", @patient, nil,
+    {
+    :id => "other_civil_status",
+    :helpText => "Specify other marital status",
+    :tt_onLoad => "__$('nextButton').style.display='none';",
+    :condition => "__$('civil_status').value == 'Other'"
+  } %>
+
+  <%= submit_tag 'Finish' %>
+</form>

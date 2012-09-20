@@ -14,7 +14,7 @@
 	</head>
 	<body>
 		<div id='content'>
-			<div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div>
+			<div id='description' style='color:#777;position:absolute;margin-top:-100px;'></div>
 			<form id = 'dashboard' action='/clinic'>
 			    <div id='project_name'>
 			         OPD
@@ -32,9 +32,10 @@
 					<option value='/patients/overview?patient_id=<%= @patient.id %>'>Overview</option>
 					<option value='/patients/visit_history?patient_id=<%= @patient.id %>'>Current Visit</option>
 					<option value='/patients/past_visits_summary?patient_id=<%= @patient.id %>'>Past Visits</option>
-					<option value="/patients/past_diagnoses?patient_id=<%= @patient.id%>">Medical History</option>
-					<option value="/patients/personal/<%= @patient.id%>">Printouts/Other</option>
-					<option value="/patients/social_history?patient_id=<%= @patient.id%>">Social History</option>
+					<option value='/patients/tab_social_history?patient_id=<%= @patient.id %>'>Social History</option>
+					<option value="/patients/past_diagnoses?patient_id=<%=@patient.patient_id%>">Medical History</option>
+					<option value='/patients/personal/<%= @patient.id -%>'>Printouts/Other</option>
+
 				<%  if @spine_clinician  %>
 					<option value="/patients/influenza_info?patient_id=<%=@patient.patient_id%>"> Influenza </option>
 					<option value="/patients/chronic_conditions_info?patient_id=<%=@patient.patient_id%>"> Chronic Diseases</option>
@@ -47,7 +48,7 @@
 				<select id="links">
 						<!-- option value='/encounters/new/outpatient_diagnosis?diagnosis_type=PRIMARY DIAGNOSIS&patient_id=<%= @patient.id -%>&diagnosis=true'>
 						<%= (@category.downcase == "adults" ? "Emergency" : "OPD" rescue 'Emergency') %> Diagnosis</option -->
-						<option value='/encounters/new/vitals?patient_id=<%= @patient.id %>'>Vitals</option>
+						<option value='/encounters/new/vitals?patient_id=<%= @patient.id %>'>Triage</option>
 						<option value='/encounters/new/presenting_complaints?patient_id=<%= @patient.id %>'>Presenting complaints</option>
 						<option value='/encounters/new/outpatient_diagnosis?patient_id=<%= @patient.id %>'>Diagnosis</option>
 						<option value='/patients/treatment_dashboard/<%= @patient.id %>'>Treatment</option>

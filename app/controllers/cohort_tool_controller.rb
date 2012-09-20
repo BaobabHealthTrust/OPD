@@ -1094,6 +1094,7 @@ class CohortToolController < ApplicationController
   end
   
   def opd_cohort
+  	@report_type = params[:selType]
     @start_date = nil
     @end_date = nil
     @start_age = params[:startAge]
@@ -1106,13 +1107,30 @@ class CohortToolController < ApplicationController
       @end_date = params[:day]
 
     when "week"
-      
+     if params[:selWeek] != ""
+		if params[:selWeek] == "mon"
+		  @start_date = "#{params[:selYear]}-#{Date.today.month.to_s}-01".to_date
+		  @end_date = Date.today
+		elsif params[:selWeek] == "lmon"
+		  lmon = Date.today.month - 1
+		  lmon_days = days_in_month(lmon).to_s	
+		  @start_date = "#{params[:selYear]}-#{lmon}-01".to_date
+		  @end_date = "#{params[:selYear]}-#{lmon}-#{lmon_days}".to_date 
+		elsif params[:selWeek] == "all"
+		  mon = Date.today.month
+		  mon_days = days_in_month(mon).to_s
+		  @start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
+      	  @end_date = Date.today 
+		else
       @start_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) - 
         ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
-      
       @end_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) +
         6 - ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
-
+		end
+      else
+ 		@start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
+     	@end_date = ("#{params[:selYear]}-12-31").to_date.strftime("%Y-%m-%d")
+	  end	
     when "month"
       @start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date.strftime("%Y-%m-%d")
       
@@ -1238,7 +1256,7 @@ class CohortToolController < ApplicationController
     @pud = report.pud
 
     @gastritis = report.gastritis
-
+	@current_location_name = Location.current_health_center.name
     if @type == "diagnoses" || @type == "diagnoses_adults" || @type == "diagnoses_paeds"
       @general = report.general
     end
@@ -1246,11 +1264,11 @@ class CohortToolController < ApplicationController
     if params[:selType]
       case params[:selType]
       when "adults"
-        render :layout => "opd_cohort", :action => "adults_cohort" and return
+        render :layout => "report", :action => "adults_cohort" and return
       when "paeds"
-        render :layout => "opd_cohort", :action => "paeds_cohort" and return
+        render :layout => "report", :action => "paeds_cohort" and return
       else
-        render :layout => "opd_cohort", :action => "general_cohort" and return
+        render :layout => "report", :action => "general_cohort" and return
       end
     end
     render :layout => "opd_cohort"
@@ -1261,8 +1279,8 @@ class CohortToolController < ApplicationController
   end
   
 	def disaggregated_diagnosis
-  	
 		@report_name = params[:report_name]
+		#raise @report_name.to_yaml
 		session_date = session[:datetime].to_date rescue Date.today
 		@logo = CoreService.get_global_property_value('logo').to_s
 		@location =Location.current_health_center.name
@@ -1271,8 +1289,9 @@ class CohortToolController < ApplicationController
 		end
 
 		@start_date = (params[:start_year] + "-" + params[:start_month] + "-" + params[:start_day]).to_date
+		@formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
 		@end_date = (params[:end_year] + "-" + params[:end_month] + "-" + params[:end_day]).to_date
-	
+		@formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
 		@disaggregated_diagnosis = {}
 		@diagnosis_by_address = {}
 		@patient_level_data = {}
@@ -1350,6 +1369,8 @@ class CohortToolController < ApplicationController
 				end
 			end
 		end
+		@logo = CoreService.get_global_property_value("logo").to_s
+		@current_location_name = Location.current_health_center.name
 		render :layout => 'report'
 	end
 
@@ -1454,7 +1475,5 @@ class CohortToolController < ApplicationController
 		end
 
 	end
-  
-  
 end
 

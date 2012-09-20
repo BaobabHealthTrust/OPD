@@ -1,74 +1,275 @@
-<script >
-    </script>
+<html>
+<head>
+    <%= javascript_include_tag "prototype" %>
     <%= javascript_include_tag 'jquery' %>
     <%= stylesheet_link_tag 'extra_buttons' %>
-	<%=javascript_include_tag "jquery_data_table" %>
-	<%=javascript_include_tag "jquery.dataTables.min" %>
-	<%=javascript_include_tag "jquery.table2CSV.min" %>
-	
+	<%= javascript_include_tag 'jquery_data_table.js' %>
+	<%= stylesheet_link_tag 'jquery.dataTables' %>
+	<script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
+	<script src="/javascripts/jquery.table2CSV.min.js" type="text/javascript"></script>
 <script>
-    jQuery(document).ready(function($) {
-      document.getElementById("find").innerHTML = "<span>Back</span>";
-      document.getElementById("find").style.cssFloat = "left";
-        $('#find').click(function() {		
-              window.location = '/cohort_tool/opd_menu?report_name=<%=@report_name%>'; // /report/data_cleaning';
-          })
-     })
-  $(document).ready(function () {
-	$('#data_table').dataTable({
-			})
-	})
+		jQuery(document).ready(function($) {
+	 	$('#table_id').dataTable({
+		"bAutoWidth": false,
+		"sScrollY": "310px",
+		"bPaginate": true,
+		"bFilter": true,
+		"bProcessing": true
+		//"sPaginationType": "full_numbers"
+		//"sPageButton": "paginate_button",
+
+		//"bInfo":false
+     	});
+     	document.getElementById('table_id_paginate').style.visibility = 'hidden';//removing the div that shows next and previous buttons
+     	search_box = $('#table_id').dataTable()
+     	search = document.getElementsByTagName("input")[0];
+ 	 	search.setAttribute("id","search");
+ 	 	document.getElementById('search').setAttribute("onclick","showKeyboard();");
+     	document.getElementById("find").innerHTML = "<span>Back</span>";
+     	document.getElementById("find").style.cssFloat = "left";
+      
+     	$('#find').click(function() {
+      		window.location = '/cohort_tool/opd_menu?report_name=<%=@report_name%>'; // /report/data_cleaning';
+      	})
+          
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+		keyboard = document.getElementsByClassName("keypad")[0]
+		function getCharButtonSetID(character,id){
+			return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' +"<span style='width:32px'>"+character+"</span>"+ "</button>";
+		}
+		function getButtonString(id,string){
+			return "<button \
+			onMouseDown='press(this.id);' \
+			class='keyboardButton' \
+			id='"+id+"'>"+
+			string +
+			"</button>";
+		}
+
+		function getButtons(chars){
+			var buttonLine = "";
+			for(var i=0; i<chars.length; i++){
+			character = chars.substring(i,i+1)
+			buttonLine += getCharButtonSetID(character,character)
+			}
+			return buttonLine;
+		}
+
+		showAlphaKeypad();
+
+		function showAlphaKeypad(){
+			document.getElementById("keypad").style.height = "280";
+			keyboard.innerHTML = getButtons("QWERTYUIOP") + "</br>"
+			keyboard.innerHTML+= getButtons("ASDFGHJKL:") + "</br>"
+			keyboard.innerHTML+= getButtons("ZXCVBNM,.?")
+			keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>') 
+			keyboard.innerHTML+= getButtonString('Space','<span>Space</span>') 
+			keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>') 
+			//keyboard.innerHTML+= getButtonString('num','<span>Num</span>') 
+		}
+ 
+		function showNumericKeypad(){
+			document.getElementById("keypad").style.height = "145";
+			keyboard.innerHTML = getButtons("123") 
+			keyboard.innerHTML+= getButtons("456") 
+			keyboard.innerHTML+= getButtons("7890") 
+			keyboard.innerHTML+= getButtonString('space','<span>Space</span>') 
+			keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>') 
+			keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>') 
+			keyboard.innerHTML+= getButtonString('abc','<span>abc</span>') 
+			keyboard.innerHTML+= getButtonString('dash','<span>-</span>') 
+			keyboard.innerHTML+= getButtonString('slash','<span>/</span>') 
+		}
+		
+		data_table_length =document.getElementsByName('table_id_length')[0];
+		data_table_length.setAttribute("style","font-size:20px;");
+
+		table_length = document.getElementById("table_id_length");
+		table_length.setAttribute("style","width:100px;");
+
+		
+		<%if @disaggregated_diagnosis.length > 100 %>
+  		var elements = <%=@disaggregated_diagnosis.length%>
+		var x = 200
+		while(x < elements){
+			data_table_length.innerHTML+="<option value='" + x + "'>" + x + "</option>";
+			x+=100
+		}
+		data_table_length.innerHTML+="<option value='" + x + "'>" + x + "</option>";
+		<% end %>
+
+		})
 </script>
 
+<script>
+	
+ function showKeyboard(){
+   key = document.getElementById("keypad")
+   if(key.style.display == 'none' || key.style.display == ""){
+    key.style.display = "inline";
+    return
+   }
 
+    key.style.display = "none";
+ }
+
+  function press(pressedChar){
+    switch (pressedChar) {
+      case 'backspace':
+        search.value = search.value.substring(0,search.value.length-1);
+        search_box.fnFilter(search.value)
+        return;
+      case 'Space':
+        search.value+= " "
+        search_box.fnFilter(search.value)
+        return
+      case 'clear':
+        search.value = ""
+        search_box.fnFilter(search.value)
+        return
+      case 'num':
+        showNumericKeypad();
+        return
+      case 'slash':
+        search.value+= "/"
+        search_box.fnFilter(search.value)
+        return
+      case 'dash':
+        search.value+= "-"
+        search_box.fnFilter(search.value)
+        return
+      case 'abc':
+        showAlphaKeypad();
+        return
+    }
+    search.value+= pressedChar
+    search_box.fnFilter(search.value)
+  }
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+</script>
 
 <style>
+
+#backspace{
+	position:absolute;
+	left:100px;
+	bottom:2px;
+}
+
+#Space{
+	position:absolute;
+	left:220px;
+	bottom:2px;
+	width:200px;
+}
+
+#clear{
+	position:absolute;
+	left:470px;
+	bottom:2px;
+}
+
+#keypad{
+	background-color: #FFFFFF;
+	border: 2px solid #9999FF;
+	border-radius: 15px 15px 15px 15px;
+	padding: 5px;
+ 	position:absolute;
+ 	width:670px;
+ 	right:510px;
+ 	height:260px;
+ 	display:none;
+	right:4px;
+	top:270px;
+}
+</style>
+
+<style>
+	div {
+-moz-user-select: none;
+	}
 	.basic_span {
 		position:relative;
 		width:50%;
 		display:block;
 		float:left;
 	}
+	
+	.logo {
+		float:left
+	}
 
-</style> 
+	#table_id {
+    	width: 100%;
+    }
+    
+    #table_id_filter{
+    	position:absolute;
+    	top:60px;
+    	left:970px;
+    	margin-top:-40px;
+    }
+    
+    #table_id_filter input{
+    	padding:0.5em;
+    }
 
-						<h1 align='center' style="position:relative; top:15px;"><%= image_tag(@logo) %></h1>
+
+    .dataTables_length select {
+   		font-size: 25px;
+	}
+	.horizontal_line hr{
+	 	position:absolute;
+	 	bottom:94px;
+	}
+	#table_id_info{
+	 	position:fixed;
+	 	left:750px;
+	 	font-weight:bold;
+	 	top:675px;
+	}
+</style>
+</head>
+<body >
+	<%= image_tag(@logo, :class => "logo")%>
+	<br /><b style="margin-left:75px"><%= @current_location_name %></b><br />
 	<% if @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT" %>
-		<h1 align='center' style="position:relative; top:15px;"><%= @location %> : <u> <%= @report_name.upcase == "REFERRAL" ? "Referal In" : "Transfer Out" %> </u></h1>
+		<b style="position:relative; top:0px;margin-left:75px"><%= @report_name.upcase == "REFERRAL" ? "Referal In" : "Transfer Out" %></b><br />
 	<% else %>
-		<h1 align='center' style="position:relative; top:15px;"><%= @location %> : <u><%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %> </u></h1>
+		<b style="position:relative; top:0px;margin-left:75px"><%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %></b><br />
 	<% end %>
 
-	<br > <span style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px; font-size:20px;"> Dates : <u><%= "#{@start_date} to #{@end_date}"%></u> <%= "<br> Total Registered: <u>#{@total_registered.length}</u>" if (@report_name.upcase == "TOTAL_REGISTERED") %></span>
+	 <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Dates : <%= "#{@formated_start_date} to #{@formated_end_date}"%> <%= "<br> Total Registered: #{@total_registered.length}" if (@report_name.upcase == "TOTAL_REGISTERED") %></b>
 
 	<% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase) %>	
-		<span style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px; font-size:20px;"> Group (s) : <u><%= "#{@age_groups.join(' , ').to_s} </u>" %> </span>	
+		<b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Group (s) : <%= "#{@age_groups.join(' , ').to_s}" %> </b><br /><br />
 	<% end %>
-	<div style="position:relative; width:95%; overflow-y:scroll; height:340px; left:20px">
-		<table id="data_table" name="data_table" width="98%">
+
+	<div>
+		<table  id="table_id" class="display" >
 				<thead>
-					
+				
 					<% if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS" %>
 				    <tr>
-						  <th > <u>Diagnosis</u> <p />
+						  <th  align="left"> Diagnosis <p />
 						  </th>
-						  <th colspan = "2"> 
+						  <th> 
 									<span><u>< 6 Months </u></span> <br />
 									<span class="basic_span"> M </span><span class="basic_span" > F </span>
 						  </th>						  
-						  <th colspan = "2"> 
+						  <th> 
 									<span><u>	6 Months to < 5</u></span> <br />
 									<span class="basic_span"> M </span><span class="basic_span" > F </span>
-						  </th >						  
-						  <th colspan = "2">
+						  </th>						  
+						  <th>
 									<span><u> 5 to 14 </u></span> <br />
 									<span class="basic_span"> M </span><span class="basic_span" > F </span>
 						  </th>						  
-						  <th colspan = "2">
+						  <th>
 									<span><u> > 14 <u/></span> <br />
 									<span class="basic_span"> M </span><span class="basic_span" > F </span>
 						  </th>
-						  <th colspan = "2">
+						  <th>
 									<span> <u>Total by gender</u></span> <br />
 									<span class="basic_span"> M </span><span class="basic_span" > F </span>
 						  </th>
@@ -76,41 +277,46 @@
 				    </tr>
 				    
 				  <% elsif @report_name.upcase == "DIAGNOSIS_BY_ADDRESS" %>
-						  <th> <u>Diagnosis</u> <p />
+				  	<tr  style="background-color:gray">
+						  <th align="left"> Diagnosis <p />
 						  </th>
-						  <th> 
-									<u> Address </u> <p />
+						  <th align="left"> 
+									 Address  <p />
 						  </th>						  
-						  <th> 
-									<u>	Total </u> <p />
+						  <th align="center"> 
+										Total  <p />
 						  </th>
-						  
+					</tr>  
 				  <% elsif @report_name.upcase == "PATIENT_LEVEL_DATA" %>
-						  <th> <u>Name</u> <p />
+				  <tr  style="background-color:gray">
+						  <th align="left"> Name <p />
 						  </th>
-						  <th> 
-									<u> Birthdate </u> <p />
+						  <th align="left"> 
+									 Birthdate  <p />
 						  </th>						  
-						  <th> 
-									<u>	Gender </u> <p />
+						  <th align="left"> 
+										Gender  <p />
 						  </th>
-						  <th> <u> Primary Diagnosis </u> <p />
+						  <th align="left">  Primary Diagnosis <p />
 						  </th>
-						  <th> 
-									<u> Secondary Diagnosis </u> <p />
+						  <th align="left"> 
+								 Secondary Diagnosis  <p />
 						  </th>						  
-						  <th> 
-									<u>	Treatment </u> <p />
+						  <th  align="left"> 
+									Treatment <p />
+						  </th>
+						  <th align="left"> 
+										Visit Date  <p />
+						  </th>
+					</tr>
+					<% elsif @report_name.upcase == "DIAGNOSIS_REPORT" %> 
+					<tr  style="background-color:gray"> 	
+						  <th align="left">DIAGNOSIS<p />
 						  </th>
 						  <th> 
-									<u>	Visit Date </u> <p />
+									 Total  <p />
 						  </th>
-					<% elsif @report_name.upcase == "DIAGNOSIS_REPORT" %>  	
-						  <th> <u>DIAGNOSIS</u> <p />
-						  </th>
-						  <th> 
-									<u> Total </u> <p />
-						  </th>
+
 				  <% elsif @report_name.upcase == "TOTAL_REGISTERED" %>
 						  <th> <u>Name</u> <p />
 						  </th>
@@ -128,7 +334,7 @@
 						  <th> 
 									<u>	T.A </u> <p />
 						  </th>
-
+						</tr>
 					<% elsif @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT" %>  	
 						  <th> <u>Facility</u> <p />
 						  </th>
@@ -138,30 +344,24 @@
 						  	  
 				  <% end %>
 				</thead>
-		 		 <tbody>
+		  <tbody>
 
 				<% if @report_name.upcase == "disaggregated_diagnosis".upcase %>
 		      <% @disaggregated_diagnosis.each do |key,value| %>
 		      	<tr>
-		      			<td > <span style="display:block; width:90%;"> <%= key.to_s %> </span> </td>
+		      			<td width="300px"> <span style="display:block; width:90%;"> <%= key.to_s %> </span> </td>
 
-		      			<td align="center" ><%= "<span class='basic_span' > #{value["< 6 MONTHS"]["M"]}</span>" %>
-								</td>						
-						<td align="center"><%= "<span class='basic_span'> #{value["< 6 MONTHS"]["F"]}  </span>" %> </td>
+		      			<td align="left" > <%= "<span class='basic_span' > #{value["< 6 MONTHS"]["M"]} </span> <span class='basic_span'> #{value["< 6 MONTHS"]["F"]}" %> </span> </td>
 
-		      			<td align="center" > <%= "<span class='basic_span' > #{value["U5"]["M"]} </span>" %></td>
-						<td align="center"><%= "<span class='basic_span'> #{value["U5"]["F"]} </span> " %> </td>
-		      			<td align="center" > <%= "<span class='basic_span'> #{value["5-14"]["M"]} </span>" %></td>
-						<td align="center"> <%= "<span class='basic_span'> #{value["5-14"]["F"]}" %> </span> </td>
-		      			<td align="center" > <%= "<span class='basic_span'> #{value[">14"]["M"]}  </span>" %></td>
-						<td align="center"> <%= "<span class='basic_span'> #{value[">14"]["F"]}" %> </span> </td>
+		      			<td align="left" > <%= "<span class='basic_span' > #{value["U5"]["M"]} </span> <span class='basic_span'> #{value["U5"]["F"]}" %> </span> </td>
+		      			<td align="left" > <%= "<span class='basic_span'> #{value["5-14"]["M"]} </span> <span class='basic_span'> #{value["5-14"]["F"]}" %> </span> </td>
+		      			<td align="left" > <%= "<span class='basic_span'> #{value[">14"]["M"]}  </span> <span class='basic_span'> #{value[">14"]["F"]}" %> </span> </td>
 		      			<% 
 		      				 m_total = value[">14"]["M"] + value["5-14"]["M"] + value["U5"]["M"]
 		      				 f_total = value["U5"]["F"]+value["5-14"]["F"]+value[">14"]["F"]
 		      			%>
-		      			<td align="center" > <%= "<span class='basic_span'> #{m_total}  </span>" %></td>
-						<td align="center"> <%= "<span class='basic_span'> #{f_total} </span>" %> </td>
-		      			<td align="right" style="padding-right:30px; width:130px;" > <%= "#{m_total+f_total}" %> </td>
+		      			<td align="left" > <%= "<span class='basic_span'> #{m_total}  </span> <span class='basic_span'> #{f_total}" %> </td>
+		      			<td align="left" style="padding-right:30px; width:130px;" > <%= "#{m_total+f_total}" %> </td>
 		      	</tr>
 		      <% end %>
 		      
@@ -194,12 +394,12 @@
 									<% data_hash_by_birthdate.each do |birthdate, data_hash_by_data| %>
 									<tr>
 											<td> <span style="display:block; width:90%;"> <%= "#{name}" %> </span> </td>
-											<td align="center" > <%= "<span > #{birthdate} </span> " %> </td>
-											<td align="right" > <%= "<span class='basic_span' > #{gender} </span> " %> </td>
-											<td align="right" > <%= "<span class='basic_span' > #{data_hash_by_data[primary_diagnosis]} </span> " %> </td>
-											<td align="right" > <%= "<span class='basic_span' > #{data_hash_by_data[secondary_diagnosis]} </span> " %> </td>	     
+											<td align="left" > <%= "<span > #{birthdate} </span> " %> </td>
+											<td align="center" > <%= "<span class='basic_span' > #{gender} </span> " %> </td>
+											<td align="left" > <%= "<span class='basic_span' > #{data_hash_by_data[primary_diagnosis]} </span> " %> </td>
+											<td align="left" > <%= "<span class='basic_span' > #{data_hash_by_data[secondary_diagnosis]} </span> " %> </td>	     
 											<td align="left" > <%= "<span class='basic_spuan' > #{data_hash_by_data[treatment]} </span> " %> </td>
-											<td align="right" > <%= "<span class='basic_span' > #{date} </span> " %> </td> 				
+											<td align="left" > <%= "<span class='basic_span' > #{date} </span> " %> </td> 				
 									</tr>
 									<% end %>
 
@@ -247,10 +447,26 @@
 									</tr>					
 					<% end %>
 				<% end %>
-				
-		      <script>
-		          //insertBlankRow ();
-		      </script>
 		  <tbody>
 	</table>
 </div>
+	<div class="horizontal_line">
+		<hr width="100%" color="gray">
+	</div>
+	
+
+
+
+
+<div id="keypad">
+ <span class="keypad">
+ </span>
+ </center>
+
+</div>
+
+</body>
+
+</body>
+</html>
+

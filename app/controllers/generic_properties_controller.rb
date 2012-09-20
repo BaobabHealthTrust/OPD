@@ -108,7 +108,7 @@ class GenericPropertiesController < ApplicationController
       RolePrivilege.find(:all,:conditions => ["role = ?",role]).each do | privilege |
         privilege.destroy
       end
-
+	
       privileges.each do | privilege |
         role_privilege = RolePrivilege.new()
         role_privilege.role = Role.find_by_role(role)
