@@ -17,23 +17,30 @@ end
 
 
 <style type="text/css">
+  body {
+    -moz-user-select:none;
+	font-family: Arial,sans-serif;
+  }
+
   #stats {
     width:98%;
     margin:10px;
     background:white;
+    -moz-user-select:none;
   }
 
-  #stats a {
-    background-color: grey;
-    border-bottom: 1px outset black;
-    border-style: outset;
-    border-top: 1px outset black;
-    color: white;
-    display: block;
-    padding: 10px 16px 10px 10px;
-    text-align: center;
-    text-decoration: none;
-  }
+	#stats a {
+		border-radius: 7px; 
+		background-color: #669999;
+		border-bottom: 1px outset black;
+		border-style: outset;
+		border-top: 1px outset black;
+		color: white;
+		display: block;
+		padding: 10px 16px 10px 10px;
+		text-align: center;
+		text-decoration: none;
+	}
 
   #stats td {
     width: 310px;
@@ -41,13 +48,13 @@ end
 
   #table_div {
     overflow:auto;
-    height: 320px;
+    height: 280px;
     background-color: white;
     border: 1px #eee solid;
     border-width: 1px;
   }
-
 </style>
+
 
 <script>
   function setInnerHtmlData(id,result,path) {
