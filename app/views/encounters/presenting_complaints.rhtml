@@ -51,6 +51,7 @@
                             </td>
                         </tr>
                     </table>
+
                <%= touch_select_tag "Life threatening condition", @patient, nil,
 			{	:ajaxURL => "/encounters/life_threatening_condition?search_string=",
 				:helpText => 'Life Threatening Condition', 
@@ -59,7 +60,10 @@
 			<%= touch_select_tag "triage category", @patient, options_for_select([]),
 			{	:ajaxURL => "/encounters/triage_category?search_string=",
 				:helpText => "Select Triage Category",
-				:id => 'triage category'} %>   
+				:id => 'triage category'} %> 
+			
+			<%= touch_text_area_tag("CLINICAL NOTES CONSTRUCT", @patient, nil,
+			{	:optional => true,:helpText => "Additional notes on complaints (optional)"}, time=DateTime.now()) %>
 				
 			<% if @retrospective %>
 				<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
