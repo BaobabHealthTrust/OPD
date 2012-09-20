@@ -1598,20 +1598,33 @@ function clearInput(){
     }
     
     if(tstFormElements[tstPages[tstCurrentPage]].tagName == "SELECT"){
-        var options = __$("tt_currentUnorderedListOptions").getElementsByTagName("li");
+        if(__$("tt_currentUnorderedListOptions")){
+            var options = __$("tt_currentUnorderedListOptions").getElementsByTagName("li");
             
-        if(tstFormElements[tstPages[tstCurrentPage]].getAttribute("multiple")){
-            for(var i = 0; i < options.length; i++){
-                if(options[i].style.backgroundColor == "lightblue"){
-                    options[i].click();
+            if(tstFormElements[tstPages[tstCurrentPage]].getAttribute("multiple")){
+                for(var i = 0; i < options.length; i++){
+                    if(options[i].style.backgroundColor == "lightblue"){
+                        options[i].click();
+                    }
+                }
+            } else {
+                for(var i = 0; i < options.length; i++){
+                    if(options[i].style.backgroundColor == "lightblue"){
+                        options[i].style.backgroundColor = "";
+                        tstFormElements[tstPages[tstCurrentPage]].value = "";
+                        __$('touchscreenInput'+tstCurrentPage).setAttribute("tstvalue", "");
+                    }
                 }
             }
         } else {
-            for(var i = 0; i < options.length; i++){
-                if(options[i].style.backgroundColor == "lightblue"){
-                    options[i].style.backgroundColor = "";
-                    tstFormElements[tstPages[tstCurrentPage]].value = ""; 
-                    __$('touchscreenInput'+tstCurrentPage).setAttribute("tstvalue", "");
+            var controls = __$("options").getElementsByTagName("img");
+
+            for(var j = 0; j < controls.length; j++){
+                try{
+                    if(controls[j].getAttribute("src").match(/un/) == null){
+                        controls[j].click();
+                    }
+                } catch(e){
                 }
             }
         }
@@ -1702,12 +1715,16 @@ function toggleShift() {
 
 function showBestKeyboard(aPageNum) {
     var inputElement = tstFormElements[tstPages[aPageNum]];
+
+    __$("keyboard").style.display = "block";
+    
     if (isDateElement(inputElement)) {
         var thisDate = new RailsDate(inputElement);
+
         if (tstSearchPage) {
             if (thisDate.isDayOfMonthElement()) getDatePicker();
             else __$("keyboard").innerHTML = getNumericKeyboard();
-        }	else {
+        } else {
             getDatePicker();
         }
         return;
@@ -3172,6 +3189,7 @@ var DateSelector = function() {
 
 DateSelector.prototype = {
     build: function() {
+
         var node = document.createElement('div');
         // TODO: move style stuff to a css file
         node.innerHTML = ' \
