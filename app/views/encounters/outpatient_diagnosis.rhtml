@@ -50,11 +50,10 @@
 		 	:helpText => "Detailed primary diagnosis" } %>
 
   <%= touch_text_area_tag("Specific primary diagnosis", @patient, nil,          
-      { :optional => true,
-        :id => "specific_diagnosis",
-        :helpText => "Specific primary diagnosis",
-		 	  :condition => 'diagnoses_requiring_specification.contains($("primary_diagnosis").value.toUpperCase())'})
-    %>
+      { 	:optional => true,
+        	:id => "specific_diagnosis",
+        	:helpText => "Specific primary diagnosis",
+			:condition => 'diagnoses_requiring_specification.contains($("primary_diagnosis").value.toUpperCase())'}) %>
 
 
 		 	 	
