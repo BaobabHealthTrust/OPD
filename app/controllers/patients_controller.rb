@@ -1,45 +1,45 @@
 class PatientsController < GenericPatientsController
 
 	def tab_social_history
-    @alcohol = nil
-    @smoke = nil
-    @nutrition = nil
-    
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-    
-    @alcohol = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Patient currently consumes alcohol').concept_id]).answer_string rescue nil
+		@alcohol = nil
+		@smoke = nil
+		@nutrition = nil
 
-    @smokes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Patient currently smokes').concept_id]).answer_string rescue nil
+		@patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 
-    @nutrition = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Nutrition status').concept_id]).answer_string rescue nil
+		@alcohol = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			@patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			ConceptName.find_by_name('Patient currently consumes alcohol').concept_id]).answer_string rescue nil
+
+		@smokes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			@patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			ConceptName.find_by_name('Patient currently smokes').concept_id]).answer_string rescue nil
+
+		@nutrition = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			@patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			ConceptName.find_by_name('Nutrition status').concept_id]).answer_string rescue nil
+
+		@civil = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			@patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			ConceptName.find_by_name('Civil status').concept_id]).answer_string.titleize rescue nil
+
+		@civil_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			  @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			  ConceptName.find_by_name('Other Civil Status Comment').concept_id]).answer_string rescue nil) if @civil == "Other"
+
+		@religion = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			@patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			ConceptName.find_by_name('Religion').concept_id]).answer_string.titleize rescue nil
+
+		@religion_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			  @patient.id, Encounter.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
+				  @patient.id, EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|e| e.encounter_id},
+			  ConceptName.find_by_name('Other').concept_id]).answer_string rescue nil) if @religion == "Other"
+
+		render :layout => false
+	end
   
-    @civil = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Civil status').concept_id]).answer_string.titleize rescue nil
-  
-    @civil_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('Other Civil Status Comment').concept_id]).answer_string rescue nil) if @civil == "Other"
-  
-    @religion = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Religion').concept_id]).answer_string.titleize rescue nil
-  
-    @religion_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
-              @patient.id, EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('Other').concept_id]).answer_string rescue nil) if @religion == "Other"
-  
-    render :layout => false
-  end
-  
-  def show
+	def show
 		session[:mastercard_ids] = []
 		session_date = session[:datetime].to_date rescue Date.today
 		@patient_bean = PatientService.get_patient(@patient.person)
@@ -48,11 +48,11 @@ class PatientsController < GenericPatientsController
 		@prescriptions = @patient.orders.unfinished.prescriptions.all
 		@programs = @patient.patient_programs.all
 		@alerts = alerts(@patient, session_date) rescue nil
-	
+
 		if !session[:location].blank?
 			session["category"] = (session[:location] == "Paeds A and E" ? "paeds" : "adults")
 		end
-	
+
 		#find the user priviledges
 		@super_user = false
 		@clinician  = false
@@ -63,7 +63,7 @@ class PatientsController < GenericPatientsController
 
 
 		@user = current_user
-	
+
 		user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role.downcase}
 		inherited_roles = RoleRole.find(:all,:conditions => ["child_role IN (?)", user_roles]).collect{|r|r.parent_role.downcase}
 		user_roles = user_roles + inherited_roles
@@ -72,7 +72,7 @@ class PatientsController < GenericPatientsController
 		if user_roles.include?("superuser")
 			@super_user = true
 		end
-	
+
 		if user_roles.include?("clinician")
 			@clinician  = true
 		end
@@ -84,33 +84,33 @@ class PatientsController < GenericPatientsController
 		if user_roles.include?("regstration_clerk")
 			@regstration_clerk  = true
 		end
-	
+
 		if user_roles.include?("adults")
 			@adults  = true
 		end
-	
+
 		if user_roles.include?("paediatrics")
 			@paediatrics  = true
 		end
-	
+
 		if user_roles.include?("hmis lab order")
 			@hmis_lab_order  = true
 		end
-	
+
 		if user_roles.include?("spine clinician")
 			@spine_clinician  = true
 		end
-	
+
 		if user_roles.include?("lab")
 			@lab  = true
 		end
-       
-    if ! allowed_hiv_viewer
-      @show_hiv_tab = false
-    else
-      @show_hiv_tab = true
-    end
-   
+
+		if ! allowed_hiv_viewer
+		@show_hiv_tab = false
+		else
+		@show_hiv_tab = true
+		end
+
 		@restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
 
 		@restricted.each do |restriction|
@@ -127,72 +127,71 @@ class PatientsController < GenericPatientsController
 		@hiv_status = PatientService.patient_hiv_status(@patient)
 		@reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
 		@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
-       
+
 		render :template => 'patients/index', :layout => false
-  end
+	end
 
-  def personal
-    @links = []
-    patient = Patient.find(params[:id])
+	def personal
+		@links = []
+		patient = Patient.find(params[:id])
 
-    @links << ["Visit Summary (Print)","/patients/dashboard_print_opd_visit/#{patient.id}"]
-    @links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
+		@links << ["Visit Summary (Print)","/patients/dashboard_print_opd_visit/#{patient.id}"]
+		@links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
 
-    if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
-      @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]
-    end 
+		if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
+		  @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]
+		end 
 
-    if use_filing_number and PatientService.get_patient_identifier(patient, 'Filing Number').blank?
-      @links << ["Filing Number (Create)","/patients/set_filing_number/#{patient.id}"]
-    end 
+		if use_filing_number and PatientService.get_patient_identifier(patient, 'Filing Number').blank?
+		  @links << ["Filing Number (Create)","/patients/set_filing_number/#{patient.id}"]
+		end 
 
-    if use_user_selected_activities
-      @links << ["Change User Activities","/user/activities/#{current_user.id}?patient_id=#{patient.id}"]
-    end
+		if use_user_selected_activities
+		  @links << ["Change User Activities","/user/activities/#{current_user.id}?patient_id=#{patient.id}"]
+		end
 
-    @links << ["Recent Lab Orders Label","/patients/recent_lab_orders?patient_id=#{patient.id}"]
+		@links << ["Recent Lab Orders Label","/patients/recent_lab_orders?patient_id=#{patient.id}"]
 
-    render :template => 'dashboards/personal_tab', :layout => false
-  end
+		render :template => 'dashboards/personal_tab', :layout => false
+	end
   
-  def dashboard_print_opd_visit
-    print_and_redirect("/patients/opd_visit_label/?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")
-  end
+	def dashboard_print_opd_visit
+		print_and_redirect("/patients/opd_visit_label/?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")
+	end
  
-  def opd_visit_label
-    session_date = session[:datetime].to_date rescue Date.today
-    print_string = opd_patient_visit_label(@patient, session_date) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
-    send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
-  end
+	def opd_visit_label
+		session_date = session[:datetime].to_date rescue Date.today
+		print_string = opd_patient_visit_label(@patient, session_date) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
+		send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
+	end
 	
 	def mastercard
-    @type = params[:type]
-    
-    #the parameter are used to re-construct the url when the mastercard is called from a Data cleaning report
-    @quarter = params[:quarter]
-    @arv_start_number = params[:arv_start_number]
-    @arv_end_number = params[:arv_end_number]
-    @show_mastercard_counter = false
+		@type = params[:type]
 
-    if params[:patient_id].blank?
+		#the parameter are used to re-construct the url when the mastercard is called from a Data cleaning report
+		@quarter = params[:quarter]
+		@arv_start_number = params[:arv_start_number]
+		@arv_end_number = params[:arv_end_number]
+		@show_mastercard_counter = false
 
-      @patient_id = session[:mastercard_ids][session[:mastercard_counter]]
-       
-    elsif session[:mastercard_ids].length.to_i != 0
-      @patient_id = params[:patient_id]
-    else
-      @patient_id = params[:patient_id]
-    end
+		if params[:patient_id].blank?
 
-    unless params.include?("source")
-      @source = params[:source] rescue nil
-    else
-      @source = nil
-    end
+		  @patient_id = session[:mastercard_ids][session[:mastercard_counter]]
+		   
+		elsif session[:mastercard_ids].length.to_i != 0
+		  @patient_id = params[:patient_id]
+		else
+		  @patient_id = params[:patient_id]
+		end
 
-    render :layout => false
-    
-  end
+		unless params.include?("source")
+		  @source = params[:source] rescue nil
+		else
+		  @source = nil
+		end
+
+		render :layout => false
+	end
 
   def opd_patient_visit_label(patient, date = Date.today)
     result = Location.current_location.name.match(/outpatient/i).nil?
