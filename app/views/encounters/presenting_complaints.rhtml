@@ -45,14 +45,14 @@
 	%>
 	<% 5.times do %>
 			<% counter += 1%>
-			<%= touch_select_tag "Presenting complaint", @patient, nil,
+			<%= touch_select_tag "PRESENTING COMPLAINT", @patient, nil,
 				{	:id => "presenting_complaint_#{counter}",
 					:ajaxURL => "/encounters/presenting_complaints?search_string=",
 					:optional => "true",
 				 	:condition => "$('presenting_complaint_#{counter-1}').value != '';",
 				 	:helpText => presenting_label } %>
 
-			<%= touch_select_tag "Detailed additional diagnosis", @patient, nil,
+			<%= touch_select_tag "DETAILED PRESENTING COMPLAINT", @patient, nil,
 				{	:id => "detailed_presenting_complaint_#{counter}",
 					:parent_concept_name => "Presenting complaint",
 				 	:condition => "complaints_requiring_details.contains($('presenting_complaint_#{counter}').value.toUpperCase())",
@@ -60,7 +60,7 @@
 					:tt_onLoad => "set_ajaxURL_for_suggestions(document.getElementById('presenting_complaint_#{counter}').value);",
 				 	:helpText => "Detailed presenting complaint" } %>
 
-			<%= touch_text_field_tag "Specific presenting complaint", @patient, nil,
+			<%= touch_text_field_tag "SPECIFIC PRESENTING COMPLAINT", @patient, nil,
 				{	:id => "specific_presenting_complaint_#{counter}",
 					:parent_concept_name => "Presenting complaint",
 				 	:condition => "complaints_requiring_specification.contains($('presenting_complaint_#{counter}').value.toUpperCase())",
