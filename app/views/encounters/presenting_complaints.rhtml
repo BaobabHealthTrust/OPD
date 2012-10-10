@@ -80,6 +80,11 @@
 		{	:id => "triage_category",
 		 	:helpText => "Triage category" } %>
 
+        <%= touch_text_area_tag "CLINICAL NOTES CONSTRUCT", @patient, nil,
+		{	:id => "clinical_notes",
+			:optional => true,
+			:helpText => "Clinical notes (optional)"
+		}%>
 
 	<% if @retrospective %>
 		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
