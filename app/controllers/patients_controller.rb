@@ -242,7 +242,19 @@ class PatientsController < GenericPatientsController
               Location.find("#{observe.answer_string}".squish).name rescue nil if observe.concept.fullname.upcase.include?('TRANSFER')}.compact.join("; ")
             obs
             label.draw_multi_text("#{obs}", :font_reverse => false)
-                       
+          
+          elsif encounter.name.upcase.include?("PRESENTING COMPLAINTS")
+            obs = []
+            encounter.observations.each{|observation|
+              concept_name = observation.concept.concept_names.last.name rescue ''
+							next if concept_name.match(/Workstation location/i)
+              next if concept_name.match(/Life threatening condition/i)
+              next if concept_name.match(/Triage category/i)
+              next if concept_name.match(/clinician notes/i)
+              obs << observation.answer_string rescue ''
+            }
+            label.draw_multi_text('Complaints : ' + obs.join(','), :font_reverse => false)
+
 					elsif encounter.name.upcase.include?("VITALS")
 						string = []
 						encounter.observations.each do |observation|
@@ -250,8 +262,9 @@ class PatientsController < GenericPatientsController
 							next if concept_name.match(/Workstation location/i)
 							string << observation.to_s(["short", "order"]).squish + units[concept_name.upcase].to_s
 						end
-						label.draw_multi_text("Vitals - " + string.join(', '), :font_reverse => false)
-          end
+						label.draw_multi_text("Vitals - " + string.join(','), :font_reverse => false)
+          
+        end
 
       }
 			
