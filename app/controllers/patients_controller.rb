@@ -194,80 +194,128 @@ class PatientsController < GenericPatientsController
 	end
 
   def opd_patient_visit_label(patient, date = Date.today)
-    result = Location.current_location.name.match(/outpatient/i).nil?
-
-    if result == false
-      return mastercard_visit_label(patient,date)
-    else
       label = ZebraPrinter::StandardLabel.new
       label.font_size = 3
       label.font_horizontal_multiplier = 1
       label.font_vertical_multiplier = 1
       label.left_margin = 50
+      title_header_font = {:font_reverse => true, :font_size => 4, :font_horizontal_multiplier => 1, :font_vertical_multiplier => 1}
+      concepts_font = {:font_reverse => false, :font_size => 3, :font_horizontal_multiplier => 1, :font_vertical_multiplier => 1 }
+      title_font_top_bottom = {:font_reverse => true, :font_size => 4, :font_horizontal_multiplier => 1, :font_vertical_multiplier => 1}
       units = {"WEIGHT"=>"kg", "HT"=>"cm"}
-      encs = patient.encounters.find(:all,:conditions =>["DATE(encounter_datetime) = ?",date])
+      encs = patient.encounters.find(:all, :order => 'encounter_datetime ASC', :conditions =>["DATE(encounter_datetime) = ?",date])
       return nil if encs.blank?
 
       label.draw_multi_text("Visit: #{encs.first.encounter_datetime.strftime("%d/%b/%Y %H:%M")}" +
-    " - #{encs.last.encounter_datetime.strftime("%d/%b/%Y %H:%M")}", :font_reverse => true)
+    " - #{encs.last.encounter_datetime.strftime("%d/%b/%Y %H:%M")}", title_font_top_bottom)
 
       encs.each {|encounter|
 
           if encounter.name.upcase.include?('TREATMENT')
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             o = encounter.orders.collect{|order| order.to_s if order.order_type_id == OrderType.find_by_name('Drug Order').order_type_id}.join("\n")
             o = "No prescriptions have been made" if o.blank?
             o = "TREATMENT NOT DONE" if treatment_not_done(encounter.patient, date)
-            label.draw_multi_text("#{o}", :font_reverse => false)
+            label.draw_multi_text("Prescriptions at #{encounter_datetime}", title_header_font)
+            label.draw_multi_text("#{o}", concepts_font)
 
           elsif encounter.name.upcase.include?("PROCEDURES DONE")
             procs = ["Procedures - "]
             procs << encounter.observations.collect{|observation| 
               observation.answer_string.squish if !observation.concept.fullname.match(/Workstation location/i)
             }.compact.join("; ")
-            label.draw_multi_text("#{procs}", :font_reverse => false)
+            label.draw_multi_text("#{procs}", concepts_font)
 
           elsif encounter.name.upcase.include?('UPDATE HIV STATUS')            
             label.draw_multi_text("#{ 'HIV Status - ' + PatientService.patient_hiv_status(patient).to_s }", :font_reverse => false)
 
           elsif encounter.name.upcase.include?('DIAGNOSIS')
-            obs = ["Diagnoses - "]
-            obs << encounter.observations.collect{|observe|
-              "#{observe.answer_string}".squish rescue nil if observe.concept.fullname.upcase.include?('DIAGNOSIS')}.compact.join("; ")
-            obs
-            label.draw_multi_text("#{obs}", :font_reverse => false)
- 
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
+            obs = []
+            encounter.observations.each{|observation|
+            concept_name = observation.concept.concept_names.last.name rescue ''
+            next if concept_name.match(/Workstation location/i)
+            next if !observation.obs_group_id.blank?
+
+              child_obs = Observation.find(:all, :conditions => ["obs_group_id = ?", observation.obs_id])
+
+              if !child_obs.empty?
+                text = observation.answer_string.to_s + " - "
+                count = 0
+                child_obs.each { | child_observation |
+                  text = text + ", " if count > 0
+                  text = text + child_observation.answer_string.to_s
+                  count = count + 1
+                }
+                obs << text
+              else
+                obs << observation.answer_string.to_s
+              end
+            }
+              #"#{observe.answer_string}".squish rescue nil if observe.concept.fullname.upcase.include?('DIAGNOSIS')
+            #.compact.join("; ")
+            label.draw_multi_text("Diagnoses at #{encounter_datetime}",title_header_font )
+            obs.each { | observation |
+                label.draw_multi_text("#{observation}", concepts_font)
+            }
           elsif encounter.name.upcase.include?('TRANSFER OUT')
             obs = ["Referred to facility - "]
             obs << encounter.observations.collect{|observe|
               Location.find("#{observe.answer_string}".squish).name rescue nil if observe.concept.fullname.upcase.include?('TRANSFER')}.compact.join("; ")
             obs
-            label.draw_multi_text("#{obs}", :font_reverse => false)
+            label.draw_multi_text("Transfer Out", :font_reverse => true)
+            label.draw_multi_text("#{obs}", concepts_font)
           
           elsif encounter.name.upcase.include?("PRESENTING COMPLAINTS")
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
-            encounter.observations.each{|observation|
+            encounter.observations.each { | observation |
+
+             # if (observation.concept_id == 8578)
               concept_name = observation.concept.concept_names.last.name rescue ''
+              #next if concept_name.match(/Detailed presenting complaint/i)
 							next if concept_name.match(/Workstation location/i)
               next if concept_name.match(/Life threatening condition/i)
               next if concept_name.match(/Triage category/i)
               next if concept_name.match(/clinician notes/i)
-              obs << observation.answer_string rescue ''
+              next if !observation.obs_group_id.blank?
+
+              child_obs = Observation.find(:all, :conditions => ["obs_group_id = ?", observation.obs_id])
+
+              if !child_obs.empty?
+                text = observation.answer_string.to_s + " - "
+                count = 0
+                child_obs.each { | child_observation |
+                  text = text + ", " if count > 0
+                  text = text + child_observation.answer_string.to_s
+                  count = count + 1
+                }
+                obs << text
+              else
+                obs << observation.answer_string.to_s
+              end
             }
-            label.draw_multi_text('Complaints : ' + obs.join(','), :font_reverse => false)
+
+            label.draw_multi_text("Presenting complaints at #{encounter_datetime}",title_header_font)
+            obs.each { | observation |
+              label.draw_multi_text("#{observation}", concepts_font)
+            }
 
 					elsif encounter.name.upcase.include?("VITALS")
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
 						string = []
 						encounter.observations.each do |observation|
 							concept_name = observation.concept.concept_names.last.name rescue ''
 							next if concept_name.match(/Workstation location/i)
 							string << observation.to_s(["short", "order"]).squish + units[concept_name.upcase].to_s
 						end
-						label.draw_multi_text("Vitals - " + string.join(','), :font_reverse => false)
+            label.draw_multi_text("Vitals at #{encounter_datetime}", title_header_font)
+						label.draw_multi_text(string.join(','), concepts_font)
           
         end
 
       }
-			
+
 			['OPD PROGRAM','IPD PROGRAM'].each do |program_name|		
 					program_id = Program.find_by_name(program_name).id
 					state = patient.patient_programs.local.select{|p| p.program_id == program_id}.last.patient_states.last rescue nil
@@ -278,15 +326,14 @@ class PatientsController < GenericPatientsController
 					state_name = state.program_workflow_state.concept.fullname
 					
 					if ((state_start_date == session[:datetime]) || (state_start_date == Date.today)) && (state_name.upcase != 'FOLLOWING')					
-      			label.draw_multi_text("Outcome - #{state_name}", :font_reverse => false)
+      			label.draw_multi_text("Outcome - #{state_name}", concepts_font)
       		end
 			end
 
       label.draw_multi_text("Seen by: #{current_user.name rescue ''} at " +
-        " #{Location.current_location.name rescue ''}", :font_reverse => true)
+        " #{Location.current_location.name rescue ''}", title_font_top_bottom)
       
       label.print(1)
-    end
   end
 
   def past_diagnoses
