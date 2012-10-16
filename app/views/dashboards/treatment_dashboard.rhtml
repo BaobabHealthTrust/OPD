@@ -66,7 +66,6 @@
 				<select id="links">
 					<% if advanced_prescription_interface %>
 						<option value='/prescriptions/generic_advanced_prescription?patient_id=<%= @patient.id -%>'>Prescribe</option>
-						<option value='/prescriptions/auto?patient_id=<%= @patient.id -%>'>Dispense</option>
 					<% else %>
 						<option value='/prescriptions/auto?patient_id=<%= @patient.id -%>'>Prescribe</option>
 					<% end %>
