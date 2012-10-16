@@ -1279,9 +1279,9 @@ class CohortToolController < ApplicationController
   end
   
 	def disaggregated_diagnosis
+
 		@report_name = params[:report_name]
-		#raise @report_name.to_yaml
-		session_date = session[:datetime].to_date rescue Date.today
+		#session_date = session[:datetime].to_date rescue Date.today
 		@logo = CoreService.get_global_property_value('logo').to_s
 		@location =Location.current_health_center.name
 		if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
@@ -1302,68 +1302,62 @@ class CohortToolController < ApplicationController
 		if @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT"
 			report_trasfer_outs_and_refrerrals(@report_name)
 		else
-			person_with_diagnosis = Person.find(:all,
-															:include =>{:patient=>{:encounters=>{:observations=>{:concept=>{:concept_names=>{}}}, :type=>{}}}},
-															:conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?) 
-															AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?) AND concept_name.name NOT IN ('Detailed secondary diagnosis','Detailed primary diagnosis')", ["TREATMENT", "OUTPATIENT DIAGNOSIS"],
-															@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')])	
-
-			person_with_diagnosis.each do |person|
-				patient_bean = PatientService.get_patient(person,session_date)				
-				age = patient_bean.age
-				gender = person.gender
-				prescription = ""
-				
-				#check age boundary
+     # observations = Observation.find(:all, :include => {:person => {}}, :conditions => ["obs_datetime >= ? AND obs_datetime <= ? AND concept_id IN (?)", @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'), [3065, 6542, 6543, 6669]])
+      Observation.find_each(:include => {:person => {}}, :conditions => ["obs_datetime >= ? AND obs_datetime <= ? AND concept_id IN (?)", @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'), [3065, 6542, 6543, 6669]]) do | obs |
+      #observations.each do | obs |
+        patient_bean = obs
+				person = obs.person
+        patient_age = age(person, obs)
+        patient_age_in_months = age_in_months(person, obs)
 				if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT", "DISAGGREGATED_DIAGNOSIS"].include?(@report_name.upcase)
-			
+
 					report = false
-					
+
 					if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS"
-						report_patient(patient_bean, person)
+						report_patient(patient_bean, person, @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'))
 						next
 					end
-				
+
 					if @age_groups.include?("ALL")
 						report = true
 					end
-		
-					if @age_groups.include?("40 TO < 50") && (patient_bean.age >=40 && patient_bean.age < 50)
+
+					if @age_groups.include?("40 TO < 50") && (patient_age >=40 && patient_age < 50)
 						report = true
 					end
-		
-					if @age_groups.include?("30 TO < 40") && (patient_bean.age >=30 && patient_bean.age < 40)
+
+					if @age_groups.include?("30 TO < 40") && (patient_age >=30 && patient_age < 40)
 						report = true
 					end
-		
-					if @age_groups.include?("20 TO 30") && (patient_bean.age >=20 && patient_bean.age < 30)
+
+					if @age_groups.include?("20 TO 30") && (patient_age >=20 && patient_age < 30)
 						report = true
 					end
-		
-					if @age_groups.include?("> 14 TO < 20") && (patient_bean.age > 14 && patient_bean.age < 20)
+
+					if @age_groups.include?("> 14 TO < 20") && (patient_age > 14 && patient_age < 20)
 						report = true
 					end
-		
-					if @age_groups.include?("5 TO 14") && (patient_bean.age >=5 && patient_bean.age <= 14)
+
+					if @age_groups.include?("5 TO 14") && (patient_age >=5 && patient_age <= 14)
 						report = true
 					end
-		
-					if @age_groups.include?("1 TO < 5") && (patient_bean.age >=1 && patient_bean.age < 5)
+
+					if @age_groups.include?("1 TO < 5") && (patient_age >=1 && patient_age < 5)
 						report = true
 					end
-		
-					if @age_groups.include?("6 MONTHS TO < 1 YR") && (patient_bean.age_in_months >=6 && patient_bean.age < 30)
+
+					if @age_groups.include?("6 MONTHS TO < 1 YR") && (patient_age_in_months >=6 && patient_age < 30)
 						report = true
 					end
-		
-					if @age_groups.include?("< 6 MONTHS") && (patient_bean.age_in_months < 6)
+
+					if @age_groups.include?("< 6 MONTHS") && (patient_age_in_months < 6)
 						report = true
 					end
 
 					if @report_name.upcase == "TOTAL_REGISTERED"
-							total_registered(patient_bean, person) if report
+							total_registered(person) if report
 					else
-							report_patient(patient_bean, person) if report					
+							report_patient(patient_bean, person, @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59') ) if report
 					end
 
 				end
@@ -1374,12 +1368,15 @@ class CohortToolController < ApplicationController
 		render :layout => 'report'
 	end
 
-	def total_registered(patient_bean, person)
-			age = patient_bean.age
-			gender = person.gender
-			@total_registered << [patient_bean.name, person.birthdate, patient_bean.sex,
+	def total_registered(person)
+      name = PatientService.name(person)
+      sex = PatientService.sex(person)
+      address = person.addresses.first.city_village
+      traditional_authority = person.addresses.first.county_district
+      birthdate = person.birthdate
+			@total_registered << [name, birthdate, sex,
 														person.patient.encounters.find(:first, :order => "encounter_datetime").encounter_datetime.to_date,
-														patient_bean.address, patient_bean.traditional_authority]
+														address, traditional_authority]
 	end
 	
 	def report_trasfer_outs_and_refrerrals(report_name)
@@ -1398,81 +1395,91 @@ class CohortToolController < ApplicationController
 												@referral_locations[Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name]+=1
 			end
 	end
-	
-	def report_patient(patient_bean, person)
-		age = patient_bean.age
-		gender = person.gender
 
-		person.patient.encounters.each do | encounter |	
+	def age(person, obs)
+      patient_age = (obs.obs_datetime.year - person.birthdate.year) + ((obs.obs_datetime.month - person.birthdate.month) + ((obs.obs_datetime.day - person.birthdate.day) < 0 ? -1 : 0) < 0 ? -1 : 0)
+      birth_date = person.birthdate
+      estimate=person.birthdate_estimated==1
+      patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  &&
+        obs.obs_datetime.month < birth_date.month && person.date_created.year == obs.obs_datetime.year) ? 1 : 0
+  end
+  
+  def age_in_months(person, obs)
+      years = (obs.obs_datetime.year - person.birthdate.year)
+      months = (obs.obs_datetime.month - person.birthdate.month)
+      (years * 12) + months
+  end
 
-			prescription = encounter.orders.map{|o| o.instructions }.join(" <br />") if encounter.name.upcase=="TREATMENT"
-	
-			encounter.observations.each do | obs |
-	
-				diagnosis_type = obs.concept.fullname rescue ''
-				diagnosis_name = obs.answer_concept.fullname rescue ''
-										
-				#Disaggregated Diagnosis Report
-				if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS"
-						break if encounter.name.upcase=="TREATMENT"
-						next if obs.answer_concept.blank?
-				
+  def name(person)
+    "#{person.names.first.given_name} #{person.names.first.family_name}".titleize rescue nil
+  end
+  
+	def report_patient(patient_bean, person, start_date, end_date)
+      obs = patient_bean
+			diagnosis_name = obs.answer_concept.fullname rescue ''
+
+			if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS"
+          age = age(person, obs)
+          patient_age_in_months = age_in_months(person, obs)
+          gender = person.gender
+					if !obs.answer_concept.blank?
+
 						@disaggregated_diagnosis[diagnosis_name]={"U5" =>{"M"=> 0, "F"=>0},
 																											"5-14" =>{"M"=> 0, "F"=>0},
 																											">14" =>{"M"=> 0, "F"=>0},
 																											"< 6 MONTHS" =>{"M"=> 0, "F"=>0}
 																											}	if @disaggregated_diagnosis[diagnosis_name].nil?
-																														
-						if patient_bean.age_in_months.to_i < 6
-									@disaggregated_diagnosis[diagnosis_name]["< 6 MONTHS"][gender]+=1												  
-						elsif patient_bean.age_in_months.to_i >= 6 && age.to_i < 5
+
+              if patient_age_in_months.to_i < 6
+									@disaggregated_diagnosis[diagnosis_name]["< 6 MONTHS"][gender]+=1
+              elsif patient_age_in_months.to_i >= 6 && age.to_i < 5
 									@disaggregated_diagnosis[diagnosis_name]["U5"][gender]+=1
-						elsif age.to_i <= 14
-									@disaggregated_diagnosis[diagnosis_name]["5-14"][gender]+=1		
-						else
-									@disaggregated_diagnosis[diagnosis_name][">14"][gender]+=1					
-						end
-				end
-		
-				#Diagnosis Report				
-				if @report_name.upcase == "DIAGNOSIS_REPORT"
-					 break if encounter.name.upcase=="TREATMENT"
-					 next if obs.answer_concept.blank?
-					 @diagnosis_report[diagnosis_name]+=1
-				end
-		
+              elsif age.to_i <= 14
+									@disaggregated_diagnosis[diagnosis_name]["5-14"][gender]+=1
+              else
+									@disaggregated_diagnosis[diagnosis_name][">14"][gender]+=1
+              end
+            end
+			end
+				#Diagnosis Report
+			if @report_name.upcase == "DIAGNOSIS_REPORT"
+					 if !obs.answer_concept.blank?
+            @diagnosis_report[diagnosis_name]+=1
+           end
+			end
+
 				#Diagnosis by Traditional Authority Report
-				if @report_name.upcase == "DIAGNOSIS_BY_ADDRESS"
-		
-						break if encounter.name.upcase=="TREATMENT"
-						next if obs.answer_concept.blank?
-				
-						@diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-						@diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority] = 0 if @diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority].nil?
-						@diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority]+=1
-				end
-		
-				#Patient Level Data						
+			if @report_name.upcase == "DIAGNOSIS_BY_ADDRESS"
+
+						address = person.addresses.first.county_district
+
+            if !obs.answer_concept.blank?
+              @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+              @diagnosis_by_address[diagnosis_name][address] = 0 if @diagnosis_by_address[diagnosis_name][address].nil?
+              @diagnosis_by_address[diagnosis_name][address]+=1
+            end
+			end
+=begin
+				Patient Level Data
 				if @report_name.upcase == "PATIENT_LEVEL_DATA"
 						visit_date = encounter.encounter_datetime.to_date.to_s
-	
+
 						next if !((diagnosis_type.upcase == "PRIMARY DIAGNOSIS") ||
-									 (diagnosis_type.upcase == "SECONDARY DIAGNOSIS") || (encounter.name.upcase=="TREATMENT"))	
-				
+									 (diagnosis_type.upcase == "SECONDARY DIAGNOSIS") || (encounter.name.upcase=="TREATMENT"))
+
 						@patient_level_data[visit_date] = {} if @patient_level_data[visit_date].nil?
 						@patient_level_data[visit_date][gender] = {} if @patient_level_data[visit_date][gender].nil?
 						@patient_level_data[visit_date][gender][person.id] = {} if @patient_level_data[visit_date][gender][person.id].nil?
-						@patient_level_data[visit_date][gender][person.id][patient_bean.name] = {} if @patient_level_data[visit_date][gender][person.id][patient_bean.name].nil?
-						@patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate] = {"PRIMARY DIAGNOSIS"=> "",
+						@patient_level_data[visit_date][gender][person.id][patient] = {} if @patient_level_data[visit_date][gender][person.id][patient].nil?
+						@patient_level_data[visit_date][gender][person.id][patient][person.birthdate] = {"PRIMARY DIAGNOSIS"=> "",
 																																																			 "SECONDARY DIAGNOSIS"=> "",
-																																																			 "TREATMENT"=> "" } if @patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate].nil?
+																																																			 "TREATMENT"=> "" } if @patient_level_data[visit_date][gender][person.id][patient.name][person.birthdate].nil?
 
-						@patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate][diagnosis_type.upcase] = diagnosis_name
-						@patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate]["TREATMENT"] = prescription if (encounter.name.upcase=="TREATMENT" && !prescription.blank?)
+						@patient_level_data[visit_date][gender][person.id][patient][person.birthdate][diagnosis_type.upcase] = diagnosis_name
+						@patient_level_data[visit_date][gender][person.id][patient][person.birthdate]["TREATMENT"] = prescription if (encounter.name.upcase=="TREATMENT" && !prescription.blank?)
 				end
-		
-			end
-		end
+=end
+			#end
 
 	end
 end
