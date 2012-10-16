@@ -626,10 +626,10 @@ class GenericEncountersController < ApplicationController
 
 	def observations
 		# We could eventually include more here, maybe using a scope with includes
-		@encounter = Encounter.find(params[:id], :include => [:observations])
+		encounter = Encounter.find(params[:id], :include => [:observations])
 		@child_obs = {}
-    	@observations = []
-		@encounter.observations.map do |obs|
+		@observations = []
+		encounter.observations.map do |obs|
 			next if !obs.obs_group_id.blank?
 			if ConceptName.find_by_concept_id(obs.concept_id).name.match(/location/)
 				obs.value_numeric = ""
@@ -1197,121 +1197,74 @@ class GenericEncountersController < ApplicationController
     #render :layout => "menu"                                                    
   end
   
-  def update
+	def update
 
-    @encounter = Encounter.find(params[:encounter_id])
-    ActiveRecord::Base.transaction do
-      @encounter.void
-    end
-    
-    encounter = Encounter.new(params[:encounter])
-    encounter.encounter_datetime = session[:datetime] unless session[:datetime].blank? or encounter.name == 'DIABETES TEST'
-    encounter.save
+		@encounter = Encounter.find(params[:encounter_id])
+		ActiveRecord::Base.transaction do
+			@encounter.void
+		end
 
-       # saving  of encounter states
-    if(params[:complete])
-      encounter_state = EncounterState.find(encounter.encounter_id) rescue nil
+		encounter = Encounter.new(params[:encounter])
+		encounter.encounter_datetime = session[:datetime] unless session[:datetime].blank? or encounter.name == 'DIABETES TEST'
+		encounter.save
 
-      if(encounter_state) # update an existing encounter_state
-        state =  params[:complete] == "true"? 1 : 0
-        EncounterState.update_attributes(:encounter_id => encounter.encounter_id, :state => state)
-      else # a new encounter_state
-        state =  params[:complete] == "true"? 1 : 0
-        EncounterState.create(:encounter_id => encounter.encounter_id, :state => state)
-      end
-    end
+		# saving  of encounter states
+		if(params[:complete])
+			encounter_state = EncounterState.find(encounter.encounter_id) rescue nil
 
-    (params[:observations] || []).each{|observation|
-      # Check to see if any values are part of this observation
-      # This keeps us from saving empty observations
-      values = "coded_or_text group_id boolean coded drug datetime numeric modifier text".split(" ").map{|value_name|
-        observation["value_#{value_name}"] unless observation["value_#{value_name}"].blank? rescue nil
-      }.compact
+			if(encounter_state) # update an existing encounter_state
+				state =  params[:complete] == "true"? 1 : 0
+				EncounterState.update_attributes(:encounter_id => encounter.encounter_id, :state => state)
+			else # a new encounter_state
+				state =  params[:complete] == "true"? 1 : 0
+				EncounterState.create(:encounter_id => encounter.encounter_id, :state => state)
+			end
+		end
 
-      next if values.length == 0
-      observation.delete(:value_text) unless observation[:value_coded_or_text].blank?
-      observation[:encounter_id] = encounter.id
-      observation[:obs_datetime] = encounter.encounter_datetime ||= Time.now()
-      observation[:person_id] ||= encounter.patient_id
-      observation[:concept_name] ||= "OUTPATIENT DIAGNOSIS" if encounter.type.name == "OUTPATIENT DIAGNOSIS"
+		(params[:observations] || []).each{ | observation |
+			# Check to see if any values are part of this observation
+			# This keeps us from saving empty observations
+			values = "coded_or_text group_id boolean coded drug datetime numeric modifier text".split(" ").map{ | value_name |
+				observation["value_#{value_name}"] unless observation["value_#{value_name}"].blank? rescue nil
+			}.compact
 
-      # convert values from 'mmol/litre' to 'mg/declitre'
-      if(observation[:measurement_unit])
-        observation[:value_numeric] = observation[:value_numeric].to_f * 18 if ( observation[:measurement_unit] == "mmol/l")
-        observation.delete(:measurement_unit)
-      end
-      
-			if encounter.type.name.upcase == 'FILM' && observation[:concept_name].upcase == 'FILM SIZE'
-					observation.delete(:parent_concept_name)
+			next if values.length == 0
+			observation.delete(:value_text) unless observation[:value_coded_or_text].blank?
+			observation[:encounter_id] = encounter.id
+			observation[:obs_datetime] = encounter.encounter_datetime ||= Time.now()
+			observation[:person_id] ||= encounter.patient_id
+			observation[:concept_name] ||= "OUTPATIENT DIAGNOSIS" if encounter.type.name == "OUTPATIENT DIAGNOSIS"
+
+			# convert values from 'mmol/litre' to 'mg/declitre'
+			if(observation[:measurement_unit])
+				observation[:value_numeric] = observation[:value_numeric].to_f * 18 if ( observation[:measurement_unit] == "mmol/l")
+				observation.delete(:measurement_unit)
 			end
 
-      if(observation[:parent_concept_name])
-        concept_id = Concept.find_by_name(observation[:parent_concept_name]).id rescue nil
-        observation[:obs_group_id] = Observation.find(:first, :conditions=> ['value_coded = ? AND encounter_id = ?',concept_id, encounter.id]).id rescue ""
-        observation.delete(:parent_concept_name)
-      end
+			if(observation[:parent_concept_name])
+				concept_id = Concept.find_by_name(observation[:parent_concept_name]).id rescue nil
+				observation[:obs_group_id] = Observation.find(:last, :conditions=> ['concept_id = ? AND encounter_id = ?', concept_id, encounter.id], :order => "obs_id ASC, date_created ASC").id rescue ""
+				observation.delete(:parent_concept_name)
+			end
 
-      concept_id = Concept.find_by_name(observation[:concept_name]).id rescue nil
-      obs_id = Observation.find(:first, :conditions=> ['concept_id = ? AND encounter_id = ?',concept_id, encounter.id]).id rescue nil
+			concept_id = Concept.find_by_name(observation[:concept_name]).id rescue nil
+			obs_id = Observation.find(:first, :conditions=> ['concept_id = ? AND encounter_id = ?',concept_id, encounter.id]).id rescue nil
 
-      extracted_value_numerics = observation[:value_numeric]
-      if (extracted_value_numerics.class == Array)
+			extracted_value_numerics = observation[:value_numeric]
+			if (extracted_value_numerics.class == Array)
+				extracted_value_numerics.each do |	value_numeric |
+					observation[:value_numeric] = value_numeric
+					Observation.create(observation)
+				end
+			else
+				Observation.create(observation)
+			end
+			  
+		}
 
-        extracted_value_numerics.each do |value_numeric|
-          observation[:value_numeric] = value_numeric
-          Observation.create(observation)
-        end
-      else
-        Observation.create(observation)
-      end
-              
-    }
+    	@patient = Patient.find(params[:encounter][:patient_id])
 
-    @patient = Patient.find(params[:encounter][:patient_id])
-
-    # redirect to a custom destination page 'next_url'
-    #if(params[:next_url])
       redirect_to "/patients/show/#{@patient.patient_id}" and return
-    #else
-    #  redirect_to next_task(@patient)
-    #end
-
-  end
-
-	def test_create
-=begin
-		o = {:encounter_id => 26,
-			  :obs_group_id => "",
-			  :obs_datetime => Time.now,
-			  :person_id => 2,
-			  :value_numeric => "",
-			  :value_drug => "",
-			  :value_datetime => "",
-			  :value_boolean => "",
-			  :concept_name => "TB STATUS",
-			  :value_coded_or_text => "Confirmed TB NOT on treatment",
-			  :patient_id => "2",
-			  :value_modifier => "",
-			  :order_id => "",
-			  :value_coded => ""}
-
-=end
-		o = {:encounter_id => 26,
-			  :obs_datetime => Time.now,
-			  :person_id => 2,
-			  :concept_name => "TB STATUS",
-			  :value_coded_or_text => "Confirmed TB NOT on treatment",
-			  :patient_id => "2"
-			}
-
-		#raise current_user.to_yaml
-		#result = Observation.create(o)
-
-		result = Observation.new(o)
-		result.date_created = Time.now
-		result.creator = current_user
-		result.save
-		render :text => result.to_yaml
 	end
 
   private
@@ -1352,10 +1305,6 @@ class GenericEncountersController < ApplicationController
 				observation.delete(:measurement_unit)
 			end
 
-			if encounter.type.name.upcase == 'FILM' && observation[:concept_name].upcase == 'FILM SIZE'
-					observation.delete(:parent_concept_name)
-			end
-			
 			if(observation[:parent_concept_name])
 				concept_id = Concept.find_by_name(observation[:parent_concept_name]).id rescue nil
 				observation[:obs_group_id] = Observation.find(:last, :conditions=> ['concept_id = ? AND encounter_id = ?', concept_id, encounter.id], :order => "obs_id ASC, date_created ASC").id rescue ""
@@ -1412,7 +1361,7 @@ class GenericEncountersController < ApplicationController
 				observation.delete(:value_coded_or_text_multiple)
 				observation = update_observation_value(observation) if !observation[:value_coded_or_text].blank?
 				
-		    if !observation[:value_numeric].blank? && !(Float(observation[:value_numeric]) rescue false)
+				if !observation[:value_numeric].blank? && !(Float(observation[:value_numeric]) rescue false)
 					observation[:value_text] = observation[:value_numeric]
 					observation.delete(:value_numeric)
 				end
