@@ -1,7 +1,6 @@
 class EncountersController < GenericEncountersController
 
 	def new
-	
 		@patient = Patient.find(params[:patient_id] || session[:patient_id])
 		@patient_bean = PatientService.get_patient(@patient.person)
 		session_date = session[:datetime].to_date rescue Date.today
@@ -32,7 +31,7 @@ class EncountersController < GenericEncountersController
 
 		@select_options = select_options
 
-        if  ['OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
+        if  ['INPATIENT_DIAGNOSIS', 'OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id
 			diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set_id])	
 			@diagnoses_requiring_specification = diagnosis_concepts.map{|concept| concept.fullname.upcase}.join(';')
@@ -404,6 +403,16 @@ class EncountersController < GenericEncountersController
 		end
 	end
 
+	def create_influenza_recruitment
+		create_influenza_data
+	end
+  
+	# create_chronics is a method to save the results of an influenza
+	# Chronic Conditions question set
+	def create_chronics
+		create_influenza_data
+	end
+
 	def presenting_complaints
 		search_string = (params[:search_string] || '').upcase
 		filter_list = params[:filter_list].split(/, */) rescue []
@@ -429,17 +438,6 @@ class EncountersController < GenericEncountersController
 		@suggested_answers = (previous_answers + valid_answers.sort!).reject{|answer| filter_list.include?(answer) }.uniq[0..10] 
 		@suggested_answers = @suggested_answers - params[:search_filter].split(',') rescue @suggested_answers
 		render :text => "<li></li>" + "<li>" + @suggested_answers.join("</li><li>") + "</li>"
-	end
-
-
-	def create_influenza_recruitment
-		create_influenza_data
-	end
-  
-	# create_chronics is a method to save the results of an influenza
-	# Chronic Conditions question set
-	def create_chronics
-		create_influenza_data
 	end
 
 	#added this to ensure that we are able to get the detailed diagnosis set
