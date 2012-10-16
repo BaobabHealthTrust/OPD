@@ -6,7 +6,7 @@
   <%= hidden_field_tag "encounter[encounter_type_name]", "SOCIAL HISTORY" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
   <%= touch_select_tag "Patient currently smokes", @patient, options_for_select([["", ""], ["Yes", "Yes"], ["No", "No"]]),
     {:id => "smoker", :tt_requireNextClick => false,
