@@ -15,7 +15,7 @@
 		jQuery(document).ready(function($) {
 	 	$('#table_id').dataTable({
 		"bAutoWidth": false,
-		"sScrollY": "374px",
+		"sScrollY": "333px",
 		"bPaginate": true,
 		"bFilter": true,
 		"bProcessing": true,
@@ -28,7 +28,7 @@
  	 	search.setAttribute("id","search");
  	 	document.getElementById('search').setAttribute("onclick","showKeyboard();");
  	 	keyboard = document.getElementsByClassName("keypad")[0]
- 	 	document.getElementById('table_id_paginate').style.visibility = 'hidden';//removing the div that shows next and previous buttons
+ 	 	//document.getElementById('table_id_paginate').style.visibility = 'hidden';//removing the div that shows next and previous buttons
  	 	search_box = $('#table_id').dataTable()
  	 	//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -218,21 +218,21 @@
 
             .horizontal_line hr{
             position:absolute;
-            bottom:94px;
+            bottom:100px;
             }
 
             #table_id_info{
             position:fixed;
-            left:700px;
+            left:650px;
             font-weight:bold;
             top:675px;
             }
 
             #table_id_paginate {
              position:fixed;
-             left:20px;
+             right:150px;
              font-weight:bold;
-             top:600px;
+             top:670px;
             }
 
       </style>
