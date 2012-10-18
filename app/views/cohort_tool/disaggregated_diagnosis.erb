@@ -8,7 +8,9 @@
     <%=javascript_include_tag "jquery.table2CSV.min" %>
     <script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
     <script>
-      var name = '<%= @report_name.upcase %>'
+      var name = '<%= @report_name.upcase %>';
+      var options;
+      var options1;
       jQuery(document).ready(function($) {        
         if (( name != "TOTAL_REGISTERED") && ( name != "PATIENT_LEVEL_DATA")) {
           $('#table_id').dataTable({
@@ -27,15 +29,14 @@
             "bProcessing": true,
             "sScrollY": "400px",
             "bInfo": false
-            ///"sPaginationType": "full_numbers",
-            //"sPageButton": "paging_two_button"
-            //"sPageButton": "paginate_button"
-
-            //"bInfo":false
-
           });
+          var  buttondiv = document.getElementById("buttons");
           document.getElementById("buttons").innerHTML+= ' <%= will_paginate @page, :page_links => false %>'
-        }
+          options = document.getElementsByTagName('a')[0];
+          options1 = document.getElementsByTagName('a')[1];
+          buttondiv.innerHTML+= "<button id='nextButton'><span>Next >></span></button>"
+          buttondiv.innerHTML+= "<button id='prevButton'><span><< Previous</span></button>"
+          }
         //$("#table_id_infor").text("This is the new content.");
         //document.getElementById('table_id_paginate').style.visibility = 'hidden';//removing the div that shows next and previous buttons
         search_box = $('#table_id').dataTable()
@@ -50,6 +51,12 @@
         })
         $('#logout').click(function() {
           window.location = '/clinic'; // /';
+        })
+        $('#nextButton').click(function() {
+          window.location = options1; 
+        })
+        $('#prevButton').click(function() {
+          window.location = options; 
         })
         //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         keyboard = document.getElementsByClassName("keypad")[0]
@@ -247,41 +254,19 @@
         left:250px;
         top:696px;
       }
+      .pagination{
+        display:none;
+      }
       #num{ display:none; }
       #char{ display:none; }
       .prev_page,.next_page {
-        -moz-user-select: none;
-        display: block;
-        padding-top: 20px;
-        margin-left:10px;
-        min-width: 140px;
-        height:60px;
-        float: left;
-        text-align: center;
-        vertical-align:middle;
-        background: url("../images/buttons/btn_left_blue.png") no-repeat scroll left center transparent;
-        font-size: 1.3em;
-        text-decoration: none;
-        border: 0 none;
-        color: white;
-        cursor: pointer;
-        font-weight: bold;
-      }
+         }
 
       .prev_page:hover, .next_page:hover
-      {
-        background: url("../images/buttons/btn_left_hover_blue.png") no-repeat scroll left center transparent;
+      { }
+      .disabled { }
 
-      }
-      .disabled {
-
-        background: url("../images/buttons/btn_left_gray.png") no-repeat scroll left center transparent;
-      }
-
-      .disabled:hover {
-
-        background: url("../images/buttons/btn_left_gray.png") no-repeat scroll left center transparent;
-      }
+      .disabled:hover {}
 
 
 
@@ -516,9 +501,9 @@
       </table>
     </div>
 
-      <div>
-        <hr width="100%" color="gray">
-      </div>
+    <div>
+      <hr width="100%" color="gray">
+    </div>
     <div id="keypad">
       <span class="keypad">
       </span>
