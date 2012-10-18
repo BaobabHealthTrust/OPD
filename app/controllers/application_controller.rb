@@ -1,5 +1,4 @@
 class ApplicationController < GenericApplicationController
-COMMON_YEAR_DAYS_IN_MONTH = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 helper_method :allowed_hiv_viewer
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
@@ -100,7 +99,11 @@ helper_method :allowed_hiv_viewer
 	end
 
 	def allowed_hiv_viewer
-	 allowed = current_user_roles.include?("Doctor" || "Nurse" || "Superuser") rescue nil 
+      allowed = false
+      user_roles = current_user_roles.collect{|role| role.to_s.upcase}
+     if user_roles.include?("DOCTOR") || user_roles.include?("NURSE") || user_roles.include?("SUPERUSER")
+       allowed = true
+     end
 	 return allowed
   end 	
   
@@ -152,11 +155,6 @@ helper_method :allowed_hiv_viewer
     
     return non_art_encounters
     
-  end
-  
-  def days_in_month(month, year = Time.now.year)
-   	return 29 if month == 2 && Date.gregorian_leap?(year)
-   	COMMON_YEAR_DAYS_IN_MONTH[month]
   end
   
   def check_for_arvs_presence(encounter)

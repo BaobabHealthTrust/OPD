@@ -8,9 +8,7 @@
       <!--
       tt_cancel_destination = '/people';
       var minYear = 2008;
-      function thisyear(){
-		return new Date().getFullYear();
-		}
+      
       function $(id){
         return document.getElementById(id);
       }
@@ -96,16 +94,17 @@
              tt_onUnLoad="$('endAge').setAttribute('absoluteMin', $('touchscreenInput'+tstCurrentPage).value)"/>
       <input type="text" id="endAge" name="endAge" helpText="End Age" value="" field_type="number"
              tt_pageStyleClass="NumbersOnlyWithDecimal" 
-			 tt_onLoad="removeoption();"
-			 tt_onUnload="addoption();" />
+			 tt_onLoad="removeoption()"
+			 tt_onUnLoad="addoption()"	
+			 />
 
-      <select id="selType" name="selType" helpText="Report Type:"> <!--condition="$('endAge').value <= 15"-->
+      <select id="selType" name="selType" helpText="Report Type:" >
         <option value="adults">General Outpatient</option>
         <option value="paeds">Paediatrics</option>
         <option value="diagnoses">General Diagnoses</option>
         <option value="diagnoses_paeds">Paediatrics Diagnoses</option>
       </select>
-
+	 
       <select id="selSelect" name="selSelect" helpText="Report By:">
         <option></option>
         <option value="week">Week</option>
@@ -178,16 +177,12 @@
         end
       %>
       </select>
-
-
-      <select id="selWeek" name="selWeek" helpText="Select Week:" field_type="number"
-              condition="($('selYear').value == thisyear()) && ($('selSelect').value == 'week')" tt_pageStyleClass="NumbersOnly">
-		<option value=""></option>
-		 <option value="<%= Date.today.cweek.to_i - 1 %>" >This Week</option>
-		 <option value="<%= Date.today.cweek.to_i - 2 %>">Last Week</option>
-		 <option value='mon'>This Month</option>
-		 <option value='lmon'>Last Month</option>
-		 <option value='all'>All Dates</option>
+		<select id="selWeek" name="selWeek" helpText="Select Week:" field_type="number"
+              condition="$('selSelect').value == 'week'" tt_pageStyleClass="NumbersOnly">
+		<option>This Week</option>
+		<option>Last Week</option>
+		<option>This Month</option>
+		<option>All Dates</option>
       </select>
 
       <input type="text" field_type="date" id="start_date" name="start_date" value="" helpText="Select Start Date:"

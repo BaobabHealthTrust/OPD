@@ -44,6 +44,8 @@ class ClinicController < GenericClinicController
   end
 
   def reports_tab
+    session[:observation] = nil
+    session[:people] = nil
     @reports = [
 						      ["OPD General", "/cohort_tool/opd_report_index"],
 						      ["Disaggregated Diagnosis", "/cohort_tool/opd_menu?report_name=disaggregated_diagnosis"],

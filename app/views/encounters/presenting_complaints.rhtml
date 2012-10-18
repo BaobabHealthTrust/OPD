@@ -1,97 +1,87 @@
-<%= javascript_include_tag "jquery" %>
-<%= javascript_include_tag 'utils' %>
-
-<script>
-  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
-
-	function updateNextFinish(){
-		if (tstInputTarget.value == '') {
-			$('nextButton').innerHTML = '<span>Finish</span>';
-			$('nextButton').setAttribute("onMouseDown","submit();");
-		} else {
-			$('nextButton').innerHTML = '<span>Next</span>';
-			$('nextButton').setAttribute("onMouseDown", "gotoNextPage()");
-		}
-		setTimeout(updateNextFinish, 500)
-	}
-	
-  function set_ajaxURL_for_suggestions(value) {
-  	url = "/encounters/concept_options?search_string=" + value 
-    $('touchscreenInput'+tstCurrentPage).setAttribute('ajaxURL', url);
-    listSuggestions(tstCurrentPage);
-  }
-
-	complaints_requiring_details = '<%= "#{@complaints_requiring_details}" %>';
-	complaints_requiring_specification = '<%= "#{@complaints_requiring_specification}"%>';
-	
-  function submit()
-  {
-      document.forms["presenting_complaints"].submit();
-  }
-
+<html>
+    <head>
+		<%= javascript_include_tag "jquery" %>
+		<%= javascript_include_tag 'utils' %>
+        
+    <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
+    <script language="javascript">            
+    tt_cancel_destination = '/patients/show/<%= @patient.patient_id %>';
+    tt_cancel_show =  '/patients/show/<%= @patient.patient_id %>';
+    var hash_str = "|";             
+ 	
+	 
 </script>
 
-<form id='presenting_complaints' action="/encounters/create" method='post'>
+	<style>
+	  	#tt_page_select_ .options { height: 506px; }
 
-	<%= hidden_field_tag "encounter[encounter_type_name]", "PRESENTING COMPLAINTS" %>
-	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+      #tt_page_life_threatening_condition .inputFrameClass {
+        height: 450px;
+      }
 
-	<%= hidden_field_tag "filter[provider]", "Dummy", {:id => "presenting_complaint_0"} %>
+      #tt_page_life_threatening_condition .options {
+        height: 16em;
+      }
 
-	<% counter = 0
-		presenting_label = "Presenting complaint"	
-	%>
-	<% 5.times do %>
-			<% counter += 1%>
-			<%= touch_select_tag "PRESENTING COMPLAINT", @patient, nil,
-				{	:id => "presenting_complaint_#{counter}",
-					:ajaxURL => "/encounters/presenting_complaints?search_string=",
-					:optional => "true",
-				 	:condition => "$('presenting_complaint_#{counter-1}').value != '';",
-				 	:helpText => presenting_label } %>
+	</style>
 
-			<%= touch_select_tag "DETAILED PRESENTING COMPLAINT", @patient, nil,
-				{	:id => "detailed_presenting_complaint_#{counter}",
-					:parent_concept_name => "Presenting complaint",
-				 	:condition => "complaints_requiring_details.contains($('presenting_complaint_#{counter}').value.toUpperCase())",
-					:ajaxURL => "/encounters/concept_options?search_string=",
-					:tt_onLoad => "set_ajaxURL_for_suggestions(document.getElementById('presenting_complaint_#{counter}').value);",
-				 	:helpText => "Detailed presenting complaint" } %>
+	
+    </head>
+    <body>
+             
+            <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
+               <form  action="/encounters/create_complaints" method="post">
+                    <%= hidden_field_tag "encounter[encounter_type_name]", "PRESENTING COMPLAINTS" %>
+	                <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+	                <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+					<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+                    
+					<table cellpadding=5>                                 
+                        <tr>
+                            <td>
+                            </td>
+                            <td>
+								<select class = "multi" style="width: 100%" name="complaints[]" id="multiple"
+		                         helptext="Select Complaint(s)" multiple="multiple" nested="true" >
+		                                <option></option>
+                                        <%complaints_set = concept_set('presenting complaint')%>
+                                        <%if complaints_set%>
+	 										<%complaints_set.sort.each do |concept|%>                           
+                                               <%if concept_set(concept).size > 0 %>
+						                        	<optgroup id ="<%=concept%>" label="<%=concept%>">
+			                                     	<%complaint_sub_set = concept_set(concept)%>
+													<%if complaint_sub_set %>
+														<%complaint_sub_set.sort.each do |value|%>
+		 <option id ="<%=value%>$<%=concept%>" value="<%=concept%>:<%=value%>"><%=value%> <%= '('%><%= concept %><%= ')'%></option>	
+					                                	<%end%>	   
+			                                    	<%end%>                                 
+				                             		</optgroup>
+                                                <%else%>
+													<option id ="<%=concept%>"><%=concept%></option>	
+                                                <%end%>
+	                                        <%end%>                                     	
+									<%end%>
+		                            </select>
+                            </td>
+                        </tr>
+                    </table>
+               <%= touch_select_tag "Life threatening condition", @patient, nil,
+			{	:ajaxURL => "/encounters/life_threatening_condition?search_string=",
+				:helpText => 'Life Threatening Condition', 
+				:id => 'life threatening condition'} %>
 
-			<%= touch_text_field_tag "SPECIFIC PRESENTING COMPLAINT", @patient, nil,
-				{	:id => "specific_presenting_complaint_#{counter}",
-					:parent_concept_name => "Presenting complaint",
-				 	:condition => "complaints_requiring_specification.contains($('presenting_complaint_#{counter}').value.toUpperCase())",
-					:allowFreeText => 'true',
-					:textCase => "upper",
-				 	:helpText => "Specific presenting complaint" } %>
-			<% presenting_label = "Additional presenting complaint" %>
-	<% end %>
-
-	<%= touch_select_tag "Life threatening condition", @patient, concept_set_options('LIFE THREATENING CONDITION'),
-		{	:id => "life_threatening_conditions",
-			:optional => "true",
-			:multiple => "true",
-		 	:helpText => "Select life threatening conditions" } %>
-
-	<%= touch_select_tag "Triage category", @patient, concept_set_options('TRIAGE CATEGORY'),
-		{	:id => "triage_category",
-		 	:helpText => "Triage category" } %>
-
-        <%= touch_text_area_tag "CLINICAL NOTES CONSTRUCT", @patient, nil,
-		{	:id => "clinical_notes",
-			:optional => true,
-			:helpText => "Clinical notes (optional)"
-		}%>
-
-	<% if @retrospective %>
-		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
-		<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
-	<% else %>
-		<%= hidden_field_tag "filter[provider]", nil %>
-	<% end %>
-
-  <%= submit_tag "Finish" %>
-</form>
+			<%= touch_select_tag "triage category", @patient, options_for_select([]),
+			{	:ajaxURL => "/encounters/triage_category?search_string=",
+				:helpText => "Select Triage Category",
+				:id => 'triage category'} %>   
+				
+			<% if @retrospective %>
+				<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+				<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+			<% else %>
+				<%= hidden_field_tag "filter[provider]", nil %>
+			<% end %>         		
+		                </form>                
+            </center>
+    </body>
+</html>

@@ -8,6 +8,7 @@ class Observation < ActiveRecord::Base
   belongs_to :concept_name, :class_name => "ConceptName", :foreign_key => "concept_name", :conditions => {:voided => 0}
   belongs_to :answer_concept, :class_name => "Concept", :foreign_key => "value_coded", :conditions => {:retired => 0}
   belongs_to :answer_concept_name, :class_name => "ConceptName", :foreign_key => "value_coded_name_id", :conditions => {:voided => 0}
+  belongs_to :person, :foreign_key => "person_id"
   has_many :concept_names, :through => :concept
 
   named_scope :recent, lambda {|number| {:order => 'obs_datetime DESC,date_created DESC', :limit => number}}
