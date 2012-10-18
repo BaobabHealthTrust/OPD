@@ -1302,9 +1302,9 @@ class CohortToolController < ApplicationController
 		if @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT"
 			report_trasfer_outs_and_refrerrals(@report_name)
 		else
-     # observations = Observation.find(:all, :include => {:person => {}}, :conditions => ["obs_datetime >= ? AND obs_datetime <= ? AND concept_id IN (?)", @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'), [3065, 6542, 6543, 6669]])
-      Observation.find_each(:include => {:person => {}}, :conditions => ["obs_datetime >= ? AND obs_datetime <= ? AND concept_id IN (?)", @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'), [3065, 6542, 6543, 6669]]) do | obs |
-      #observations.each do | obs |
+      observations = Observation.find(:all, :include => {:person => {}}, :conditions => ["obs_datetime >= ? AND obs_datetime <= ? AND concept_id IN (?)", @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'), [3065, 6542, 6543, 6669]])
+      #Observation.find_each(:include => {:person => {}}, :conditions => ["obs_datetime >= ? AND obs_datetime <= ? AND concept_id IN (?)", @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'), [3065, 6542, 6543, 6669]]) do | obs |
+      observations.each do | obs |
         patient_bean = obs
 				person = obs.person
         patient_age = age(person, obs)
@@ -1359,9 +1359,8 @@ class CohortToolController < ApplicationController
 					else
 							report_patient(patient_bean, person, @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59') ) if report
 					end
-
+        end
 				end
-			end
 		end
 		@logo = CoreService.get_global_property_value("logo").to_s
 		@current_location_name = Location.current_health_center.name
