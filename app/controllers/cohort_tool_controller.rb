@@ -1432,7 +1432,8 @@ require 'will_paginate'
                                @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'), 
                                [3065, 6542, 6543,6669]]) do | obs|
                               next if obs.answer_concept.blank?
-                              diagnosis_name = obs.answer_concept.fullname rescue ''
+
+       diagnosis_name = obs.answer_concept.fullname rescue ''
                               @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
                               @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
                               @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
