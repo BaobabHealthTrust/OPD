@@ -15,23 +15,43 @@
 		jQuery(document).ready(function($) {
 	 	$('#table_id').dataTable({
 		"bAutoWidth": false,
-		"sScrollY": "333px",
-		"bPaginate": true,
-		"bFilter": true,
-		"bProcessing": true,
-		"sPaginationType": "full_numbers"
+		"sScrollY": "380px",
+		"bPaginate": false,
+		"bFilter": false
+		//"bProcessing": true
+		//"sPaginationType": "full_numbers"
 		//"sPageButton": "paginate_button",
 
 		//"bInfo":false
      	});
+                button_div = document.getElementById("buttons")
+                next_page = document.getElementsByClassName('next_page')[0]
+                button_div.appendChild(next_page)
+                if (next_page != 'undefined'){
+                  disabled_next_button = (next_page.innerHTML="<button><span>Next >></span></button")
+                }
+                <% if params[:page].to_i == 1  %>
+                disabled_prev_page = document.getElementsByClassName('disabled prev_page')[0]
+                button_div.appendChild(disabled_prev_page)
+                if (disabled_prev_page != 'undefined'){
+                  disabled_prev_button = (disabled_prev_page.innerHTML="<button class='gray'><span><< Previous</span></button")
+                }
+                <% else  %>
+                  prev_page = document.getElementsByClassName('prev_page')[0]
+                  button_div.appendChild(prev_page)
+                  if (prev_page != 'undefined'){
+                    prev_button = (prev_page.innerHTML="<button><span><< Previous</span></button")
+                  }
+                <% end %>
+           
                 search = document.getElementsByTagName("input")[0];
  	 	search.setAttribute("id","search");
  	 	document.getElementById('search').setAttribute("onclick","showKeyboard();");
  	 	keyboard = document.getElementsByClassName("keypad")[0]
- 	 	//document.getElementById('table_id_paginate').style.visibility = 'hidden';//removing the div that shows next and previous buttons
+ 	 	document.getElementById('table_id_paginate').style.visibility = 'hidden';//removing the div that shows next and previous buttons
  	 	search_box = $('#table_id').dataTable()
  	 	//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
+                
 		function getCharButtonSetID(character,id){
 			return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' +"<span style='width:32px'>"+character+"</span>"+ "</button>";
 		}
@@ -218,7 +238,7 @@
 
             .horizontal_line hr{
             position:absolute;
-            bottom:100px;
+            bottom:130px;
             }
 
             #table_id_info{
@@ -254,212 +274,218 @@
 
 	<div>
 		<table  id="table_id" class="display" >
-				<thead>
+<thead>
 
-					<% if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS" %>
-				    <tr>
-						  <th  align="left"> Diagnosis <p />
-						  </th>
-						  <th>
-									<span><u>< 6 Months </u></span> <br />
-									<span class="basic_span"> M </span><span class="basic_span" > F </span>
-						  </th>
-						  <th>
-									<span><u>	6 Months to < 5</u></span> <br />
-									<span class="basic_span"> M </span><span class="basic_span" > F </span>
-						  </th>
-						  <th>
-									<span><u> 5 to 14 </u></span> <br />
-									<span class="basic_span"> M </span><span class="basic_span" > F </span>
-						  </th>
-						  <th>
-									<span><u> > 14 <u/></span> <br />
-									<span class="basic_span"> M </span><span class="basic_span" > F </span>
-						  </th>
-						  <th>
-									<span> <u>Total by gender</u></span> <br />
-									<span class="basic_span"> M </span><span class="basic_span" > F </span>
-						  </th>
-						  <th style="padding-right:30px;" ><u>Total</u><p /></th>
-				    </tr>
+<% if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS" %>
+<tr>
+          <th  align="left"> Diagnosis <p />
+          </th>
+          <th>
+              <span><u>< 6 Months </u></span> <br />
+              <span class="basic_span"> M </span><span class="basic_span" > F </span>
+          </th>
+          <th>
+              <span><u>	6 Months to < 5</u></span> <br />
+              <span class="basic_span"> M </span><span class="basic_span" > F </span>
+          </th>
+          <th>
+              <span><u> 5 to 14 </u></span> <br />
+              <span class="basic_span"> M </span><span class="basic_span" > F </span>
+          </th>
+          <th>
+              <span><u> > 14 <u/></span> <br />
+              <span class="basic_span"> M </span><span class="basic_span" > F </span>
+          </th>
+          <th>
+              <span> <u>Total by gender</u></span> <br />
+              <span class="basic_span"> M </span><span class="basic_span" > F </span>
+          </th>
+          <th style="padding-right:30px;" ><u>Total</u><p /></th>
+</tr>
 
-				  <% elsif @report_name.upcase == "DIAGNOSIS_BY_ADDRESS" %>
-				  	<tr  style="background-color:gray">
-						  <th align="left"> Diagnosis <p />
-						  </th>
-						  <th align="left">
-									 Address  <p />
-						  </th>
-						  <th align="center">
-										Total  <p />
-						  </th>
-					</tr>
-				  <% elsif @report_name.upcase == "PATIENT_LEVEL_DATA" %>
-				  <tr  style="background-color:gray">
-						  <th align="left"> Name <p />
-						  </th>
-						  <th align="left">
-									 Birthdate  <p />
-						  </th>
-						  <th align="left">
-										Gender  <p />
-						  </th>
-						  <th align="left">  Primary Diagnosis <p />
-						  </th>
-						  <th align="left">
-								 Secondary Diagnosis  <p />
-						  </th>
-						  <th  align="left">
-									Treatment <p />
-						  </th>
-						  <th align="left">
-										Visit Date  <p />
-						  </th>
-					</tr>
-					<% elsif @report_name.upcase == "DIAGNOSIS_REPORT" %>
-					<tr  style="background-color:gray">
-						  <th align="left">DIAGNOSIS<p />
-						  </th>
-						  <th>
-									 Total  <p />
-						  </th>
+<% elsif @report_name.upcase == "DIAGNOSIS_BY_ADDRESS" %>
+    <tr  style="background-color:gray">
+          <th align="left"> Diagnosis <p />
+          </th>
+          <th align="left">
+                                 Address  <p />
+          </th>
+          <th align="center">
+                                        Total  <p />
+          </th>
+    </tr>
+<% elsif @report_name.upcase == "PATIENT_LEVEL_DATA" %>
+    <tr  style="background-color:gray">
+          <th align="left"> Name <p />
+          </th>
+          <th align="left">
+                                 Birthdate  <p />
+          </th>
+          <th align="left">
+                                        Gender  <p />
+          </th>
+          <th align="left">  Primary Diagnosis <p />
+          </th>
+          <th align="left">
+                         Secondary Diagnosis  <p />
+          </th>
+          <th  align="left">
+                                Treatment <p />
+          </th>
+          <th align="left">
+                                        Visit Date  <p />
+          </th>
+    </tr>
+<% elsif @report_name.upcase == "DIAGNOSIS_REPORT" %>
+    <tr  style="background-color:gray">
+          <th align="left">DIAGNOSIS<p />
+          </th>
+          <th>
+            Total  <p />
+          </th>
 
-				  <% elsif @report_name.upcase == "TOTAL_REGISTERED" %>
-						  <th> <u>Name</u> <p />
-						  </th>
-						  <th>
-									<u> Birthdate </u> <p />
-						  </th>
-						  <th>
-									<u>	Gender </u> <p />
-						  </th>
-						  <th> <u> Date Registered </u> <p />
-						  </th>
-						  <th>
-									<u> Address </u> <p />
-						  </th>
-						  <th>
-									<u>	T.A </u> <p />
-						  </th>
-						</tr>
-					<% elsif @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT" %>
-						  <th> <u>Facility</u> <p />
-						  </th>
-						  <th>
-									<u> <%= @report_name.upcase == "REFERRAL" ? "Total Referrals" : "Total Transfer Outs" %> </u> <p />
-						  </th>
+<% elsif @report_name.upcase == "TOTAL_REGISTERED" %>
+          <th> <u>Name</u> <p />
+          </th>
+          <th>
+                                <u> Birthdate </u> <p />
+          </th>
+          <th>
+                                <u>	Gender </u> <p />
+          </th>
+          <th> <u> Date Registered </u> <p />
+          </th>
+          <th>
+                                <u> Address </u> <p />
+          </th>
+          <th>
+                                <u>	T.A </u> <p />
+          </th>
+    </tr>
+<% elsif @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT" %>
+          <th> <u>Facility</u> <p />
+          </th>
+          <th>
+                                <u> <%= @report_name.upcase == "REFERRAL" ? "Total Referrals" : "Total Transfer Outs" %> </u> <p />
+          </th>
 
-				  <% end %>
-				</thead>
-		  <tbody>
+<% end %>
+</thead>
+<tbody>
 
-				<% if @report_name.upcase == "disaggregated_diagnosis".upcase %>
-		      <% @disaggregated_diagnosis.each do |key,value| %>
-		      	<tr>
-		      			<td width="300px"> <span style="display:block; width:90%;"> <%= key.to_s %> </span> </td>
 
-		      			<td align="left" > <%= "<span class='basic_span' > #{value["< 6 MONTHS"]["M"]} </span> <span class='basic_span'> #{value["< 6 MONTHS"]["F"]}" %> </span> </td>
+<% if @report_name.upcase == "disaggregated_diagnosis".upcase %>
+   <%= will_paginate @disaggregated,:page_links => false,:params => {"@report_name" => @report_name}%>
+    <% @diaggregated_diagnosis.each do |key,value| %>
+  <tr>
+        <td width="300px"> <span style="display:block; width:90%;"> <%= key.to_s %> </span> </td>
 
-		      			<td align="left" > <%= "<span class='basic_span' > #{value["U5"]["M"]} </span> <span class='basic_span'> #{value["U5"]["F"]}" %> </span> </td>
-		      			<td align="left" > <%= "<span class='basic_span'> #{value["5-14"]["M"]} </span> <span class='basic_span'> #{value["5-14"]["F"]}" %> </span> </td>
-		      			<td align="left" > <%= "<span class='basic_span'> #{value[">14"]["M"]}  </span> <span class='basic_span'> #{value[">14"]["F"]}" %> </span> </td>
-		      			<%
-		      				 m_total = value[">14"]["M"] + value["5-14"]["M"] + value["U5"]["M"]
-		      				 f_total = value["U5"]["F"]+value["5-14"]["F"]+value[">14"]["F"]
-		      			%>
-		      			<td align="left" > <%= "<span class='basic_span'> #{m_total}  </span> <span class='basic_span'> #{f_total}" %> </td>
-		      			<td align="left" style="padding-right:30px; width:130px;" > <%= "#{m_total+f_total}" %> </td>
-		      	</tr>
-		      <% end %>
+        <td align="left" > <%= "<span class='basic_span' > #{value["< 6 MONTHS"]["M"]} </span> <span class='basic_span'> #{value["< 6 MONTHS"]["F"]}" %> </span> </td>
 
-				<% elsif @report_name.upcase == "diagnosis_by_address".upcase %>
-		      <% @diagnosis_by_address.sort.each do |key,value| %>
+        <td align="left" > <%= "<span class='basic_span' > #{value["U5"]["M"]} </span> <span class='basic_span'> #{value["U5"]["F"]}" %> </span> </td>
+        <td align="left" > <%= "<span class='basic_span'> #{value["5-14"]["M"]} </span> <span class='basic_span'> #{value["5-14"]["F"]}" %> </span> </td>
+        <td align="left" > <%= "<span class='basic_span'> #{value[">14"]["M"]}  </span> <span class='basic_span'> #{value[">14"]["F"]}" %> </span> </td>
+        <%
+                 m_total = value[">14"]["M"] + value["5-14"]["M"] + value["U5"]["M"]
+                 f_total = value["U5"]["F"]+value["5-14"]["F"]+value[">14"]["F"]
+        %>
+        <td align="left" > <%= "<span class='basic_span'> #{m_total}  </span> <span class='basic_span'> #{f_total}" %> </td>
+        <td align="left" style="padding-right:30px; width:130px;" > <%= "#{m_total+f_total}" %> </td>
+  </tr>
+<% end %>
 
-		      			<% value.sort.each do |address, total| %>
-									<tr>
-											<td width="35%"> <span style="display:block; width:90%;"> <%= key.to_s %> </span> </td>
-											<td width="35%" align="left" > <%= "<span class='basic_span' > #{ address} </span> " %> </td>
-											<td width="30%" align="right" > <%= "<span class='basic_span' > #{ total} </span> " %> </td>
-									</tr>
-		      			<% end %>
-		      <% end %>
+<% elsif @report_name.upcase == "diagnosis_by_address".upcase %>
+      <%= will_paginate @diagnoses,:page_links => false,:params => {"@report_name" => @report_name}%>
+      <% diagnosis =0
+         village=1
+         total=2
+      %>
+ <% @diagn_address.each do |address| %>
+      <tr>
+        <td width="35%"> <span style="display:block; width:90%;"> <%= address[diagnosis] %> </span> </td>
+        <td width="35%" align="left" > <%= "<span class='basic_span' > #{ address[village]} </span> " %> </td>
+        <td width="30%" align="right" > <%= "<span class='basic_span' > #{ address[total]} </span> " %> </td>
+      </tr>
+    <% end %>
 
-				<% elsif @report_name.upcase == "patient_level_data".upcase %>
-					<%
-						primary_diagnosis = "PRIMARY DIAGNOSIS"
-						secondary_diagnosis = "SECONDARY DIAGNOSIS"
-						treatment = "TREATMENT"
-					%>
-					<% @patient_level_data.each do |date,data_hash_by_gender| %>
+<% elsif @report_name.upcase == "patient_level_data".upcase %>
+        <%
+                primary_diagnosis = "PRIMARY DIAGNOSIS"
+                secondary_diagnosis = "SECONDARY DIAGNOSIS"
+                treatment = "TREATMENT"
+        %>
+        <% @patient_level_data.each do |date,data_hash_by_gender| %>
 
-						<% data_hash_by_gender.each do |gender, data_hash_by_id| %>
+        <% data_hash_by_gender.each do |gender, data_hash_by_id| %>
 
-							<% data_hash_by_id.each do |id, data_hash_by_name| %>
+            <% data_hash_by_id.each do |id, data_hash_by_name| %>
 
-								<% data_hash_by_name.each do |name, data_hash_by_birthdate| %>
+                <% data_hash_by_name.each do |name, data_hash_by_birthdate| %>
 
-									<% data_hash_by_birthdate.each do |birthdate, data_hash_by_data| %>
-									<tr>
-											<td> <span style="display:block; width:90%;"> <%= "#{name}" %> </span> </td>
-											<td align="left" > <%= "<span > #{birthdate} </span> " %> </td>
-											<td align="center" > <%= "<span class='basic_span' > #{gender} </span> " %> </td>
-											<td align="left" > <%= "<span class='basic_span' > #{data_hash_by_data[primary_diagnosis]} </span> " %> </td>
-											<td align="left" > <%= "<span class='basic_span' > #{data_hash_by_data[secondary_diagnosis]} </span> " %> </td>
-											<td align="left" > <%= "<span class='basic_spuan' > #{data_hash_by_data[treatment]} </span> " %> </td>
-											<td align="left" > <%= "<span class='basic_span' > #{date} </span> " %> </td>
-									</tr>
-									<% end %>
+                    <% data_hash_by_birthdate.each do |birthdate, data_hash_by_data| %>
+                          <tr>
+                              <td> <span style="display:block; width:90%;"> <%= "#{name}" %> </span> </td>
+                              <td align="left" > <%= "<span > #{birthdate} </span> " %> </td>
+                              <td align="center" > <%= "<span class='basic_span' > #{gender} </span> " %> </td>
+                              <td align="left" > <%= "<span class='basic_span' > #{data_hash_by_data[primary_diagnosis]} </span> " %> </td>
+                              <td align="left" > <%= "<span class='basic_span' > #{data_hash_by_data[secondary_diagnosis]} </span> " %> </td>
+                              <td align="left" > <%= "<span class='basic_spuan' > #{data_hash_by_data[treatment]} </span> " %> </td>
+                              <td align="left" > <%= "<span class='basic_span' > #{date} </span> " %> </td>
+                          </tr>
+                    <% end %>
 
-								<% end %>
+                <% end %>
 
-							<% end %>
+            <% end %>
 
-						<% end %>
+          <% end %>
 
-					<% end %>
+      <% end %>
 
-				<% elsif @report_name.upcase == "DIAGNOSIS_REPORT" %>
-					<% @diagnosis_report.each do |diagnosis,total| %>
-									<tr>
-											<td width="50%"> <span style="display:block; width:90%;"> <%= "#{diagnosis}" %> </span> </td>
-											<td align="center" > <%= "<span > #{total} </span> " %> </td>
-									</tr>
-					<% end %>
+<% elsif @report_name.upcase == "DIAGNOSIS_REPORT" %>
+   <%= will_paginate @diagnosis_report,:page_links => false,:params => {"@report_name" => @report_name}%>
+        <% @diagnosis_report.each do |diagnosis,total| %>
+        <tr>
+            <td width="50%"> <span style="display:block; width:90%;"> <%= "#{diagnosis}" %> </span> </td>
+            <td align="center" > <%= "<span > #{total} </span> " %> </td>
+        </tr>
+<% end %>
 
-				<% elsif @report_name.upcase == "TOTAL_REGISTERED" %>
-						<%
-								name=0
-								birthdate=1
-								gender=2
-								date_registered=3
-								address=4
-								t_a=5
-						%>
-						<% @total_registered.each do |record| %>
-						<tr>
-								<td> <span style="display:block; width:90%;"> <%= "#{record[name]}" %> </span> </td>
-								<td align="center" > <%= "<span > #{record[birthdate]} </span> " %> </td>
-								<td> <%= "<span class='basic_span' > #{record[gender]} </span> " %> </td>
-								<td align="right" > <%= "<span class='basic_span' > #{record[date_registered]} </span> " %> </td>
-								<td> <%= "<span class='basic_span' > #{record[address]} </span> " %> </td>
-								<td align="left" > <%= "<span class='basic_spuan' > #{record[t_a]} </span> " %> </td>
-						</tr>
-						<% end %>
+<% elsif @report_name.upcase == "TOTAL_REGISTERED" %>
+  <%= will_paginate @total_registered,:page_links => false,:params => {"@report_name" => @report_name}%>
+        <%
+            name=0
+            birthdate=1
+            gender=2
+            date_registered=3
+            address=4
+            t_a=5
+        %>
+        <% @total_registered.each do |record| %>
+        <tr>
+            <td> <span style="display:block; width:90%;"> <%= "#{record[name]}" %> </span> </td>
+            <td align="center" > <%= "<span > #{record[birthdate]} </span> " %> </td>
+            <td> <%= "<span class='basic_span' > #{record[gender]} </span> " %> </td>
+            <td align="right" > <%= "<span class='basic_span' > #{record[date_registered]} </span> " %> </td>
+            <td> <%= "<span class='basic_span' > #{record[address]} </span> " %> </td>
+            <td align="left" > <%= "<span class='basic_spuan' > #{record[t_a]} </span> " %> </td>
+        </tr>
+<% end %>
 
-				<% elsif  @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT"  %>
-					<% @referral_locations.each do |referral,total| %>
-									<tr>
-											<td width="50%"> <span style="display:block; width:90%;"> <%= "#{referral}" %> </span> </td>
-											<td align="center" > <%= "<span > #{total} </span> " %> </td>
-									</tr>
-					<% end %>
-				<% end %>
-		  </tbody>
-	</table>
+<% elsif  @report_name.upcase == "REFERRAL" || @report_name.upcase == "TRANSFER_OUT"  %>
+        <% @referral_locations.each do |referral,total| %>
+            <tr>
+                <td width="50%"> <span style="display:block; width:90%;"> <%= "#{referral}" %> </span> </td>
+                <td align="center" > <%= "<span > #{total} </span> " %> </td>
+            </tr>
+        <% end %>
+<% end %>
+</tbody>
+</table>
 </div>
-	<div class="horizontal_line">
-		<hr width="100%" color="gray"/>
-	</div>
+<div class="horizontal_line">
+        <hr width="100%" color="gray"/>
+</div>
 
 
 
