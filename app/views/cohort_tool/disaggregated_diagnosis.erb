@@ -32,108 +32,104 @@
             "bInfo": false
           });
         }
-       <% if @report_name.upcase == "TOTAL_REGISTERED" || @report_name.upcase == "PATIENT_LEVEL_DATA" %>
-          var  buttondiv = document.getElementById("buttons");
-          buttondiv.innerHTML+= ' <%= will_paginate @page, :page_links => false %>'          
-          if ((document.getElementsByTagName('a').length) == 1 ){
-                  options3 = document.getElementsByTagName('a')[0];//Control variable
-                  if (options3.getAttribute('class') == 'prev_page'){
-                    options = document.getElementsByTagName('a')[0];
-                    options1 = null
-                  }
-                  else {
-                    options1 = document.getElementsByTagName('a')[0];
-                    options = null
-                  }
-          }
-          else {
-                  options = document.getElementsByTagName('a')[0];
-                  options1 = document.getElementsByTagName('a')[1];
-          }
-          if (options1 != undefined){
-            buttondiv.innerHTML+= "<button id='nextButton' class='green'><span>Next</span></button>"
-          }
-          if (options != undefined){
-            buttondiv.innerHTML+= "<button id='prevButton' class='green'><span>Previous</span></button>"
-          }
-          //#######################################
-       <%end%>
-        search_box = $('#table_id').dataTable()
-        search = document.getElementsByTagName("input")[0];
-        search.setAttribute("id","search");
-        document.getElementById('search').setAttribute("onclick","showKeyboard();");
-        document.getElementById("find").innerHTML = "<span>Back</span>";
-        document.getElementById("find").style.cssFloat = "left";
+<% if @report_name.upcase == "TOTAL_REGISTERED" || @report_name.upcase == "PATIENT_LEVEL_DATA" %>
+      var  buttondiv = document.getElementById("buttons");
+      buttondiv.innerHTML+= ' <%= will_paginate @page, :page_links => false %>'
+      if (document.getElementsByClassName('disabled prev_page').length == 1){
+        options1 = document.getElementsByClassName('next_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>' + "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>' + "&age_groups=" + '<%= @age_groups %>';
+        options = null
+        buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
+        buttondiv.innerHTML+= "<button id='disabled prev_page' class='gray'><span>Previous</span></button>"
+      }
+      else if (document.getElementsByClassName('disabled next_page').length == 1){
+        options = document.getElementsByClassName('prev_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>' + "&age_groups=" + '<%= @age_groups %>';
+        options1 = null
+        buttondiv.innerHTML+= "<button id='disabled next_page' class='gray'><span>Next</span></button>"
+        buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
+      }
+      else if (document.getElementsByClassName('next_page').length == 1 && document.getElementsByClassName('prev_page').length == 1) {
+        options = document.getElementsByClassName('prev_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>' + "&age_groups=" + '<%= @age_groups %>';
+        options1 = document.getElementsByClassName('next_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>' + "&age_groups=" + '<%= @age_groups %>';
+        buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
+        buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
+      }
+<%end%>
+    search_box = $('#table_id').dataTable()
+    search = document.getElementsByTagName("input")[0];
+    search.setAttribute("id","search");
+    document.getElementById('search').setAttribute("onclick","showKeyboard();");
+    document.getElementById("find").innerHTML = "<span>Back</span>";
+    document.getElementById("find").style.cssFloat = "left";
       
-        $('#find').click(function() {
-          window.location = '/cohort_tool/opd_menu?report_name=<%=@report_name%>'; // /report/data_cleaning';
-        })
-        $('#logout').click(function() {
-          window.location = '/clinic'; // /';
-        })
-        $('#nextButton').click(function() {
-           window.location = options1; 
-        })
-        $('#prevButton').click(function() {
-          window.location = options; 
-        })
-        //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-        keyboard = document.getElementsByClassName("keypad")[0]
-        function getCharButtonSetID(character,id){
-          return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' +"<span style='width:32px'>"+character+"</span>"+ "</button>";
-        }
-        function getButtonString(id,string){
-          return "<button \
+    $('#find').click(function() {
+      window.location = '/cohort_tool/opd_menu?report_name=<%=@report_name%>'; // /report/data_cleaning';
+    })
+    $('#logout').click(function() {
+      window.location = '/clinic'; // /';
+    })
+    $('#nextButton').click(function() {
+      window.location = options1;
+    })
+    $('#prevButton').click(function() {
+      window.location = options;
+    })
+    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    keyboard = document.getElementsByClassName("keypad")[0]
+    function getCharButtonSetID(character,id){
+      return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' +"<span style='width:32px'>"+character+"</span>"+ "</button>";
+    }
+    function getButtonString(id,string){
+      return "<button \
                             onMouseDown='press(this.id);' \
                             class='keyboardButton' \
                             id='"+id+"'>"+
-            string +
-            "</button>";
-        }
+        string +
+        "</button>";
+    }
 
-        function getButtons(chars){
-          var buttonLine = "";
-          for(var i=0; i<chars.length; i++){
-            character = chars.substring(i,i+1)
-            buttonLine += getCharButtonSetID(character,character)
-          }
-          return buttonLine;
-        }
+    function getButtons(chars){
+      var buttonLine = "";
+      for(var i=0; i<chars.length; i++){
+        character = chars.substring(i,i+1)
+        buttonLine += getCharButtonSetID(character,character)
+      }
+      return buttonLine;
+    }
 
-        showAlphaKeypad();
+    showAlphaKeypad();
 
-        function showAlphaKeypad(){
-          document.getElementById("keypad").style.height = "280";
-          keyboard.innerHTML = getButtons("QWERTYUIOP") + "</br>"
-          keyboard.innerHTML+= getButtons("ASDFGHJKL:") + "</br>"
-          keyboard.innerHTML+= getButtons("ZXCVBNM,.?")
-          keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
-          keyboard.innerHTML+= getButtonString('Space','<span>Space</span>')
-          keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
+    function showAlphaKeypad(){
+      document.getElementById("keypad").style.height = "280";
+      keyboard.innerHTML = getButtons("QWERTYUIOP") + "</br>"
+      keyboard.innerHTML+= getButtons("ASDFGHJKL:") + "</br>"
+      keyboard.innerHTML+= getButtons("ZXCVBNM,.?")
+      keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
+      keyboard.innerHTML+= getButtonString('Space','<span>Space</span>')
+      keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
 			
-        }
+    }
  
-        function showNumericKeypad(){
-          document.getElementById("keypad").style.height = "145";
-          keyboard.innerHTML = getButtons("123")
-          keyboard.innerHTML+= getButtons("456")
-          keyboard.innerHTML+= getButtons("7890")
-          keyboard.innerHTML+= getButtonString('space','<span>Space</span>')
-          keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
-          keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
-          keyboard.innerHTML+= getButtonString('abc','<span>abc</span>')
-          keyboard.innerHTML+= getButtonString('dash','<span>-</span>')
-          keyboard.innerHTML+= getButtonString('slash','<span>/</span>')
-        }
+    function showNumericKeypad(){
+      document.getElementById("keypad").style.height = "145";
+      keyboard.innerHTML = getButtons("123")
+      keyboard.innerHTML+= getButtons("456")
+      keyboard.innerHTML+= getButtons("7890")
+      keyboard.innerHTML+= getButtonString('space','<span>Space</span>')
+      keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
+      keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
+      keyboard.innerHTML+= getButtonString('abc','<span>abc</span>')
+      keyboard.innerHTML+= getButtonString('dash','<span>-</span>')
+      keyboard.innerHTML+= getButtonString('slash','<span>/</span>')
+    }
 		
-        data_table_length =document.getElementsByName('table_id_length')[0];
-        data_table_length.setAttribute("style","font-size:20px;");
+    data_table_length =document.getElementsByName('table_id_length')[0];
+    data_table_length.setAttribute("style","font-size:20px;");
 
-        table_length = document.getElementById("table_id_length");
-        table_length.setAttribute("style","width:100px;");
+    table_length = document.getElementById("table_id_length");
+    table_length.setAttribute("style","width:100px;");
 
 
-<%if @disaggregated_diagnosis.length > 100 %>
+<%if @disaggregated_diagnosis != nil && @disaggregated_diagnosis.length > 100 %>
       var elements = <%=@disaggregated_diagnosis.length%>
       var x = 200
       while(x < elements){
@@ -303,7 +299,12 @@
     <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Dates : <%= "#{@formated_start_date} to #{@formated_end_date}"%> <%= "<br> Total Registered: #{@total_registered.length}" if (@report_name.upcase == "TOTAL_REGISTERED") %></b>
 
     <% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase) %>
-      <b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Group (s) : <%= "#{@age_groups.join(' , ').to_s}" %> </b><br /><br />
+      <b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Group (s) : <% if @paged != "y" %>
+                                                                                                                                            <%= "#{@age_groups.join(' , ').to_s}" %>
+                                                                                                                                   <%else%>
+                                                                                                                                            <%=  @age_groups %>
+                                                                                                                                   <% end %>
+                                                                                                                                   </b><br /><br />
     <% end %>
 
     <div>
