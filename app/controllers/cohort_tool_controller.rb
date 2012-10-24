@@ -1298,6 +1298,7 @@ class CohortToolController < ApplicationController
     if params[:page].blank?
       session[:people] = nil
       session[:observation] = nil
+      session[:groups] = params[:age_groups]
       age_groups = params[:age_groups]
       start_year = params[:start_year]
       start_month = params[:start_month]
