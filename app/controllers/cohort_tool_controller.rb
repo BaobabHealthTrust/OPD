@@ -1,6 +1,6 @@
 class CohortToolController < ApplicationController
-require 'bean'
-require 'will_paginate'
+  require 'bean'
+  require 'will_paginate'
   def select
     @cohort_quarters  = [""]
     @report_type      = params[:report_type]
@@ -11,98 +11,98 @@ require 'will_paginate'
       @arv_number_start = params[:arv_number_start]
       @arv_number_end   = params[:arv_number_end]
     end
-##testing push
-  start_date  = PatientService.initial_encounter.encounter_datetime rescue Date.today
+    ##testing push
+    start_date  = PatientService.initial_encounter.encounter_datetime rescue Date.today
 
-  end_date    = Date.today
+    end_date    = Date.today
 
-  @cohort_quarters  += Report.generate_cohort_quarters(start_date, end_date)
+    @cohort_quarters  += Report.generate_cohort_quarters(start_date, end_date)
   end
 
   def reports
     session[:list_of_patients] = nil
     if params[:report]
       case  params[:report_type]
-        when "visits_by_day"
-          redirect_to :action   => "visits_by_day",
-                      :name     => params[:report],
-                      :pat_name => "Visits by day",
-                      :quarter  => params[:report].gsub("_"," ")
+      when "visits_by_day"
+        redirect_to :action   => "visits_by_day",
+          :name     => params[:report],
+          :pat_name => "Visits by day",
+          :quarter  => params[:report].gsub("_"," ")
         return
 
-        when "non_eligible_patients_in_cohort"
-          date = Report.generate_cohort_date_range(params[:report])
+      when "non_eligible_patients_in_cohort"
+        date = Report.generate_cohort_date_range(params[:report])
 
-          redirect_to :action       => "non_eligible_patients_in_art",
-                      :controller   => "report",
-                      :start_date   => date.first.to_s,
-                      :end_date     => date.last.to_s,
-                      :id           => "start_reason_other",
-                      :report_type  => "non_eligible patients in: #{params[:report]}"
+        redirect_to :action       => "non_eligible_patients_in_art",
+          :controller   => "report",
+          :start_date   => date.first.to_s,
+          :end_date     => date.last.to_s,
+          :id           => "start_reason_other",
+          :report_type  => "non_eligible patients in: #{params[:report]}"
         return
 
-        when "out_of_range_arv_number"
-          redirect_to :action           => "out_of_range_arv_number",
-                      :arv_end_number   => params[:arv_end_number],
-                      :arv_start_number => params[:arv_start_number],
-                      :quarter          => params[:report].gsub("_"," "),
-                      :report_type      => params[:report_type]
+      when "out_of_range_arv_number"
+        redirect_to :action           => "out_of_range_arv_number",
+          :arv_end_number   => params[:arv_end_number],
+          :arv_start_number => params[:arv_start_number],
+          :quarter          => params[:report].gsub("_"," "),
+          :report_type      => params[:report_type]
         return
 
-        when "data_consistency_check"
-          redirect_to :action       => "data_consistency_check",
-                      :quarter      => params[:report],
-                      :report_type  => params[:report_type]
+      when "data_consistency_check"
+        redirect_to :action       => "data_consistency_check",
+          :quarter      => params[:report],
+          :report_type  => params[:report_type]
         return
 
-        when "summary_of_records_that_were_updated"
-          redirect_to :action   => "records_that_were_updated",
-                      :quarter  => params[:report].gsub("_"," ")
+      when "summary_of_records_that_were_updated"
+        redirect_to :action   => "records_that_were_updated",
+          :quarter  => params[:report].gsub("_"," ")
         return
 
-        when "adherence_histogram_for_all_patients_in_the_quarter"
-          redirect_to :action   => "adherence",
-                      :quarter  => params[:report].gsub("_"," ")
+      when "adherence_histogram_for_all_patients_in_the_quarter"
+        redirect_to :action   => "adherence",
+          :quarter  => params[:report].gsub("_"," ")
         return
 
-        when "patients_with_adherence_greater_than_hundred"
-          redirect_to :action  => "patients_with_adherence_greater_than_hundred",
-                      :quarter => params[:report].gsub("_"," ")
+      when "patients_with_adherence_greater_than_hundred"
+        redirect_to :action  => "patients_with_adherence_greater_than_hundred",
+          :quarter => params[:report].gsub("_"," ")
         return
 
-        when "patients_with_multiple_start_reasons"
-          redirect_to :action       => "patients_with_multiple_start_reasons",
-                      :quarter      => params[:report],
-                      :report_type  => params[:report_type]
+      when "patients_with_multiple_start_reasons"
+        redirect_to :action       => "patients_with_multiple_start_reasons",
+          :quarter      => params[:report],
+          :report_type  => params[:report_type]
         return
 
-        when "dispensations_without_prescriptions"
-          redirect_to :action       => "dispensations_without_prescriptions",
-                      :quarter      => params[:report],
-                      :report_type  => params[:report_type]
+      when "dispensations_without_prescriptions"
+        redirect_to :action       => "dispensations_without_prescriptions",
+          :quarter      => params[:report],
+          :report_type  => params[:report_type]
         return
 
-        when "prescriptions_without_dispensations"
-          redirect_to :action       => "prescriptions_without_dispensations",
-                      :quarter      => params[:report],
-                      :report_type  => params[:report_type]
+      when "prescriptions_without_dispensations"
+        redirect_to :action       => "prescriptions_without_dispensations",
+          :quarter      => params[:report],
+          :report_type  => params[:report_type]
         return
 
-        when "drug_stock_report"
-          start_date  = "#{params[:start_year]}-#{params[:start_month]}-#{params[:start_day]}"
-          end_date    = "#{params[:end_year]}-#{params[:end_month]}-#{params[:end_day]}"
+      when "drug_stock_report"
+        start_date  = "#{params[:start_year]}-#{params[:start_month]}-#{params[:start_day]}"
+        end_date    = "#{params[:end_year]}-#{params[:end_month]}-#{params[:end_day]}"
 
-          if end_date.to_date < start_date.to_date
-            redirect_to :controller   => "cohort_tool",
-                        :action       => "select",
-                        :report_type  =>"drug_stock_report" and return
-          end rescue nil
+        if end_date.to_date < start_date.to_date
+          redirect_to :controller   => "cohort_tool",
+            :action       => "select",
+            :report_type  =>"drug_stock_report" and return
+        end rescue nil
 
-          redirect_to :controller => "drug",
-                      :action     => "report",
-                      :start_date => start_date,
-                      :end_date   => end_date,
-                      :quarter    => params[:report].gsub("_"," ")
+        redirect_to :controller => "drug",
+          :action     => "report",
+          :start_date => start_date,
+          :end_date   => end_date,
+          :quarter    => params[:report].gsub("_"," ")
         return
       end
     end
@@ -148,8 +148,8 @@ require 'will_paginate'
 
       new_encounter  = other_encounters.reduce([])do |result, e|
         result << e if( e.encounter_datetime.strftime("%d-%m-%Y") == encounter.encounter_datetime.strftime("%d-%m-%Y")&&
-                        e.patient_id      == encounter.patient_id &&
-                        e.encounter_type  == encounter. encounter_type)
+            e.patient_id      == encounter.patient_id &&
+            e.encounter_type  == encounter. encounter_type)
         result
       end
 
@@ -162,17 +162,17 @@ require 'will_paginate'
       changed_from  = changed_from(voided_observations)
 
       if( voided_observations && !voided_observations.empty?)
-          voided_records[encounter.id] = {
-              "id"              => patient.patient_id,
-              "arv_number"      => patient_bean.arv_number,
-              "name"            => patient_bean.name,
-              "national_id"     => patient_bean.national_id,
-              "encounter_name"  => encounter.name,
-              "voided_date"     => encounter.date_voided,
-              "reason"          => encounter.void_reason,
-              "change_from"     => changed_from,
-              "change_to"       => changed_to
-            }
+        voided_records[encounter.id] = {
+          "id"              => patient.patient_id,
+          "arv_number"      => patient_bean.arv_number,
+          "name"            => patient_bean.name,
+          "national_id"     => patient_bean.national_id,
+          "encounter_name"  => encounter.name,
+          "voided_date"     => encounter.date_voided,
+          "reason"          => encounter.void_reason,
+          "change_from"     => changed_from,
+          "change_to"       => changed_to
+        }
       end
     end
 
@@ -188,12 +188,12 @@ require 'will_paginate'
       changed_from      = ''
       changed_to        = ''
 
-     new_encounter  =  drug_encounters.reduce([])do |result, e|
+      new_encounter  =  drug_encounters.reduce([])do |result, e|
         result << e if( e.encounter_datetime.strftime("%d-%m-%Y") == encounter.encounter_datetime.strftime("%d-%m-%Y")&&
-                        e.patient_id      == encounter.patient_id &&
-                        e.encounter_type  == encounter. encounter_type)
-          result
-        end
+            e.patient_id      == encounter.patient_id &&
+            e.encounter_type  == encounter. encounter_type)
+        result
+      end
 
       new_encounter = new_encounter.last
 
@@ -203,15 +203,15 @@ require 'will_paginate'
 
       if( orders && !orders.empty?)
         voided_records[encounter.id]= {
-            "id"              => patient.patient_id,
-            "arv_number"      => patient_bean.arv_number,
-            "name"            => patient_bean.name,
-            "national_id"     => patient_bean.national_id,
-            "encounter_name"  => encounter.name,
-            "voided_date"     => encounter.date_voided,
-            "reason"          => encounter.void_reason,
-            "change_from"     => changed_from,
-            "change_to"       => changed_to
+          "id"              => patient.patient_id,
+          "arv_number"      => patient_bean.arv_number,
+          "name"            => patient_bean.name,
+          "national_id"     => patient_bean.national_id,
+          "encounter_name"  => encounter.name,
+          "voided_date"     => encounter.date_voided,
+          "reason"          => encounter.void_reason,
+          "change_from"     => changed_from,
+          "change_to"       => changed_to
         }
       end
 
@@ -220,7 +220,7 @@ require 'will_paginate'
     show_tabuler_format(voided_records)
   end
 
-   def show_tabuler_format(records)
+  def show_tabuler_format(records)
 
     patients = {}
 
@@ -252,35 +252,35 @@ require 'will_paginate'
       value_data =  value.last
 
       case value_name
-        when "id"
-          patient_id = value_data
-        when "arv_number"
-          arv_number = value_data
-        when "name"
-          name = value_data
-        when "national_id"
-          national_id = value_data
-        when "encounter_name"
-          encounter_name = value_data
-        when "voided_date"
-          voided_date = value_data
-        when "reason"
-          reason = value_data
-        when "change_from"
-          value_data.split("</br>").each do |obs|
-            obs_name  = obs.split(':')[0].strip
-            obs_value = obs.split(':')[1].strip rescue ''
+      when "id"
+        patient_id = value_data
+      when "arv_number"
+        arv_number = value_data
+      when "name"
+        name = value_data
+      when "national_id"
+        national_id = value_data
+      when "encounter_name"
+        encounter_name = value_data
+      when "voided_date"
+        voided_date = value_data
+      when "reason"
+        reason = value_data
+      when "change_from"
+        value_data.split("</br>").each do |obs|
+          obs_name  = obs.split(':')[0].strip
+          obs_value = obs.split(':')[1].strip rescue ''
 
-            changed_from_obs[obs_name] = obs_value
-          end unless value_data.blank?
-        when "change_to"
+          changed_from_obs[obs_name] = obs_value
+        end unless value_data.blank?
+      when "change_to"
 
-          value_data.split("</br>").each do |obs|
-            obs_name  = obs.split(':')[0].strip
-            obs_value = obs.split(':')[1].strip rescue ''
+        value_data.split("</br>").each do |obs|
+          obs_name  = obs.split(':')[0].strip
+          obs_value = obs.split(':')[1].strip rescue ''
 
-            changed_to_obs[obs_name] = obs_value
-          end unless value_data.blank?
+          changed_to_obs[obs_name] = obs_value
+        end unless value_data.blank?
       end
     end
 
@@ -321,15 +321,15 @@ require 'will_paginate'
     end
 
     results = {
-        "id"              => patient_id,
-        "arv_number"      => arv_number,
-        "name"            => name,
-        "national_id"     => national_id,
-        "encounter_name"  => encounter_name,
-        "voided_date"     => voided_date,
-        "obs_name"        => obs_names,
-        "reason"          => reason
-      }
+      "id"              => patient_id,
+      "arv_number"      => arv_number,
+      "name"            => name,
+      "national_id"     => national_id,
+      "encounter_name"  => encounter_name,
+      "voided_date"     => voided_date,
+      "obs_name"        => obs_names,
+      "reason"          => reason
+    }
 
     results
   end
@@ -340,21 +340,21 @@ require 'will_paginate'
     observations.collect do |obs|
       ["value_coded","value_datetime","value_modifier","value_numeric","value_text"].each do |value|
         case value
-          when "value_coded"
-            next if obs.value_coded.blank?
-            changed_obs += "#{obs.to_s}</br>"
-          when "value_datetime"
-            next if obs.value_datetime.blank?
-            changed_obs += "#{obs.to_s}</br>"
-          when "value_numeric"
-            next if obs.value_numeric.blank?
-            changed_obs += "#{obs.to_s}</br>"
-          when "value_text"
-            next if obs.value_text.blank?
-            changed_obs += "#{obs.to_s}</br>"
-          when "value_modifier"
-            next if obs.value_modifier.blank?
-            changed_obs += "#{obs.to_s}</br>"
+        when "value_coded"
+          next if obs.value_coded.blank?
+          changed_obs += "#{obs.to_s}</br>"
+        when "value_datetime"
+          next if obs.value_datetime.blank?
+          changed_obs += "#{obs.to_s}</br>"
+        when "value_numeric"
+          next if obs.value_numeric.blank?
+          changed_obs += "#{obs.to_s}</br>"
+        when "value_text"
+          next if obs.value_text.blank?
+          changed_obs += "#{obs.to_s}</br>"
+        when "value_modifier"
+          next if obs.value_modifier.blank?
+          changed_obs += "#{obs.to_s}</br>"
         end
       end
     end
@@ -366,11 +366,11 @@ require 'will_paginate'
     encounter_type = enc.encounter_type
 
     encounter = Encounter.find(:first,
-                 :joins       => "INNER JOIN obs ON encounter.encounter_id=obs.encounter_id",
-                 :conditions  => ["encounter_type=? AND encounter.patient_id=? AND Date(encounter.encounter_datetime)=?",
-                                  encounter_type,enc.patient_id, enc.encounter_datetime.to_date],
-                 :group       => "encounter.encounter_type",
-                 :order       => "encounter.encounter_datetime DESC")
+      :joins       => "INNER JOIN obs ON encounter.encounter_id=obs.encounter_id",
+      :conditions  => ["encounter_type=? AND encounter.patient_id=? AND Date(encounter.encounter_datetime)=?",
+        encounter_type,enc.patient_id, enc.encounter_datetime.to_date],
+      :group       => "encounter.encounter_type",
+      :order       => "encounter.encounter_datetime DESC")
 
     observations = encounter.observations rescue nil
     return if observations.blank?
@@ -379,21 +379,21 @@ require 'will_paginate'
     observations.collect do |obs|
       ["value_coded","value_datetime","value_modifier","value_numeric","value_text"].each do |value|
         case value
-          when "value_coded"
-            next if obs.value_coded.blank?
-            changed_obs += "#{obs.to_s}</br>"
-          when "value_datetime"
-            next if obs.value_datetime.blank?
-            changed_obs += "#{obs.to_s}</br>"
-          when "value_numeric"
-            next if obs.value_numeric.blank?
-            changed_obs += "#{obs.to_s}</br>"
-          when "value_text"
-            next if obs.value_text.blank?
-            changed_obs += "#{obs.to_s}</br>"
-          when "value_modifier"
-            next if obs.value_modifier.blank?
-            changed_obs += "#{obs.to_s}</br>"
+        when "value_coded"
+          next if obs.value_coded.blank?
+          changed_obs += "#{obs.to_s}</br>"
+        when "value_datetime"
+          next if obs.value_datetime.blank?
+          changed_obs += "#{obs.to_s}</br>"
+        when "value_numeric"
+          next if obs.value_numeric.blank?
+          changed_obs += "#{obs.to_s}</br>"
+        when "value_text"
+          next if obs.value_text.blank?
+          changed_obs += "#{obs.to_s}</br>"
+        when "value_modifier"
+          next if obs.value_modifier.blank?
+          changed_obs += "#{obs.to_s}</br>"
         end
       end
     end
@@ -453,9 +453,9 @@ require 'will_paginate'
           visit_date    = this_day.first.encounter_datetime.to_date.strftime("%d-%b-%Y")
           js_date       = this_day.first.encounter_datetime.to_time.to_i * 1000
         else
-        this_day      = (week.to_date + index.days)
-        visit_date    = this_day.strftime("%d-%b-%Y")
-        js_date       = this_day.to_time.to_i * 1000
+          this_day      = (week.to_date + index.days)
+          visit_date    = this_day.strftime("%d-%b-%Y")
+          js_date       = this_day.to_time.to_i * 1000
         end
 
         (week_day_visits[day].nil?) ? week_day_visits[day] = [[js_date, visits_number, visit_date]] : week_day_visits[day].push([js_date, visits_number, visit_date])
@@ -470,18 +470,18 @@ require 'will_paginate'
 
       visit_date = visit.encounter_datetime.strftime("%d-%b-%Y")
 
-	  patient_bean = PatientService.get_patient(visit.patient.person)
+      patient_bean = PatientService.get_patient(visit.patient.person)
 
       # get a patient of a given visit
       new_patient   = { :patient_id   => (visit.patient.patient_id || ""),
-                        :arv_number   => (patient_bean.arv_number || ""),
-                        :name         => (patient_bean.name || ""),
-                        :national_id  => (patient_bean.national_id || ""),
-                        :gender       => (patient_bean.sex || ""),
-                        :age          => (patient_bean.age || ""),
-                        :birthdate    => (patient_bean.birth_date || ""),
-                        :phone_number => (PatientService.phone_numbers(visit.patient) || ""),
-                        :start_date   => (visit.patient.encounters.last.encounter_datetime.strftime("%d-%b-%Y") || "")
+        :arv_number   => (patient_bean.arv_number || ""),
+        :name         => (patient_bean.name || ""),
+        :national_id  => (patient_bean.national_id || ""),
+        :gender       => (patient_bean.sex || ""),
+        :age          => (patient_bean.age || ""),
+        :birthdate    => (patient_bean.birth_date || ""),
+        :phone_number => (PatientService.phone_numbers(visit.patient) || ""),
+        :start_date   => (visit.patient.encounters.last.encounter_datetime.strftime("%d-%b-%Y") || "")
       }
 
       #add a patient to the day
@@ -495,8 +495,8 @@ require 'will_paginate'
 
   def get_visits_by_day(start_date,end_date)
     required_encounters = ["ART ADHERENCE", "ART_FOLLOWUP",   "ART_INITIAL",
-                           "ART VISIT",     "HIV RECEPTION",  "HIV STAGING",
-                           "PART_FOLLOWUP", "PART_INITIAL",   "VITALS"]
+      "ART VISIT",     "HIV RECEPTION",  "HIV STAGING",
+      "PART_FOLLOWUP", "PART_INITIAL",   "VITALS"]
 
     required_encounters_ids = required_encounters.inject([]) do |encounters_ids, encounter_type|
       encounters_ids << EncounterType.find_by_name(encounter_type).id rescue nil
@@ -507,79 +507,79 @@ require 'will_paginate'
 
     Encounter.find(:all,
       :joins      => ["INNER JOIN obs     ON obs.encounter_id    = encounter.encounter_id",
-                      "INNER JOIN patient ON patient.patient_id  = encounter.patient_id"],
+        "INNER JOIN patient ON patient.patient_id  = encounter.patient_id"],
       :conditions => ["obs.voided = 0 AND encounter_type IN (?) AND encounter_datetime >=? AND encounter_datetime <=?",required_encounters_ids,start_date,end_date],
       :group      => "encounter.patient_id,DATE(encounter_datetime)",
       :order      => "encounter.encounter_datetime ASC")
   end
 
   def prescriptions_without_dispensations
-      include_url_params_for_back_button
+    include_url_params_for_back_button
 
-      date_range  = Report.generate_cohort_date_range(params[:quarter])
-      start_date  = date_range.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
-      end_date    = date_range.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
-      @report     = report_prescriptions_without_dispensations_data(start_date , end_date)
+    date_range  = Report.generate_cohort_date_range(params[:quarter])
+    start_date  = date_range.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    end_date    = date_range.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    @report     = report_prescriptions_without_dispensations_data(start_date , end_date)
 
-      render :layout => 'report'
+    render :layout => 'report'
   end
 
   def  dispensations_without_prescriptions
-       include_url_params_for_back_button
+    include_url_params_for_back_button
 
-      date_range  = Report.generate_cohort_date_range(params[:quarter])
-      start_date  = date_range.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
-      end_date    = date_range.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
-      @report     = report_dispensations_without_prescriptions_data(start_date , end_date)
+    date_range  = Report.generate_cohort_date_range(params[:quarter])
+    start_date  = date_range.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    end_date    = date_range.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    @report     = report_dispensations_without_prescriptions_data(start_date , end_date)
 
-       render :layout => 'report'
+    render :layout => 'report'
   end
 
   def  patients_with_multiple_start_reasons
-       include_url_params_for_back_button
+    include_url_params_for_back_button
 
-      date_range  = Report.generate_cohort_date_range(params[:quarter])
-      start_date  = date_range.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
-      end_date    = date_range.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
-      @report     = report_patients_with_multiple_start_reasons(start_date , end_date)
+    date_range  = Report.generate_cohort_date_range(params[:quarter])
+    start_date  = date_range.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    end_date    = date_range.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    @report     = report_patients_with_multiple_start_reasons(start_date , end_date)
 
-      render :layout => 'report'
+    render :layout => 'report'
   end
 
   def out_of_range_arv_number
 
-      include_url_params_for_back_button
+    include_url_params_for_back_button
 
-      date_range        = Report.generate_cohort_date_range(params[:quarter])
-      start_date  = date_range.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
-      end_date    = date_range.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
-      arv_number_range  = [params[:arv_start_number].to_i, params[:arv_end_number].to_i]
+    date_range        = Report.generate_cohort_date_range(params[:quarter])
+    start_date  = date_range.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    end_date    = date_range.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    arv_number_range  = [params[:arv_start_number].to_i, params[:arv_end_number].to_i]
 
-      @report = report_out_of_range_arv_numbers(arv_number_range, start_date, end_date)
+    @report = report_out_of_range_arv_numbers(arv_number_range, start_date, end_date)
 
-      render :layout => 'report'
+    render :layout => 'report'
   end
 
   def data_consistency_check
-      include_url_params_for_back_button
-      date_range  = Report.generate_cohort_date_range(params[:quarter])
-      start_date  = date_range.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
-      end_date    = date_range.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    include_url_params_for_back_button
+    date_range  = Report.generate_cohort_date_range(params[:quarter])
+    start_date  = date_range.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    end_date    = date_range.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
 
-      @dead_patients_with_visits       = report_dead_with_visits(start_date, end_date)
-      @males_allegedly_pregnant        = report_males_allegedly_pregnant(start_date, end_date)
-      @move_from_second_line_to_first =  report_patients_who_moved_from_second_to_first_line_drugs(start_date, end_date)
-      @patients_with_wrong_start_dates = report_with_drug_start_dates_less_than_program_enrollment_dates(start_date, end_date)
-      session[:data_consistency_check] = { :dead_patients_with_visits => @dead_patients_with_visits,
-                                           :males_allegedly_pregnant  => @males_allegedly_pregnant,
-                                           :patients_with_wrong_start_dates => @patients_with_wrong_start_dates,
-                                           :move_from_second_line_to_first =>  @move_from_second_line_to_first
-                                         }
-      @checks = [['Dead patients with Visits', @dead_patients_with_visits.length],
-                 ['Male patients with a pregnant observation', @males_allegedly_pregnant.length],
-                 ['Patients who moved from 2nd to 1st line drugs', @move_from_second_line_to_first.length],
-                 ['patients with start dates > first receive drug dates', @patients_with_wrong_start_dates.length]]
-      render :layout => 'report'
+    @dead_patients_with_visits       = report_dead_with_visits(start_date, end_date)
+    @males_allegedly_pregnant        = report_males_allegedly_pregnant(start_date, end_date)
+    @move_from_second_line_to_first =  report_patients_who_moved_from_second_to_first_line_drugs(start_date, end_date)
+    @patients_with_wrong_start_dates = report_with_drug_start_dates_less_than_program_enrollment_dates(start_date, end_date)
+    session[:data_consistency_check] = { :dead_patients_with_visits => @dead_patients_with_visits,
+      :males_allegedly_pregnant  => @males_allegedly_pregnant,
+      :patients_with_wrong_start_dates => @patients_with_wrong_start_dates,
+      :move_from_second_line_to_first =>  @move_from_second_line_to_first
+    }
+    @checks = [['Dead patients with Visits', @dead_patients_with_visits.length],
+      ['Male patients with a pregnant observation', @males_allegedly_pregnant.length],
+      ['Patients who moved from 2nd to 1st line drugs', @move_from_second_line_to_first.length],
+      ['patients with start dates > first receive drug dates', @patients_with_wrong_start_dates.length]]
+    render :layout => 'report'
   end
 
   def list
@@ -587,15 +587,15 @@ require 'will_paginate'
     include_url_params_for_back_button
 
     case params[:check_type]
-       when 'Dead patients with Visits' then
-            @report  =  session[:data_consistency_check][:dead_patients_with_visits]
-       when 'Patients who moved from 2nd to 1st line drugs'then
-             @report =  session[:data_consistency_check][:move_from_second_line_to_first]
-       when 'Male patients with a pregnant observation' then
-             @report =  session[:data_consistency_check][:males_allegedly_pregnant]
-       when 'patients with start dates > first receive drug dates' then
-             @report =  session[:data_consistency_check][:patients_with_wrong_start_dates]
-       else
+    when 'Dead patients with Visits' then
+      @report  =  session[:data_consistency_check][:dead_patients_with_visits]
+    when 'Patients who moved from 2nd to 1st line drugs'then
+      @report =  session[:data_consistency_check][:move_from_second_line_to_first]
+    when 'Male patients with a pregnant observation' then
+      @report =  session[:data_consistency_check][:males_allegedly_pregnant]
+    when 'patients with start dates > first receive drug dates' then
+      @report =  session[:data_consistency_check][:patients_with_wrong_start_dates]
+    else
 
     end
 
@@ -603,8 +603,8 @@ require 'will_paginate'
   end
 
   def include_url_params_for_back_button
-       @report_quarter = params[:quarter]
-       @report_type = params[:report_type]
+    @report_quarter = params[:quarter]
+    @report_type = params[:report_type]
   end
 
   def cohort
@@ -655,31 +655,31 @@ require 'will_paginate'
 
   def patients_with_adherence_greater_than_hundred
 
-      min_range = params[:min_range]
-      max_range = params[:max_range]
-      missing_adherence = false
-      missing_adherence = true if params[:show_missing_adherence] == "yes"
-      session[:list_of_patients] = nil
+    min_range = params[:min_range]
+    max_range = params[:max_range]
+    missing_adherence = false
+    missing_adherence = true if params[:show_missing_adherence] == "yes"
+    session[:list_of_patients] = nil
 
-      @patients = adherence_over_hundred(params[:quarter],min_range,max_range,missing_adherence)
+    @patients = adherence_over_hundred(params[:quarter],min_range,max_range,missing_adherence)
 
-      @quarter = params[:quarter] + ": (#{@patients.length})" rescue  params[:quarter]
-      if missing_adherence
-        @report_type = "Patient(s) with missing adherence"
-      elsif max_range.blank? and min_range.blank?
-        @report_type = "Patient(s) with adherence greater than 100%"
-      else
-        @report_type = "Patient(s) with adherence starting from  #{min_range}% to #{max_range}%"
-      end
-      render :layout => 'report'
-      return
+    @quarter = params[:quarter] + ": (#{@patients.length})" rescue  params[:quarter]
+    if missing_adherence
+      @report_type = "Patient(s) with missing adherence"
+    elsif max_range.blank? and min_range.blank?
+      @report_type = "Patient(s) with adherence greater than 100%"
+    else
+      @report_type = "Patient(s) with adherence starting from  #{min_range}% to #{max_range}%"
+    end
+    render :layout => 'report'
+    return
   end
 
   def report_patients_with_multiple_start_reasons(start_date , end_date)
 
     art_eligibility_id = ConceptName.find_by_name('REASON FOR ART ELIGIBILITY').concept_id
     patients = Observation.find_by_sql(
-                ["SELECT person_id, concept_id, date_created, obs_datetime, value_coded_name_id
+      ["SELECT person_id, concept_id, date_created, obs_datetime, value_coded_name_id
                  FROM obs
                  WHERE (SELECT COUNT(*)
                         FROM obs observation
@@ -695,13 +695,13 @@ require 'will_paginate'
       patient = Patient.find(reason[:person_id])
       patient_bean = PatientService.get_patient(patient.person)
       patients_data << {'person_id' => patient.id,
-                        'arv_number' => patient_bean.arv_number,
-                        'national_id' => patient_bean.national_id,
-                        'date_created' => reason[:date_created].strftime("%Y-%m-%d %H:%M:%S"),
-                        'start_reason' => ConceptName.find(reason[:value_coded_name_id]).name
-                       }
+        'arv_number' => patient_bean.arv_number,
+        'national_id' => patient_bean.national_id,
+        'date_created' => reason[:date_created].strftime("%Y-%m-%d %H:%M:%S"),
+        'start_reason' => ConceptName.find(reason[:value_coded_name_id]).name
+      }
     end
-   patients_data
+    patients_data
   end
 
   def voided_observations(encounter)
@@ -725,7 +725,7 @@ require 'will_paginate'
                                    AND voided = 0
                                    AND (NOT EXISTS(SELECT * FROM patient_identifier
                                    WHERE identifier_type = ? AND date_created >= ? AND date_created <= ?))",
-                                   arv_number_id,  arv_start_number,  arv_end_number, arv_number_id, start_date, end_date])
+        arv_number_id,  arv_start_number,  arv_end_number, arv_number_id, start_date, end_date])
 
     out_of_range_arv_numbers_data = []
     out_of_range_arv_numbers.each do |arv_num_data|
@@ -733,14 +733,14 @@ require 'will_paginate'
       patient_bean = PatientService.get_patient(patient.person)
 
       out_of_range_arv_numbers_data <<{'person_id' => patient.id,
-                                       'arv_number' => patient_bean.arv_number,
-                                       'name' => patient_bean.name,
-                                       'national_id' => patient_bean.national_id,
-                                       'gender' => patient_bean.sex,
-                                       'age' => patient_bean.age,
-                                       'birthdate' => patient_bean.birth_date,
-                                       'date_created' => arv_num_data[:date_created].strftime("%Y-%m-%d %H:%M:%S")
-                                       }
+        'arv_number' => patient_bean.arv_number,
+        'name' => patient_bean.name,
+        'national_id' => patient_bean.national_id,
+        'gender' => patient_bean.sex,
+        'age' => patient_bean.age,
+        'birthdate' => patient_bean.birth_date,
+        'date_created' => arv_num_data[:date_created].strftime("%Y-%m-%d %H:%M:%S")
+      }
     end
     out_of_range_arv_numbers_data
   end
@@ -749,22 +749,22 @@ require 'will_paginate'
     pills_dispensed_id      = ConceptName.find_by_name('PILLS DISPENSED').concept_id
 
     missed_prescriptions_data = Observation.find(:all, :select =>  "person_id, value_drug, date_created",
-                                              :conditions =>["order_id IS NULL
+      :conditions =>["order_id IS NULL
                                                 AND date_created >= ? AND date_created <= ? AND
                                                     concept_id = ? AND voided = 0" ,start_date , end_date, pills_dispensed_id])
     dispensations_without_prescriptions = []
 
     missed_prescriptions_data.each do |dispensation|
-        patient = Patient.find(dispensation[:person_id])
-        patient_bean = PatientService.get_patient(patient.person)
-        drug_name    = Drug.find(dispensation[:value_drug]).name
+      patient = Patient.find(dispensation[:person_id])
+      patient_bean = PatientService.get_patient(patient.person)
+      drug_name    = Drug.find(dispensation[:value_drug]).name
 
-        dispensations_without_prescriptions << { 'person_id' => patient.id,
-                                              'arv_number' => patient_bean.arv_number,
-                                              'national_id' => patient_bean.national_id,
-                                              'date_created' => dispensation[:date_created].strftime("%Y-%m-%d %H:%M:%S"),
-                                              'drug_name' => drug_name
-                                             }
+      dispensations_without_prescriptions << { 'person_id' => patient.id,
+        'arv_number' => patient_bean.arv_number,
+        'national_id' => patient_bean.national_id,
+        'date_created' => dispensation[:date_created].strftime("%Y-%m-%d %H:%M:%S"),
+        'drug_name' => drug_name
+      }
     end
 
     dispensations_without_prescriptions
@@ -781,16 +781,16 @@ require 'will_paginate'
     prescriptions_without_dispensations = []
 
     missed_dispensations_data.each do |prescription|
-        patient      = Patient.find(prescription[:patient_id])
-        drug_id      = DrugOrder.find(prescription[:order_id]).drug_inventory_id
-        drug_name    = Drug.find(drug_id).name
+      patient      = Patient.find(prescription[:patient_id])
+      drug_id      = DrugOrder.find(prescription[:order_id]).drug_inventory_id
+      drug_name    = Drug.find(drug_id).name
 
-        prescriptions_without_dispensations << {'person_id' => patient.id,
-                                                'arv_number' => PatientService.get_patient_identifier(patient, 'ARV Number'),
-                                                'national_id' => PatientService.get_national_id(patient),
-                                                'date_created' => prescription[:date_created].strftime("%Y-%m-%d %H:%M:%S"),
-                                                'drug_name' => drug_name
-                                                }
+      prescriptions_without_dispensations << {'person_id' => patient.id,
+        'arv_number' => PatientService.get_patient_identifier(patient, 'ARV Number'),
+        'national_id' => PatientService.get_national_id(patient),
+        'date_created' => prescription[:date_created].strftime("%Y-%m-%d %H:%M:%S"),
+        'drug_name' => drug_name
+      }
     end
     prescriptions_without_dispensations
   end
@@ -812,15 +812,15 @@ require 'will_paginate'
       person = Person.find(patient_data_row[:patient_id].to_i)
       patient_bean = PatientService.get_patient(person)
       patients_data <<{ 'person_id' => person.id,
-                        'arv_number' => patient_bean.arv_number,
-                        'name' => patient_bean.name,
-                        'national_id' => patient_bean.national_id,
-                        'gender' => patient_bean.sex,
-                        'age' => patient_bean.age,
-                        'birthdate' => patient_bean.birth_date,
-                        'phone' => PatientService.phone_numbers(person),
-                        'date_created' => patient_data_row[:date_started]
-                       }
+        'arv_number' => patient_bean.arv_number,
+        'name' => patient_bean.name,
+        'national_id' => patient_bean.national_id,
+        'gender' => patient_bean.sex,
+        'age' => patient_bean.age,
+        'birthdate' => patient_bean.birth_date,
+        'phone' => PatientService.phone_numbers(person),
+        'date_created' => patient_data_row[:date_started]
+      }
     end
     patients_data
   end
@@ -834,22 +834,22 @@ require 'will_paginate'
                                            obs.concept_id = ? AND obs.obs_datetime >= ? AND obs.obs_datetime <= ? AND obs.voided = 0",
         pregnant_patient_concept_id, '2008-12-23 00:00:00', end_date])
 
-        patients_data  = []
-        patients.each do |patient_data_row|
-          person = Person.find(patient_data_row[:person_id].to_i)
+    patients_data  = []
+    patients.each do |patient_data_row|
+      person = Person.find(patient_data_row[:person_id].to_i)
 		  patient_bean = PatientService.get_patient(person)
-          patients_data <<{ 'person_id' => person.id,
-                            'arv_number' => patient_bean.arv_number,
-                            'name' => patient_bean.name,
-                            'national_id' => patient_bean.national_id,
-                            'gender' => patient_bean.sex,
-                            'age' => patient_bean.age,
-                            'birthdate' => patient_bean.birth_date,
-                            'phone' => PatientService.phone_numbers(person),
-                            'date_created' => patient_data_row[:obs_datetime]
-                           }
-        end
-        patients_data
+      patients_data <<{ 'person_id' => person.id,
+        'arv_number' => patient_bean.arv_number,
+        'name' => patient_bean.name,
+        'national_id' => patient_bean.national_id,
+        'gender' => patient_bean.sex,
+        'age' => patient_bean.age,
+        'birthdate' => patient_bean.birth_date,
+        'phone' => PatientService.phone_numbers(person),
+        'date_created' => patient_data_row[:obs_datetime]
+      }
+    end
+    patients_data
   end
 
   def report_patients_who_moved_from_second_to_first_line_drugs(start_date, end_date)
@@ -889,15 +889,15 @@ require 'will_paginate'
       person = Person.find(patient_data_row[:person_id].to_i)
       patient_bean = PatientService.get_patient(person)
       patients_data <<{ 'person_id' => person.id,
-                        'arv_number' => patient_bean.arv_number,
-                        'name' => patient_bean.name,
-                        'national_id' => patient_bean.national_id,
-                        'gender' => patient_bean.sex,
-                        'age' => patient_bean.age,
-                        'birthdate' => patient_bean.birth_date,
-                        'phone' => PatientService.phone_numbers(person),
-                        'date_created' => patient_data_row[:date_started]
-                       }
+        'arv_number' => patient_bean.arv_number,
+        'name' => patient_bean.name,
+        'national_id' => patient_bean.national_id,
+        'gender' => patient_bean.sex,
+        'age' => patient_bean.age,
+        'birthdate' => patient_bean.birth_date,
+        'phone' => PatientService.phone_numbers(person),
+        'date_created' => patient_data_row[:date_started]
+      }
     end
     patients_data
   end
@@ -942,30 +942,30 @@ require 'will_paginate'
     patients_data  = []
     patients.each do |patient_data_row|
       person = Person.find(patient_data_row[:patient_id])
-	  patient_bean = PatientService.get_patient(person)
+      patient_bean = PatientService.get_patient(person)
       patients_data <<{ 'person_id' => person.id,
-                        'arv_number' => patient_bean.arv_number,
-                        'name' => patient_bean.name,
-                        'national_id' => patient_bean.national_id,
-                        'gender' => patient_bean.sex,
-                        'age' => patient_bean.age,
-                        'birthdate' => patient_bean.birth_date,
-                        'phone' => PatientService.phone_numbers(person),
-                        'date_created' => patient_data_row[:date_started_ARV]
-                       }
+        'arv_number' => patient_bean.arv_number,
+        'name' => patient_bean.name,
+        'national_id' => patient_bean.national_id,
+        'gender' => patient_bean.sex,
+        'age' => patient_bean.age,
+        'birthdate' => patient_bean.birth_date,
+        'phone' => PatientService.phone_numbers(person),
+        'date_created' => patient_data_row[:date_started_ARV]
+      }
     end
     patients_data
   end
 
   def get_adherence(quarter="Q1 2009")
-  date = Report.generate_cohort_date_range(quarter)
+    date = Report.generate_cohort_date_range(quarter)
 
-  start_date  = date.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
-  end_date    = date.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
-  adherences  = Hash.new(0)
-  adherence_concept_id = ConceptName.find_by_name("WHAT WAS THE PATIENTS ADHERENCE FOR THIS DRUG ORDER").concept_id
+    start_date  = date.first.beginning_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    end_date    = date.last.end_of_day.strftime("%Y-%m-%d %H:%M:%S")
+    adherences  = Hash.new(0)
+    adherence_concept_id = ConceptName.find_by_name("WHAT WAS THE PATIENTS ADHERENCE FOR THIS DRUG ORDER").concept_id
 
- adherence_sql_statement= " SELECT worse_adherence_dif, pat_ad.person_id as patient_id, pat_ad.value_numeric AS adherence_rate_worse
+    adherence_sql_statement= " SELECT worse_adherence_dif, pat_ad.person_id as patient_id, pat_ad.value_numeric AS adherence_rate_worse
                             FROM (SELECT ABS(100 - Abs(value_numeric)) as worse_adherence_dif, obs_id, person_id, concept_id, encounter_id, order_id, obs_datetime, location_id, value_numeric
                                   FROM obs q
                                   WHERE concept_id = #{adherence_concept_id} AND order_id IS NOT NULL
@@ -973,22 +973,22 @@ require 'will_paginate'
                             WHERE pat_ad.obs_datetime >= '#{start_date}' AND pat_ad.obs_datetime<= '#{end_date}'
                             GROUP BY patient_id "
 
-  adherence_rates = Observation.find_by_sql(adherence_sql_statement)
+    adherence_rates = Observation.find_by_sql(adherence_sql_statement)
 
-  adherence_rates.each{|adherence|
+    adherence_rates.each{|adherence|
 
-    rate = adherence.adherence_rate_worse.to_i
+      rate = adherence.adherence_rate_worse.to_i
 
-    if rate >= 91 and rate <= 94
-      cal_adherence = 94
-    elsif  rate >= 95 and rate <= 100
-      cal_adherence = 100
-    else
-      cal_adherence = rate + (5- rate%5)%5
-    end
-    adherences[cal_adherence]+=1
-  }
-  adherences
+      if rate >= 91 and rate <= 94
+        cal_adherence = 94
+      elsif  rate >= 95 and rate <= 100
+        cal_adherence = 100
+      else
+        cal_adherence = rate + (5- rate%5)%5
+      end
+      adherences[cal_adherence]+=1
+    }
+    adherences
   end
 
   def adherence_over_hundred(quarter="Q1 2009",min_range = nil,max_range=nil,missing_adherence=false)
@@ -1002,10 +1002,10 @@ require 'will_paginate'
     patients = {}
 
     if (min_range.blank? or max_range.blank?) and !missing_adherence
-        adherence_range_filter = " (adherence_rate_worse > 100) "
+      adherence_range_filter = " (adherence_rate_worse > 100) "
     elsif missing_adherence
 
-       adherence_range_filter = " (adherence_rate_worse IS NULL) "
+      adherence_range_filter = " (adherence_rate_worse IS NULL) "
 
     end
 
@@ -1028,7 +1028,7 @@ require 'will_paginate'
                                     orders oders
                                On     oders.order_id = obs_inner_order.order_id) patients_with_adherence  "
 
-      worse_adherence_per_patient =" (SELECT worse_adherence_dif, pat_ad.person_id as patient_id, pat_ad.value_numeric AS adherence_rate_worse
+    worse_adherence_per_patient =" (SELECT worse_adherence_dif, pat_ad.person_id as patient_id, pat_ad.value_numeric AS adherence_rate_worse
                                 FROM (SELECT ABS(100 - Abs(value_numeric)) as worse_adherence_dif, obs_id, person_id, concept_id, encounter_id, order_id, obs_datetime, location_id, value_numeric
                                       FROM obs q
                                       WHERE concept_id = #{adherence_concept_id} AND order_id IS NOT NULL
@@ -1036,18 +1036,18 @@ require 'will_paginate'
                                 WHERE pat_ad.obs_datetime >= '#{start_date}' AND pat_ad.obs_datetime<= '#{end_date}'
                                 GROUP BY patient_id ) worse_adherence_per_patient   "
 
-     patient_adherences_sql =  " SELECT *
+    patient_adherences_sql =  " SELECT *
                                  FROM   #{patients_with_adherences} INNER JOIN #{worse_adherence_per_patient}
                                  ON patients_with_adherence.patient_id = worse_adherence_per_patient.patient_id
                                  WHERE  #{adherence_range_filter} "
 
-      rates = Observation.find_by_sql(patient_adherences_sql)
+    rates = Observation.find_by_sql(patient_adherences_sql)
 
-      patients_rates = []
-      rates.each{|rate|
-        patients_rates << rate
-      }
-      adherence_rates = patients_rates
+    patients_rates = []
+    rates.each{|rate|
+      patients_rates << rate
+    }
+    adherence_rates = patients_rates
 
     arv_number_id = PatientIdentifierType.find_by_name('ARV Number').patient_identifier_type_id
     adherence_rates.each{|rate|
@@ -1059,33 +1059,33 @@ require 'will_paginate'
       pill_count = Observation.find(:first, :conditions => "order_id = #{rate.order_id} AND encounter_id = #{rate.encounter_id} AND concept_id = #{brought_drug_concept_id} ").value_numeric rescue ""
       if !patients[patient.patient_id] then
 
-          patients[patient.patient_id]={"id" =>patient.id,
-                                        "arv_number" => patient_bean.arv_number,
-                                        "name" => patient_bean.name,
-                                        "national_id" => patient_bean.national_id,
-                                        "visit_date" =>rate.obs_datetime,
-                                        "gender" =>patient_bean.sex,
-                                        "age" => PatientService.patient_age_at_initiation(patient, rate.start_date.to_date),
-                                        "birthdate" => patient_bean.birth_date,
-                                        "pill_count" => pill_count.to_i.to_s,
-                                        "adherence" => rate. adherence_rate_worse,
-                                        "start_date" => rate.start_date.to_date,
-                                        "expected_count" =>rate.expected_remaining,
-                                        "drug" => drug.name}
-   elsif  patients[patient.patient_id] then
+        patients[patient.patient_id]={"id" =>patient.id,
+          "arv_number" => patient_bean.arv_number,
+          "name" => patient_bean.name,
+          "national_id" => patient_bean.national_id,
+          "visit_date" =>rate.obs_datetime,
+          "gender" =>patient_bean.sex,
+          "age" => PatientService.patient_age_at_initiation(patient, rate.start_date.to_date),
+          "birthdate" => patient_bean.birth_date,
+          "pill_count" => pill_count.to_i.to_s,
+          "adherence" => rate. adherence_rate_worse,
+          "start_date" => rate.start_date.to_date,
+          "expected_count" =>rate.expected_remaining,
+          "drug" => drug.name}
+      elsif  patients[patient.patient_id] then
 
-          patients[patient.patient_id]["age"].to_i < PatientService.patient_age_at_initiation(patient, rate.start_date.to_date).to_i ? patients[patient.patient_id]["age"] = patient.age_at_initiation(rate.start_date.to_date).to_s : ""
+        patients[patient.patient_id]["age"].to_i < PatientService.patient_age_at_initiation(patient, rate.start_date.to_date).to_i ? patients[patient.patient_id]["age"] = patient.age_at_initiation(rate.start_date.to_date).to_s : ""
 
-          patients[patient.patient_id]["drug"] = patients[patient.patient_id]["drug"].to_s + "<br>#{drug.name}"
+        patients[patient.patient_id]["drug"] = patients[patient.patient_id]["drug"].to_s + "<br>#{drug.name}"
 
-          patients[patient.patient_id]["pill_count"] << "<br>#{pill_count.to_i.to_s}"
+        patients[patient.patient_id]["pill_count"] << "<br>#{pill_count.to_i.to_s}"
 
-          patients[patient.patient_id]["expected_count"] << "<br>#{rate.expected_remaining.to_i.to_s}"
+        patients[patient.patient_id]["expected_count"] << "<br>#{rate.expected_remaining.to_i.to_s}"
 
-          patients[patient.patient_id]["start_date"].to_date > rate.start_date.to_date ?
+        patients[patient.patient_id]["start_date"].to_date > rate.start_date.to_date ?
           patients[patient.patient_id]["start_date"] = rate.start_date.to_date : ""
 
-    end
+      end
     }
 
     patients.sort { |a,b| a[1]['adherence'].to_i <=> b[1]['adherence'].to_i }
@@ -1102,62 +1102,62 @@ require 'will_paginate'
     @end_age = params[:endAge]
     @type = params[:selType]
 
-   case params[:selSelect]
+    case params[:selSelect]
     when "day"
       @start_date = params[:day]
       @end_date = params[:day]
 
     when "week"
-		@message = "Week"
-	 if params[:selWeek] != ""
-		if params[:selWeek] == "mon"
-		  @start_date = "#{params[:selYear]}-#{Date.today.month.to_s}-01".to_date
-		  @end_date = Date.today
-		elsif params[:selWeek] == "lmon"
-		  lmon = Date.today.month - 1
-		  lmon_days = days_in_month(lmon).to_s
-		  @start_date = "#{params[:selYear]}-#{lmon}-01".to_date
-		  @end_date = "#{params[:selYear]}-#{lmon}-#{lmon_days}".to_date
-		elsif params[:selWeek] == "all"
-		  mon = Date.today.month
-		  mon_days = days_in_month(mon).to_s
-		  @start_date = ("#{params[:selYear]}-01-01").to_date
+      @message = "Week"
+      if params[:selWeek] != ""
+        if params[:selWeek] == "mon"
+          @start_date = "#{params[:selYear]}-#{Date.today.month.to_s}-01".to_date
+          @end_date = Date.today
+        elsif params[:selWeek] == "lmon"
+          lmon = Date.today.month - 1
+          lmon_days = days_in_month(lmon).to_s
+          @start_date = "#{params[:selYear]}-#{lmon}-01".to_date
+          @end_date = "#{params[:selYear]}-#{lmon}-#{lmon_days}".to_date
+        elsif params[:selWeek] == "all"
+          mon = Date.today.month
+          mon_days = days_in_month(mon).to_s
+          @start_date = ("#{params[:selYear]}-01-01").to_date
       	  @end_date = Date.today
-		elsif params[:selWeek] == "this"
-			@start_date = Date.today.beginning_of_week
-     		@end_date = Date.today.end_of_week
-		else
-     	@start_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) -
-        	("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
-		@start_date = @start_date.beginning_of_week
-		@end_date = @start_date.end_of_week
-		end
+        elsif params[:selWeek] == "this"
+          @start_date = Date.today.beginning_of_week
+          @end_date = Date.today.end_of_week
+        else
+          @start_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) -
+            ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
+          @start_date = @start_date.beginning_of_week
+          @end_date = @start_date.end_of_week
+        end
       else
- 		@start_date = ("#{params[:selYear]}-01-01").to_date
-     	@end_date = ("#{params[:selYear]}-12-31").to_date
+        @start_date = ("#{params[:selYear]}-01-01").to_date
+        @end_date = ("#{params[:selYear]}-12-31").to_date
 
-	  end
+      end
     when "month"
-		@message = "Month"
+      @message = "Month"
       @start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date
 
       @end_date = ("#{params[:selYear]}-#{params[:selMonth]}-#{ (params[:selMonth].to_i != 12 ?
         ("#{params[:selYear]}-#{params[:selMonth].to_i + 1}-01".to_date - 1).strftime("%d") : "31") }").to_date
 
     when "year"
-		@message = "Year"
+      @message = "Year"
       @start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
       @end_date = ("#{params[:selYear]}-12-31").to_date.strftime("%Y-%m-%d")
 
     when "quarter"
-		@message = "Quarter"
+      @message = "Quarter"
       day = params[:selQtr].to_s.match(/^min=(.+)&max=(.+)$/)
 
       @start_date = (day ? day[1] : Date.today.strftime("%Y-%m-%d"))
       @end_date = (day ? day[2] : Date.today.strftime("%Y-%m-%d"))
 
     when "range"
-		@message = "Range"
+      @message = "Range"
       @start_date = params[:start_date]
       @end_date = params[:end_date]
 
@@ -1266,7 +1266,7 @@ require 'will_paginate'
     @pud = report.pud
 
     @gastritis = report.gastritis
-	@current_location_name = Location.current_health_center.name
+    @current_location_name = Location.current_health_center.name
     if @type == "diagnoses" || @type == "diagnoses_adults" || @type == "diagnoses_paeds"
       @general = report.general
     end
@@ -1290,184 +1290,188 @@ require 'will_paginate'
   end
 
 	def disaggregated_diagnosis
-    if ! params[:report_name].nil?
+    @report_name = params[:report_name]
+    @age_groups = params[:age_groups]
+    @logo = CoreService.get_global_property_value('logo').to_s
+    session_date = session[:datetime].to_date rescue Date.today
+    @current_location_name =Location.current_health_center.name
+    if params[:page].blank?
       session[:people] = nil
       session[:observation] = nil
-      session[:age_groups] = params[:age_groups]
-      session[:start_year] = params[:start_year]
-      session[:start_month] = params[:start_month]
-      session[:start_day] = params[:start_day]
-      session[:end_year] = params[:end_year]
-      session[:end_month] = params[:end_month]
-      session[:end_day] = params[:end_day]
-      session[:report_name] = params[:report_name]
-    end
-    @report_name  = session[:report_name]
-		session_date = session[:datetime].to_date rescue Date.today
-		@logo = CoreService.get_global_property_value('logo').to_s
-		@current_location_name =Location.current_health_center.name
-		if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
-			@age_groups = session[:age_groups].map{|g|g.upcase}
-      @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
+      age_groups = params[:age_groups]
+      start_year = params[:start_year]
+      start_month = params[:start_month]
+      start_day = params[:start_day]
+      end_year = params[:end_year]
+      end_month = params[:end_month]
+      end_day = params[:end_day] 	
+      if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
+        @age_groups = age_groups.map{|g|g.upcase}
+        @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
+      else
+        @required = ["OUTPATIENT DIAGNOSIS"]
+      end
+
+      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      @disaggregated_diagnosis = {}
+      @diagnosis_by_address = {}
+      @diagnosis_name = {}
+      @diagnosis_report = Hash.new(0)
+      @total_registered = []
+      @referral_locations = Hash.new(0)
+      report = false
+      if @age_groups != ""
+        report = true
+      end
     else
-      @required = ["OUTPATIENT DIAGNOSIS"]
-		end
-
-		@start_date = (session[:start_year] + "-" + session[:start_month] + "-" + session[:start_day]).to_date
-		@formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
-		@end_date = (session[:end_year] + "-" + session[:end_month] + "-" + session[:end_day]).to_date
-		@formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
-		@disaggregated_diagnosis = {}
-		@diagnosis_by_address = {}		
-    @diagnosis_name = {}
-    @diagnosis_report = Hash.new(0)
-		@total_registered = []
-		@referral_locations = Hash.new(0)
-    report = false
-	  if @age_groups != ""
-      report = true
-		end
+      @paged = "y"
+      @start_date = params[:start_date].to_date
+      @end_date = params[:end_date].to_date
+    end
+    @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+    @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
     if @report_name.upcase == "DIAGNOSIS_REPORT"
-          Observation.find_each( :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id NOT IN (?)",
-                               @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'), 
-                               [8346, 8345]])   do | obs|
-                    next if obs.answer_concept.blank?
-                    diagnosis_name = obs.answer_concept.fullname rescue ''
-                    @diagnosis_report[diagnosis_name]+=1
-          end
+      Observation.find_each( :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id NOT IN (?)",
+          @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
+          [8346, 8345]])   do | obs|
+        next if obs.answer_concept.blank?
+        diagnosis_name = obs.answer_concept.fullname rescue ''
+        @diagnosis_report[diagnosis_name]+=1
+      end
     elsif @report_name.upcase == "DISAGGREGATED_DIAGNOSIS"
-         Observation.find_each(:batch_size => 50, :include=>{:person=>{}},
-															:conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
-                               @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
-                               [3065, 6542, 6543, 6669]]) do | obs|
+      Observation.find_each(:batch_size => 50, :include=>{:person=>{}},
+        :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
+          @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
+          [3065, 6542, 6543, 6669]]) do | obs|
            
-            next if obs.answer_concept.blank?
-            previous_date = obs.obs_datetime.strftime('%Y-%m-%d').to_date
-            sex = obs.person.gender
-            age = PatientService.age(obs.person, previous_date)
-            diagnosis_name = obs.answer_concept.fullname rescue ''
-            @disaggregated_diagnosis[diagnosis_name]={"U5" =>{"M"=> 0, "F"=>0},
-																											"5-14" =>{"M"=> 0, "F"=>0},
-																											">14" =>{"M"=> 0, "F"=>0},
-																											"< 6 MONTHS" =>{"M"=> 0, "F"=>0}
-																											}	if @disaggregated_diagnosis[diagnosis_name].nil?
+        next if obs.answer_concept.blank?
+        previous_date = obs.obs_datetime.strftime('%Y-%m-%d').to_date
+        sex = obs.person.gender
+        age = PatientService.age(obs.person, previous_date)
+        diagnosis_name = obs.answer_concept.fullname rescue ''
+        @disaggregated_diagnosis[diagnosis_name]={"U5" =>{"M"=> 0, "F"=>0},
+          "5-14" =>{"M"=> 0, "F"=>0},
+          ">14" =>{"M"=> 0, "F"=>0},
+          "< 6 MONTHS" =>{"M"=> 0, "F"=>0}
+        }	if @disaggregated_diagnosis[diagnosis_name].nil?
 
-             if age.to_i < 1
-               age_in_months = PatientService.age_in_months(obs.person, previous_date)
-               if age_in_months.to_i < 6
-							@disaggregated_diagnosis[diagnosis_name]["< 6 MONTHS"][sex]+=1
-               else age_in_months.to_i >= 6 && age.to_i < 5
-									@disaggregated_diagnosis[diagnosis_name]["U5"][sex]+=1
-               end
-            elsif age.to_i >= 1 and age.to_i <= 14
-									@disaggregated_diagnosis[diagnosis_name]["5-14"][sex]+=1
-						else
-									@disaggregated_diagnosis[diagnosis_name][">14"][sex]+=1
-						end
-          
+        if age.to_i < 1
+          age_in_months = PatientService.age_in_months(obs.person, previous_date)
+          if age_in_months.to_i < 6
+            @disaggregated_diagnosis[diagnosis_name]["< 6 MONTHS"][sex]+=1
+          else age_in_months.to_i >= 6 && age.to_i < 5
+            @disaggregated_diagnosis[diagnosis_name]["U5"][sex]+=1
           end
-  elsif @report_name.upcase == "TOTAL_REGISTERED"
+        elsif age.to_i >= 1 and age.to_i <= 14
+          @disaggregated_diagnosis[diagnosis_name]["5-14"][sex]+=1
+        else
+          @disaggregated_diagnosis[diagnosis_name][">14"][sex]+=1
+        end
+          
+      end
+    elsif @report_name.upcase == "TOTAL_REGISTERED"
 
       people = session[:people]
       if people.blank?
         people = Person.find(:all,:include =>{:patient=>{:encounters=>{:type=>{}}}},
-                          :conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?)
+          :conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?)
                           AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)",
-                          @required, @start_date.strftime('%Y-%m-%d 00:00:00'),
-                          @end_date.strftime('%Y-%m-%d 23:59:59')]).collect do | person |
-                            person.id
-                          end
+            ["TREATMENT","OUTPATIENT DIAGNOSIS"], @start_date.strftime('%Y-%m-%d 00:00:00'),
+            @end_date.strftime('%Y-%m-%d 23:59:59')]).collect do | person |
+          person.id
+        end
         session[:people] = people
+        
       end
-        @total_registered = session[:people]
+      @total_registered = session[:people]
       records_per_page = CoreService.get_global_property_value('records_per_page') || 13
+      @page = people.paginate(:page => params[:page], :per_page => records_per_page.to_i)
       unless people.nil?
-        @page = people.paginate(:page => params[:page], :per_page => records_per_page.to_i)
         @registered = []
         @page.each do | person_id |
           person = Person.find(person_id)
           name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
           @registered << [name, person.birthdate, person.gender,
-          person.patient.encounters.find(:first, :order => "encounter_datetime").encounter_datetime.to_date,
-          person.addresses.first.county_district, person.addresses.first.county_district]
+            person.patient.encounters.find(:first, :order => "encounter_datetime").encounter_datetime.to_date,
+            person.addresses.first.county_district, person.addresses.first.county_district]
         end
       end
-
     elsif @report_name.upcase == "PATIENT_LEVEL_DATA"
-               observation = session[:observation]
-               if observation.blank?
-               observation =Observation.find(:all, :include=>{:encounter=>{:type=>{}},  :person=>{}},
-                                    :conditions => ["encounter_type.name IN (?) AND obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?)",
-                                                   ['outpatient diagnosis','treatment'], @start_date.strftime('%Y-%m-%d 00:00:00'), 
-                                                   @end_date.strftime('%Y-%m-%d 23:59:59')])
-               session[:observation] = observation
-               end
-               records_per_page = CoreService.get_global_property_value('records_per_page') || 20
-               unless observation.nil?
-                      @page = observation.paginate(:page => params[:page], :per_page => records_per_page.to_i)
-                      @patient_level_data = {}
-                      @page.each do |obs|
-                                  diagnosis_type = obs.concept.fullname rescue ''
-                                  prescription = obs.encounter.orders.map{|o| o.instructions }.join(" <br />") if obs.encounter.name.upcase=="TREATMENT"
-                                  person =  obs.person
-                                  gender = person.gender
-                                  visit_date = obs.encounter.encounter_datetime.to_date.to_s
-                                  name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
-                                  diagnosis_name = obs.answer_concept.fullname rescue ''
-                                  @patient_level_data[visit_date] = {} if @patient_level_data[visit_date].nil?
-                                  @patient_level_data[visit_date][gender] = {} if @patient_level_data[visit_date][gender].nil?
-                                  @patient_level_data[visit_date][gender][person.id] = {} if @patient_level_data[visit_date][gender][person.id].nil?
-                                  @patient_level_data[visit_date][gender][person.id][name] = {} if @patient_level_data[visit_date][gender][person.id][name].nil?
-                                  @patient_level_data[visit_date][gender][person.id][name][person.birthdate] = {"PRIMARY DIAGNOSIS"=> "",
-                                                                                                                             "SECONDARY DIAGNOSIS"=> "",
-                                                                                                                             "TREATMENT"=> "" } if @patient_level_data[visit_date][gender][person.id][name][person.birthdate].nil?
+      observation = session[:observation]
+      if observation.blank?
+        observation =Observation.find(:all, :include=>{:encounter=>{:type=>{}},  :person=>{}},
+          :conditions => ["encounter_type.name IN (?) AND obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?)",
+            ['outpatient diagnosis','treatment'], @start_date.strftime('%Y-%m-%d 00:00:00'),
+            @end_date.strftime('%Y-%m-%d 23:59:59')])
+        session[:observation] = observation
+      end
+      records_per_page = CoreService.get_global_property_value('records_per_page') || 20
+      unless observation.nil?
+        @page = observation.paginate(:page => params[:page], :per_page => records_per_page.to_i)
+        @patient_level_data = {}
+        @page.each do |obs|
+          diagnosis_type = obs.concept.fullname rescue ''
+          prescription = obs.encounter.orders.map{|o| o.instructions }.join(" <br />") if obs.encounter.name.upcase=="TREATMENT"
+          person =  obs.person
+          gender = person.gender
+          visit_date = obs.encounter.encounter_datetime.to_date.to_s
+          name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
+          diagnosis_name = obs.answer_concept.fullname rescue ''
+          @patient_level_data[visit_date] = {} if @patient_level_data[visit_date].nil?
+          @patient_level_data[visit_date][gender] = {} if @patient_level_data[visit_date][gender].nil?
+          @patient_level_data[visit_date][gender][person.id] = {} if @patient_level_data[visit_date][gender][person.id].nil?
+          @patient_level_data[visit_date][gender][person.id][name] = {} if @patient_level_data[visit_date][gender][person.id][name].nil?
+          @patient_level_data[visit_date][gender][person.id][name][person.birthdate] = {"PRIMARY DIAGNOSIS"=> "",
+            "SECONDARY DIAGNOSIS"=> "",
+            "TREATMENT"=> "" } if @patient_level_data[visit_date][gender][person.id][name][person.birthdate].nil?
 
-                                  @patient_level_data[visit_date][gender][person.id][name][person.birthdate][diagnosis_type.upcase] = diagnosis_name
-                                  @patient_level_data[visit_date][gender][person.id][name][person.birthdate]["TREATMENT"] = prescription if (obs.encounter.name.upcase=="TREATMENT" && !prescription.blank?)
-                      end
-               end
-        elsif @report_name.upcase == "DIAGNOSIS_BY_ADDRESS"
-               Observation.find_each(:include=>{:person=>{}},
-															:conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
-                               @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'), 
-                               [3065, 6542, 6543,6669]]) do | obs|
-                              next if obs.answer_concept.blank?
+          @patient_level_data[visit_date][gender][person.id][name][person.birthdate][diagnosis_type.upcase] = diagnosis_name
+          @patient_level_data[visit_date][gender][person.id][name][person.birthdate]["TREATMENT"] = prescription if (obs.encounter.name.upcase=="TREATMENT" && !prescription.blank?)
+        end
+      end
+    elsif @report_name.upcase == "DIAGNOSIS_BY_ADDRESS"
+      Observation.find_each(:include=>{:person=>{}},
+        :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
+          @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
+          [3065, 6542, 6543,6669]]) do | obs|
+        next if obs.answer_concept.blank?
 
-       diagnosis_name = obs.answer_concept.fullname rescue ''
-                              @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-                              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-                              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
-               end
-        else
-             @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-            report_trasfer_outs_and_refrerrals(@report_name)
-       end
+        diagnosis_name = obs.answer_concept.fullname rescue ''
+        @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+        @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+        @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+      end
+    else
+      @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
+      report_trasfer_outs_and_refrerrals(@report_name)
+    end
 		render :layout => 'report'
 	end
 
 	def total_registered(patient_bean, person)
-			age = patient_bean.age
-			gender = person.gender
-			@total_registered << [patient_bean.name, person.birthdate, patient_bean.sex,
-														person.patient.encounters.find(:first, :order => "encounter_datetime").encounter_datetime.to_date,
-														patient_bean.address, patient_bean.traditional_authority]
+    age = patient_bean.age
+    gender = person.gender
+    @total_registered << [patient_bean.name, person.birthdate, patient_bean.sex,
+      person.patient.encounters.find(:first, :order => "encounter_datetime").encounter_datetime.to_date,
+      patient_bean.address, patient_bean.traditional_authority]
 	end
 
 	def report_trasfer_outs_and_refrerrals(report_name)
-			report_encounter_name = "OUTPATIENT RECEPTION"
-			obs_concept_name = "Referral clinic if referred"
+    report_encounter_name = "OUTPATIENT RECEPTION"
+    obs_concept_name = "Referral clinic if referred"
 
-			if report_name.upcase == "TRANSFER_OUT"
-				report_encounter_name = "TRANSFER OUT"
-				obs_concept_name = "Transfer to"
-			end
+    if report_name.upcase == "TRANSFER_OUT"
+      report_encounter_name = "TRANSFER OUT"
+      obs_concept_name = "Transfer to"
+    end
 
-			Observation.find(:all, :include=>{:encounter=>{:type=>{}}, :concept=>{:concept_names=>{}}},
-											 :conditions => ["encounter_type.name = ? AND concept_name.name = ?
+    Observation.find(:all, :include=>{:encounter=>{:type=>{}}, :concept=>{:concept_names=>{}}},
+      :conditions => ["encounter_type.name = ? AND concept_name.name = ?
 											 									AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)",
-											 									report_encounter_name, obs_concept_name, @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')]). each do |obs|
-												@referral_locations[Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name]+=1
-			end
+        report_encounter_name, obs_concept_name, @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')]). each do |obs|
+      @referral_locations[Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name]+=1
+    end
 	end
 
 	def report_patient(patient_bean, person)
@@ -1485,61 +1489,61 @@ require 'will_paginate'
 
 				#Disaggregated Diagnosis Report
 				if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS"
-						# break if encounter.name.upcase=="TREATMENT"
-						next if obs.answer_concept.blank?
+          # break if encounter.name.upcase=="TREATMENT"
+          next if obs.answer_concept.blank?
 
-						@disaggregated_diagnosis[diagnosis_name]={"U5" =>{"M"=> 0, "F"=>0},
-																											"5-14" =>{"M"=> 0, "F"=>0},
-																											">14" =>{"M"=> 0, "F"=>0},
-																											"< 6 MONTHS" =>{"M"=> 0, "F"=>0}
-																											}	if @disaggregated_diagnosis[diagnosis_name].nil?
+          @disaggregated_diagnosis[diagnosis_name]={"U5" =>{"M"=> 0, "F"=>0},
+            "5-14" =>{"M"=> 0, "F"=>0},
+            ">14" =>{"M"=> 0, "F"=>0},
+            "< 6 MONTHS" =>{"M"=> 0, "F"=>0}
+          }	if @disaggregated_diagnosis[diagnosis_name].nil?
 
-						if patient_bean.age_in_months.to_i < 6
-							@disaggregated_diagnosis[diagnosis_name]["< 6 MONTHS"][gender]+= 1
-						elsif patient_bean.age_in_months.to_i >= 6 && age.to_i < 5
-									@disaggregated_diagnosis[diagnosis_name]["U5"][gender]+=1
-						elsif age.to_i <= 14
-									@disaggregated_diagnosis[diagnosis_name]["5-14"][gender]+=1
-						else
-									@disaggregated_diagnosis[diagnosis_name][">14"][gender]+=1
-						end
+          if patient_bean.age_in_months.to_i < 6
+            @disaggregated_diagnosis[diagnosis_name]["< 6 MONTHS"][gender]+= 1
+          elsif patient_bean.age_in_months.to_i >= 6 && age.to_i < 5
+            @disaggregated_diagnosis[diagnosis_name]["U5"][gender]+=1
+          elsif age.to_i <= 14
+            @disaggregated_diagnosis[diagnosis_name]["5-14"][gender]+=1
+          else
+            @disaggregated_diagnosis[diagnosis_name][">14"][gender]+=1
+          end
 				end
 
 				#Diagnosis Report
 				if @report_name.upcase == "DIAGNOSIS_REPORT"
-					 break if encounter.name.upcase=="TREATMENT"
-					 next if obs.answer_concept.blank?
-					 @diagnosis_report[diagnosis_name]+=1
+          break if encounter.name.upcase=="TREATMENT"
+          next if obs.answer_concept.blank?
+          @diagnosis_report[diagnosis_name]+=1
 				end
 
 				#Diagnosis by Traditional Authority Report
 				if @report_name.upcase == "DIAGNOSIS_BY_ADDRESS"
 
-						break if encounter.name.upcase=="TREATMENT"
-						next if obs.answer_concept.blank?
+          break if encounter.name.upcase=="TREATMENT"
+          next if obs.answer_concept.blank?
 
-						@diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-						@diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority] = 0 if @diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority].nil?
-						@diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority]+=1
+          @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+          @diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority] = 0 if @diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority].nil?
+          @diagnosis_by_address[diagnosis_name][patient_bean.traditional_authority]+=1
 				end
 
 				#Patient Level Data
 				if @report_name.upcase == "PATIENT_LEVEL_DATA"
-						visit_date = encounter.encounter_datetime.to_date.to_s
+          visit_date = encounter.encounter_datetime.to_date.to_s
 
-						next if !((diagnosis_type.upcase == "PRIMARY DIAGNOSIS") ||
-									 (diagnosis_type.upcase == "SECONDARY DIAGNOSIS") || (encounter.name.upcase=="TREATMENT"))
+          next if !((diagnosis_type.upcase == "PRIMARY DIAGNOSIS") ||
+              (diagnosis_type.upcase == "SECONDARY DIAGNOSIS") || (encounter.name.upcase=="TREATMENT"))
 
-						@patient_level_data[visit_date] = {} if @patient_level_data[visit_date].nil?
-						@patient_level_data[visit_date][gender] = {} if @patient_level_data[visit_date][gender].nil?
-						@patient_level_data[visit_date][gender][person.id] = {} if @patient_level_data[visit_date][gender][person.id].nil?
-						@patient_level_data[visit_date][gender][person.id][patient_bean.name] = {} if @patient_level_data[visit_date][gender][person.id][patient_bean.name].nil?
-						@patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate] = {"PRIMARY DIAGNOSIS"=> "",
-																																																			 "SECONDARY DIAGNOSIS"=> "",
-																																																			 "TREATMENT"=> "" } if @patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate].nil?
+          @patient_level_data[visit_date] = {} if @patient_level_data[visit_date].nil?
+          @patient_level_data[visit_date][gender] = {} if @patient_level_data[visit_date][gender].nil?
+          @patient_level_data[visit_date][gender][person.id] = {} if @patient_level_data[visit_date][gender][person.id].nil?
+          @patient_level_data[visit_date][gender][person.id][patient_bean.name] = {} if @patient_level_data[visit_date][gender][person.id][patient_bean.name].nil?
+          @patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate] = {"PRIMARY DIAGNOSIS"=> "",
+            "SECONDARY DIAGNOSIS"=> "",
+            "TREATMENT"=> "" } if @patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate].nil?
 
-						@patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate][diagnosis_type.upcase] = diagnosis_name
-						@patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate]["TREATMENT"] = prescription if (encounter.name.upcase=="TREATMENT" && !prescription.blank?)
+          @patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate][diagnosis_type.upcase] = diagnosis_name
+          @patient_level_data[visit_date][gender][person.id][patient_bean.name][person.birthdate]["TREATMENT"] = prescription if (encounter.name.upcase=="TREATMENT" && !prescription.blank?)
 				end
 
 			end
