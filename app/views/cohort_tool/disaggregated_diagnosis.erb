@@ -9,9 +9,8 @@
     <script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
     <script>
       var names = '<%= @report_name.upcase %>';
-      var options;
-      var options1;
-      var options3;
+      var prev_link;
+      var next_link;
       jQuery(document).ready(function($) {        
         if (( names != "TOTAL_REGISTERED") && ( names != "PATIENT_LEVEL_DATA")) {
           $('#table_id').dataTable({
@@ -36,20 +35,20 @@
       var  buttondiv = document.getElementById("buttons");
       buttondiv.innerHTML+= ' <%= will_paginate @page, :page_links => false %>'
       if (document.getElementsByClassName('disabled prev_page').length == 1){
-        options1 = document.getElementsByClassName('next_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>' + "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>' + "&age_groups=" + '<%= @age_groups %>';
-        options = null
+        next_link = document.getElementsByClassName('next_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>' + "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
+        prev_link = null
         buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
         buttondiv.innerHTML+= "<button id='disabled prev_page' class='gray'><span>Previous</span></button>"
       }
       else if (document.getElementsByClassName('disabled next_page').length == 1){
-        options = document.getElementsByClassName('prev_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>' + "&age_groups=" + '<%= @age_groups %>';
-        options1 = null
+        prev_link = document.getElementsByClassName('prev_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
+        next_link = null
         buttondiv.innerHTML+= "<button id='disabled next_page' class='gray'><span>Next</span></button>"
         buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
       }
       else if (document.getElementsByClassName('next_page').length == 1 && document.getElementsByClassName('prev_page').length == 1) {
-        options = document.getElementsByClassName('prev_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>' + "&age_groups=" + '<%= @age_groups %>';
-        options1 = document.getElementsByClassName('next_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>' + "&age_groups=" + '<%= @age_groups %>';
+        prev_link = document.getElementsByClassName('prev_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
+        next_link = document.getElementsByClassName('next_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
         buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
         buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
       }
@@ -68,10 +67,10 @@
       window.location = '/clinic'; // /';
     })
     $('#nextButton').click(function() {
-      window.location = options1;
+      window.location = next_link;
     })
     $('#prevButton').click(function() {
-      window.location = options;
+      window.location = prev_link;
     })
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     keyboard = document.getElementsByClassName("keypad")[0]
@@ -299,12 +298,9 @@
     <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Dates : <%= "#{@formated_start_date} to #{@formated_end_date}"%> <%= "<br> Total Registered: #{@total_registered.length}" if (@report_name.upcase == "TOTAL_REGISTERED") %></b>
 
     <% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase) %>
-      <b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Group (s) : <% if @paged != "y" %>
-                                                                                                                                            <%= "#{@age_groups.join(' , ').to_s}" %>
-                                                                                                                                   <%else%>
-                                                                                                                                            <%=  @age_groups %>
-                                                                                                                                   <% end %>
-                                                                                                                                   </b><br /><br />
+      <b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Group (s) :        
+          <%= "#{session[:groups].join(' , ').to_s}" %>       
+      </b><br /><br />
     <% end %>
 
     <div>
