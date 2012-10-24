@@ -1279,18 +1279,26 @@ class CohortToolController < ApplicationController
   end
   
 	def disaggregated_diagnosis
-
-		@report_name = params[:report_name]
+    unless params[:report_name].nil?
+      session[:age_groups] = params[:age_groups]
+      session[:start_year] = params[:start_year]
+      session[:start_month] = params[:start_month]
+      session[:start_day] = params[:start_day]
+      session[:end_year] = params[:end_year]
+      session[:end_month] = params[:end_month]
+      session[:end_day] = params[:end_day]
+      session[:report_name] = params[:report_name]
+    end
+    @report_name = session[:report_name]
 		#session_date = session[:datetime].to_date rescue Date.today
-		@logo = CoreService.get_global_property_value('logo').to_s
+		@logo = CoreService.get_global_property_value('logo').to_s rescue ''
 		@location =Location.current_health_center.name
 		if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA" , "DIAGNOSIS_REPORT"].include?(@report_name.upcase)
-			@age_groups=params[:age_groups].map{|g|g.upcase}
+			@age_groups=session[:age_groups].map{|g|g.upcase}
 		end
-
-		@start_date = (params[:start_year] + "-" + params[:start_month] + "-" + params[:start_day]).to_date
+		@start_date = (session[:start_day] + '-' + session[:start_month] + '-' + session[:start_year]).to_date
 		@formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
-		@end_date = (params[:end_year] + "-" + params[:end_month] + "-" + params[:end_day]).to_date
+    @end_date = (session[:end_day] + '-' + session[:end_month] + '-' + session[:end_year]).to_date
 		@formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
 		@disaggregated_diagnosis = {}
 		@diagnosis_by_address = {}
@@ -1362,11 +1370,36 @@ class CohortToolController < ApplicationController
         end
 				end
 		end
-		@logo = CoreService.get_global_property_value("logo").to_s
-		@current_location_name = Location.current_health_center.name
+    if @report_name.upcase == "diagnosis_by_address".upcase
+    diagnoses =  @diagnosis_by_address.inject([]){|result,v| result << v; result }
+    @diagnoses = diagnoses.paginate(:page => params[:page], :per_page =>10)
+    @diagn_address = []
+    @diagnoses.each { |diagn|
+      diagnosis = diagn[0]
+      address_total = diagn[1]
+      address_total.each { |address,total|
+        @diagn_address << [diagnosis,address,total]
+      } 
+    }
+    end
+    if @report_name.upcase == "disaggregated_diagnosis".upcase
+      disaggregated_diagnosis = @disaggregated_diagnosis.inject([]){|result,v| result << v; result}
+      @disaggregated = disaggregated_diagnosis.paginate(:page => params[:page], :per_page =>13)
+      @diaggregated_diagnosis = []
+      @disaggregated.each { | diag, value |
+        diagnosis = diag
+        @diaggregated_diagnosis << [diag, value]
+      }
+    end
+   if @report_name.upcase == "total_registered".upcase
+      @total_registered = @total_registered.paginate(:page => params[:page], :per_page =>13)
+   end
+   if @report_name.upcase == "diagnosis_report".upcase
+      diagnosis_report = @diagnosis_report.inject([]){|result, v| result << v; result}
+      @diagnosis_report = diagnosis_report.paginate(:page => params[:page], :per_page => 13)
+   end
 		render :layout => 'report'
-	end
-
+ end
 	def total_registered(person)
       name = PatientService.name(person)
       sex = PatientService.sex(person)
