@@ -1,3 +1,25 @@
+	<%= javascript_include_tag "prototype" %>
+        <%= javascript_include_tag 'jquery' %>
+        <%= stylesheet_link_tag 'extra_buttons' %>
+	<link href="/stylesheets/opd_cohort.css" media="screen" rel="stylesheet" type="text/css" />
+        <script>
+        jQuery(document).ready(function($) {
+            <% if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS" %>
+                document.forms[0].action = "disaggregated_diagnosis"
+            <% elsif @report_name.upcase == "DIAGNOSIS_REPORT" %>
+                document.forms[0].action = "diagnosis_report"
+            <% elsif @report_name.upcase == "DIAGNOSIS_BY_ADDRESS" %>
+                document.forms[0].action = "diagnosis_by_address"
+            <% elsif @report_name.upcase == "TOTAL_REGISTERED" %>
+                document.forms[0].action = "total_registration"
+            <% elsif @report_name.upcase == "PATIENT_LEVEL_DATA" %>
+                document.forms[0].action = "patient_level_data"
+            <% else %>
+                document.forms[0].action = "referals"
+            <% end %>
+            });
+        
+        </script>
 <style>
 
 	.tt_controls_start_month .keyboard{display:none;}
@@ -15,7 +37,7 @@
 		
 </style>
 
-<form action="disaggregated_diagnosis" method='post' >
+<form name='opd_report' method='post' >
 	
 	<% month_names = month_name_options.gsub('<option value="Unknown">Unknown</option>', '') %>
   <%= text_field_tag "start_year", nil, {:helpText => 'Start Year', :field_type => 'number', :absoluteMin => "1890", :min => "1940", :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly",:validationJS => "setDOB();" }  %>
