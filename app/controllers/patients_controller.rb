@@ -300,6 +300,30 @@ class PatientsController < GenericPatientsController
             obs.each { | observation |
               label.draw_multi_text("#{observation}", concepts_font)
             }
+            
+            elsif encounter.name.upcase.include?("ADMIT PATIENT")
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
+            obs = []
+            encounter.observations.each do |observation|
+              concept_name = observation.concept.concept_names.last.name rescue ''
+              next if concept_name.match(/Workstation location/i)
+                obs << observation.answer_string rescue ''
+            end
+            label.draw_multi_text("Patient admission at #{encounter_datetime}", title_header_font)
+            label.draw_multi_text("#{obs}", concepts_font)
+          elsif encounter.name.upcase.include?("REFERRAL")
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
+            obs = []
+            encounter.observations.each do |observation|
+              concept_name = observation.concept.concept_names.last.name rescue ''
+              next if concept_name.match(/Workstation location/i)
+              obs << "Referred to : " + observation.answer_string rescue '' unless concept_name.match(/SPECIALIST CLINIC/i)
+              obs << "Specialist clinic : " + observation.answer_string rescue '' if concept_name.match(/SPECIALIST CLINIC/i)
+            end
+            label.draw_multi_text("Referral at #{encounter_datetime}", title_header_font)
+            obs.each { | observation |
+            label.draw_multi_text("#{observation}", concepts_font)
+            }
 
 					elsif encounter.name.upcase.include?("VITALS")
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
@@ -311,7 +335,6 @@ class PatientsController < GenericPatientsController
 						end
             label.draw_multi_text("Vitals at #{encounter_datetime}", title_header_font)
 						label.draw_multi_text(string.join(','), concepts_font)
-          
         end
 
       }
@@ -326,7 +349,7 @@ class PatientsController < GenericPatientsController
 					state_name = state.program_workflow_state.concept.fullname
 					
 					if ((state_start_date == session[:datetime]) || (state_start_date == Date.today)) && (state_name.upcase != 'FOLLOWING')					
-      			label.draw_multi_text("Outcome - #{state_name}", concepts_font)
+      			label.draw_multi_text("Outcome : #{state_name}", concepts_font)
       		end
 			end
 
