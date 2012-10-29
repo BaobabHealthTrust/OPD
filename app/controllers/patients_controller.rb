@@ -233,7 +233,7 @@ class PatientsController < GenericPatientsController
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
             encounter.observations.each{|observation|
-            concept_name = observation.concept.concept_names.last.name
+            concept_name = observation.concept.fullname
             next if concept_name.match(/Workstation location/i)
             next if !observation.obs_group_id.blank?
 
@@ -272,7 +272,7 @@ class PatientsController < GenericPatientsController
             encounter.observations.each { | observation |
 
              # if (observation.concept_id == 8578)
-              concept_name = observation.concept.concept_names.last.name
+              concept_name = observation.concept.fullname
               #next if concept_name.match(/Detailed presenting complaint/i)
 							next if concept_name.match(/Workstation location/i)
               next if concept_name.match(/Life threatening condition/i)
@@ -305,19 +305,20 @@ class PatientsController < GenericPatientsController
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
             encounter.observations.each do |observation|
-              concept_name = observation.concept.concept_names.last.name 
+              concept_name = observation.concept.fullname
               next if concept_name.match(/Workstation location/i)
                 obs << observation.answer_string
             end
             label.draw_multi_text("Patient admission at #{encounter_datetime}", title_header_font)
             label.draw_multi_text("#{obs}", concepts_font)
+            
           elsif encounter.name.upcase.include?("REFERRAL")
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
             encounter.observations.each do |observation|
-              concept_name = observation.concept.concept_names.last.name
+              concept_name = observation.concept.fullname
               next if concept_name.match(/Workstation location/i)
-              obs << "Referred to : " + observation.answer_string if concept_name.match(/REFER TO OTHER CLINIC/i)
+              obs << "Referred to : " + observation.answer_string if concept_name.match(/REFER TO OTHER HOSPITAL/i)
               obs << "Specialist clinic : " + observation.answer_string if concept_name.match(/SPECIALIST CLINIC/i)
             end
             label.draw_multi_text("Referral at #{encounter_datetime}", title_header_font)
@@ -329,7 +330,7 @@ class PatientsController < GenericPatientsController
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
 						string = []
 						encounter.observations.each do |observation|
-							concept_name = observation.concept.concept_names.last.name
+							concept_name = observation.concept.fullname
 							next if concept_name.match(/Workstation location/i)
 							string << observation.to_s(["short", "order"]).squish + units[concept_name.upcase].to_s
 						end
