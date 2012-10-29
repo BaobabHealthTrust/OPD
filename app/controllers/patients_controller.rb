@@ -233,7 +233,7 @@ class PatientsController < GenericPatientsController
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
             encounter.observations.each{|observation|
-            concept_name = observation.concept.concept_names.last.name rescue ''
+            concept_name = observation.concept.concept_names.last.name
             next if concept_name.match(/Workstation location/i)
             next if !observation.obs_group_id.blank?
 
@@ -261,7 +261,7 @@ class PatientsController < GenericPatientsController
           elsif encounter.name.upcase.include?('TRANSFER OUT')
             obs = ["Referred to facility - "]
             obs << encounter.observations.collect{|observe|
-              Location.find("#{observe.answer_string}".squish).name rescue nil if observe.concept.fullname.upcase.include?('TRANSFER')}.compact.join("; ")
+              Location.find("#{observe.answer_string}".squish).name if observe.concept.fullname.upcase.include?('TRANSFER')}.compact.join("; ")
             obs
             label.draw_multi_text("Transfer Out", :font_reverse => true)
             label.draw_multi_text("#{obs}", concepts_font)
@@ -272,7 +272,7 @@ class PatientsController < GenericPatientsController
             encounter.observations.each { | observation |
 
              # if (observation.concept_id == 8578)
-              concept_name = observation.concept.concept_names.last.name rescue ''
+              concept_name = observation.concept.concept_names.last.name
               #next if concept_name.match(/Detailed presenting complaint/i)
 							next if concept_name.match(/Workstation location/i)
               next if concept_name.match(/Life threatening condition/i)
@@ -305,9 +305,9 @@ class PatientsController < GenericPatientsController
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
             encounter.observations.each do |observation|
-              concept_name = observation.concept.concept_names.last.name rescue ''
+              concept_name = observation.concept.concept_names.last.name 
               next if concept_name.match(/Workstation location/i)
-                obs << observation.answer_string rescue ''
+                obs << observation.answer_string
             end
             label.draw_multi_text("Patient admission at #{encounter_datetime}", title_header_font)
             label.draw_multi_text("#{obs}", concepts_font)
@@ -315,10 +315,10 @@ class PatientsController < GenericPatientsController
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
             encounter.observations.each do |observation|
-              concept_name = observation.concept.concept_names.last.name rescue ''
+              concept_name = observation.concept.concept_names.last.name
               next if concept_name.match(/Workstation location/i)
-              obs << "Referred to : " + observation.answer_string rescue '' unless concept_name.match(/SPECIALIST CLINIC/i)
-              obs << "Specialist clinic : " + observation.answer_string rescue '' if concept_name.match(/SPECIALIST CLINIC/i)
+              obs << "Referred to : " + observation.answer_string if concept_name.match(/REFER TO OTHER CLINIC/i)
+              obs << "Specialist clinic : " + observation.answer_string if concept_name.match(/SPECIALIST CLINIC/i)
             end
             label.draw_multi_text("Referral at #{encounter_datetime}", title_header_font)
             obs.each { | observation |
@@ -329,7 +329,7 @@ class PatientsController < GenericPatientsController
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
 						string = []
 						encounter.observations.each do |observation|
-							concept_name = observation.concept.concept_names.last.name rescue ''
+							concept_name = observation.concept.concept_names.last.name
 							next if concept_name.match(/Workstation location/i)
 							string << observation.to_s(["short", "order"]).squish + units[concept_name.upcase].to_s
 						end
@@ -341,7 +341,7 @@ class PatientsController < GenericPatientsController
 
 			['OPD PROGRAM','IPD PROGRAM'].each do |program_name|		
 					program_id = Program.find_by_name(program_name).id
-					state = patient.patient_programs.local.select{|p| p.program_id == program_id}.last.patient_states.last rescue nil
+					state = patient.patient_programs.local.select{|p| p.program_id == program_id}.last.patient_states.last
 
 					next if state.nil?
 					
@@ -353,8 +353,8 @@ class PatientsController < GenericPatientsController
       		end
 			end
 
-      label.draw_multi_text("Seen by: #{current_user.name rescue ''} at " +
-        " #{Location.current_location.name rescue ''}", title_font_top_bottom)
+      label.draw_multi_text("Seen by: #{current_user.name} at " +
+        " #{Location.current_location.name}", title_font_top_bottom)
       
       label.print(1)
   end
