@@ -287,7 +287,7 @@
     </style>
   </head>
   <body >
-    <%= image_tag(@logo, :class => "logo")%>
+    <%= image_tag('/images/mw.gif', :class => "logo")%>
     <br /><b style="margin-left:75px"><%= @current_location_name %></b><br />
 
       <b style="position:relative; top:0px;margin-left:75px"><%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %></b><br />
