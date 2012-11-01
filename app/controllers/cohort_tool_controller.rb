@@ -1365,7 +1365,7 @@ class CohortToolController < ApplicationController
 	def total_registration
 
     @report_name = params[:report_name]
-   # @logo = CoreService.get_global_property_value('logo').to_s
+    @logo = CoreService.get_global_property_value('logo').to_s
     session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
 
@@ -1452,7 +1452,7 @@ class CohortToolController < ApplicationController
   def diagnosis_report
 
     @report_name = params[:report_name]
-    #@logo = CoreService.get_global_property_value('logo').to_s
+    @logo = CoreService.get_global_property_value('logo').to_s
     session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
 
@@ -1525,7 +1525,7 @@ class CohortToolController < ApplicationController
   def patient_level_data
     @report_name = params[:report_name]
     @age_groups = params[:age_groups]
-   # @logo = CoreService.get_global_property_value('logo').to_s
+    @logo = CoreService.get_global_property_value('logo').to_s
     session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
     if params[:page].blank?
@@ -1588,7 +1588,7 @@ class CohortToolController < ApplicationController
   def diagnosis_by_address
 
     @report_name = params[:report_name]
-    #@logo = CoreService.get_global_property_value('logo').to_s
+    @logo = CoreService.get_global_property_value('logo').to_s
     session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
 
@@ -1667,7 +1667,7 @@ class CohortToolController < ApplicationController
 
   def referals
     @report_name = params[:report_name]
-    #@logo = CoreService.get_global_property_value('logo').to_s
+    @logo = CoreService.get_global_property_value('logo').to_s
     session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
     start_year = params[:start_year]
@@ -1690,7 +1690,7 @@ class CohortToolController < ApplicationController
 	def disaggregated_diagnosis
 
     @report_name = params[:report_name]
-   # @logo = CoreService.get_global_property_value('logo').to_s
+    @logo = CoreService.get_global_property_value('logo').to_s
     session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
     if params[:page].blank?
