@@ -1279,87 +1279,76 @@ class CohortToolController < ApplicationController
 		@report_name = params[:report_name]
   end
 
-	def report_age_range
+	def report_age_range(age_groups)
 
-		@max_age = ""
-		@min_age = ""
+		age_range = [nil, nil]
 
-		if @age_groups.include?("ALL")
-						report = "all"
-		else
-
-							if @age_groups.include?("< 6 MONTHS") 
-								 @max_age = 6
-								 @min_age = 0
-								 @in_month = 1
+		if ! age_groups.include?("ALL")
+							if age_groups.include?("< 6 MONTHS") 
+								 max_age = 6
+								 min_age = 0
 							end
 
-							if @age_groups.include?("6 MONTHS TO < 1 YR") 
-								 @max_age = 1
-								 if @min_age.blank?
-										@min_age = 0.6
+							if age_groups.include?("6 MONTHS TO < 1 YR") 
+								 max_age = 1
+								 if min_age.blank?
+										min_age = 0.6
 								 end
-								 @in_month = 1
 							end
 
-							if @age_groups.include?("1 TO < 5") 
-								 @max_age = 5
+							if age_groups.include?("1 TO < 5") 
+								 max_age = 5
 
-								 if @min_age.blank?
-											@in_month = 0
-											@min_age = 1
+								 if min_age.blank?
+											min_age = 1
 								 end
 
 							end
 
-							if @age_groups.include?("5 TO 14") 
-								@max_age = 14
+							if age_groups.include?("5 TO 14") 
+								max_age = 14
 
-								if @min_age.blank?
-											@min_age = 5
-											@in_month = 0
+								if min_age.blank?
+											min_age = 5
 								end
 
 							end
 
-							if @age_groups.include?("> 14 TO < 20")
-								@max_age = 20
-								 if @min_age.blank?
-											@min_age = 14
-											@in_month = 0
+							if age_groups.include?("> 14 TO < 20")
+								max_age = 20
+								 if min_age.blank?
+											min_age = 14
 								 end
 							end
 
-							if @age_groups.include?("20 TO 30") 
-								@max_age = 30
+							if age_groups.include?("20 TO 30") 
+								 max_age = 30
 
-									if @min_age.blank?
-												@min_age = 20
-												@in_month = 0
+									if min_age.blank?
+												min_age = 20
 									end
 
 							end
 
-							if @age_groups.include?("30 TO < 40")
-								@max_age = 40
+							if age_groups.include?("30 TO < 40")
+								max_age = 40
 
-											if @min_age.blank?
-														@min_age = 30
-														@in_month = 0
+											if min_age.blank?
+														min_age = 30
 											end
 
 							end
 
-							if @age_groups.include?("40 TO < 50") 
-								 @max_age = 50
-											 if @min_age.blank?
-																@min_age = 40
-																@in_month = 0
+							if age_groups.include?("40 TO < 50") 
+								 max_age = 50
+											 if min_age.blank?
+																min_age = 40
 											 end
 							end
-		
-		end
 
+						  age_range = [min_age, max_age]
+		end
+		return age_range
 	end
 
 	def total_registration
@@ -1373,15 +1362,13 @@ class CohortToolController < ApplicationController
 						session[:people] = nil
 						session[:observation] = nil
 						session[:groups] = params[:age_groups]
-						age_groups = params[:age_groups]
 						start_year = params[:start_year]
 						start_month = params[:start_month]
 						start_day = params[:start_day]
 						end_year = params[:end_year]
 						end_month = params[:end_month]
 						end_day = params[:end_day]
-						@age_groups = age_groups.map{|g|g.upcase}
-						@age_groups = age_groups.map{|g|g.upcase}
+						@age_groups = params[:age_groups].map{|g|g.upcase}
 						@start_date = (start_year + "-" + start_month + "-" + start_day).to_date
 						@end_date = (end_year + "-" + end_month + "-" + end_day).to_date
 						@total_registered = []
@@ -1399,9 +1386,9 @@ class CohortToolController < ApplicationController
 
     people = session[:people]
 		
-		if @age_groups != ""
+		if params[:page].blank?
 
-						report_age_range
+						min_age,max_age = report_age_range(@age_groups)
 
 						if people.blank?
 									people = Person.find(:all,:include =>{:patient=>{:encounters=>{:type=>{}}}},
@@ -1410,13 +1397,13 @@ class CohortToolController < ApplicationController
 																				AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT","OUTPATIENT DIAGNOSIS"],
 																				@start_date.strftime('%Y-%m-%d 00:00:00'),
 																				@end_date.strftime('%Y-%m-%d 23:59:59')])
-								if @min_age.blank?
+								if min_age.blank?
 									session[:people] = people
 								else
 													peoples = []
 																	session[:people] = nil
 																	people.each do  |person|
-																			if (PatientService.age(person, person.date_created).to_i >= @min_age && PatientService.age(person, person.date_created).to_i < @max_age)
+																			if (PatientService.age(person, person.date_created).to_i >= min_age && PatientService.age(person, person.date_created).to_i < max_age)
 																					peoples << person
 																				end
 																			end
@@ -1425,6 +1412,7 @@ class CohortToolController < ApplicationController
 						end
 						end
 		end
+		
     @total_registered = session[:people]
     records_per_page = CoreService.get_global_property_value('records_per_page') || 13
     @page = people.paginate(:page => params[:page], :per_page => records_per_page.to_i)
@@ -1488,7 +1476,7 @@ class CohortToolController < ApplicationController
    
     diagnosis_report = session[:observation]
     if params[:page].blank?
-									report_age_range
+									min_age, max_age = report_age_range(@age_groups)
 
 									observation = Observation.find(:all, :include => {:person =>{}},:conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
 																@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
@@ -1496,12 +1484,12 @@ class CohortToolController < ApplicationController
 
 
 									observation.each do |obs|
-															if @min_age.blank?
+															if min_age.blank?
 																		next if obs.answer_concept.blank?
 																		diagnosis_name = obs.answer_concept.fullname rescue ''
 																		@diagnosis_report[diagnosis_name]+=1
 															else
-																	if (PatientService.age(obs.person, obs.person.date_created).to_i >= @min_age && PatientService.age(obs.person, obs.person.date_created).to_i < @max_age)
+																	if (PatientService.age(obs.person, obs.person.date_created).to_i >= min_age && PatientService.age(obs.person, obs.person.date_created).to_i < max_age)
 																					next if obs.answer_concept.blank?
 																					diagnosis_name = obs.answer_concept.fullname rescue ''
 																					@diagnosis_report[diagnosis_name]+=1
@@ -1622,7 +1610,7 @@ class CohortToolController < ApplicationController
     diagnoses = session[:observation]
     if params[:page].blank?
 
-						report_age_range
+						min_age, max_age = report_age_range(@age_groups)
 
             observation =Observation.find(:all, :include=>{:person=>{}},
 																						:conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
@@ -1631,14 +1619,14 @@ class CohortToolController < ApplicationController
 
             observation.each do | obs|
 
-											if @min_age.blank?
+											if min_age.blank?
 																		next if obs.answer_concept.blank?
 																		diagnosis_name = obs.answer_concept.fullname rescue ''
 																					@diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
 																					@diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
 																					@diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
 															else
-																	if (PatientService.age(obs.person, obs.person.date_created).to_i >= @min_age && PatientService.age(obs.person, obs.person.date_created).to_i < @max_age)
+																	if (PatientService.age(obs.person, obs.person.date_created).to_i >= min_age && PatientService.age(obs.person, obs.person.date_created).to_i < max_age)
 																					diagnosis_name = obs.answer_concept.fullname rescue ''
 																					@diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
 																					@diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
