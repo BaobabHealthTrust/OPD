@@ -41,11 +41,11 @@
 	
 	<% month_names = month_name_options.gsub('<option value="Unknown">Unknown</option>', '') %>
   <%= text_field_tag "start_year", nil, {:helpText => 'Start Year', :field_type => 'number', :absoluteMin => "1890", :min => "1940", :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly",:validationJS => "setDOB();" }  %>
-  <%= select_tag "start_month", month_names, {:helpText => 'Start Month',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date'}%>
+  <%= select_tag "start_month", month_names, {:helpText => 'Start Month',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date',:tt_onLoad => "__$('keyboard').style.display = 'none'"}%>
   <%= text_field_tag "start_day",  nil, :field_type => 'number', :helpText => "Start Day" ,:validationJS => "validateDOB()",:validationMessage => 'Please enter a valid date'%>
 
   <%= text_field_tag "end_year", nil, {:helpText => 'End Year', :field_type => 'number', :absoluteMin => "1890", :min => "1940", :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly",:validationJS => "setDOB();" }  %>
-  <%= select_tag "end_month", month_names, {:helpText => 'End Month',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date'}%>
+  <%= select_tag "end_month", month_names, {:helpText => 'End Month',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date', :tt_onLoad => "__$('keyboard').style.display = 'none'"}%>
   <%= text_field_tag "end_day",  nil, :field_type => 'number', :helpText => "End Day" ,:validationJS => "validateDOB()",:validationMessage => 'Please enter a valid date'%>
 
 	<% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase) %>
