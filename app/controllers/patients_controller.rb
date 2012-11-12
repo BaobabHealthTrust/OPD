@@ -323,8 +323,6 @@ class PatientsController < GenericPatientsController
             string << 'Referred to : ' + obs.first
             string << 'Specialist clinic : ' + obs.last
             label.draw_multi_text("Referral at #{encounter_datetime}", title_header_font)
-            #label.draw_line(100, 0, 100, 3)
-            label.draw_line(20,60,800,2,0)
             string.each { | observation |
                label.draw_multi_text("#{observation}", concepts_font)
             }
