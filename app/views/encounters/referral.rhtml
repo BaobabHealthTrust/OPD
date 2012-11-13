@@ -28,7 +28,7 @@
 	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
 	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
   
-	<%= touch_text_field_tag "REFER TO OTHER HOSPITAL", @patient, nil,
+	<%= touch_text_field_tag "REFER TO HOSPITAL OR SPECIALIST CLINIC", @patient, nil,
 		{	:id => "hospital",
 			:allowFreeText => 'true',
 			:ajaxURL => "/encounters/locations?search_string=",
