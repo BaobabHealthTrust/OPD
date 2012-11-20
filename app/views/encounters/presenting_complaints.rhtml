@@ -73,11 +73,14 @@
         <%= touch_select_tag "Life threatening condition", @patient, nil,
           {	:ajaxURL => "/encounters/life_threatening_condition?search_string=",
           :helpText => 'Life Threatening Condition',
-          :id => 'life threatening condition'} %>
+          :id => 'life threatening condition',
+          :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';"
+        } %>
 
         <%= touch_select_tag "triage category", @patient, options_for_select([]),
           {	:ajaxURL => "/encounters/triage_category?search_string=",
           :helpText => "Select Triage Category",
+          :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';",
           :id => 'triage category'} %>
         <%= touch_text_area_tag "CLINICAL NOTES CONSTRUCT", @patient, nil,
           {	:id => "clinical_notes",
