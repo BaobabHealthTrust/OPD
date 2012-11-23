@@ -151,7 +151,12 @@ class GenericUserController < ApplicationController
     @user = RawUser.new(params[:user])
     @user.person_id = person.id
     if @user.save
-     # if params[:user_role_admin][:role] == "Yes"  
+     user = UserActivation.new
+     user.user_id = @user.id
+     user.system_id = CoreService.get_global_property_value('application.name').upcase rescue ''
+     user.status = 'pending'
+     user.save
+      # if params[:user_role_admin][:role] == "Yes"
       #  @roles = Array.new.push params[:user_role][:role_id] 
        # @roles << "superuser"
        # @roles.each{|role|
@@ -469,5 +474,51 @@ class GenericUserController < ApplicationController
   
   def users
   		@users = User.find(:all)
+  end
+
+  def view_users
+    logged_user = current_user
+    users = User.find(:all, :conditions => ['user_id != ?',logged_user.id])
+    @users = users.paginate(:page => params[:page], :per_page => 7)
+    render:layout => false
+  end
+
+  def manage_user
+    user_status = ['pending','blocked','active']
+    user_id = params[:user_id]
+    action = params[:user_action]
+    app_name = CoreService.get_global_property_value('application.name') rescue ''
+    if !app_name.blank?
+      application_name = app_name.upcase
+    end
+    
+    if action == 'block'
+      user_has_status = UserActivation.find_by_user_id(user_id)
+      if user_has_status
+        user_has_status.update_attribute(:status, user_status[1])
+      else
+        @user_status = UserActivation.new
+        @user_status.user_id = user_id
+        @user_status.system_id = application_name
+        @user_status.status = user_status[1]
+        @user_status.save
+      end
+    end
+
+    if action == 'pending'
+    user_has_status = UserActivation.find_by_user_id(user_id)
+    if user_has_status
+      user_has_status.update_attribute(:status, user_status[2])
+    end
+
+    redirect_to("/user/view_users")
+    end
+
+    if action == 'activate'
+     @user_status = UserActivation.find_by_user_id(user_id)
+     @user_status.update_attribute(:status, user_status[2])
+     redirect_to("/user/view_users")
+    end
+    
   end
 end
