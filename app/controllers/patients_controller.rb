@@ -277,6 +277,7 @@ class PatientsController < GenericPatientsController
               next if concept_name.match(/Life threatening condition/i)
               next if concept_name.match(/Triage category/i)
               next if concept_name.match(/clinician notes/i)
+              next if concept_name.match(/specific presenting complaint/i)
               next if !observation.obs_group_id.blank?
 
               child_obs = Observation.find(:all, :conditions => ["obs_group_id = ?", observation.obs_id])
