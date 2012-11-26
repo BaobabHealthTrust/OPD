@@ -47,7 +47,7 @@
 					
 				<select id="links">
 					<option value='/encounters/new/vitals?patient_id=<%= @patient.id %>'>Vital Signs</option>
-					<option value='/encounters/new/presenting_complaints?patient_id=<%= @patient.id %>'>Presenting complaints</option>
+					<option value='/encounters/new/presenting_complaints?patient_id=<%= @patient.id %>'>Complaints</option>
 					<option value='/encounters/new/outpatient_diagnosis?patient_id=<%= @patient.id %>'>Diagnosis</option>
 					<option value='/patients/treatment_dashboard/<%= @patient.id %>'>Treatment</option>
 					<%  if @spine_clinician  %>

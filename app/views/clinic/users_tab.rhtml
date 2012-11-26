@@ -10,8 +10,9 @@ end
 if current_user.admin?
   @reports << ['Create user',"/user/new"]
   @reports << ['Edit user',"/user/select_user"]
-	@reports << ['Set user roles',"/user/users"]
-	@reports << ['Set related roles',"/user/set_role_role/#{current_user.id}"]
+  @reports << ['Set user roles',"/user/users"]
+  @reports << ['Set related roles',"/user/set_role_role/#{current_user.id}"]
+  @reports << ['View users',"/user/view_users"]
 end
 %>
 

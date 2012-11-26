@@ -44,6 +44,8 @@ class ClinicController < GenericClinicController
   end
 
   def reports_tab
+    session[:observation] = nil
+    session[:people] = nil
     @reports = [
 						      ["OPD General", "/cohort_tool/opd_report_index"],
 						      ["Disaggregated Diagnosis", "/cohort_tool/opd_menu?report_name=disaggregated_diagnosis"],
@@ -54,9 +56,9 @@ class ClinicController < GenericClinicController
       						["Referrals", "/cohort_tool/opd_menu?report_name=referral"],
       						["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"]
                ] 
-        if allowed_hiv_viewer
-        	@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
-        end
+        #if allowed_hiv_viewer
+        	#@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
+        #end
     render :layout => false
   end
 

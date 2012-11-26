@@ -100,8 +100,11 @@ helper_method :allowed_hiv_viewer
 	end
 
 	def allowed_hiv_viewer
-	 allowed = current_user_roles.include?("Doctor" || "Nurse" || "Superuser") rescue nil 
-	 return allowed
+				allowed = false
+				user_roles = current_user_roles.collect{|role| role.to_s.upcase}
+				if user_roles.include?("DOCTOR") || user_roles.include?("NURSE") || user_roles.include?("SUPERUSER")
+						allowed = true
+				end
   end 	
   
   def hiv_program

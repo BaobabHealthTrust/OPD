@@ -172,7 +172,10 @@
 
   <%= text_field_tag "person[birth_year]", nil, {:helpText => 'Year of Birth', :field_type => 'number', :absoluteMin => "1890", :min => "1940", :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly", :tt_onLoad => 'seen(tstCurrentPage);',:validationJS => "setDOB();" }  %>
 
-  <%= select_tag "person[birth_month]", month_name_options, {:helpText => 'Month of Birth', :condition => '$("person_birth_year").value.toLowerCase() != "unknown"',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date'}%>
+  <%= select_tag "person[birth_month]", month_name_options, {
+	:helpText => 'Month of Birth', :condition => '$("person_birth_year").value.toLowerCase() != "unknown"',
+	:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date',
+	:tt_pageStyleClass => "NoKeyboard", :tt_onLoad => "__$('keyboard').style.display = 'none'"}%>
 
   <%= text_field_tag "person[age_estimate]", nil, {:helpText => 'Age Estimate', :absoluteMin => 1, :absoluteMax => age_limit, :field_type => 'number', :condition => '$("person_birth_year").value == "Unknown"', :tt_onLoad => "$('nextButton').style.display = 'block';", :tt_pageStyleClass => "Numeric NumbersOnly"} %> 
 
@@ -281,7 +284,7 @@
       :helpText =>"Occupation",
       :id => "occupation",
       :allowFreeText => false, 
-      :tt_onLoad => 'seen(tstCurrentPage);', 
+      :tt_onLoad => "seen(tstCurrentPage); __$('keyboard').style.display = 'none';",
       :ttMatchFromBeginning => "true")%>
 
   <!-- Make sure patient is created -->

@@ -12,12 +12,26 @@
       var prev_link;
       var next_link;
       jQuery(document).ready(function($) {
+        if (( names != "TOTAL_REGISTERED") && ( names != "PATIENT_LEVEL_DATA")) {
           $('#table_id').dataTable({
             "bAutoWidth": true,
             "bPaginate": false,
             "bProcessing": true,
+            "bFilter": true,
+            "sScrollY": "400px",
             "bInfo": false
           });
+        }
+        else {
+          $('#table_id').dataTable({
+            "bAutoWidth": true,
+            "bPaginate": false,
+            "bProcessing": true,
+            "sScrollY": "400px",
+            "bInfo": false
+          });
+        }
+<% if @report_name.upcase == "TOTAL_REGISTERED" || @report_name.upcase == "PATIENT_LEVEL_DATA" %>
       var  buttondiv = document.getElementById("buttons");
       buttondiv.innerHTML+= ' <%= will_paginate @page, :page_links => false %>'
       if (document.getElementsByClassName('disabled prev_page').length == 1){
@@ -38,6 +52,7 @@
         buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
         buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
       }
+<%end%>
     search_box = $('#table_id').dataTable()
     search = document.getElementsByTagName("input")[0];
     search.setAttribute("id","search");
@@ -271,65 +286,29 @@
 
     </style>
   </head>
-  <body >
+  <body>
     <%= image_tag(@logo, :class => "logo")%>
     <br /><b style="margin-left:75px"><%= @current_location_name %></b><br />
+      <b style="position:relative; top:0px;margin-left:75px"><%= @report_name.upcase == "REFERRAL" ? "Referal In" : "Transfer Out" %></b><br />
 
-      <b style="position:relative; top:0px;margin-left:75px"><%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %></b><br />
-
-
-    <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Dates : <%= "#{@formated_start_date} to #{@formated_end_date}"%> <%= "<br> Total Registered: #{@total_registered.length}" if (@report_name.upcase == "TOTAL_REGISTERED") %></b>
-
+    <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Dates : <%= "#{@formated_start_date} to #{@formated_end_date}"%></b>
 
     <div>
       <table  id="table_id" class="display" >
         <thead>
-          <tr>
-            <th  align="left"> Diagnosis <p />
-            </th>
-            <th>
-              <span><u>< 6 Months </u></span> <br />
-              <span class="basic_span"> M </span><span class="basic_span" > F </span>
-            </th>
-            <th>
-              <span><u>	6 Months to < 5</u></span> <br />
-              <span class="basic_span"> M </span><span class="basic_span" > F </span>
-            </th>
-            <th>
-              <span><u> 5 to 14 </u></span> <br />
-              <span class="basic_span"> M </span><span class="basic_span" > F </span>
-            </th>
-            <th>
-              <span><u> > 14 <u/></span> <br />
-              <span class="basic_span"> M </span><span class="basic_span" > F </span>
-            </th>
-            <th>
-              <span> <u>Total by gender</u></span> <br />
-              <span class="basic_span"> M </span><span class="basic_span" > F </span>
-            </th>
-            <th style="padding-right:30px;" ><u>Total</u><p /></th>
-          </tr>
+        <th> <u>Facility</u> <p />
+        </th>
+        <th>
+          <u> <%= @report_name.upcase == "REFERRAL" ? "Total Referrals" : "Total Transfer Outs" %> </u> <p />
+        </th>
         </thead>
         <tbody>
-
-
-          <% @diaggregated_paginated.each do |key,value| %>
-            <tr>
-              <td width="300px"> <span style="display:block; width:90%;"> <%= key.to_s %> </span> </td>
-
-              <td align="left" > <%= "<span class='basic_span' > #{value["< 6 MONTHS"]["M"]} </span> <span class='basic_span'> #{value["< 6 MONTHS"]["F"]}" %> </span> </td>
-
-              <td align="left" > <%= "<span class='basic_span' > #{value["U5"]["M"]} </span> <span class='basic_span'> #{value["U5"]["F"]}" %> </span> </td>
-              <td align="left" > <%= "<span class='basic_span'> #{value["5-14"]["M"]} </span> <span class='basic_span'> #{value["5-14"]["F"]}" %> </span> </td>
-              <td align="left" > <%= "<span class='basic_span'> #{value[">14"]["M"]}  </span> <span class='basic_span'> #{value[">14"]["F"]}" %> </span> </td>
-              <%
-              m_total = value[">14"]["M"] + value["5-14"]["M"] + value["U5"]["M"]
-              f_total = value["U5"]["F"]+value["5-14"]["F"]+value[">14"]["F"]
-            %>
-              <td align="left" > <%= "<span class='basic_span'> #{m_total}  </span> <span class='basic_span'> #{f_total}" %> </td>
-              <td align="left" style="padding-right:30px; width:130px;" > <%= "#{m_total+f_total}" %> </td>
-            </tr>
-          <% end %>
+        <% @referral_locations.each do |referral,total| %>
+          <tr>
+            <td width="50%"> <span style="display:block; width:90%;"> <%= "#{referral}" %> </span> </td>
+            <td align="center" > <%= "<span > #{total} </span> " %> </td>
+          </tr>
+          <% end  %>
         </tbody>
       </table>
     </div>

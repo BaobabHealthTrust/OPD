@@ -1,0 +1,196 @@
+<html>
+  <head>
+    <%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag 'jquery' %>
+    <%= stylesheet_link_tag 'extra_buttons' %>
+    <%= javascript_include_tag 'jquery_data_table.js' %>
+    <%= stylesheet_link_tag 'jquery.dataTables' %>
+    <%=javascript_include_tag "jquery.table2CSV.min" %>
+    <script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="/javascripts/FixedColumns.min.js"></script>
+    <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer="true"></script>
+    <script type="text/javascript">
+  /*
+ * Example initialisation
+ */
+$(document).ready( function () {
+        
+ 	var oTable = $('#user').dataTable( {
+                "bAutoWidth": false,
+ 		"sScrollY": "600px",
+		"sScrollX": "100%",
+		"sScrollXInner": "1200px",
+		"bScrollCollapse": true,
+		"bPaginate": false
+ 	} );
+        new FixedColumns( oTable, {
+		"iLeftColumns": 2,
+                "iRightColumns":2
+		
+	} );
+        $(".button").click(function(event) {
+          user_id = event.target.id;
+          user_action = document.getElementById(user_id).getAttribute('user_action')
+          window.location = "/user/manage_user?user_id=" + user_id + '&user_action=' + user_action
+         });
+         
+         $(".retire_button").click(function(event) {
+          user_id = event.target.id;
+          user_action = document.getElementsByClassName('retire_button')[0].getAttribute('retire')
+          window.location = "/user/manage_user?user_id=" + user_id + '&user_action=' + user_action
+         });
+        //$('#button').click(function(){
+          //var x = document.getElementById('button').getAttribute("name");
+          //window.location = "/user/manage_user?name=" + x
+        //})
+        var buttondiv = document.getElementById("buttons");
+      buttondiv.innerHTML+= ' <%= will_paginate @users, :page_links => false %>'
+      if (document.getElementsByClassName('disabled prev_page').length == 1){
+        next_link = document.getElementsByClassName('next_page')[0].getAttribute('href')
+        prev_link = null
+        buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
+        buttondiv.innerHTML+= "<button id='disabled prev_page' class='gray'><span>Previous</span></button>"
+      }
+      else if (document.getElementsByClassName('disabled next_page').length == 1){
+        prev_link = document.getElementsByClassName('prev_page')[0].getAttribute('href');
+        next_link = null
+        buttondiv.innerHTML+= "<button id='disabled next_page' class='gray'><span>Next</span></button>"
+        buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
+      }
+      else if (document.getElementsByClassName('next_page').length == 1 && document.getElementsByClassName('prev_page').length == 1) {
+        prev_link = document.getElementsByClassName('prev_page')[0].getAttribute('href');
+        next_link = document.getElementsByClassName('next_page')[0].getAttribute('href');
+        buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
+        buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
+      }
+      $('#nextButton').click(function() {
+      window.location = next_link;
+      })
+      $('#prevButton').click(function() {
+      window.location = prev_link;
+      })
+      $('#finish').click(function(){
+          window.location = "/clinic"
+        });
+        
+        
+ } );
+    </script>
+  
+  <style type="text/css">
+    .mytable{
+      width:950px;
+      margin-left:20px;
+      bottom: 20px;
+      position: relative;
+      }
+    /*
+    table.curvedEdges
+    {
+      border:10px blueviolet;
+      -webkit-border-radius:13px;
+      -moz-border-radius:13px;
+      -ms-border-radius:13px;
+      -o-border-radius:13px;
+      border-radius:13px;
+    }
+    table.curvedEdges td, table.curvedEdges th {
+      border-bottom:1px dotted black;
+      padding:5px;
+    }
+   
+     a {
+      background-color: cornflowerblue;
+      border-bottom: 1px outset #EEEEEE;
+      border-style: outset;
+      color: white;
+      padding: 10px 20px 10px 20px;
+      text-align: right;
+      text-decoration: none;
+      font-weight: bold;
+      max-width: 50px;
+      min-width: 50px;
+      }
+       */
+       #row{
+         border-bottom: 1px outset #EEEEEE;
+         border-style: outset;
+         padding: 10px 20px 10px 20px;
+         width:100px;
+    }
+      
+       .link{
+       text-decoration: none;
+       color:white;
+       font-weight:bold;
+        }
+        .pagination{
+        display:none;
+      }
+  </style>
+  </head>
+  
+  <body>
+  <div id="content">
+    <center><h2>OPD Available Users</h2></center>
+    <div id="details" style="float:none; width:97%;">
+      <div class="mytable">
+    <table id="user" class="display">
+     <thead>
+    <tr>
+      <th>status</th>
+      <th>Username</th>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Date created</th>
+      <th>&nbsp;</th>
+      <th>&nbsp;</th>
+      <th>&nbsp;</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @users.each do |user| %>
+    <% user_first_name = user.person.names.first.given_name rescue '' %>
+    <% user_last_name = user.person.names.first.family_name rescue '' %>
+    <% user_date_registered = user.date_created.strftime("%d-%m-%Y") %>
+    <% creator_id = user.creator %>
+    <% creator = User.find_by_user_id(creator_id) %>
+    <% creator_first_name = creator.person.names.first.given_name rescue '' %>
+    <% creator_last_name = creator.person.names.first.family_name rescue '' %>
+    <tr style="line-height: 44px;">
+      <td id="row"><%= user.status %></td>
+      <td id="row"><%= user.username %></td>
+      <td id="row"><%= user_first_name %></td>
+      <td id="row"><%= user_last_name %></td>
+      <td id="row"><%= user_date_registered %></td>
+      <td id="row"><%= creator_first_name + ' ' + creator_last_name %></td>
+      <% if user.status == 'active' || user.status == '' %>
+      <td>
+        <button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="block"><span>Block</span></button>
+      </td>
+      <% end %>
+      <% if user.status == 'blocked' %>
+      <td>
+        <button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="activate" ><span>Activate</span></button>
+      </td>
+      <% end %>
+      <% if user.status == 'pending' %>
+      <td>
+        <button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="pending" ><span>Activate</span></button>
+      </td>
+      <% end %>
+      <td>
+       <button style="width:100%" id = "<%= user.id %>" class = "blue retire_button" retire = "retire" ><span>Retire</span></button>
+      </td>
+    </tr>
+    <%  end %>
+    </tbody>
+  </table>
+      </div>
+  </div>
+    <div id="buttons" class="buttonsDiv">
+      <button id="finish" class="green left" style="position :relative; float:right;"><span>Finish</span></button>
+    </div>
+  </div>
+  </body>
+</html>
