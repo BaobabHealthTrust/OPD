@@ -133,12 +133,21 @@ $(document).ready( function () {
       #user_info{
       display: none;
       }
+
+      th {
+        text-align: left;
+      }
+
+      td {
+        text-align: left;
+      }
+
   </style>
   </head>
   
   <body>
   <div id="content">
-    <h2 style="margin-left:40px">OPD Available Users</h2><br />
+    <h2 style="margin-left:40px"><%=Location.current_health_center.name%><br />OPD registered users</h2><br />
     <div id="details" style="float:none; width:97%;">
       <div class="mytable">
     <table id="user" class="display">
@@ -149,7 +158,7 @@ $(document).ready( function () {
       <th>First Name</th>
       <th>Last Name</th>
       <th>Date created</th>
-      <th>&nbsp;</th>
+      <th>Creator</th>
       <th>&nbsp;</th>
       <th>&nbsp;</th>
     </tr>
