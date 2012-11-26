@@ -478,11 +478,15 @@ class GenericUserController < ApplicationController
 
   def view_users
     logged_user = current_user
-    users = User.find(:all, :conditions => ['user_id != ?',logged_user.id])
+    users = User.find(:all, :conditions => ['user_id !=? AND retired = 0',logged_user.id])
     @users = users.paginate(:page => params[:page], :per_page => 7)
     render:layout => false
   end
 
+  def retire_reason
+    
+  end
+  
   def manage_user
     user_status = ['pending','blocked','active']
     user_id = params[:user_id]
@@ -503,15 +507,15 @@ class GenericUserController < ApplicationController
         @user_status.status = user_status[1]
         @user_status.save
       end
+      redirect_to("/user/view_users")
     end
 
     if action == 'pending'
-    user_has_status = UserActivation.find_by_user_id(user_id)
-    if user_has_status
-      user_has_status.update_attribute(:status, user_status[2])
-    end
-
-    redirect_to("/user/view_users")
+      user_has_status = UserActivation.find_by_user_id(user_id)
+      if user_has_status
+        user_has_status.update_attribute(:status, user_status[2])
+        redirect_to("/user/view_users")
+      end
     end
 
     if action == 'activate'
@@ -519,6 +523,25 @@ class GenericUserController < ApplicationController
      @user_status.update_attribute(:status, user_status[2])
      redirect_to("/user/view_users")
     end
+
+    if action == 'retire'
+      session[:user_id] = params[:user_id]
+      session[:action] = params[:user_action]
+      redirect_to(:action => "retire_reason")
+    end
     
+    if params[:retire_reason]
+      current_user_id = current_user.id
+      retire_reason = params[:retire_reason]
+      retire_time = Time.now
+      @user = User.find(session[:user_id])
+      @user.retired = 1
+      @user.retired_by = current_user_id
+      @user.date_retired = retire_time
+      @user.retire_reason = retire_reason
+      @user.save
+      redirect_to("/user/view_users")
+    end
+
   end
 end
