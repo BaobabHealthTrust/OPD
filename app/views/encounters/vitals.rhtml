@@ -167,6 +167,64 @@
 			:validationMessage => "You must enter a number between 0 and 9 (for example: 54<b>.6</b>)",
 			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
 
+
+
+
+  <!--   start -->
+
+
+
+    <table cellpadding=5>
+          <tr>
+            <td>
+            </td>
+            <td>
+              <select class = "multi" style="width: 100%" name="complaints[]" id="multiple"
+                      helptext="Select Complaint(s)" multiple="multiple" nested="true" >
+                <option></option>
+                <%complaints_set = concept_set('presenting complaint')%>
+                <%if complaints_set%>
+                  <%complaints_set.sort.each do |concept|%>
+                    <%if concept_set(concept).size > 0 %>
+                      <optgroup id ="<%=concept%>" label="<%=concept%>">
+                        <%complaint_sub_set = concept_set(concept)%>
+                        <%if complaint_sub_set %>
+                          <%complaint_sub_set.sort.each do |value|%>
+                            <option id ="<%=value%>$<%=concept%>" value="<%=concept%>:<%=value%>"><%=value%> <%= '('%><%= concept %><%= ')'%></option>
+                          <%end%>
+                        <%end%>
+                      </optgroup>
+                    <%else%>
+                      <option id ="<%=concept%>"><%=concept%></option>
+                    <%end%>
+                  <%end%>
+                <%end%>
+              </select>
+            </td>
+          </tr>
+        </table>
+        <%= touch_text_area_tag "SPECIFIC PRESENTING COMPLAINT", @patient, nil,
+          { :id => "other",
+          :optional => true,
+          :helpText => "Specific Presenting complaint (optional)"
+        }%>
+        <%= touch_select_tag "Life threatening condition", @patient, nil,
+          { :ajaxURL => "/encounters/life_threatening_condition?search_string=",
+          :helpText => 'Life Threatening Condition',
+          :id => 'life threatening condition',
+          :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';"
+        } %>
+
+        <%= touch_select_tag "triage category", @patient, options_for_select([]),
+          { :ajaxURL => "/encounters/triage_category?search_string=",
+          :helpText => "Select Triage Category",
+          :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';",
+          :id => 'triage category'} %>
+
+
+<!-- end -->
+
+
 	<label for='showSummary'>Summary </label>
 	<%#= text_field_tag :showSummary, nil, { :tt_onLoad => "growthIndicators()", :optional => "true", :tt_pageStyleClass => "NoControls" } %>
 

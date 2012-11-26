@@ -15,7 +15,8 @@ helper_method :allowed_hiv_viewer
   # Try to find the next task for the patient at the given location
 	def main_next_task(location, patient, session_date = Date.today)
 		encounter_available = nil
-		task = Task.first rescue Task.new()
+		task = Task.first rescue nil
+    task = Task.new() if task.blank?
 		
 		task.encounter_type = 'NONE'
 		task.url = "/patients/show/#{patient.id}"

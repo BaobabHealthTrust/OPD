@@ -8,17 +8,17 @@ GEM
       rack (~> 1.0.0)
     activerecord (2.3.5)
       activesupport (= 2.3.5)
+    activerecord-mysql2-adapter (0.0.3)
+      mysql2
     activeresource (2.3.5)
       activesupport (= 2.3.5)
     activesupport (2.3.5)
-    daemon_controller (1.0.0)
     devise (1.0.11)
       warden (~> 0.10.3)
     domain_name (0.5.3)
       unf (~> 0.0.3)
     fastercsv (1.5.5)
-    fastthread (1.0.7)
-    json (1.7.3)
+    json (1.5.0)
     mechanize (2.5.1)
       domain_name (~> 0.5, >= 0.5.1)
       mime-types (~> 1.17, >= 1.17.2)
@@ -33,11 +33,6 @@ GEM
     net-http-persistent (2.6)
     nokogiri (1.5.2)
     ntlm-http (0.1.1)
-    passenger (3.0.17)
-      daemon_controller (>= 1.0.0)
-      fastthread (>= 1.0.1)
-      rack
-      rake (>= 0.8.1)
     rack (1.0.1)
     rails (2.3.5)
       actionmailer (= 2.3.5)
@@ -62,14 +57,14 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activerecord-mysql2-adapter (= 0.0.3)
   devise
   fastercsv
-  json
+  json (= 1.5.0)
   mechanize
   mysql2
-  passenger
   rails (= 2.3.5)
   rest-client
   settingslogic
   warden
-  will_paginate (~> 2.0)
+  will_paginate (= 2.3.16)
