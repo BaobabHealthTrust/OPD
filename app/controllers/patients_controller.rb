@@ -128,6 +128,14 @@ class PatientsController < GenericPatientsController
 		@reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
 		@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
 
+    @active_opd_program_id = nil
+    (@programs || []).each do |patient_program|
+      if patient_program.program.name.upcase == 'OPD PROGRAM'
+        @active_opd_program_id = patient_program.id
+        break
+      end
+    end
+
 		render :template => 'patients/index', :layout => false
 	end
 
