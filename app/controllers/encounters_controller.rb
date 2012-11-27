@@ -500,7 +500,7 @@ class EncountersController < GenericEncountersController
 
   def create_complaints
       encounter = Encounter.new()
-      encounter.encounter_type = EncounterType.find_by_name("PRESENTING COMPLAINTS").id
+      encounter.encounter_type = EncounterType.find_by_name("VITALS").id
       encounter.patient_id = params['encounter']['patient_id']
       encounter.encounter_datetime = session[:datetime]
       if params[:filter] and !params[:filter][:provider].blank?
