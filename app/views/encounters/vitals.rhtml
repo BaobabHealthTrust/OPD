@@ -7,7 +7,9 @@
 #tt_page_select_vital_signs .options {                            
   height: 18em;                                                           
 }     
-
+#inputFrame12{
+  height:12em;
+}
 
 </style>
 
@@ -54,7 +56,7 @@
   
 </script>
 
-<form action="/encounters/create/vitals">
+<form action="/encounters/create_complaints">
 	<%= hidden_field_tag "encounter[encounter_type_name]", "VITALS" %>
 	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
 	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
@@ -220,8 +222,6 @@
           :helpText => "Select Triage Category",
           :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';",
           :id => 'triage category'} %>
-
-
 <!-- end -->
 
 
