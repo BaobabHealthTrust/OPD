@@ -184,7 +184,7 @@
       }else if (triageSelect == 'PRIORITY'){
         container.style.background = 'yellow';
         setTimeout("selectTriageCategory('Priority')",1000);
-        $('header').innerHTML = "Summary (TO BE SEEN WITH 1 HOUR)"
+        $('header').innerHTML = "Summary (TO BE SEEN WITHIN 1 HOUR)"
         $('header').style.color = 'black';
         list = document.getElementsByClassName('data');
         for(var x = 0;x < list.length; x++ ) {
@@ -193,7 +193,7 @@
       }else{
         container.style.background = 'green';
         setTimeout("selectTriageCategory('Queue')",1000);
-        $('header').innerHTML = "Summary (TO BE SEEN WITH 4 HOURS)"
+        $('header').innerHTML = "Summary (TO BE SEEN WITHIN 4 HOURS)"
         $('header').style.color = 'white';
         list = document.getElementsByClassName('data');
         for(var x = 0;x < list.length; x++ ) {
