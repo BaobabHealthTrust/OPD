@@ -16,6 +16,43 @@
   height: 17em;
 }
 
+
+
+#tt_page_select_triage_category .inputFrameClass {
+  height: 11em;
+}
+
+#tt_page_select_triage_category .options {
+  height: 17em;
+}
+
+/* ................................ */
+
+#summary_container {                                                   
+    bottom: 124px;                                                              
+    font-size: 20px;                                                            
+    left: 25px;                                                                 
+    position: absolute;                                                         
+    z-index: 600;                                                               
+    border-radius: 10px 10px 10px 10px;                                         
+    width: 47.2em;                                                                 
+    border-style: solid;                                                        
+    border-width: 1px;                                                          
+    background-color: lightgrey;                                                
+    display: none;
+    -moz-user-select: none;
+    height: 18em;
+    overflow: auto;
+  }                                                                             
+                                                                                
+  .summary {
+    font-size: 20px;
+    padding-left: 15px;
+  }
+
+  .data {
+  
+  }
 </style>
 
 <script>
@@ -31,6 +68,18 @@
     }
 
     return choices;
+  }
+  
+  function getComplaints(){
+    var complaints = "";
+
+    for(var o = 0; o < $('multiple').options.length; o++){
+      if($('multiple').options[o].selected == true){
+        complaints += $('multiple').options[o].innerHTML + " ";
+      }
+    }
+
+    return complaints;
   }
   
   function calculateBP(pos){
@@ -59,6 +108,52 @@
     timedEvent = setTimeout('calculateBP(' + pos + ')', 500);
   }
   
+
+
+  /* starts */
+
+
+   function showSelectedConditions() {                                                      
+      var conditions = [];
+
+      if ($('weight').value.length > 0)
+        conditions.push("Weight: " + $('weight').value);
+
+      
+      if ($('temperature').value.length > 0)
+        conditions.push("Temperature: " + $('temperature').value);
+
+      if($('systolic_blood_pressure').value.length > 0 && $('diastolic_blood_pressure').value.length > 0){
+        conditions.push("BP: " + $('systolic_blood_pressure').value +"/"+ $('diastolic_blood_pressure').value);
+      }
+
+      if ($('respiratory_rate').value.length > 0)
+        conditions.push("Respiratory rate: " + $('respiratory_rate').value);
+
+      if ($('pulse').value.length > 0)
+        conditions.push("Pulse: " + $('pulse').value);
+
+      if ($('oxygen').value.length > 0)
+        conditions.push("Oxygen: " + $('oxygen').value);
+
+      if ($('life threatening condition').value.length > 0)
+        conditions.push("Life threatening condition: " + $('life threatening condition').value);
+
+
+
+      var container = $("summary_container");                      
+      var html = "<div class='summary'>"                                                          
+      for(var i=0;i < conditions.length;i++) {                        
+        html += "<div class='data'>" + conditions[i] + "</div>";                          
+      }                                                                       
+      html += "</div>"                                                        
+      container.innerHTML = html                                   
+      container.style.display = "inline";                          
+    }  
+
+
+  /* end */
+
 </script>
 
 <form action="/encounters/create_complaints">
@@ -225,15 +320,12 @@
         <%= touch_select_tag "triage category", @patient, options_for_select([]),
           { :ajaxURL => "/encounters/triage_category?search_string=",
           :helpText => "Select Triage Category",
-          :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';",
+          :tt_onUnLoad => "document.getElementById('summary_container').style.display = 'none'",
+          :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';showSelectedConditions();",
           :id => 'triage category'} %>
 
 
 <!-- end -->
-
-
-	<label for='showSummary'>Summary </label>
-	<%#= text_field_tag :showSummary, nil, { :tt_onLoad => "growthIndicators()", :optional => "true", :tt_pageStyleClass => "NoControls" } %>
 
 	<% if @retrospective %>
 		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
@@ -244,3 +336,7 @@
 		
 	<%= submit_tag "Finish" %>    
 </form>
+
+  <div id = "summary_container">                                           
+   am here
+  </div>
