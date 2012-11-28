@@ -290,7 +290,7 @@
 
     <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> 
 	  Shift Date : <%= "#{@shift_date}"%> <br>
-	  Category : <%= "#{@shift_type}"%></b>
+	  Category : <%= "#{@shift_type}"%> From <%= "#{@start_time}"%> To <%= "#{@end_time}"%></b>
     <div style="position:relative; width:100%; overflow-y:scroll;" class='scrollTableContainer'>
       <table  id="table_id" class="display" valign="top">
 		<tr valign="top">
@@ -350,8 +350,52 @@
 			  <tr>
 				<td>Discharges</td>
 			  </tr>
-			  <tr>
-				<td>Transfer Out : (Circle)</td>
+			  <tr valign="top">
+				<td>Transfer Out : (Circle)
+				</td>
+				<td>
+				   <table>
+					 <tr>
+					   <td>&nbsp;
+					   </td>
+					 </tr>
+					<tr>
+					  <td>
+					  Medical   </td><td>3B:   </td> <td>4A:
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Surgical  </td><td>5A:  </td><td> 5B:    </td><td>6A:
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Obstetrics   </td><td>LW:   </td><td>PNW: </td><td>ANW:
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Gyanecology:
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Intensive Care Unit(ICU):
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Paying   </td><td>1A:     </td><td>2A
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Other:
+					  </td>
+					</tr>
+				   </table>
+				</td>
 			  </tr>
 			  <tr>
 				<td>Patients awaiting review</td>
@@ -372,8 +416,52 @@
 			  <tr>
 				<td>Admited</td>
 			  </tr>
-			  <tr>
-				<td>Transfer Out : (Circle)</td>
+			  <tr valign="top">
+				<td>Transfer Out : (Circle)
+				</td>
+				<td>
+				   <table>
+					 <tr>
+					   <td>&nbsp;
+					   </td>
+					 </tr>
+					<tr>
+					  <td>
+						Medical   </td><td>3B:   </td><td> 4A:
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Surgical  </td><td>5A:   </td><td>5B:    </td><td>6A:
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Obstetrics  </td><td> LW:   </td><td>PNW:</td><td> ANW:
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Gyanecology:
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Intensive Care Unit(ICU):
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Paying   </td><td>1A:     </td><td>2A
+					  </td>
+					</tr>
+					<tr>
+					  <td>
+						Other:
+					  </td>
+					</tr>
+				  </table>
+				</td>
 			  </tr>
 			  </tr>
 			</table>
