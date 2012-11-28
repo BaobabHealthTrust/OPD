@@ -155,7 +155,7 @@
       var html = "<div class='summary'>" 
       html = "<ul>"                                                          
       for(var i=0;i < conditions.length;i++) {                        
-        if (selected_complaints[i].length > 0)
+        if (conditions[i].length > 0)
           html += "<li class='data'>" + conditions[i] + "</li>";                          
 
       }                                                                       
@@ -223,12 +223,12 @@
         }
       }
 
-      if ($('temperature').length > 0) {
+      /*if ($('temperature').length > 0) {
         temp = parseFloat($('temperature').value);
         if (temp > 40 || temp < 34) {
           return 'EMERGENCY'
         }
-      }
+      }*/
       
       if($('systolic_blood_pressure').value.length > 0){
         sbp = parseFloat($('systolic_blood_pressure').value);
@@ -260,7 +260,7 @@
       
       if($('oxygen').value.length > 0){
         oxygen = parseFloat($('oxygen').value);
-        if (oxygen > 90) {
+        if (oxygen < 90) {
           return 'EMERGENCY'
         }
       }
@@ -372,6 +372,69 @@
 
       }  
      
+
+
+
+     /*  ..................... */
+
+
+
+      if ($('temperature').value.length > 0) {
+        temp = parseFloat($('temperature').value);
+        if (temp > 38 || temp < 35.5) {
+          return 'PRIORITY'
+        }
+      }
+
+      /*if ($('temperature').length > 0) {
+        temp = parseFloat($('temperature').value);
+        if (temp > 40 || temp < 34) {
+          return 'EMERGENCY'
+        }
+      }*/
+      
+      if($('systolic_blood_pressure').value.length > 0){
+        sbp = parseFloat($('systolic_blood_pressure').value);
+        if (sbp > 180 || sbp < 90) {
+          return 'PRIORITY'
+        }
+      }
+      
+      if($('diastolic_blood_pressure').value.length > 0){
+        dbp = parseFloat($('diastolic_blood_pressure').value);
+        if (dbp > 110) {
+          return 'PRIORITY'
+        }
+      }
+      
+      if($('respiratory_rate').value.length > 0){
+        respiratory_rate = parseFloat($('respiratory_rate').value);
+        if (respiratory_rate > 20 || respiratory_rate < 12) {
+          return 'PRIORITY'
+        }
+      }
+      
+      if($('pulse').value.length > 0){
+        pulse = parseFloat($('pulse').value);
+        if (pulse > 110 || pulse < 50) {
+          return 'PRIORITY'
+        }
+      }
+      
+      if($('oxygen').value.length > 0){
+        oxygen = parseFloat($('oxygen').value);
+        if (oxygen < 92) {
+          return 'PRIORITY'
+        }
+      }	
+
+
+     /* .......................... */
+
+
+
+
+
       return 'QUEUE';
     }
 
