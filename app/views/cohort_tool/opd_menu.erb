@@ -43,8 +43,9 @@
   <% month_names = month_name_options.gsub('<option value="Unknown">Unknown</option>', '') %>
   <% if  @report_name.upcase == "SHIFT_REPORT" %>
     <input type="text" field_type="date" id="start_date" name="shift_date" value="" helpText="Select Shift Date" />
-	<%= select_tag "shift_type", options_for_select(@shifts), {:helpText => 'Shift Type',:validationJS => "validateDOB();"}%>
-
+	<%= select_tag "shift_type", options_for_select(@shifts), {:helpText => 'Shift Type', :validationMessage => 'Please Select a Shift'}%>
+	<input type="text" field_type="advancedTime" id="start_time" name="start_time" value="" helpText="Select Shift Start Time" condition="$('shift_type').value == 'specific'"/>
+	<input type="text" field_type="advancedTime" id="end_time" name="end_time" value="" helpText="Select Shift End Time" condition="$('shift_type').value == 'specific'"/>
 
   <%else%>
 
