@@ -1294,7 +1294,7 @@ class CohortToolController < ApplicationController
 		if params[:start_time] == ""
 			 if @shift_type == "day"
 				 @start_time = Time.parse(@shift_date + " 7:30:00")
-				 @end_time = Time.parse(@shift_date + " 16:59:59").to_date
+				 @end_time = Time.parse(@shift_date + " 16:59:59")
 			 elsif @shift_type == "night"
 				 @start_time = Time.parse(@shift_date + " 17:00:00")
 				 @end_time= (Time.parse(@shift_date + " 7:30:00")).tomorrow
