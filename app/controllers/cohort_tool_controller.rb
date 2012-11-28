@@ -1276,9 +1276,23 @@ class CohortToolController < ApplicationController
   end
   
   def opd_menu
+	@shifts =[
+			["Day","Day"],
+			["Night","Night"],
+			["24 Hours",""]
+		]
 		@report_name = params[:report_name]
   end
 
+	def shift_report
+		@report_name = params[:report_name]
+		@logo = CoreService.get_global_property_value('logo').to_s
+    session_date = session[:datetime].to_date rescue Date.today
+    @current_location_name =Location.current_health_center.name
+		@shift_type = params[:shift_type]
+		@shift_date = params[:shift_date]
+		render :layout => "report"
+  end
 	def report_age_range(age_groups)
 
 		age_range = [nil, nil]
@@ -1431,10 +1445,6 @@ class CohortToolController < ApplicationController
 
     end
     render :layout => "report"
-  end
-	
-  def opd_menu
-		@report_name = params[:report_name]
   end
 
   def diagnosis_report
