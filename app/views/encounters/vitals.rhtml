@@ -46,13 +46,23 @@
   }                                                                             
                                                                                 
   .summary {
-    font-size: 20px;
+    font-size: 27px;
     padding-left: 15px;
   }
 
   .data {
-  
+    color: white;
+    font-size: 25px;
   }
+
+  .header {
+    font-size: 27px;
+    color: white;
+    padding-left: 30px;
+    border-style: solid;
+    border-width: 0px 0px 1px 0px;
+  }
+
 </style>
 
 <script>
@@ -142,15 +152,242 @@
 
 
       var container = $("summary_container");                      
-      var html = "<div class='summary'>"                                                          
+      var html = "<div class='summary'>" 
+      html = "<ul>"                                                          
       for(var i=0;i < conditions.length;i++) {                        
-        html += "<div class='data'>" + conditions[i] + "</div>";                          
+        if (selected_complaints[i].length > 0)
+          html += "<li class='data'>" + conditions[i] + "</li>";                          
+
       }                                                                       
+
+      for(var i=0;i < selected_complaints.length;i++) {                        
+        if (selected_complaints[i].length > 0)
+          html += "<li class='data'>" + selected_complaints[i] + "</li>";                          
+        
+      }                                                                       
+
+      html += "</ul>"                                                        
       html += "</div>"                                                        
-      container.innerHTML = html                                   
+      container.innerHTML = "<br /><div class='header' id = 'header'>Summary</div>";                                                     
+      container.innerHTML += html                                   
+      triageSelect = triage();
+
+      if(triageSelect == 'EMERGENCY'){
+        container.style.background = 'red';
+        setTimeout("selectTriageCategory('Emergency')",1000);
+        $('header').innerHTML = "Summary (IMMEDIATE ACTION NECESSARY)"
+        $('header').style.color = 'white';
+        list = document.getElementsByClassName('data');
+        for(var x = 0;x < list.length; x++ ) {
+          list[x].style.color = 'white';
+        }
+      }else if (triageSelect == 'PRIORITY'){
+        container.style.background = 'yellow';
+        setTimeout("selectTriageCategory('Priority')",1000);
+        $('header').innerHTML = "Summary (TO BE SEEN WITH 1 HOUR)"
+        $('header').style.color = 'black';
+        list = document.getElementsByClassName('data');
+        for(var x = 0;x < list.length; x++ ) {
+          list[x].style.color = 'black';
+        }
+      }else{
+        container.style.background = 'green';
+        setTimeout("selectTriageCategory('Queue')",1000);
+        $('header').innerHTML = "Summary (TO BE SEEN WITH 4 HOURS)"
+        $('header').style.color = 'white';
+        list = document.getElementsByClassName('data');
+        for(var x = 0;x < list.length; x++ ) {
+          list[x].style.color = 'white';
+        }
+      }
       container.style.display = "inline";                          
     }  
 
+    function selectTriageCategory(category) {
+      var options = document.getElementsByTagName("li");
+      for(var i = 0; i < options.length; i++){
+        if(options[i].innerHTML == category){
+          updateTouchscreenInputForSelect(options[i]);
+          break
+        }
+      }
+    }
+
+
+    function triage() {
+
+      if ($('temperature').value.length > 0) {
+        temp = parseFloat($('temperature').value);
+        if (temp > 40 || temp < 34) {
+          return 'EMERGENCY'
+        }
+      }
+
+      if ($('temperature').length > 0) {
+        temp = parseFloat($('temperature').value);
+        if (temp > 40 || temp < 34) {
+          return 'EMERGENCY'
+        }
+      }
+      
+      if($('systolic_blood_pressure').value.length > 0){
+        sbp = parseFloat($('systolic_blood_pressure').value);
+        if (sbp > 220 || sbp < 80) {
+          return 'EMERGENCY'
+        }
+      }
+      
+      if($('diastolic_blood_pressure').value.length > 0){
+        dbp = parseFloat($('diastolic_blood_pressure').value);
+        if (dbp > 130) {
+          return 'EMERGENCY'
+        }
+      }
+      
+      if($('respiratory_rate').value.length > 0){
+        respiratory_rate = parseFloat($('respiratory_rate').value);
+        if (respiratory_rate > 30 || respiratory_rate < 8) {
+          return 'EMERGENCY'
+        }
+      }
+      
+      if($('pulse').value.length > 0){
+        pulse = parseFloat($('pulse').value);
+        if (pulse > 130 || pulse < 40) {
+          return 'EMERGENCY'
+        }
+      }
+      
+      if($('oxygen').value.length > 0){
+        oxygen = parseFloat($('oxygen').value);
+        if (oxygen > 90) {
+          return 'EMERGENCY'
+        }
+      }
+      
+      if($('life threatening condition').value.length > 0){
+        ltc = $('life threatening condition').value;
+        if (ltc != 'None' && ltc != 'Other') {
+          return 'EMERGENCY'
+        }
+      }
+
+     
+     
+     
+      for(var i=0;i < selected_complaints.length;i++) {                         
+        if (selected_complaints[i] == 'Snike bite (Bites)')                                  
+          return 'EMERGENCY'
+       
+        if (selected_complaints[i] == 'Major (Burns)')                                  
+          return 'EMERGENCY'
+       
+        if (selected_complaints[i] == 'Snike bite (Bites)')                                  
+          return 'EMERGENCY'
+       
+        if (selected_complaints[i] == 'PV bleeding (Pregnancy)')                                  
+          return 'EMERGENCY'
+       
+        if (selected_complaints[i] == 'Major (Trauma)')                                  
+          return 'EMERGENCY'
+       
+        if (selected_complaints[i] == 'Violent behaviour')                                  
+          return 'EMERGENCY'
+       
+        if (selected_complaints[i] == 'Severe (Shortness of breath)')                                  
+          return 'EMERGENCY'
+
+      }  
+     
+      for(var i=0;i < selected_complaints.length;i++) {                         
+        //alert(selected_complaints[i])
+        if (selected_complaints[i] == 'Active bleeding')                                  
+          return 'PRIORITY'
+       
+        if (selected_complaints[i] == 'Chest pain')                                  
+          return 'PRIORITY'
+       
+        if (selected_complaints[i] == 'Focal neurologic deficit')                                  
+          return 'PRIORITY'
+       
+        if (selected_complaints[i] == 'Lower limb (Fracture)')                                  
+          return 'PRIORITY'
+       
+        if (selected_complaints[i] == 'Pelvis limb (Fracture)')                                  
+          return 'PRIORITY'
+       
+        if (selected_complaints[i] == 'Rib (Fracture)')                                  
+          return 'PRIORITY'
+       
+        if (selected_complaints[i] == 'Skull (Fracture)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Spine (Fracture)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Upper limb (Fracture)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Severe (Head injury)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Unconscious (Head injury)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Medication history (Convulsions)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Minor (Burns)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Iron posioning (Poisioning)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Organophosphate posioning (Poisioning)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Other (Poisioning)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Paraffin (Poisioning)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Abdominal pain (Pregnancy)')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Pain')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Sexual assualt')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Visual changes')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Body swelling')                                  
+          return 'PRIORITY'
+
+        if (selected_complaints[i] == 'Weakness')                                  
+          return 'PRIORITY'
+
+      }  
+     
+      return 'QUEUE';
+    }
+
+
+    var selected_complaints = [];
+
+    function unLoadSelectedComplaints() {
+      selected_complaints = [];
+    }
+
+    function LoadSelectedComplaints() {
+      complaints = $('touchscreenInput'+tstCurrentPage).value.split(';');
+      for(var i = 0 ; i < complaints.length; i++) {
+        selected_complaints.push(complaints[i]);
+      } 
+    }
 
   /* end */
 
@@ -281,8 +518,12 @@
             <td>
             </td>
             <td>
-              <select class = "multi" style="width: 100%" name="complaints[]" id="multiple"
-                      helptext="Select Complaint(s)" multiple="multiple" nested="true" >
+              <select class = "multi" style="width: 100%" 
+                      name="complaints[]" id="multiple"
+                      helptext="Select Complaint(s)" 
+                      tt_onUnLoad = "LoadSelectedComplaints()"
+                      tt_onLoad = "unLoadSelectedComplaints()"
+                      multiple="multiple" nested="true" >
                 <option></option>
                 <%complaints_set = concept_set('presenting complaint')%>
                 <%if complaints_set%>
@@ -321,8 +562,8 @@
           { :ajaxURL => "/encounters/triage_category?search_string=",
           :helpText => "Select Triage Category",
           :tt_onUnLoad => "document.getElementById('summary_container').style.display = 'none'",
-          :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';showSelectedConditions();",
-          :id => 'triage category'} %>
+          :tt_onLoad =>"clearInput();document.getElementById('keyboard').style.display = 'none';showSelectedConditions();",
+          :id => 'triage_category'} %>
 
 
 <!-- end -->
