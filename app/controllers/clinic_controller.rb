@@ -54,7 +54,8 @@ class ClinicController < GenericClinicController
       						["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report"],
       						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered"],
       						["Referrals", "/cohort_tool/opd_menu?report_name=referral"],
-      						["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"]
+      						["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"],
+      						["Shift Report", "/cohort_tool/opd_menu?report_name=shift_report"]
                ] 
         #if allowed_hiv_viewer
         	#@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
