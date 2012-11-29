@@ -1,11 +1,11 @@
 <style>
 
 #tt_page_select_vital_signs .inputFrameClass {                    
-  height: 455px;                                                          
+  height: 495px;                                                          
 }                                                                         
                                                               
 #tt_page_select_vital_signs .options {                            
-  height: 18em;                                                           
+  height: 19em;                                                           
 }     
 
 #tt_page_life_threatening_condition .inputFrameClass {
@@ -460,8 +460,12 @@
 	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
 	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
-	<%= select_tag "choice", options_for_select(["", "Temperature", 
-		"Respiratory Rate", "Blood Pressure", "Pulse Rate", "Weight", "Height", "Oxygen Saturation"]), 
+  <%
+    vital_signs = ["","Temperature","Respiratory Rate","Blood Pressure", 
+    "Pulse Rate", "Weight", "Height","Oxygen Saturation","Presenting complaints"]
+  %>
+
+	<%= select_tag "choice", options_for_select(vital_signs), 
 		{	:helpText => 'Select vital signs', 
 			:id => "choice", 
 			:multiple => true } %>
@@ -584,6 +588,7 @@
                       helptext="Select Complaint(s)" 
                       tt_onUnLoad = "LoadSelectedComplaints()"
                       tt_onLoad = "unLoadSelectedComplaints()"
+                      condition = "getSelected().match(/PRESENTING COMPLAINTS/i)"
                       multiple="multiple" nested="true" >
                 <option></option>
                 <%complaints_set = concept_set('presenting complaint')%>
@@ -610,6 +615,7 @@
         <%= touch_text_area_tag "SPECIFIC PRESENTING COMPLAINT", @patient, nil,
           { :id => "other",
           :optional => true,
+          :condition => "getSelected().match(/PRESENTING COMPLAINTS/i)",
           :helpText => "Specific Presenting complaint (optional)"
         }%>
         <%= touch_select_tag "Life threatening condition", @patient, nil,

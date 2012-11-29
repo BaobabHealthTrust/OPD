@@ -128,14 +128,6 @@ class PatientsController < GenericPatientsController
 		@reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
 		@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
 
-    @active_opd_program_id = nil
-    (@programs || []).each do |patient_program|
-      if patient_program.program.name.upcase == 'OPD PROGRAM'
-        @active_opd_program_id = patient_program.id
-        break
-      end
-    end
-
 		render :template => 'patients/index', :layout => false
 	end
 
@@ -145,6 +137,7 @@ class PatientsController < GenericPatientsController
 
 		@links << ["Visit Summary (Print)","/patients/dashboard_print_opd_visit/#{patient.id}"]
 		@links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
+		@links << ["Demographics (Edit)","/patients/edit_demographics?patient_id=#{patient.id}"]
 
 		if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
 		  @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]

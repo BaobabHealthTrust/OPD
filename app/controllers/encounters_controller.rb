@@ -499,6 +499,7 @@ class EncountersController < GenericEncountersController
 
 
   def create_complaints
+      raise params[:complaints].blank?.to_s and return
       encounter = Encounter.new()
       encounter.encounter_type = EncounterType.find_by_name("VITALS").id
       encounter.patient_id = params['encounter']['patient_id']
