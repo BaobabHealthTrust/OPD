@@ -499,9 +499,12 @@ class EncountersController < GenericEncountersController
 
 
   def create_complaints
-      raise params[:complaints].blank?.to_s and return
       encounter = Encounter.new()
-      encounter.encounter_type = EncounterType.find_by_name("VITALS").id
+      if params['encounter']['encounter_type_name'].upcase == 'NOTES'
+        encounter.encounter_type = EncounterType.find_by_name("NOTES").id
+      else
+        encounter.encounter_type = EncounterType.find_by_name("VITALS").id
+      end
       encounter.patient_id = params['encounter']['patient_id']
       encounter.encounter_datetime = session[:datetime]
       if params[:filter] and !params[:filter][:provider].blank?
@@ -512,7 +515,7 @@ class EncountersController < GenericEncountersController
       encounter.provider_id = user_person_id
       encounter.save
 
-      params[:complaints].each do |complaint|
+      (params[:complaints] || []).each do |complaint|
       encounter_id = Encounter.find(:last, :order => 'encounter_id ASC').id
 		  if !complaint.blank?
         multiple = complaint.match(/[:]/)
