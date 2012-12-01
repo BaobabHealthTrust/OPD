@@ -52,23 +52,18 @@ class EncountersController < GenericEncountersController
     end
 
     if (params[:encounter_type].upcase rescue '') == 'SOCIAL_HISTORY'
-			religions = ["Jehovahs Witness",  
-			  "Roman Catholic", 
-			  "Presbyterian (C.C.A.P.)",
-			  "Seventh Day Adventist", 
-			  "Baptist", 
-			  "Moslem"]
-
-			@religions = Observation.find(:all, :joins => [:concept, :encounter], 
+			@religions = ["Roman Catholic", "Presbyterian (C.C.A.P.)",
+			  "Seventh Day Adventist","Baptist","Moslem","Jehovahs Witness"]
+=begin
+			recorded_religions = Observation.find(:all, :joins => [:concept, :encounter], 
 			  :conditions => ["obs.concept_id = ? AND NOT value_text IN (?) AND " + 
             "encounter_type = ?",
           ConceptName.find_by_name("Other").concept_id, religions,
           EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|o| o.value_text}
 
-			@religions = religions + @religions
-
-			@religions = @religions.sort
-
+			@religions = religions  
+			@religions += recorded_religions.uniq.sort unless recorded_religions.blank?
+=end
 			@religions << "Other"
     end
 
@@ -562,5 +557,15 @@ class EncountersController < GenericEncountersController
    redirect_to("/patients/show/#{@patient_id}")
   end
 
+  def recorded_religions                                                        
+    religions = Observation.find(:all, :joins => [:concept, :encounter],         
+      :conditions => ["obs.concept_id = ? 
+      AND value_text LIKE '%#{params[:search_string]}%' AND encounter_type = ?",                                                
+      ConceptName.find_by_name("Other").concept_id,                           
+      EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|o| o.value_text}
+                                                                                
+    result = "<li>" + religions.map{|n| n } .join("</li><li>") + "</li>"        
+    render :text => result                                                      
+  end
 
 end
