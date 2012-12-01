@@ -335,7 +335,7 @@
             <tr>
               <td> <span style="display:block; width:90%;"> <%= "#{record[name]}" %> </span> </td>
               <td align="center" > <%= "<span > #{record[birthdate]} </span> " %> </td>
-              <td> <%= "<span class='basic_span' > #{record[gender]} </span> " %> </td>
+              <td> <%= "<span class='basic_span' > #{record[gender] == 'F' ? "Female" : "Male"} </span> " %> </td>
               <td align="right" > <%= "<span class='basic_span' > #{record[date_registered]} </span> " %> </td>
               <td> <%= "<span class='basic_span' > #{record[address]} </span> " %> </td>
               <td align="left" > <%= "<span class='basic_spuan' > #{record[t_a]} </span> " %> </td>
