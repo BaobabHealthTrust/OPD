@@ -1290,7 +1290,6 @@ class CohortToolController < ApplicationController
 		
 		@shift_type = params[:shift_type]
 		@shift_date = params[:shift_date]
-		
 		if params[:start_time] == ""
 			 if @shift_type == "day"
 				 @start_time = Time.parse(@shift_date + " 7:30:00")
@@ -1299,7 +1298,6 @@ class CohortToolController < ApplicationController
 				 @start_time = Time.parse(@shift_date + " 17:00:00")
 				 @end_time= (Time.parse(@shift_date + " 7:30:00")).tomorrow
 				 #@end_time = (next_day + " 7:29:59"
-				 raise @start_time.to_yaml
 			 else
 				 @start_time = Time.parse(@shift_date + " 17:00:00")
 				 @end_time= (Time.parse(@shift_date + " 7:29:59")).tomorrow
@@ -1310,13 +1308,56 @@ class CohortToolController < ApplicationController
 		end
 		
 		@logo = CoreService.get_global_property_value('logo').to_s
-    session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
-		
-		
+    @admission = []
+    admission_concepts = ['trauma','fracture','Abortion']
+    admission_concepts.each { | concept |
+      condition_string = "name LIKE \"#{concept}\" "
+      @outpatient_diagnosis_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+			@concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
+      #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
+      total = Encounter.find(:all,
+			:joins => [:type, :observations, [:patient => :person]],\
+        :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
+					value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
+          @outpatient_diagnosis_id, @concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
+      @admission << "#{concept + ':' + total.to_s}"
+     }
+ raise @admission.inspect
+    @diagnosis = []
+    admission_concepts = ['trauma','fracture','Abortion']
+    admission_concepts.each { | concept |
+      condition_string = "name LIKE \"#{concept}\" "
+      @outpatient_diagnosis_id = EncounterType.find_by_name("ADMIT PATIENT").encounter_type_id
+			@concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
+      #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
+      total = Encounter.find(:all,
+			:joins => [:type, :observations, [:patient => :person]],\
+        :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
+					value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
+          @outpatient_diagnosis_id, @concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
+      @diagnosis << "#{concept + ':' + total.to_s}"
+     }
+  raise @diagnosis.inspect
 		render :layout => "report"
   end
+  
+  def count_patient_with_concept(concept, start_date, end_date)
 
+			condition_string = "name LIKE \"#{concept}\" "
+      @outpatient_diagnosis_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+			@concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
+        #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
+
+			Encounter.find(:all,
+										 :joins => [:type, :observations, [:patient => :person]],\
+										 :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
+																		value_coded IN (?) AND encounter_datetime >= ?\
+																		AND encounter_datetime <= ?",\
+																		@outpatient_diagnosis_id, @concept_ids, start_date, end_date]\
+										).map{|e| e. patient_id}.uniq.size
+	end
+  
 	def report_age_range(age_groups)
 
 		age_range = [nil, nil]
