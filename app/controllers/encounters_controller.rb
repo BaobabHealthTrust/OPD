@@ -52,23 +52,18 @@ class EncountersController < GenericEncountersController
     end
 
     if (params[:encounter_type].upcase rescue '') == 'SOCIAL_HISTORY'
-			religions = ["Jehovahs Witness",  
-			  "Roman Catholic", 
-			  "Presbyterian (C.C.A.P.)",
-			  "Seventh Day Adventist", 
-			  "Baptist", 
-			  "Moslem"]
-
-			@religions = Observation.find(:all, :joins => [:concept, :encounter], 
+			@religions = ["Roman Catholic", "Presbyterian (C.C.A.P.)",
+			  "Seventh Day Adventist","Baptist","Moslem","Jehovahs Witness"]
+=begin
+			recorded_religions = Observation.find(:all, :joins => [:concept, :encounter], 
 			  :conditions => ["obs.concept_id = ? AND NOT value_text IN (?) AND " + 
             "encounter_type = ?",
           ConceptName.find_by_name("Other").concept_id, religions,
           EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|o| o.value_text}
 
-			@religions = religions + @religions
-
-			@religions = @religions.sort
-
+			@religions = religions  
+			@religions += recorded_religions.uniq.sort unless recorded_religions.blank?
+=end
 			@religions << "Other"
     end
 
@@ -500,7 +495,11 @@ class EncountersController < GenericEncountersController
 
   def create_complaints
       encounter = Encounter.new()
-      encounter.encounter_type = EncounterType.find_by_name("VITALS").id
+      if params['encounter']['encounter_type_name'].upcase == 'NOTES'
+        encounter.encounter_type = EncounterType.find_by_name("NOTES").id
+      else
+        encounter.encounter_type = EncounterType.find_by_name("VITALS").id
+      end
       encounter.patient_id = params['encounter']['patient_id']
       encounter.encounter_datetime = session[:datetime]
       if params[:filter] and !params[:filter][:provider].blank?
@@ -511,7 +510,7 @@ class EncountersController < GenericEncountersController
       encounter.provider_id = user_person_id
       encounter.save
 
-      params[:complaints].each do |complaint|
+      (params[:complaints] || []).each do |complaint|
       encounter_id = Encounter.find(:last, :order => 'encounter_id ASC').id
 		  if !complaint.blank?
         multiple = complaint.match(/[:]/)
@@ -558,5 +557,15 @@ class EncountersController < GenericEncountersController
    redirect_to("/patients/show/#{@patient_id}")
   end
 
+  def recorded_religions                                                        
+    religions = Observation.find(:all, :joins => [:concept, :encounter],         
+      :conditions => ["obs.concept_id = ? 
+      AND value_text LIKE '%#{params[:search_string]}%' AND encounter_type = ?",                                                
+      ConceptName.find_by_name("Other").concept_id,                           
+      EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|o| o.value_text}
+                                                                                
+    result = "<li>" + religions.map{|n| n } .join("</li><li>") + "</li>"        
+    render :text => result                                                      
+  end
 
 end

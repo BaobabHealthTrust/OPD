@@ -116,6 +116,10 @@ class User < ActiveRecord::Base
 		admin = user_roles.map{|user_role| user_role.role }.include? 'Superuser' unless admin
 		admin
 	end  
+  
+  def program_manager?
+		user_roles.map{|user_role| user_role.role }.include? 'Program Manager'
+  end
       
 	# Encrypts plain data with the salt.
 	# Digest::SHA1.hexdigest("#{plain}#{salt}") would be equivalent to

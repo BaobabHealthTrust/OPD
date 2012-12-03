@@ -12,7 +12,9 @@ if current_user.admin?
   @reports << ['Edit user',"/user/select_user"]
   @reports << ['Set user roles',"/user/users"]
   @reports << ['Set related roles',"/user/set_role_role/#{current_user.id}"]
-  @reports << ['View users',"/user/view_users"]
+  if current_user.program_manager?
+    @reports << ['View users',"/user/view_users"]
+  end
 end
 %>
 

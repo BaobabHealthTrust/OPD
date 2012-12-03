@@ -45,13 +45,13 @@
     :tt_onLoad => "__$('nextButton').style.display='block';",
     :helptext => "Religion" } %>
 
-  <%= touch_text_field_tag "Other", @patient, nil,
-    {
-    :id => "other",
-    :helpText => "Specify other religion",
-    :tt_onLoad => "__$('nextButton').style.display='block';",
-    :condition => "__$('religion').value == 'Other'"
-  } %>
+  <%= touch_text_field_tag "Other", @patient,nil, 
+      {:field_type => 'alpha', 
+      :helpText => 'Specify other religion', 
+      :ajaxURL => '/encounters/recorded_religions?search_string=', 
+      :tt_onLoad => "__$('nextButton').style.display='block';",
+      :condition => "__$('religion').value == 'Other'",
+      :allowFreeText => true }%>
 
 	<% if @retrospective %>
 		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>

@@ -478,7 +478,9 @@ class GenericUserController < ApplicationController
 
   def view_users
     logged_user = current_user
-    users = User.find(:all, :conditions => ['user_id !=? AND retired = 0',logged_user.id])
+    users = User.find(:all, 
+      :conditions => ['user_id !=? AND retired = 0',logged_user.id],
+      :order => "date_created DESC")
     @users = users.paginate(:page => params[:page], :per_page => 7)
     render:layout => false
   end

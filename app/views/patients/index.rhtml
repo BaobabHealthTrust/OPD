@@ -61,7 +61,6 @@
 						<option value='/patients/programs_dashboard/<%= @patient.id -%>'>Outcomes</option>
 					</select>
 					<select id="navigation_links">
-						<option link='/patients/edit_demographics?patient_id=<%= @patient.id -%>'>Edit Demographics</option>						
 						<option link='<%= ((session[:datetime].to_date rescue '') != '' ?
 							"/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
 							<%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
@@ -84,12 +83,7 @@
 						<option link='<%= ((session[:datetime].to_date rescue '') != '' ?
 						"/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
 						<%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
-						<option link='/patients/edit_demographics?patient_id=<%= @patient.id -%>'>Edit Demographics</option>
-            <% unless @active_opd_program_id.blank? %>
-              <option link='/programs/update/<%= @active_opd_program_id %>'>Update Outcome</option>
-            <% else %>
-              <option link='/patients/programs_dashboard/<%= @patient.id %>'>Update Outcome</option>
-            <% end %>
+            <option link='/patients/programs_dashboard/<%= @patient.id %>'>Update Outcome</option>
 					</select>
 				<% end %>
 			</form>
