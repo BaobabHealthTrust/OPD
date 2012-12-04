@@ -47,10 +47,12 @@ helper_method :allowed_hiv_viewer
 			end
 		end
 
+    ask_social_history_questions = CoreService.get_global_property_value('ask.social.history.questions').to_s == "true" rescue false
+
 		if !encounter_available_ever(patient, 'SOCIAL HISTORY') && patient_bean.age > 14 
 			task.encounter_type = 'SOCIAL HISTORY'
 			task.url = "/encounters/new/social_history?patient_id=#{patient.id}"
-		end
+		end if ask_social_history_questions
 
 		if !encounter_available_ever(patient, 'SOCIAL DETERMINANTS') && patient_bean.age <= 14 
 			task.encounter_type = 'SOCIAL DETERMINANTS'
