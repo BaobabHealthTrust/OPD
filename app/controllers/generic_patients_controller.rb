@@ -703,8 +703,10 @@ class GenericPatientsController < ApplicationController
     @encounter_dates.each do |encounter|
       @past_encounter_dates << encounter if encounter < (session[:datetime].to_date rescue Date.today.to_date)
     end
-
-    render :template => 'dashboards/past_visits_summary_tab', :layout => false
+ 
+    @patient_bean = PatientService.get_patient(Person.find(params[:patient_id]))
+  
+    render :layout => "menu"
   end
 
   def treatment_dashboard
@@ -2304,8 +2306,8 @@ class GenericPatientsController < ApplicationController
     @patient_bean = PatientService.get_patient(@person)
     @address = @person.addresses.last
     
-	@phone = PatientService.phone_numbers(@person)['Cell phone number']
-	@phone = 'Unknown' if @phone.blank?
+    @phone = PatientService.phone_numbers(@person)['Cell phone number']
+    @phone = 'Unknown' if @phone.blank?
     render :layout => 'edit_demographics'
   end
   

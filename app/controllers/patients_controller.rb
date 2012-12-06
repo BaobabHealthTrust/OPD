@@ -138,6 +138,8 @@ class PatientsController < GenericPatientsController
 		@links << ["Visit Summary (Print)","/patients/dashboard_print_opd_visit/#{patient.id}"]
 		@links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
 		@links << ["Demographics (Edit)","/patients/edit_demographics?patient_id=#{patient.id}"]
+		@links << ["Patient past visits (View)","/patients/past_visits_summary?patient_id=#{patient.id}"]
+		@links << ["Medical History (View)","/patients/past_diagnoses?patient_id=#{patient.id}"]
 
 		if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
 		  @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]
@@ -431,10 +433,10 @@ class PatientsController < GenericPatientsController
     patient_encounters.each{|e| 
       @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")][e.name] = encounter_summary(e)  if e.encounter_datetime.to_date < (session[:datetime].to_date rescue Date.today.to_date)   
       } rescue nil
-    
+   
+    @patient_bean = PatientService.get_patient(Person.find(@patient_ID)) 
     @past_local_cases = @past_local_cases.sort.reverse!
-    render :layout => false
-    
+    render :layout => "menu"
   end
   
 	def diagnosis_summary(encounter)
