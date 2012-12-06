@@ -17,21 +17,29 @@
 		height: 470px; 
 	}
 </style>
-
+<%#= raise params.inspect %>
 <script>
 	var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
+        referral_type = '<%= "#{params[:referral]}" %>';
 </script>
-
 <form id='referr_out' action="/encounters/create" method='post'>
 	<%= hidden_field_tag "encounter[encounter_type_name]", "REFERRAL" %>
 	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
 	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
 	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
   
+       <% if params[:referral].upcase == 'INTERNAL REFERRAL' %>
+         <%= hidden_field_tag("observations[][concept_name]",  "REFER TO HOSPITAL OR SPECIALIST CLINIC") %>
+         <%= hidden_field_tag("observations[][value_coded_or_text]", Location.current_health_center.name)%>
+         <%= hidden_field_tag("observations[][patient_id]",    @patient.id) %>
+         <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
+       <% end %>
+  
 	<%= touch_text_field_tag "REFER TO HOSPITAL OR SPECIALIST CLINIC", @patient, nil,
 		{	:id => "hospital",
 			:allowFreeText => 'true',
 			:ajaxURL => "/encounters/locations?search_string=",
+                        :condition => "referral_type.match(/EXTERNAL REFERRAL/i)",
 		 	:helpText => "Referral Facility" } %>
 
 	<%= touch_select_tag "SPECIALIST CLINIC", @patient, concept_set_options('SPECIALIST CLINIC'),
