@@ -22,7 +22,7 @@ EOF
       activation.system_id = "OPD"
       activation.status = "active"
       activation.save
-      puts "................. #{user.username}"
+      puts "................. Set user: #{user.username} , Status: active"
     end
   end
 
