@@ -18,10 +18,12 @@ class ProgramsController < GenericProgramsController
       if patient_state.save
 		    # Close and save current_active_state if a new state has been created
 		   current_active_state.save
-
-        if patient_state.program_workflow_state.concept.fullname.upcase == 'PATIENT TRANSFERRED OUT' ||
+			 
+        if patient_state.program_workflow_state.concept.fullname.upcase == 'PATIENT DIED' ||
+					 patient_state.program_workflow_state.concept.fullname.upcase == 'PATIENT TRANSFERRED OUT' ||
         	 patient_state.program_workflow_state.concept.fullname.upcase == 'REFERRED TO ANOTHER FACILITY'
-          encounter = Encounter.new(params[:encounter])
+					 
+					encounter = Encounter.new(params[:encounter])
           encounter.encounter_datetime = session[:datetime] unless session[:datetime].blank?
           encounter.save
 
@@ -37,7 +39,8 @@ class ProgramsController < GenericProgramsController
           end
 
           observation = {} 
-          observation[:concept_name] = 'TRANSFER OUT TO'
+          #observation[:concept_name] = 'TRANSFER OUT TO'
+					observation[:concept_name] = 'TRANSFER OUT TO'
           observation[:encounter_id] = encounter.id
           observation[:obs_datetime] = encounter.encounter_datetime || Time.now()
           observation[:person_id] ||= encounter.patient_id

@@ -33,7 +33,7 @@
           }
           else
           {
-              window.location = '/clinic'; // /report/data_cleaning';
+              history.go(-1);// /report/data_cleaning';
           }
 
           })
@@ -110,7 +110,8 @@
       <div id="content" style = "position : relative; width : 85%; margin-left : -43%;">
 
         <%= yield %>
-      <% if session[:mastercard_ids].length.to_i != 0 %>
+		<%#=  raise session[:mastercard_ids].to_yaml %>
+      <% if session[:mastercard_ids].length.to_i != 0 and session[:mastercard_ids].length.to_i != "" %>
          <% session[:mastercard_ids] = session[:mastercard_ids].uniq.sort! rescue ""%>
         <form action="/patients/mastercard?source=data_cleaning&show_mastercard_counter=true&current=1"  method="post" id="myform">
         </form>
@@ -119,7 +120,7 @@
         <div id="footer" class="dark">
           <div id="buttons" class="buttons" style="top:0px">
             <button id="logout" class="red left" style="position :relative; float:right;"><span>Finish</span></button>
-            <button id="find" class="green" style="width:200px;" style="position :relative; float:right;"><span>Mastercards</span></button>
+            <button id="find" class="blue" style="width:200px;" style="right:-0px; float:right;"><span>Back</span></button>
              
 						 <% if params[:action] != "opd_cohort" %>
 										 
@@ -139,7 +140,7 @@
 											  <button id="print" class="blue" style="position :relative; float:right;"
 											  onClick="$('#table_id').table2CSV({header:['Name','Birthdate','Gender','Date Registered', 'Address','T.A']})">
 											  <span>Export</span></button>
-										  <% else %>
+										  <% elsif @report_name.upcase != 'SHIFT_REPORT' %>
 											  <button id="print" class="blue" style="position :relative; float:right;"
 											  onClick="$('#table_id').table2CSV({header:['Facility','Total']})"><span>Export</span></button>
 										  <% end %>

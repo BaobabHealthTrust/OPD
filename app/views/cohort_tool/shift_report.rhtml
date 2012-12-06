@@ -1,504 +1,314 @@
 <html>
   <head>
 	<%= javascript_include_tag "prototype" %>
-	<%= javascript_include_tag 'jquery' %>
-	<%= stylesheet_link_tag 'extra_buttons' %>
-	<%= javascript_include_tag 'jquery_data_table.js' %>
-	<%= stylesheet_link_tag 'jquery.dataTables' %>
-	<%=javascript_include_tag "jquery.table2CSV.min" %>
-    <script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
-    <script>
-      var names = '<%= @report_name.upcase %>';
-      var prev_link;
-      var next_link;
-      jQuery(document).ready(function($) {
-		$('#table_id').dataTable({
-		  "bAutoWidth": true,
-		  "bPaginate": false,
-		  "bProcessing": true,
-		  "bInfo": false
-		});
-		/*
-      var  buttondiv = document.getElementById("buttons");
-      buttondiv.innerHTML+= ' <%#= will_paginate @page, :page_links => false %>'
-      if (document.getElementsByClassName('disabled prev_page').length == 1){
-        next_link = document.getElementsByClassName('next_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>' + "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
-        prev_link = null
-        buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
-        buttondiv.innerHTML+= "<button id='disabled prev_page' class='gray'><span>Previous</span></button>"
-      }
-      else if (document.getElementsByClassName('disabled next_page').length == 1){
-        prev_link = document.getElementsByClassName('prev_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
-        next_link = null
-        buttondiv.innerHTML+= "<button id='disabled next_page' class='gray'><span>Next</span></button>"
-        buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
-      }
-      else if (document.getElementsByClassName('next_page').length == 1 && document.getElementsByClassName('prev_page').length == 1) {
-        prev_link = document.getElementsByClassName('prev_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
-        next_link = document.getElementsByClassName('next_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
-        buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
-        buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
-      }
-		 */
-		search_box = $('#table_id').dataTable()
-		search = document.getElementsByTagName("input")[0];
-		search.setAttribute("id","search");
-		document.getElementById('search').setAttribute("onclick","showKeyboard();");
-		document.getElementById("find").innerHTML = "<span>Back</span>";
-		document.getElementById("find").style.cssFloat = "left";
+	<%= stylesheet_link_tag "cohort" %>
+	<script src="/javascripts/jquery-1.3.2.min.js" type="text/javascript"></script>
+	<script type="text/javascript">
 
-		$('#find').click(function() {
-		  window.location = '/cohort_tool/opd_menu?report_name=<%=@report_name%>'; // /report/data_cleaning';
-		})
-		$('#logout').click(function() {
-		  window.location = '/clinic'; // /';
-		})
-		$('#nextButton').click(function() {
-		  window.location = next_link;
-		})
-		$('#prevButton').click(function() {
-		  window.location = prev_link;
-		})
-		//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-		keyboard = document.getElementsByClassName("keypad")[0]
-		function getCharButtonSetID(character,id){
-		  return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' +"<span style='width:32px'>"+character+"</span>"+ "</button>";
-		}
-		function getButtonString(id,string){
-		  return "<button \
-                            onMouseDown='press(this.id);' \
-                            class='keyboardButton' \
-                            id='"+id+"'>"+
-			string +
-			"</button>";
-		}
-
-		function getButtons(chars){
-		  var buttonLine = "";
-		  for(var i=0; i<chars.length; i++){
-			character = chars.substring(i,i+1)
-			buttonLine += getCharButtonSetID(character,character)
-		  }
-		  return buttonLine;
-		}
-
-		showAlphaKeypad();
-
-		function showAlphaKeypad(){
-		  document.getElementById("keypad").style.height = "280";
-		  keyboard.innerHTML = getButtons("QWERTYUIOP") + "</br>"
-		  keyboard.innerHTML+= getButtons("ASDFGHJKL:") + "</br>"
-		  keyboard.innerHTML+= getButtons("ZXCVBNM,.?")
-		  keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
-		  keyboard.innerHTML+= getButtonString('Space','<span>Space</span>')
-		  keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
-
-		}
-
-		function showNumericKeypad(){
-		  document.getElementById("keypad").style.height = "145";
-		  keyboard.innerHTML = getButtons("123")
-		  keyboard.innerHTML+= getButtons("456")
-		  keyboard.innerHTML+= getButtons("7890")
-		  keyboard.innerHTML+= getButtonString('space','<span>Space</span>')
-		  keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
-		  keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
-		  keyboard.innerHTML+= getButtonString('abc','<span>abc</span>')
-		  keyboard.innerHTML+= getButtonString('dash','<span>-</span>')
-		  keyboard.innerHTML+= getButtonString('slash','<span>/</span>')
-		}
-
-		data_table_length =document.getElementsByName('table_id_length')[0];
-		data_table_length.setAttribute("style","font-size:20px;");
-
-		table_length = document.getElementById("table_id_length");
-		table_length.setAttribute("style","width:100px;");
-
-
-<%if @disaggregated_diagnosis != nil && @disaggregated_diagnosis.length > 100 %>
-	  var elements = <%=@disaggregated_diagnosis.length%>
-	  var x = 200
-	  while(x < elements){
-		data_table_length.innerHTML+="<option value='" + x + "'>" + x + "</option>";
-		x+=100
+	</script>
+	<script>
+	  var tt_cancel_destination = "/"
+	</script>
+	<style>
+	  table {
+		border-style:none;
+		border-width:1px;
+		position:absolute;
+		top:39px;
+		left:0%;
+		margin-top:-40px;
+		width:99% !important;
 	  }
-	  data_table_length.innerHTML+="<option value='" + x + "'>" + x + "</option>";
-<% end %>$("div").removeClass("content");
 
-
-  })
-    </script>
-
-    <script>
-
-      function showKeyboard(){
-        key = document.getElementById("keypad")
-        if(key.style.display == 'none' || key.style.display == ""){
-          key.style.display = "inline";
-          return
-        }
-
-        key.style.display = "none";
-      }
-
-      function press(pressedChar){
-        switch (pressedChar) {
-          case 'backspace':
-            search.value = search.value.substring(0,search.value.length-1);
-            search_box.fnFilter(search.value)
-            return;
-          case 'Space':
-            search.value+= " "
-            search_box.fnFilter(search.value)
-            return
-          case 'clear':
-            search.value = ""
-            search_box.fnFilter(search.value)
-            return
-          case 'num':
-            showNumericKeypad();
-            return
-          case 'slash':
-            search.value+= "/"
-            search_box.fnFilter(search.value)
-            return
-          case 'dash':
-            search.value+= "-"
-            search_box.fnFilter(search.value)
-            return
-          case 'abc':
-            showAlphaKeypad();
-            return
-        }
-        search.value+= pressedChar
-        search_box.fnFilter(search.value)
-      }
-      //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    </script>
-
-    <style>
-
-      #backspace{
-        position:absolute;
-        left:100px;
-        bottom:2px;
-      }
-
-      #Space{
-        position:absolute;
-        left:220px;
-        bottom:2px;
-        width:200px;
-      }
-
-      #clear{
-        position:absolute;
-        left:470px;
-        bottom:2px;
-      }
-
-      #keypad{
-        background-color: #FFFFFF;
-        border: 2px solid #9999FF;
-        border-radius: 15px 15px 15px 15px;
-        padding: 5px;
-        position:absolute;
-        width:670px;
-        right:510px;
-        height:260px;
-        display:none;
-        right:4px;
-        top:270px;
-      }
-    </style>
-    <style>
-      div {
-        -moz-user-select: none;
-      }
-	    div.scrollTableContainer {
-    border-style:solid;
-	height:68%;
-	top:10px;
-	width: 80% !important;
-  }
-      .basic_span {
-        position:relative;
-        width:50%;
-        display:block;
-        float:left;
-      }
-
-      .logo {
-        float:left
-      }
-	  .display{
-		height:50%;
+	  th {
+		border-style:none;
+		border-width:1px;
 	  }
-      #table_id {
-        width: 80%;
-      }
 
-      #table_id_filter{
-        position:absolute;
-        top:0px;
-        right:1%;
-        margin-top:-40px;
-      }
+	  td {
+		text-align:center;
+		border-style:solid;
+		border-width:1px;
+	  }
 
-      #table_id_filter input{
-        padding:0.5em;
-      }
-
-
-      .dataTables_length select {
-        font-size: 25px;
-      }
-      .horizontal_line hr{
-        position:absolute;
-        bottom:104px;
-      }
-      #table_id_info{
-        overflow:hidden;
-        position:fixed;
-        left:250px;
-        top:696px;
-      }
-      .pagination{
-        display:none;
-      }
-      #num{ display:none; }
-      #char{ display:none; }
-      .prev_page,.next_page {
-      }
-
-      .prev_page:hover, .next_page:hover
-      { }
-      .disabled { }
-
-      .disabled:hover {}
-
-
+	  .row_break td {
+		border-width:0px;
+	  }
+	  .logo {
+		float: left;
+		height: 8em;
+	  }
+	  .location{
+		float:left;
+		top:-50px;
+	  }
+	  .description{
+		border-style:none;
+		border-width:1px;
+		position:absolute;
+		top:70px;
+		left:8.5%;
+		margin-top:-40px;
+	  }
+	  .shift{
+		border-style:none;
+		border-width:1px;
+		position:absolute;
+		top:70px;
+		left:8.5%;
+		margin-top:-40px;
+	  }
 
     </style>
   </head>
   <body >
+
 	<%= image_tag(@logo, :class => "logo")%>
-    <br /><b style="margin-left:75px"><%= @current_location_name %></b><br />
+	<div class="location"><h1><%= @current_location_name %></h1></div>
 
-	<b style="position:relative; top:0px;margin-left:75px"><%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %></b><br />
+	<div class="description"><h2><%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %> <br>from <%= "#{@start_time.strftime('%a %H:%M')}"%> to <%= "#{@end_time.strftime('%a %H:%M')}"%></h2>
+	
+	</div>
+		  <br>&nbsp;
+	  <br>
+	  &nbsp;
+	<div> 
+	</div>
+	<div style="position:relative; width:100%; overflow-y:scroll;" class='scrollTableContainer'>
 
 
-    <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> 
-	  Shift Date : <%= "#{@shift_date}"%> <br>
-	  Category : <%= "#{@shift_type}"%> From <%= "#{@start_time}"%> To <%= "#{@end_time}"%></b>
-    <div style="position:relative; width:100%; overflow-y:scroll;" class='scrollTableContainer'>
-      <table  id="table_id" class="display" valign="top">
-		<tr valign="top">
-		  <td>
-		  <td><b>Total Attendance</b></td>
-		  </td>
-		  <td>
-			<table>
-			  <tr>
-				<td>Trauma patients</td>
-			  </tr>
-			  <tr>
-				<td>Orthropaedic patients</td>
-			  </tr>
-			  <tr>
-				<td>Surgical patients</td>
-			  </tr>
-			  <tr>
-				<td>Psychiatric patients</td>
-			  </tr>
-			</table>
-		  </td>
+	  <table align="left" valign ="top">
+
+
+		<tr >
+		  <th style = "text-align:left;" colspan="3">Total Attendance</th>
+		  <th>&nbsp;</th>
 		</tr>
-		<tr valign="top">
-		  <td>
-		  <td><b>Total Admissions</b></td>
-		  </td>
-		  <td>
-			<table>
-			  <tr>
-				<td>Medical</td>
-			  </tr>
-			  <tr>
-				<td>Surgical</td>
-			  </tr>
-			  <tr>
-				<td>Surgical patients</td>
-			  </tr>
-			  <tr>
-				<td>Obstetric and Gynae</td>
-			  </tr>
-			  <tr>
-				<td>ICU</td>
-			  </tr>
-			</table>
-		  </td>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Trauma patients </td>
+		  <td style = "text-align:right;"><%= @referal["trauma"] %></td>
 		</tr>
-		<tr valign="top">
-		  <td>
-		  <td><b>Short Stay Ward</b></td>
-		  </td>
-		  <td>
-			<table>
-			  <tr>
-				<td>Admissions</td>
-			  </tr>
-			  <tr>
-				<td>Discharges</td>
-			  </tr>
-			  <tr valign="top">
-				<td>Transfer Out : (Circle)
-				</td>
-				<td>
-				   <table>
-					 <tr>
-					   <td>&nbsp;
-					   </td>
-					 </tr>
-					<tr>
-					  <td>
-					  Medical   </td><td>3B:   </td> <td>4A:
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Surgical  </td><td>5A:  </td><td> 5B:    </td><td>6A:
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Obstetrics   </td><td>LW:   </td><td>PNW: </td><td>ANW:
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Gyanecology:
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Intensive Care Unit(ICU):
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Paying   </td><td>1A:     </td><td>2A
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Other:
-					  </td>
-					</tr>
-				   </table>
-				</td>
-			  </tr>
-			  <tr>
-				<td>Patients awaiting review</td>
-			  </tr>
-			  <tr>
-				<td>ICU</td>
-			  </tr>
-			</table>
-		  </td>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Orthropaedic patients</td>
+		  <td style = "text-align:right;"><%=  @referal["orthropaedic"] %></td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Surgical patients</td>
+		  <td style = "text-align:right;"><%= @referal["surgical"] %></td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Psychiatric patients</td>
+		  <td style = "text-align:right;"><%=  @referal["psychiatric"] %></td>
 		</tr>
 
-				<tr valign="top">
-		  <td>
-		  <td><b>Resusciation  Area</b>
-		  </td>
-		  <td>
-			<table>
-			  <tr>
-				<td>Admited</td>
-			  </tr>
-			  <tr valign="top">
-				<td>Transfer Out : (Circle)
-				</td>
-				<td>
-				   <table>
-					 <tr>
-					   <td>&nbsp;
-					   </td>
-					 </tr>
-					<tr>
-					  <td>
-						Medical   </td><td>3B:   </td><td> 4A:
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Surgical  </td><td>5A:   </td><td>5B:    </td><td>6A:
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Obstetrics  </td><td> LW:   </td><td>PNW:</td><td> ANW:
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Gyanecology:
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Intensive Care Unit(ICU):
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Paying   </td><td>1A:     </td><td>2A
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						Other:
-					  </td>
-					</tr>
-				  </table>
-				</td>
-			  </tr>
-			  </tr>
-			</table>
-		  </td>
+		<tr>
+		  <th style = "text-align:left;" colspan="3">Total Admissons</th>
+		  <th>&nbsp;</th>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Medical </td>
+		  <td style = "text-align:right;"><%= @admission["medical"] %></td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Surgica</td>
+		  <td style = "text-align:right;"><%= @admission["surgical"] %></td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Obstetric and Gynae</td>
+		  <td style = "text-align:right;"><%= @admission["obstetric"] %></td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">ICU</td>
+		  <td style = "text-align:right;"><%= @admission["ICU"] %></td>
 		</tr>
 
-		<tr valign="top">
-		  <td>
-		  <td><b>Deaths</b></td>
-		  </td>
-		  <td>
-			<table>
-			  <tr>
-				<td>Brought in Dead</td>
-			  </tr>
-			  <tr>
-				<td>Assessment area</td>
-			  </tr>
-			  <tr>
-				<td>Short stay ward</td>
-			  </tr>
-			  <tr>
-				<td>Resusciation section</td>
-			  </tr>
-			</table>
-		  </td>
+
+		<tr>
+		  <th style = "text-align:left;" colspan="3">Short Stay Ward</th>
+		  <th>&nbsp;</th>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Admissions </td>
+		  <td style = "text-align:right;"><%= @admitted["total"] %></td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Discharges</td>
+		  <td style = "text-align:right;"><%= @admission["surgical"] %></td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="4">Transfer Out : (Circle)</td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="4">Medical</td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">3B:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">4A:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="4">Surgical</td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">5A:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">5B:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">6A:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="4">Obstetrics</td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">LW:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">PNW</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">ANW</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Gyanecology:</td>
+		  <td style = "text-align:right;"><%= @admitted["Gynaecology Ward"] %> </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Intensive Care Unit(ICU):</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="4">Paying</td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">1A:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">2A</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Other:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
 		</tr>
 
-      </table>
-    </div>
-
-    <div id="keypad">
-      <span class="keypad">
-      </span>
-    </center>
-
-  </div>
-
-</body>
+		</td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Patients awaiting review</td>
+		  <td style = "text-align:right;"><%= @admission["ICU"] %></td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">ICU</td>
+		  <td style = "text-align:right;"><%= @admission["ICU"] %></td>
+		</tr>
+		<tr>
+		  <th style = "text-align:left;" colspan="3">Resusciation  Area</th>
+		  <th>&nbsp;</th>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Admited</td>
+		  <td style = "text-align:right;"><%= @admitted["total"] %></td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="4">Transfer Out : (Circle)</td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="4">Medical</td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">3B:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">4A:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="4">Surgical</td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">5A:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">5B:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">6A:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="4">Obstetrics</td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">LW:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">PNW</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">ANW</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Gyanecology:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Intensive Care Unit(ICU):</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="4">Paying</td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">1A:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr><td colspan="2"></td>
+		  <td style = "text-align:left;" colspan="1">2A</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Other:</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+		<tr>
+		  <th style = "text-align:left;" colspan="3">Deaths</th>
+		  <th>&nbsp;</th>
+		</tr>
+		<tr>
+		  <td style = "text-align:left;" colspan="3">Brought in Dead</td>
+		  <td style = "text-align:right;"><%=  @dead["dead"] %> </td>
+		</tr>
+        <tr>
+		  <td style = "text-align:left;" colspan="3">Assessment area</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+        <tr>
+		  <td style = "text-align:left;" colspan="3">Short stay ward</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+        <tr>
+		  <td style = "text-align:left;" colspan="3">Resusciation section</td>
+		  <td style = "text-align:right;">&nbsp; </td>
+		</tr>
+	  </table>
+	</div>
+  </body>
 </html>
