@@ -1,6 +1,5 @@
 class GenericEncountersController < ApplicationController
   def create(params=params, session=session)
-
     if params[:change_appointment_date] == "true"
       session_date = session[:datetime].to_date rescue Date.today
       type = EncounterType.find_by_name("APPOINTMENT")                            
@@ -491,6 +490,18 @@ class GenericEncountersController < ApplicationController
     #find a way of printing the lab_orders labels
      if params['encounter']['encounter_type_name'] == "LAB ORDERS"
        redirect_to"/patients/print_lab_orders/?patient_id=#{@patient.id}"
+     elsif params['encounter']['encounter_type_name'].upcase == 'REFERRAL'
+        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
+        return
+     elsif params['encounter']['encounter_type_name'].upcase == 'ADMIT PATIENT'
+        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
+        return
+     elsif params['encounter']['encounter_type_name'].upcase == 'DISCHARGE PATIENT'
+        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
+        return
+     elsif params['encounter']['encounter_type_name'].upcase == 'PATIENT SENT HOME'
+        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
+        return
      elsif params['encounter']['encounter_type_name'] == "TB suspect source of referral" && !params[:gender].empty? && !params[:family_name].empty? && !params[:given_name].empty?
        redirect_to"/encounters/new/tb_suspect_source_of_referral/?patient_id=#{@patient.id}&gender=#{params[:gender]}&family_name=#{params[:family_name]}&given_name=#{params[:given_name]}"
      else
