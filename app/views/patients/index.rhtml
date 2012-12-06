@@ -84,6 +84,7 @@
 						"/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
 						<%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
             <option link='/patients/programs_dashboard/<%= @patient.id %>'>Programs</option>
+            <option link='/encounters/new/lab_orders?show&patient_id=<%= @patient.id %>'>Examinations</option>
 					</select>
 				<% end %>
 			</form>
