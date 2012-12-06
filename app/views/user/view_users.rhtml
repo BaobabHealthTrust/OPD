@@ -168,7 +168,7 @@ $(document).ready( function () {
     </tr>
     </thead>
     <tbody>
-    <% @users.each do |user| %>
+    <% (@users || []).each do |user| %>
     <% user_first_name = user.person.names.first.given_name rescue '' %>
     <% user_last_name = user.person.names.first.family_name rescue '' %>
     <% user_date_registered = user.date_created.strftime("%d-%m-%Y") %>
@@ -202,7 +202,13 @@ $(document).ready( function () {
        <button style="width:100%" id = "<%= user.id %>" class = "blue retire_button" retire = "retire" ><span>Retire</span></button>
       </td>
     </tr>
-    <%  end %>
+    <%end 
+      if @users.blank? 
+        1.upto(8).each do |n|%>
+          <td id="row">&nbsp;</td>
+      <%end
+    end%>
+
     </tbody>
   </table>
       </div>
