@@ -278,13 +278,10 @@ class PatientsController < GenericPatientsController
             obs = []
             encounter.observations.each { | observation |
 
-             # if (observation.concept_id == 8578)
               concept_name = observation.concept.concept_names.last.name
-              #next if concept_name.match(/Detailed presenting complaint/i)
 							next if concept_name.match(/Workstation location/i)
               next if concept_name.match(/Life threatening condition/i)
               next if concept_name.match(/Triage category/i)
-              next if concept_name.match(/clinician notes/i)
               next if concept_name.match(/specific presenting complaint/i)
               next if !observation.obs_group_id.blank?
 
@@ -402,7 +399,10 @@ class PatientsController < GenericPatientsController
             outcomes << state_name
       		  #label.draw_multi_text("Outcome : #{state_name}", concepts_font)
       		end
-           label.draw_multi_text("Outcomes : #{outcomes.uniq.join(',')}", concepts_font)
+          
+          unless outcomes.blank?
+            label.draw_multi_text("Outcomes : #{outcomes.uniq.join(',')}", concepts_font)
+          end
 			end
 
       label.draw_multi_text("Seen by: #{current_user.name} at " +
