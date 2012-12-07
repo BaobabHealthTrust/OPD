@@ -217,7 +217,6 @@ class PatientsController < GenericPatientsController
       check_vitals = encs.map(&:name).include?('VITALS')
       check_notes = encs.map(&:name).include?('NOTES')
       encs.each {|encounter|
-          encounter_name = encounter.name
           if encounter.name.upcase.include?('TREATMENT')
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             o = encounter.orders.collect{|order| order.to_s if order.order_type_id == OrderType.find_by_name('Drug Order').order_type_id}.join("\n")
@@ -282,10 +281,6 @@ class PatientsController < GenericPatientsController
               concept_name = observation.concept.concept_names.last.name
               #next if concept_name.match(/Detailed presenting complaint/i)
 							next if concept_name.match(/Workstation location/i)
-              next if concept_name.match(/Life threatening condition/i)
-              next if concept_name.match(/Triage category/i)
-              next if concept_name.match(/clinician notes/i)
-              next if concept_name.match(/specific presenting complaint/i)
               next if !observation.obs_group_id.blank?
 
               child_obs = Observation.find(:all, :conditions => ["obs_group_id = ?", observation.obs_id])
@@ -300,16 +295,17 @@ class PatientsController < GenericPatientsController
                 }
                 obs << text
               else
-                obs << concept_name + ' - ' + observation.answer_string.to_s
+                obs << observation.answer_string.to_s
               end
               notes << obs
             }
             notes
             if (check_vitals == false)
               label.draw_multi_text("Notes at #{encounter_datetime}",title_header_font)
-              obs.each { | observation |
-                label.draw_multi_text("#{observation}", concepts_font)
-            }
+              label.draw_multi_text("#{obs.join(',')}",title_header_font)
+              #obs.each { | observation |
+                #label.draw_multi_text("#{observation}", concepts_font)
+            #}
             end
 
             elsif encounter.name.upcase.include?("ADMIT PATIENT")
@@ -342,10 +338,11 @@ class PatientsController < GenericPatientsController
             }
 
 					elsif encounter.name.upcase.include?("VITALS")
+            vital_signs = ["HT","Weight","Heart rate","Diastolic", "TA", "Temperature","RR","SAO2"]#SAO2 for oxygen saturation
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
 						string = []
-						encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
+            complaints = []
             encounter.observations.each { | observation |
 
              # if (observation.concept_id == 8578)
@@ -357,7 +354,7 @@ class PatientsController < GenericPatientsController
               child_obs = Observation.find(:all, :conditions => ["obs_group_id = ?", observation.obs_id])
 
               if !child_obs.empty?
-                text = observation.answer_string.to_s + " - "
+                text = observation.answer_string.to_s + " : "
                 count = 0
                 child_obs.each { | child_observation |
                   text = text + ", " if count > 0
@@ -366,16 +363,21 @@ class PatientsController < GenericPatientsController
                 }
                 obs << text
               else
-                obs << concept_name + ' - ' + observation.answer_string.to_s
+                string << observation.concept.fullname + ':' + observation.answer_string if vital_signs.include?(concept_name)
+                #obs << observation.concept.fullname + ':' + observation.answer_string.to_s if !vital_signs.include?(concept_name) && observation.answer_string.match(/\d+/)
+                obs << observation.answer_string.to_s if !vital_signs.include?(concept_name)
               end
-              vitals << obs
+              vitals << obs << string
             }
             vitals
             if (check_notes == false)
               label.draw_multi_text("Vitals at #{encounter_datetime}", title_header_font)
-              obs.each { | observation |
-                label.draw_multi_text("#{observation}", concepts_font)
-              }
+              label.draw_multi_text("#{string.join(',')}", title_header_font)
+              #label.draw_multi_text("Presenting complaints", title_header_font)
+              label.draw_multi_text("Presenting complaints\n #{obs.join(',')}", title_header_font) if !obs.blank?
+              #obs.each { | observation |
+                #label.draw_multi_text("#{observation}", concepts_font)
+              #}
             end
         end
 
@@ -383,9 +385,10 @@ class PatientsController < GenericPatientsController
       if ((check_notes == true) && (check_vitals == true))
           combined = (vitals + notes).flatten.sort.uniq #Trying to remove the duplicate entries
           label.draw_multi_text("NOTES AND VITALS", concepts_font)
-          combined.each { | value |
-            label.draw_multi_text("#{value}", concepts_font)
-          }
+          label.draw_multi_text("#{combined.join(',')}", concepts_font)
+          #combined.each { | value |
+            #label.draw_multi_text("#{value}", concepts_font)
+          #}
       end
 			['OPD PROGRAM','IPD PROGRAM'].each do |program_name|		
 					program_id = Program.find_by_name(program_name).id
@@ -402,7 +405,7 @@ class PatientsController < GenericPatientsController
             outcomes << state_name
       		  #label.draw_multi_text("Outcome : #{state_name}", concepts_font)
       		end
-           label.draw_multi_text("Outcomes : #{outcomes.uniq.join(',')}", concepts_font)
+           label.draw_multi_text("Outcomes : #{outcomes.uniq.join(',')}", concepts_font) if !outcomes.blank?
 			end
 
       label.draw_multi_text("Seen by: #{current_user.name} at " +
