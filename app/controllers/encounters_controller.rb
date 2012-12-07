@@ -494,6 +494,7 @@ class EncountersController < GenericEncountersController
 
 
   def create_complaints
+    #raise params[:complaints].to_yaml
       encounter = Encounter.new()
       if params['encounter']['encounter_type_name'].upcase == 'NOTES'
         encounter.encounter_type = EncounterType.find_by_name("NOTES").id
@@ -520,7 +521,7 @@ class EncountersController < GenericEncountersController
           parent_obs = {
             "encounter_id" => "#{encounter_id}",
             "patient_id" => params['encounter']['patient_id'],
-            "concept_name" => "#{concept_name}".upcase,
+            "concept_name" => "presenting complaint".upcase,
             "value_text" => "#{multiple_array[0]}",
             "obs_datetime" => params['encounter']['encounter_datetime']
           }
@@ -544,7 +545,7 @@ class EncountersController < GenericEncountersController
           obs = {
             "encounter_id" => "#{encounter.id}",
             "patient_id" => params['encounter']['patient_id'],
-						"concept_name" => "#{complaint}".upcase,
+						"concept_name" => "Presenting complaint".upcase,
 						"value_text" => complaint,
 						"obs_datetime" => params['encounter']['encounter_datetime']
           }

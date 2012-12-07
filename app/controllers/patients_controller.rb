@@ -138,6 +138,8 @@ class PatientsController < GenericPatientsController
 		@links << ["Visit Summary (Print)","/patients/dashboard_print_opd_visit/#{patient.id}"]
 		@links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
 		@links << ["Demographics (Edit)","/patients/edit_demographics?patient_id=#{patient.id}"]
+		@links << ["Patient past visits (View)","/patients/past_visits_summary?patient_id=#{patient.id}"]
+		@links << ["Medical History (View)","/patients/past_diagnoses?patient_id=#{patient.id}"]
 
 		if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
 		  @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]
@@ -209,8 +211,13 @@ class PatientsController < GenericPatientsController
       label.draw_multi_text("Visit: #{encs.first.encounter_datetime.strftime("%d/%b/%Y %H:%M")}" +
     " - #{encs.last.encounter_datetime.strftime("%d/%b/%Y %H:%M")}", title_font_top_bottom)
       label.draw_line(20,60,800,2,0)
+      outcomes = []
+      vitals = []
+      notes = []
+      check_vitals = encs.map(&:name).include?('VITALS')
+      check_notes = encs.map(&:name).include?('NOTES')
       encs.each {|encounter|
-
+          encounter_name = encounter.name
           if encounter.name.upcase.include?('TREATMENT')
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             o = encounter.orders.collect{|order| order.to_s if order.order_type_id == OrderType.find_by_name('Drug Order').order_type_id}.join("\n")
@@ -266,18 +273,15 @@ class PatientsController < GenericPatientsController
             label.draw_multi_text("Transfer Out", :font_reverse => true)
             label.draw_multi_text("#{obs}", concepts_font)
           
-          elsif encounter.name.upcase.include?("PRESENTING COMPLAINTS")
+          elsif encounter.name.upcase.include?("NOTES")
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
             encounter.observations.each { | observation |
 
-             # if (observation.concept_id == 8578)
               concept_name = observation.concept.concept_names.last.name
-              #next if concept_name.match(/Detailed presenting complaint/i)
 							next if concept_name.match(/Workstation location/i)
               next if concept_name.match(/Life threatening condition/i)
               next if concept_name.match(/Triage category/i)
-              next if concept_name.match(/clinician notes/i)
               next if concept_name.match(/specific presenting complaint/i)
               next if !observation.obs_group_id.blank?
 
@@ -293,15 +297,18 @@ class PatientsController < GenericPatientsController
                 }
                 obs << text
               else
-                obs << observation.answer_string.to_s
+                obs << concept_name + ' - ' + observation.answer_string.to_s
               end
+              notes << obs
             }
+            notes
+            if (check_vitals == false)
+              label.draw_multi_text("Notes at #{encounter_datetime}",title_header_font)
+              obs.each { | observation |
+                label.draw_multi_text("#{observation}", concepts_font)
+            }
+            end
 
-            label.draw_multi_text("Presenting complaints at #{encounter_datetime}",title_header_font)
-            obs.each { | observation |
-              label.draw_multi_text("#{observation}", concepts_font)
-            }
-            
             elsif encounter.name.upcase.include?("ADMIT PATIENT")
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
@@ -312,8 +319,10 @@ class PatientsController < GenericPatientsController
             end
             label.draw_multi_text("Patient admission at #{encounter_datetime}", title_header_font)
             label.draw_multi_text("#{obs}", concepts_font)
-            
+          elsif encounter.name.upcase.include?("PATIENT SENT HOME")
+              outcomes << "Sent home"
           elsif encounter.name.upcase.include?("REFERRAL")
+            outcomes << "Referred"
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
             encounter.observations.each do |observation|
@@ -332,19 +341,49 @@ class PatientsController < GenericPatientsController
 					elsif encounter.name.upcase.include?("VITALS")
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
 						string = []
-						encounter.observations.each do |observation|
-							concept_name = observation.concept.concept_names.last.name
+						encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
+            obs = []
+            encounter.observations.each { | observation |
+
+             # if (observation.concept_id == 8578)
+              concept_name = observation.concept.concept_names.last.name
+              #next if concept_name.match(/Detailed presenting complaint/i)
 							next if concept_name.match(/Workstation location/i)
-							string << observation.to_s(["short", "order"]).squish + units[concept_name.upcase].to_s
-						end
-            label.draw_multi_text("Vitals at #{encounter_datetime}", title_header_font)
-            string.each { | observation |
-              label.draw_multi_text("#{observation}", concepts_font)
+              next if !observation.obs_group_id.blank?
+
+              child_obs = Observation.find(:all, :conditions => ["obs_group_id = ?", observation.obs_id])
+
+              if !child_obs.empty?
+                text = observation.answer_string.to_s + " - "
+                count = 0
+                child_obs.each { | child_observation |
+                  text = text + ", " if count > 0
+                  text = text + child_observation.answer_string.to_s
+                  count = count + 1
+                }
+                obs << text
+              else
+                obs << concept_name + ' - ' + observation.answer_string.to_s
+              end
+              vitals << obs
             }
+            vitals
+            if (check_notes == false)
+              label.draw_multi_text("Vitals at #{encounter_datetime}", title_header_font)
+              obs.each { | observation |
+                label.draw_multi_text("#{observation}", concepts_font)
+              }
+            end
         end
 
       }
-
+      if ((check_notes == true) && (check_vitals == true))
+          combined = (vitals + notes).flatten.sort.uniq #Trying to remove the duplicate entries
+          label.draw_multi_text("NOTES AND VITALS", concepts_font)
+          combined.each { | value |
+            label.draw_multi_text("#{value}", concepts_font)
+          }
+      end
 			['OPD PROGRAM','IPD PROGRAM'].each do |program_name|		
 					program_id = Program.find_by_name(program_name).id
 					state = patient.patient_programs.local.select{|p| 
@@ -356,9 +395,14 @@ class PatientsController < GenericPatientsController
 					state_start_date = state.start_date.to_date	
 					state_name = state.program_workflow_state.concept.fullname
 					
-					if ((state_start_date == session[:datetime]) || (state_start_date.to_date == Date.today)) && (state_name.upcase != 'FOLLOWING')					
-      		  label.draw_multi_text("Outcome : #{state_name}", concepts_font)
+					if ((state_start_date == session[:datetime]) || (state_start_date.to_date == Date.today)) && (state_name.upcase != 'FOLLOWING')
+            outcomes << state_name
+      		  #label.draw_multi_text("Outcome : #{state_name}", concepts_font)
       		end
+          
+          unless outcomes.blank?
+            label.draw_multi_text("Outcomes : #{outcomes.uniq.join(',')}", concepts_font)
+          end
 			end
 
       label.draw_multi_text("Seen by: #{current_user.name} at " +
@@ -389,10 +433,10 @@ class PatientsController < GenericPatientsController
     patient_encounters.each{|e| 
       @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")][e.name] = encounter_summary(e)  if e.encounter_datetime.to_date < (session[:datetime].to_date rescue Date.today.to_date)   
       } rescue nil
-    
+   
+    @patient_bean = PatientService.get_patient(Person.find(@patient_ID)) 
     @past_local_cases = @past_local_cases.sort.reverse!
-    render :layout => false
-    
+    render :layout => "menu"
   end
   
 	def diagnosis_summary(encounter)

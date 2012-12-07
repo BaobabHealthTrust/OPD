@@ -31,9 +31,9 @@
 			    <select id="tabs">
 					<option value='/patients/overview?patient_id=<%= @patient.id %>'>Overview</option>
 					<option value='/patients/visit_history?patient_id=<%= @patient.id %>'>Current Visit</option>
-					<option value='/patients/past_visits_summary?patient_id=<%= @patient.id %>'>Past Visits</option>
+					<!--option value='/patients/past_visits_summary?patient_id=<%#= @patient.id %>'>Past Visits</option-->
 					<option value='/patients/tab_social_history?patient_id=<%= @patient.id %>'>Social History</option>
-					<option value="/patients/past_diagnoses?patient_id=<%=@patient.patient_id%>">Medical History</option>
+					<!--option value="/patients/past_diagnoses?patient_id=<%#=@patient.patient_id%>">Medical History</option-->
 					<option value='/patients/personal/<%= @patient.id -%>'>Printouts/Other</option>
 
 					<%  if @spine_clinician  %>
@@ -76,14 +76,15 @@
 					</select>
 			
 					<select id="navigation_links">
-						<option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Tasks</option>
+						<option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Outcomes</option>
 						<% if show_lab_results %>
 						<option link="/lab/results/<%=@patient.id -%>">Lab results</option>
 						<%end%>
 						<option link='<%= ((session[:datetime].to_date rescue '') != '' ?
 						"/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
 						<%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
-            <option link='/patients/programs_dashboard/<%= @patient.id %>'>Update Outcome</option>
+            <option link='/patients/programs_dashboard/<%= @patient.id %>'>Programs</option>
+            <option link='/encounters/new/lab_orders?show&patient_id=<%= @patient.id %>'>Examinations</option>
 					</select>
 				<% end %>
 			</form>

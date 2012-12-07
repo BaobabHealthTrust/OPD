@@ -15,7 +15,22 @@
 						      "javascript:confirmAction()" : "/patients/show/#{@patient.id}") %>";
 
 			tt_cancel_show = "javascript:printVisitSummary()";
-			
+        
+			function updateOutcome(){
+                          navigation = document.getElementById('nav')
+                          button = document.createElement('button')
+                          button.innerHTML = "<span>Update outcome</span>"
+                          button.setAttribute("id","update_outcome")
+                          button.setAttribute("class","green")
+                          button.setAttribute("style","float:left; margin: 10px;");
+                          navigation.appendChild(button)
+                        }
+                        setTimeout("updateOutcome();",300)
+                        function setEvent(){
+                          update_outcome = document.getElementById('update_outcome')
+                          update_outcome.setAttribute('onclick',"window.location = '/encounter_types?patient_id=<%=@patient.id%>'")
+                        }
+                        setTimeout("setEvent();",300)
 			function printVisitSummary(){
 				
 				confirmOperation("Print visit summary?", "/patients/print_opd_visit_summary/<%= @patient.id %>");
@@ -44,6 +59,8 @@
 
 			}
 		</script>
+                
+                
 	</head>
 
 	<body>
