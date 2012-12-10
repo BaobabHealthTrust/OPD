@@ -1548,8 +1548,8 @@ class CohortToolController < ApplicationController
 
     people = Person.find(:all,:include =>{:patient=>{:encounters=>{:type=>{}}}},
         :conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?)
-        AND encounter.encounter_datetime >= TIMESTAMP(?)
-        AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT","OUTPATIENT DIAGNOSIS"],
+        AND person.date_created >= TIMESTAMP(?)
+        AND person.date_created  <= TIMESTAMP(?)", ["TREATMENT","OUTPATIENT DIAGNOSIS"],
         @start_date.strftime('%Y-%m-%d 00:00:00'),
         @end_date.strftime('%Y-%m-%d 23:59:59')])
         peoples = []
@@ -1613,9 +1613,8 @@ class CohortToolController < ApplicationController
         person = Person.find(person_id)
         name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
         @registered << [name, person.birthdate, person.gender,
-        person.patient.encounters.find(:first, 
-        :order => "encounter_datetime").encounter_datetime.to_date,
-        person.addresses.first.county_district, 
+        person.date_created.to_date,
+        person.addresses.first.city_village, 
         person.addresses.first.county_district]
       end
 
