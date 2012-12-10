@@ -8,21 +8,7 @@
     <%=javascript_include_tag "jquery.table2CSV.min" %>
     <script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
     <script>
-      var names = '<%= @report_name.upcase %>';
-      var prev_link;
-      var next_link;
-      jQuery(document).ready(function($) {
-        if (( names != "TOTAL_REGISTERED") && ( names != "PATIENT_LEVEL_DATA")) {
-          $('#table_id').dataTable({
-            "bAutoWidth": true,
-            "bPaginate": false,
-            "bProcessing": true,
-            "bFilter": true,
-            "sScrollY": "400px",
-            "bInfo": false
-          });
-        }
-        else {
+      jQuery(document).ready(function($) {     
           $('#table_id').dataTable({
             "bAutoWidth": true,
             "bPaginate": false,
@@ -30,48 +16,12 @@
             "sScrollY": "400px",
             "bInfo": false
           });
-        }
-<% if @report_name.upcase == "TOTAL_REGISTERED" || @report_name.upcase == "PATIENT_LEVEL_DATA" %>
-      var  buttondiv = document.getElementById("buttons");
-      buttondiv.innerHTML+= ' <%= will_paginate @page, :page_links => false %>'
-      if (document.getElementsByClassName('disabled prev_page').length == 1){
-        next_link = document.getElementsByClassName('next_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>' + "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
-        prev_link = null
-        buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
-        buttondiv.innerHTML+= "<button id='disabled prev_page' class='gray'><span>Previous</span></button>"
-      }
-      else if (document.getElementsByClassName('disabled next_page').length == 1){
-        prev_link = document.getElementsByClassName('prev_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
-        next_link = null
-        buttondiv.innerHTML+= "<button id='disabled next_page' class='gray'><span>Next</span></button>"
-        buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
-      }
-      else if (document.getElementsByClassName('next_page').length == 1 && document.getElementsByClassName('prev_page').length == 1) {
-        prev_link = document.getElementsByClassName('prev_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
-        next_link = document.getElementsByClassName('next_page')[0].getAttribute('href') + "&report_name=" + '<%= @report_name %>'+ "&start_date=" + '<%= @start_date %>' + "&end_date=" + '<%= @end_date %>';
-        buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
-        buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
-      }
-<%end%>
     search_box = $('#table_id').dataTable()
     search = document.getElementsByTagName("input")[0];
     search.setAttribute("id","search");
     document.getElementById('search').setAttribute("onclick","showKeyboard();");
     document.getElementById("find").innerHTML = "<span>Back</span>";
     document.getElementById("find").style.cssFloat = "left";
-
-    $('#find').click(function() {
-      window.location = '/cohort_tool/opd_menu?report_name=<%=@report_name%>'; // /report/data_cleaning';
-    })
-    $('#logout').click(function() {
-      window.location = '/clinic'; // /';
-    })
-    $('#nextButton').click(function() {
-      window.location = next_link;
-    })
-    $('#prevButton').click(function() {
-      window.location = prev_link;
-    })
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     keyboard = document.getElementsByClassName("keypad")[0]
     function getCharButtonSetID(character,id){
@@ -99,13 +49,13 @@
 
     function showAlphaKeypad(){
       document.getElementById("keypad").style.height = "280";
-      keyboard.innerHTML = getButtons("QWERTYUIOP") + "</br>"
+      keyboard.innerHTML= getButtons("0123456789") + "</br>"
+      keyboard.innerHTML+= getButtons("QWERTYUIOP") + "</br>"
       keyboard.innerHTML+= getButtons("ASDFGHJKL:") + "</br>"
       keyboard.innerHTML+= getButtons("ZXCVBNM,.?")
       keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
       keyboard.innerHTML+= getButtonString('Space','<span>Space</span>')
       keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
-
     }
 
     function showNumericKeypad(){
@@ -126,18 +76,6 @@
 
     table_length = document.getElementById("table_id_length");
     table_length.setAttribute("style","width:100px;");
-
-
-<%if @disaggregated_diagnosis != nil && @disaggregated_diagnosis.length > 100 %>
-      var elements = <%=@disaggregated_diagnosis.length%>
-      var x = 200
-      while(x < elements){
-        data_table_length.innerHTML+="<option value='" + x + "'>" + x + "</option>";
-        x+=100
-      }
-      data_table_length.innerHTML+="<option value='" + x + "'>" + x + "</option>";
-<% end %>$("div").removeClass("content");
-
 
   })
     </script>
@@ -209,19 +147,23 @@
         left:470px;
         bottom:2px;
       }
-
+       #num{
+        position:absolute;
+        left:470px;
+        bottom:2px;
+        width:200px;
+      }
       #keypad{
         background-color: #FFFFFF;
         border: 2px solid #9999FF;
         border-radius: 15px 15px 15px 15px;
+        display: none;
+        height: 304px;
         padding: 5px;
-        position:absolute;
-        width:670px;
-        right:510px;
-        height:260px;
-        display:none;
-        right:4px;
-        top:270px;
+        position: absolute;
+        right: 13px;
+        top: 194px;
+        width: 672px;
       }
     </style>
     <style>
@@ -295,7 +237,7 @@
 
     <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Dates : <%= "#{@formated_start_date} to #{@formated_end_date}"%> <%= "<br> Total Registered: #{@total_registered.length}" %></b>
 
-      <b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Group (s) : <%= "#{session[:groups].join(' , ').to_s}" %>  </b><br /><br />
+      <b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Group (s) : <%= "#{@age_groups.join(' , ').to_s}" %>  </b><br /><br />
 
 
     <div>
