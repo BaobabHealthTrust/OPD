@@ -1530,85 +1530,95 @@ class CohortToolController < ApplicationController
 	end
 
 	def total_registration
-
     @report_name = params[:report_name]
     @logo = CoreService.get_global_property_value('logo').to_s
-    session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
-
-    if params[:page].blank?
-			session[:people] = nil
-			session[:observation] = nil
-			session[:groups] = params[:age_groups]
-			start_year = params[:start_year]
-			start_month = params[:start_month]
-			start_day = params[:start_day]
-			end_year = params[:end_year]
-			end_month = params[:end_month]
-			end_day = params[:end_day]
-			@age_groups = params[:age_groups].map{|g|g.upcase}
-			@start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-			@end_date = (end_year + "-" + end_month + "-" + end_day).to_date
-			@total_registered = []
-						
-
-    else
-			@age_groups = session[:groups]
-			@start_date = params[:start_date].to_date
-			@end_date = params[:end_date].to_date
-
-    end
-
+    start_year = params[:start_year]
+    start_month = params[:start_month]
+    start_day = params[:start_day]
+    end_year = params[:end_year]
+    end_month = params[:end_month]
+    end_day = params[:end_day]
+    @age_groups = params[:age_groups].map{|g|g.upcase}
+    @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+    @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+    @total_registered = []
     @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
     @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
 
-    people = session[:people]
-		
-		if params[:page].blank?
+    people = Person.find(:all,:include =>{:patient=>{:encounters=>{:type=>{}}}},
+        :conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?)
+        AND encounter.encounter_datetime >= TIMESTAMP(?)
+        AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT","OUTPATIENT DIAGNOSIS"],
+        @start_date.strftime('%Y-%m-%d 00:00:00'),
+        @end_date.strftime('%Y-%m-%d 23:59:59')])
+        peoples = []
+        people.each do  |person|
+          if (@age_groups.include?("< 6 MONTHS"))
+            if (PatientService.age_in_months(person).to_i < 6 )
+                peoples << person
+            end
+          end
 
-			min_age,max_age = report_age_range(@age_groups)
+          if (@age_groups.include?("6 MONTHS TO < 1 YR"))
+            if (PatientService.age_in_months(person).to_i >= 6 && PatientService.age(person).to_i < 1)
+                peoples << person
+            end
+          end
 
-			if people.blank?
-				people = Person.find(:all,:include =>{:patient=>{:encounters=>{:type=>{}}}},
-					:conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?)
-																				AND encounter.encounter_datetime >= TIMESTAMP(?)
-																				AND encounter.encounter_datetime  <= TIMESTAMP(?)", ["TREATMENT","OUTPATIENT DIAGNOSIS"],
-						@start_date.strftime('%Y-%m-%d 00:00:00'),
-						@end_date.strftime('%Y-%m-%d 23:59:59')])
-				if min_age.blank?
-					session[:people] = people
-				else
-					peoples = []
-					session[:people] = nil
-					people.each do  |person|
-						if (PatientService.age(person, person.date_created).to_i >= min_age && PatientService.age(person, person.date_created).to_i < max_age)
-							peoples << person
-						end
-					end
-					session[:people] = peoples
-					people = session[:people]
-				end
-			end
-		end
-		
-    @total_registered = session[:people]
-    records_per_page = CoreService.get_global_property_value('records_per_page') || 13
-    @page = people.paginate(:page => params[:page], :per_page => records_per_page.to_i)
+          if (@age_groups.include?("1 TO < 5"))
+            if (PatientService.age(person).to_i >= 1 && PatientService.age(person).to_i < 5)
+                peoples << person
+            end
+          end
+          
+          if (@age_groups.include?("5 TO 14"))
+            if (PatientService.age(person).to_i >= 5 && PatientService.age(person).to_i < 14)
+                peoples << person
+            end
+          end
 
-		unless people.nil?
+          if (@age_groups.include?("> 14 TO < 20"))
+            if (PatientService.age(person).to_i >= 14 && PatientService.age(person).to_i < 20)
+                peoples << person
+            end
+          end
 
-			@registered = []
+          if (@age_groups.include?("20 TO 30"))
+            if (PatientService.age(person).to_i >= 20 && PatientService.age(person).to_i < 30)
+                peoples << person
+            end
+          end
 
-			@page.each do | person_id |
-															
-				person = Person.find(person_id)
-				name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
-				@registered << [name, person.birthdate, person.gender,
-					person.patient.encounters.find(:first, :order => "encounter_datetime").encounter_datetime.to_date,
-					person.addresses.first.county_district, person.addresses.first.county_district]
-			end
+          if (@age_groups.include?("30 TO < 40"))
+            if (PatientService.age(person).to_i >= 30 && PatientService.age(person).to_i < 40)
+                peoples << person
+            end
+          end
 
-    end
+          if (@age_groups.include?("40 TO < 50"))
+            if (PatientService.age(person).to_i >= 40 && PatientService.age(person).to_i < 50)
+                peoples << person
+            end
+          end
+
+          if (@age_groups.include?("ALL"))
+                peoples << person
+          end
+          
+        end
+    @total_registered = peoples
+      @registered = []
+      peoples.each do | person_id |
+        person = Person.find(person_id)
+        name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
+        @registered << [name, person.birthdate, person.gender,
+        person.patient.encounters.find(:first, 
+        :order => "encounter_datetime").encounter_datetime.to_date,
+        person.addresses.first.county_district, 
+        person.addresses.first.county_district]
+      end
+
     render :layout => "report"
   end
 
