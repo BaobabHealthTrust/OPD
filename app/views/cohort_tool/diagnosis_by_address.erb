@@ -11,10 +11,9 @@
       jQuery(document).ready(function($) {
           $('#table_id').dataTable({
             "bAutoWidth": true,
-            "bPaginate": false,
             "bProcessing": true,
             "sScrollY": "400px",
-            "bInfo": false
+            "bInfo": true
           });
     search_box = $('#table_id').dataTable()
     search = document.getElementsByTagName("input")[0];
@@ -205,26 +204,19 @@
         bottom:104px;
       }
       #table_id_info{
-        overflow:hidden;
-        position:fixed;
-        left:250px;
-        top:696px;
+        left: 10px;
+        position: absolute;
+        top: 476px;
+        font-weight:bold;
       }
-      .pagination{
+      #table_id_length{
+        display:none;
+      }
+       #table_id_paginate{
         display:none;
       }
       #num{ display:none; }
       #char{ display:none; }
-      .prev_page,.next_page {
-      }
-
-      .prev_page:hover, .next_page:hover
-      { }
-      .disabled { }
-
-      .disabled:hover {}
-
-
 
     </style>
   </head>
