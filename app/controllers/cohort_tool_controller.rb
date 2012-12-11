@@ -183,7 +183,7 @@ class CohortToolController < ApplicationController
 
       patient           = Patient.find(encounter.patient_id)
       patient_bean = PatientService.get_patient(patient.person)
-      
+
       orders            = encounter.orders
       changed_from      = ''
       changed_to        = ''
@@ -471,7 +471,7 @@ class CohortToolController < ApplicationController
       visit_date = visit.encounter_datetime.strftime("%d-%b-%Y")
 
       patient_bean = PatientService.get_patient(visit.patient.person)
-	  
+
       # get a patient of a given visit
       new_patient   = { :patient_id   => (visit.patient.patient_id || ""),
         :arv_number   => (patient_bean.arv_number || ""),
@@ -523,7 +523,7 @@ class CohortToolController < ApplicationController
 
     render :layout => 'report'
   end
-  
+
   def  dispensations_without_prescriptions
     include_url_params_for_back_button
 
@@ -534,7 +534,7 @@ class CohortToolController < ApplicationController
 
     render :layout => 'report'
   end
-  
+
   def  patients_with_multiple_start_reasons
     include_url_params_for_back_button
 
@@ -545,7 +545,7 @@ class CohortToolController < ApplicationController
 
     render :layout => 'report'
   end
-  
+
   def out_of_range_arv_number
 
     include_url_params_for_back_button
@@ -559,7 +559,7 @@ class CohortToolController < ApplicationController
 
     render :layout => 'report'
   end
-  
+
   def data_consistency_check
     include_url_params_for_back_button
     date_range  = Report.generate_cohort_date_range(params[:quarter])
@@ -581,7 +581,7 @@ class CohortToolController < ApplicationController
       ['patients with start dates > first receive drug dates', @patients_with_wrong_start_dates.length]]
     render :layout => 'report'
   end
-  
+
   def list
     @report = []
     include_url_params_for_back_button
@@ -606,7 +606,7 @@ class CohortToolController < ApplicationController
     @report_quarter = params[:quarter]
     @report_type = params[:report_type]
   end
-  
+
   def cohort
     @quarter = params[:quarter]
     start_date,end_date = Report.generate_cohort_date_range(@quarter)
@@ -677,14 +677,14 @@ class CohortToolController < ApplicationController
 
   def report_patients_with_multiple_start_reasons(start_date , end_date)
 
-    art_eligibility_id = ConceptName.find_by_name('REASON FOR ART ELIGIBILITY').concept_id    
+    art_eligibility_id = ConceptName.find_by_name('REASON FOR ART ELIGIBILITY').concept_id
     patients = Observation.find_by_sql(
       ["SELECT person_id, concept_id, date_created, obs_datetime, value_coded_name_id
                  FROM obs
                  WHERE (SELECT COUNT(*)
                         FROM obs observation
                         WHERE   observation.concept_id = ?
-                                AND observation.person_id = obs.person_id) > 1                                
+                                AND observation.person_id = obs.person_id) > 1
                                 AND date_created >= ? AND date_created <= ?
                                 AND obs.concept_id = ?
                                 AND obs.voided = 0", art_eligibility_id, start_date, end_date, art_eligibility_id])
@@ -744,7 +744,7 @@ class CohortToolController < ApplicationController
     end
     out_of_range_arv_numbers_data
   end
-  
+
   def report_dispensations_without_prescriptions_data(start_date , end_date)
     pills_dispensed_id      = ConceptName.find_by_name('PILLS DISPENSED').concept_id
 
@@ -769,11 +769,11 @@ class CohortToolController < ApplicationController
 
     dispensations_without_prescriptions
   end
-  
+
   def report_prescriptions_without_dispensations_data(start_date , end_date)
     pills_dispensed_id      = ConceptName.find_by_name('PILLS DISPENSED').concept_id
 
-    missed_dispensations_data = Observation.find_by_sql(["SELECT order_id, patient_id, date_created from orders 
+    missed_dispensations_data = Observation.find_by_sql(["SELECT order_id, patient_id, date_created from orders
               WHERE NOT EXISTS (SELECT * FROM obs
                WHERE orders.order_id = obs.order_id AND obs.concept_id = ?)
                 AND date_created >= ? AND date_created <= ? AND orders.voided = 0", pills_dispensed_id, start_date , end_date ])
@@ -798,7 +798,7 @@ class CohortToolController < ApplicationController
   def report_dead_with_visits(start_date, end_date)
     patient_died_concept    = ConceptName.find_by_name('PATIENT DIED').concept_id
 
-    all_dead_patients_with_visits = "SELECT * 
+    all_dead_patients_with_visits = "SELECT *
     FROM (SELECT observation.person_id AS patient_id, DATE(p.death_date) AS date_of_death, DATE(observation.date_created) AS date_started
           FROM person p right join obs observation ON p.person_id = observation.person_id
           WHERE p.dead = 1 AND DATE(p.death_date) < DATE(observation.date_created) AND observation.voided = 0
@@ -806,7 +806,7 @@ class CohortToolController < ApplicationController
     WHERE DATE(date_of_death) >= DATE('#{start_date}') AND DATE(date_of_death) <= DATE('#{end_date}')
     GROUP BY patient_id"
     patients = Patient.find_by_sql([all_dead_patients_with_visits])
-    
+
     patients_data  = []
     patients.each do |patient_data_row|
       person = Person.find(patient_data_row[:patient_id].to_i)
@@ -824,7 +824,7 @@ class CohortToolController < ApplicationController
     end
     patients_data
   end
-  
+
   def report_males_allegedly_pregnant(start_date, end_date)
     pregnant_patient_concept_id = ConceptName.find_by_name('IS PATIENT PREGNANT?').concept_id
     patients = PatientIdentifier.find_by_sql(["
@@ -851,29 +851,29 @@ class CohortToolController < ApplicationController
     end
     patients_data
   end
-  
+
   def report_patients_who_moved_from_second_to_first_line_drugs(start_date, end_date)
-  
+
     first_line_regimen = "('D4T+3TC+NVP', 'd4T 3TC + d4T 3TC NVP')"
     second_line_regimen = "('AZT+3TC+NVP', 'D4T+3TC+EFV', 'AZT+3TC+EFV', 'TDF+3TC+EFV', 'TDF+3TC+NVP', 'TDF/3TC+LPV/r', 'AZT+3TC+LPV/R', 'ABC/3TC+LPV/r')"
-    
+
     patients_who_moved_from_nd_to_st_line_drugs = "SELECT * FROM (
         SELECT patient_on_second_line_drugs.* , DATE(patient_on_first_line_drugs.date_created) AS date_started FROM (
         SELECT person_id, date_created
         FROM obs
         WHERE value_drug IN (
-        SELECT drug_id 
-        FROM drug 
-        WHERE concept_id IN (SELECT concept_id FROM concept_name 
+        SELECT drug_id
+        FROM drug
+        WHERE concept_id IN (SELECT concept_id FROM concept_name
         WHERE name IN #{second_line_regimen}))
         ) AS patient_on_second_line_drugs inner join
 
         (SELECT person_id, date_created
         FROM obs
         WHERE value_drug IN (
-        SELECT drug_id 
-        FROM drug 
-        WHERE concept_id IN (SELECT concept_id FROM concept_name 
+        SELECT drug_id
+        FROM drug
+        WHERE concept_id IN (SELECT concept_id FROM concept_name
         WHERE name IN #{first_line_regimen}))
         ) AS patient_on_first_line_drugs
         ON patient_on_first_line_drugs.person_id = patient_on_second_line_drugs.person_id
@@ -883,7 +883,7 @@ class CohortToolController < ApplicationController
         GROUP BY person_id"
 
     patients = Patient.find_by_sql([patients_who_moved_from_nd_to_st_line_drugs])
-    
+
     patients_data  = []
     patients.each do |patient_data_row|
       person = Person.find(patient_data_row[:person_id].to_i)
@@ -901,7 +901,7 @@ class CohortToolController < ApplicationController
     end
     patients_data
   end
-  
+
   def report_with_drug_start_dates_less_than_program_enrollment_dates(start_date, end_date)
 
     arv_drugs_concepts      = MedicationService.arv_drugs.inject([]) {|result, drug| result << drug.concept_id}
@@ -956,7 +956,7 @@ class CohortToolController < ApplicationController
     end
     patients_data
   end
-  
+
   def get_adherence(quarter="Q1 2009")
     date = Report.generate_cohort_date_range(quarter)
 
@@ -1090,10 +1090,10 @@ class CohortToolController < ApplicationController
 
     patients.sort { |a,b| a[1]['adherence'].to_i <=> b[1]['adherence'].to_i }
   end
-  
+
   def opd_report_index
   end
-  
+
   def opd_cohort
   	@report_type = params[:selType]
     @start_date = nil
@@ -1101,7 +1101,7 @@ class CohortToolController < ApplicationController
     @start_age = params[:startAge]
     @end_age = params[:endAge]
     @type = params[:selType]
-    
+
     case params[:selSelect]
     when "day"
       @start_date = params[:day]
@@ -1121,7 +1121,7 @@ class CohortToolController < ApplicationController
           mon = Date.today.month
           mon_days = days_in_month(mon).to_s
           @start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
-      	  @end_date = Date.today 
+      	  @end_date = Date.today
         else
           @start_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) -
             ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
@@ -1134,7 +1134,7 @@ class CohortToolController < ApplicationController
       end
     when "month"
       @start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date.strftime("%Y-%m-%d")
-      
+
       @end_date = ("#{params[:selYear]}-#{params[:selMonth]}-#{ (params[:selMonth].to_i != 12 ?
         ("#{params[:selYear]}-#{params[:selMonth].to_i + 1}-01".to_date - 1).strftime("%d") : "31") }").to_date.strftime("%Y-%m-%d")
 
@@ -1144,7 +1144,7 @@ class CohortToolController < ApplicationController
 
     when "quarter"
       day = params[:selQtr].to_s.match(/^min=(.+)&max=(.+)$/)
-      
+
       @start_date = (day ? day[1] : Date.today.strftime("%Y-%m-%d"))
       @end_date = (day ? day[2] : Date.today.strftime("%Y-%m-%d"))
 
@@ -1153,7 +1153,7 @@ class CohortToolController < ApplicationController
       @end_date = params[:end_date]
 
     end
-    
+
     report = Reports::CohortOpd.new(@start_date, @end_date, @start_age, @end_age, @type)
 
     @specified_period = report.specified_period
@@ -1165,7 +1165,7 @@ class CohortToolController < ApplicationController
     @attendance = report.attendance
 
     @measles_u_5 = report.measles_u_5
-    
+
     @measles = report.measles
 
     @tb = report.tb
@@ -1261,7 +1261,7 @@ class CohortToolController < ApplicationController
     if @type == "diagnoses" || @type == "diagnoses_adults" || @type == "diagnoses_paeds"
       @general = report.general
     end
-	
+
     if params[:selType]
       case params[:selType]
       when "adults"
@@ -1274,9 +1274,9 @@ class CohortToolController < ApplicationController
     end
     render :layout => "opd_cohort"
   end
-  
+
   def opd_menu
-		@shifts =[
+	@shifts =[
 			["Day","day"],
 			["Night","night"],
 			["24 Hours","24_hour"],
@@ -1287,174 +1287,75 @@ class CohortToolController < ApplicationController
 
 	def shift_report
 		@report_name = params[:report_name]
-		
+
 		@shift_type = params[:shift_type]
 		@shift_date = params[:shift_date]
 		if params[:start_time] == ""
-
-			if @shift_type == "day"
-				@start_time = Time.parse(@shift_date + " 7:30:00")
-				@end_time = Time.parse(@shift_date + " 16:59:59")
-			elsif @shift_type == "night"
-				@start_time = Time.parse(@shift_date + " 17:00:00")
-				@end_time= (Time.parse(@shift_date + " 7:30:00")).tomorrow
-			else
-				@start_time = Time.parse(@shift_date + " 17:00:00")
-				@end_time= (Time.parse(@shift_date + " 7:29:59")).tomorrow
-			end
+			 if @shift_type == "day"
+				 @start_time = Time.parse(@shift_date + " 7:30:00")
+				 @end_time = Time.parse(@shift_date + " 16:59:59")
+			 elsif @shift_type == "night"
+				 @start_time = Time.parse(@shift_date + " 17:00:00")
+				 @end_time= (Time.parse(@shift_date + " 7:30:00")).tomorrow
+				 #@end_time = (next_day + " 7:29:59"
+			 else
+				 @start_time = Time.parse(@shift_date + " 17:00:00")
+				 @end_time= (Time.parse(@shift_date + " 7:29:59")).tomorrow
+			 end
 		else
-			@start_time = Time.parse(@shift_date + " " + params[:start_time])
-			@end_time = Time.parse(@shift_date + " " + params[:end_time])
+					@start_time = Time.parse(@shift_date + " " + params[:start_time])
+					@end_time = Time.parse(@shift_date + " " + params[:end_time])
 		end
-		
+
 		@logo = CoreService.get_global_property_value('logo').to_s
     @current_location_name =Location.current_health_center.name
-		@referal={}; @admission = {}; @dead = {}; @admitted = {}
-
-		#Count total patients referred to different departments
-		diagnosis_id = EncounterType.find_by_name("REFERRAL").encounter_type_id
-		@referal["trauma"] = count_patient_with_concept("trauma", diagnosis_id, @start_time, @end_time)
-		@referal["orthropaedic"] = count_patient_with_concept("Orthropaedic", diagnosis_id, @start_time, @end_time)
-		@referal["surgical"] = count_patient_with_concept("Surgical", diagnosis_id, @start_time, @end_time)
-		@referal["psychiatric"] = count_patient_with_concept("Psychiatric", diagnosis_id, @start_time, @end_time)
-
-		#Count total admissions
-		admission_id = EncounterType.find_by_name("ADMIT PATIENT").encounter_type_id
-		@admission["medical"] = count_patient_with_concept("medical", admission_id, @start_time, @end_time)
-		@admission["surgical"] = count_patient_with_concept("Surgical", admission_id, @start_time, @end_time)
-		@admission["obstetric"] = count_patient_with_concept("Obstetric", admission_id, @start_time, @end_time)
-		@admission["ICU"] = count_patient_with_concept("ICU", admission_id, @start_time, @end_time)
-
-=begin
-		count the patients in the short stay ward
-		short_stay_id = EncounterType.find_by_name("Short Stay Ward").encounter_type_id
-		@short_stay["ward 3B"] = short_stay_ward("ward 3B", "medical", short_stay_id, @start_time, @end_time)
-		@short_stay["ward 4A"] = short_stay_ward("ward BA", "medical", short_stay_id, @start_time, @end_time)
-		@short_stay["ward 5A"] = short_stay_ward("ward 5A", "Surgical", short_stay_id, @start_time, @end_time)
-		@short_stay["ward 5B"] = short_stay_ward("ward 5B", "Surgical", short_stay_id, @start_time, @end_time)
-		@short_stay["ward 6A"] = short_stay_ward("ward 6A", "Surgical", short_stay_id, @start_time, @end_time)
-		@short_stay["LW"] = short_stay_ward("LW", "Obstetric", short_stay_id, @start_time, @end_time)
-		@short_stay["PNW"] = short_stay_ward("PNW", "Obstetric", short_stay_id, @start_time, @end_time)
-		@short_stay["ANW"] = short_stay_ward("ANW", "Obstetric", short_stay_id, @start_time, @end_time)
-		@short_stay["Gynaecology Ward"] = short_stay_ward("Gynaecology Ward", "transfer out", short_stay_id, @start_time, @end_time)
-		@short_stay["Intensive Care Unit"] = short_stay_ward("Intensive Care Unit", "transfer out", short_stay_id, @start_time, @end_time)
-		@short_stay["Ward 1A"] = short_stay_ward("Ward 1A", "transfer out", short_stay_id, @start_time, @end_time)
-		@short_stay["Ward 2A"] = short_stay_ward("Ward 2A", "transfer out", short_stay_id, @start_time, @end_time)
-		
-		@short_stay["Patients awaiting review"] = count_patient_with_concept("Patients awaiting review", short_stay_id, @start_time, @end_time)
-		@short_stay["Short stay icu"] = count_patient_with_concept("ICU", short_stay_id, @start_time, @end_time)
-		@short_stay["admissions"] = count_patient_with_concept("admission", short_stay_id, @start_time, @end_time)
-		@short_stay["discharged"] = count_patient_with_concept("discharged", short_stay_id, @start_time, @end_time)
-
-		count the patients in the resuscination ward
-		resuscination = EncounterType.find_by_name("Resusciation Area").encounter_type_id
-		@resuscination["admission"] = count_patient_with_concept("admission", resuscination, @start_time, @end_time)
-		@resuscination["ward 3B"] = short_stay_ward("ward 3B", "medical", resuscination, @start_time, @end_time)
-		@resuscination["ward 4A"] = short_stay_ward("ward BA", "medical", resuscination, @start_time, @end_time)
-		@resuscination["ward 5A"] = short_stay_ward("ward 5A", "Surgical", resuscination, @start_time, @end_time)
-		@resuscination["ward 5B"] = short_stay_ward("ward 5B", "Surgical", resuscination, @start_time, @end_time)
-		@resuscination["ward 6A"] = short_stay_ward("ward 6A", "Surgical", resuscination, @start_time, @end_time)
-		@resuscination["LW"] = short_stay_ward("LW", "Obstetric", resuscination, @start_time, @end_time)
-		@resuscination["PNW"] = short_stay_ward("PNW", "Obstetric", resuscination, @start_time, @end_time)
-		@resuscination["ANW"] = short_stay_ward("ANW", "Obstetric", resuscination, @start_time, @end_time)
-		@resuscination["Gynaecology Ward"] = short_stay_ward("Gynaecology Ward", "transfer out", resuscination, @start_time, @end_time)
-		@resuscination["Intensive Care Unit"] = short_stay_ward("Intensive Care Unit", "transfer out", resuscination, @start_time, @end_time)
-
-=end
-		#Count deaths for the shift
-		encounter_id = EncounterType.find_by_name("Transfer Out").encounter_type_id
-		@dead["dead"] = brought_id_dead("Brought in dead", "reason for exiting care", encounter_id, @start_time, @end_time)
-		encounter_id = EncounterType.find_by_name("ADMIT PATIENT").encounter_type_id
-		@admitted["Gynaecology Ward"] = admited_patients_to_ward("Gynaecology Ward", "Registration", encounter_id, @start_time, @end_time)
-		@admitted["Ward 2A"] = admited_patients_to_ward("Ward 2A", "Registration", encounter_id, @start_time, @end_time)
-		@admitted["ward 6A"] = admited_patients_to_ward("ward 6A", "Registration", encounter_id, @start_time, @end_time)
-		@admitted["ward 5B"] = admited_patients_to_ward("ward 5B", "Registration", encounter_id, @start_time, @end_time)
-		@admitted["ward 5A"] = admited_patients_to_ward("ward 5A", "Registration", encounter_id, @start_time, @end_time)
-		@admitted["ward 3B"] = admited_patients_to_ward("ward 3B", "Registration", encounter_id, @start_time, @end_time)
-		@admitted["ward 4A"] = admited_patients_to_ward("ward 4A", "Registration", encounter_id, @start_time, @end_time)
-		@admitted["total"] = admited_total(encounter_id, @start_time, @end_time)
-		@page = ""
-
-
+    @admission = []
+    admission_concepts = ['trauma','fracture','Abortion']
+    admission_concepts.each { | concept |
+      condition_string = "name LIKE \"#{concept}\" "
+      @outpatient_diagnosis_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+			@concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
+      #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
+      total = Encounter.find(:all,
+			:joins => [:type, :observations, [:patient => :person]],\
+        :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
+					value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
+          @outpatient_diagnosis_id, @concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
+      @admission << "#{concept + ':' + total.to_s}"
+     }
+ raise @admission.inspect
+    @diagnosis = []
+    admission_concepts = ['trauma','fracture','Abortion']
+    admission_concepts.each { | concept |
+      condition_string = "name LIKE \"#{concept}\" "
+      @outpatient_diagnosis_id = EncounterType.find_by_name("ADMIT PATIENT").encounter_type_id
+			@concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
+      #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
+      total = Encounter.find(:all,
+			:joins => [:type, :observations, [:patient => :person]],\
+        :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
+					value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
+          @outpatient_diagnosis_id, @concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
+      @diagnosis << "#{concept + ':' + total.to_s}"
+     }
+  raise @diagnosis.inspect
 		render :layout => "report"
   end
 
-	def brought_id_dead(value_coded, concept_name, encounter_id, start_date, end_date)
-		concept_id = ConceptName.find_by_name("#{concept_name}").concept_id
-		value_coded = ConceptName.find_by_name("#{value_coded}").concept_id
-		#raise end_date.to_yaml
-		Encounter.find(:all,
-			:joins => [:type, :observations, [:patient => :person]],
-			:conditions => ["encounter_type.encounter_type_id = ? AND obs.concept_id = ? AND
-																		obs.value_coded = (?) AND encounter_datetime >= ?
-																		AND encounter_datetime <= ?",
-				encounter_id, concept_id, value_coded, start_date, end_date]
-		).map{|e| e. patient_id}.uniq.size
+  def count_patient_with_concept(concept, start_date, end_date)
 
-	end
+			condition_string = "name LIKE \"#{concept}\" "
+      @outpatient_diagnosis_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+			@concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
+        #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
 
-	def admited_total(encounter_id, start_date, end_date)
-		concept_id = ConceptName.find_by_name("ADMIT TO WARD").concept_id
-		Encounter.find(:all,
-			:include => {:type =>{}, :observations=> {}},
-			:conditions => ["encounter_type.encounter_type_id = ? AND encounter_datetime >= ?
-											 AND encounter_datetime <= ? AND
-				obs.concept_id = ?",encounter_id, start_date, end_date, concept_id]
-				).map{|e| e. patient_id}.uniq.size
-	end
-
-  def admited_patients_to_ward(ward, location, encounter_id, start_date, end_date)
-		coded_values = []; patients = 0
-		Encounter.find(:all,
-			:include => {:type =>{}, :observations=> {}},
-			:conditions => ["encounter_type.encounter_type_id = ? AND encounter_datetime >= ?
-											 AND encounter_datetime <= ? AND
-				(obs.value_text = ? OR  obs.value_text = ?) ",encounter_id, start_date, end_date, ward, location]
-		).each do | encounter |
-			encounter.observations.each do |obs|
-				coded_values << obs.value_text.upcase
-			end
-			patients += 1 if coded_values.include?(ward.upcase) and coded_values.include?(location.upcase)
-			coded_values = []
-		end
-		patients
-	end
-
-	def short_stay_ward(ward, concept_name, diagnosis_id, start_date, end_date)
-		condition_string = "name LIKE \"#{concept_name}\" "
-		location_id = Location.find_by_name('#{ward}').location_id
-		concept_ids = ConceptName.find_by_sql("SELECT *
-																		 FROM concept_name
-																		 WHERE #{condition_string} AND voided = 0"
-		).map{|c| c.concept_id}
-		Encounter.find(:all,
-			:joins => [:type, :observations, [:patient => :person]],
-			:conditions => ["encounter_type = ? AND encounter.voided = 0 AND
-																		value_coded IN (?) AND encounter_datetime >= ?
-																		AND encounter_datetime <= ? AND location_id = ?",
-				diagnosis_id, concept_ids, start_date, end_date, location_id]
-		).map{|e| e. patient_id}.uniq.size
-	end
-
-	def count_patient_with_concept(concept_name, diagnosis_id, start_date, end_date)
-
-		condition_string = "name LIKE \"#{concept_name}\" "
-		if concept_name == "Obstetric"
-			value = "gynaecol"
-			condition_string << "OR name LIKE \"#{value}\""
-		end
-		concept_ids = ConceptName.find_by_sql("SELECT *
-																		 FROM concept_name
-																		 WHERE #{condition_string} AND voided = 0"
-		).map{|c| c.concept_id}
-
-		Encounter.find(:all,
-			:joins => [:type, :observations, [:patient => :person]],
-			:conditions => ["encounter_type = ? AND encounter.voided = 0 AND
-																		value_coded IN (?) AND encounter_datetime >= ?
-																		AND encounter_datetime <= ?",
-				diagnosis_id, concept_ids, start_date, end_date]
-		).map{|e| e. patient_id}.uniq.size
+			Encounter.find(:all,
+										 :joins => [:type, :observations, [:patient => :person]],\
+										 :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
+																		value_coded IN (?) AND encounter_datetime >= ?\
+																		AND encounter_datetime <= ?",\
+																		@outpatient_diagnosis_id, @concept_ids, start_date, end_date]\
+										).map{|e| e. patient_id}.uniq.size
 	end
 
 	def report_age_range(age_groups)
@@ -1462,74 +1363,75 @@ class CohortToolController < ApplicationController
 		age_range = [nil, nil]
 
 		if ! age_groups.include?("ALL")
-			if age_groups.include?("< 6 MONTHS")
-				max_age = 6
-				min_age = 0
-			end
+							if age_groups.include?("< 6 MONTHS")
+								 max_age = 6
+								 min_age = 0
+							end
 
-			if age_groups.include?("6 MONTHS TO < 1 YR")
-				max_age = 1
-				if min_age.blank?
-					min_age = 0.6
-				end
-			end
+							if age_groups.include?("6 MONTHS TO < 1 YR")
+								 max_age = 1
+								 if min_age.blank?
+										min_age = 0.6
+								 end
+							end
 
-			if age_groups.include?("1 TO < 5")
-				max_age = 5
+							if age_groups.include?("1 TO < 5")
+								 max_age = 5
 
-				if min_age.blank?
-					min_age = 1
-				end
+								 if min_age.blank?
+											min_age = 1
+								 end
 
-			end
+							end
 
-			if age_groups.include?("5 TO 14")
-				max_age = 14
+							if age_groups.include?("5 TO 14")
+								max_age = 14
 
-				if min_age.blank?
-					min_age = 5
-				end
+								if min_age.blank?
+											min_age = 5
+								end
 
-			end
+							end
 
-			if age_groups.include?("> 14 TO < 20")
-				max_age = 20
-				if min_age.blank?
-					min_age = 14
-				end
-			end
+							if age_groups.include?("> 14 TO < 20")
+								max_age = 20
+								 if min_age.blank?
+											min_age = 14
+								 end
+							end
 
-			if age_groups.include?("20 TO 30")
-				max_age = 30
+							if age_groups.include?("20 TO 30")
+								 max_age = 30
 
-				if min_age.blank?
-					min_age = 20
-				end
+									if min_age.blank?
+												min_age = 20
+									end
 
-			end
+							end
 
-			if age_groups.include?("30 TO < 40")
-				max_age = 40
+							if age_groups.include?("30 TO < 40")
+								max_age = 40
 
-				if min_age.blank?
-					min_age = 30
-				end
+											if min_age.blank?
+														min_age = 30
+											end
 
-			end
+							end
 
-			if age_groups.include?("40 TO < 50")
-				max_age = 50
-				if min_age.blank?
-					min_age = 40
-				end
-			end
+							if age_groups.include?("40 TO < 50")
+								 max_age = 50
+											 if min_age.blank?
+																min_age = 40
+											 end
+							end
 
-			age_range = [min_age, max_age]
+						  age_range = [min_age, max_age]
 		end
 		return age_range
 	end
 
 	def total_registration
+
     @report_name = params[:report_name]
     @logo = CoreService.get_global_property_value('logo').to_s
     @current_location_name =Location.current_health_center.name
@@ -1571,7 +1473,7 @@ class CohortToolController < ApplicationController
                 peoples << person
             end
           end
-          
+
           if (@age_groups.include?("5 TO 14"))
             if (PatientService.age(person).to_i >= 5 && PatientService.age(person).to_i < 14)
                 peoples << person
@@ -1605,7 +1507,7 @@ class CohortToolController < ApplicationController
           if (@age_groups.include?("ALL"))
                 peoples << person
           end
-          
+
         end
     @total_registered = peoples
       @registered = []
@@ -1613,8 +1515,8 @@ class CohortToolController < ApplicationController
         person = Person.find(person_id)
         name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
         @registered << [name, person.birthdate, person.gender,
-        person.date_created.to_date,
-        person.addresses.first.city_village, 
+        persondate_created.to_date,
+        person.addresses.first.city_village,
         person.addresses.first.county_district]
       end
 
@@ -1625,84 +1527,93 @@ class CohortToolController < ApplicationController
 
     @report_name = params[:report_name]
     @logo = CoreService.get_global_property_value('logo').to_s
-    session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
+    age_groups = params[:age_groups]
+    start_year = params[:start_year]
+    start_month = params[:start_month]
+    start_day = params[:start_day]
+    end_year = params[:end_year]
+    end_month = params[:end_month]
+    end_day = params[:end_day]
 
-    if params[:page].blank?
-
-			session[:people] = nil
-			session[:observation] = nil
-			session[:groups] = params[:age_groups]
-			age_groups = params[:age_groups]
-			start_year = params[:start_year]
-			start_month = params[:start_month]
-			start_day = params[:start_day]
-			end_year = params[:end_year]
-			end_month = params[:end_month]
-			end_day = params[:end_day]
-
-			@age_groups = age_groups.map{|g|g.upcase}
-			@required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-			@start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-			@end_date = (end_year + "-" + end_month + "-" + end_day).to_date
-			@disaggregated_diagnosis = {}
-			@diagnosis_by_address = {}
-			@diagnosis_name = {}
-			@diagnosis_report = Hash.new(0)
-
-      @age_groups = age_groups.map{|g|g.upcase}
-      @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
-      @disaggregated_diagnosis = {}
-      @diagnosis_by_address = {}
-      @diagnosis_name = {}
-      @diagnosis_report = Hash.new(0)
-    else
-      @start_date = params[:start_date].to_date
-      @end_date = params[:end_date].to_date
-    end
+    @age_groups = age_groups.map{|g|g.upcase}
+    @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
+    @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+    @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+    @disaggregated_diagnosis = {}
+    @diagnosis_by_address = {}
+    @diagnosis_name = {}
+    @diagnosis_report = Hash.new(0)
     @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
     @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
-    concept_ids = ConceptName.find(:all, 
-    :conditions => ["name IN (?)",["Additional diagnosis","Diagnosis", 
+    concept_ids = ConceptName.find(:all,
+    :conditions => ["name IN (?)",["Additional diagnosis","Diagnosis",
     "primary diagnosis","secondary diagnosis"]]).map(&:concept_id)
-   
-    diagnosis_report = session[:observation]
-    if params[:page].blank?
 
-			min_age, max_age = report_age_range(@age_groups)
+      observation = Observation.find(:all, :include => {:person =>{}},
+        :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime
+        <= TIMESTAMP(?) AND obs.concept_id IN (?)",
+        @start_date.strftime('%Y-%m-%d 00:00:00'),
+        @end_date.strftime('%Y-%m-%d 23:59:59'),concept_ids])
 
-			observation = Observation.find(:all, :include => {:person =>{}},:conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
-					@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
-					concept_ids])
+        observation.each do |obs|
+          next if obs.answer_concept.blank?
+          diagnosis_name = obs.answer_concept.fullname rescue ''
+           if (PatientService.age_in_months(obs.person).to_i < 6 )
+              @diagnosis_report[diagnosis_name]+=1
+           end
 
+          if (@age_groups.include?("6 MONTHS TO < 1 YR"))
+            if (PatientService.age_in_months(obs.person).to_i >= 6 && PatientService.age(obs.person).to_i < 1)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
 
-			observation.each do |obs|
-				if min_age.blank?
-					next if obs.answer_concept.blank?
-					diagnosis_name = obs.answer_concept.fullname rescue ''
-					@diagnosis_report[diagnosis_name]+=1
-				else
-					if (PatientService.age(obs.person, obs.person.date_created).to_i >= min_age && PatientService.age(obs.person, obs.person.date_created).to_i < max_age)
-						next if obs.answer_concept.blank?
-						diagnosis_name = obs.answer_concept.fullname rescue ''
-						@diagnosis_report[diagnosis_name]+=1
-					end
-				end
-			end
+          if (@age_groups.include?("1 TO < 5"))
+            if (PatientService.age(obs.person).to_i >= 1 && PatientService.age(obs.person).to_i < 5)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
 
-			diagnosis_report = @diagnosis_report.inject([]){|result, v| result << v; result}
-			session[:observation] = diagnosis_report
-    end
+          if (@age_groups.include?("5 TO 14"))
+            if (PatientService.age(obs.person).to_i >= 5 && PatientService.age(obs.person).to_i < 14)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
 
-    @page = diagnosis_report.paginate(:page => params[:page], :per_page => 13)
-    unless diagnosis_report.nil?
+          if (@age_groups.include?("> 14 TO < 20"))
+            if (PatientService.age(obs.person).to_i >= 14 && PatientService.age(obs.person).to_i < 20)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("20 TO 30"))
+            if (PatientService.age(obs.person).to_i >= 20 && PatientService.age(obs.person).to_i < 30)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("30 TO < 40"))
+            if (PatientService.age(obs.person).to_i >= 30 && PatientService.age(obs.person).to_i < 40)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("40 TO < 50"))
+            if (PatientService.age(obs.person).to_i >= 40 && PatientService.age(obs.person).to_i < 50)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("ALL"))
+            @diagnosis_report[diagnosis_name]+=1
+          end
+        end
+
       @diagnosis_report_paginated = []
-      @page.each { | diag, value |
+      @diagnosis_report.each { | diag, value |
         @diagnosis_report_paginated << [diag, value]
       }
-    end
     render :layout => "report"
   end
 
@@ -1773,90 +1684,119 @@ class CohortToolController < ApplicationController
 
     @report_name = params[:report_name]
     @logo = CoreService.get_global_property_value('logo').to_s
-    session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
+    age_groups = params[:age_groups]
+    start_year = params[:start_year]
+    start_month = params[:start_month]
+    start_day = params[:start_day]
+    end_year = params[:end_year]
+    end_month = params[:end_month]
+    end_day = params[:end_day]
+    @age_groups = age_groups.map{|g|g.upcase}
+    @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
+    @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+    @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+    @diagnosis_by_address = {}
+    @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+    @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
+    concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",
+      ["Additional diagnosis","Diagnosis", "primary diagnosis",
+      "secondary diagnosis"]]).map(&:concept_id)
+      observation = Observation.find(:all, :include=>{:person=>{}},
+                    :conditions => ["obs.obs_datetime >= TIMESTAMP(?)
+                    AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
+                    @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
+                    concept_ids])
 
-    if params[:page].blank?
-      session[:people] = nil
-      session[:observation] = nil
-      session[:groups] = params[:age_groups]
-      age_groups = params[:age_groups]
-      start_year = params[:start_year]
-      start_month = params[:start_month]
-      start_day = params[:start_day]
-      end_year = params[:end_year]
-      end_month = params[:end_month]
-      end_day = params[:end_day]
+      observation.each do | obs|
+        next if obs.answer_concept.nil?
+          if (@age_groups.include?("< 6 MONTHS"))
+            if (PatientService.age_in_months(obs.person).to_i < 6 )
+              diagnosis_name = obs.answer_concept.fullname rescue ''
+              @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            end
+          end
 
-			session[:people] = nil
-			session[:observation] = nil
-			session[:groups] = params[:age_groups]
-			age_groups = params[:age_groups]
-			start_year = params[:start_year]
-			start_month = params[:start_month]
-			start_day = params[:start_day]
-			end_year = params[:end_year]
-			end_month = params[:end_month]
-			end_day = params[:end_day]
+          if (@age_groups.include?("6 MONTHS TO < 1 YR"))
+            if (PatientService.age_in_months(obs.person).to_i >= 6 && PatientService.age(obs.person).to_i < 1)
+              diagnosis_name = obs.answer_concept.fullname rescue ''
+              @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            end
+          end
 
-			@age_groups = age_groups.map{|g|g.upcase}
-			@required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-			@start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-			@end_date = (end_year + "-" + end_month + "-" + end_day).to_date
-			@diagnosis_by_address = {}
-    else
-			@start_date = params[:start_date].to_date
-			@end_date = params[:end_date].to_date
-    end
+          if (@age_groups.include?("1 TO < 5"))
+            if (PatientService.age(obs.person).to_i >= 1 && PatientService.age(obs.person).to_i < 5)
+              diagnosis_name = obs.answer_concept.fullname rescue ''
+              @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            end
+          end
 
-		@formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
-		@formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
-		concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["Additional diagnosis","Diagnosis", "primary diagnosis","secondary diagnosis"]]).map(&:concept_id)
+          if (@age_groups.include?("5 TO 14"))
+            if (PatientService.age(obs.person).to_i >= 5 && PatientService.age(obs.person).to_i < 14)
+              diagnosis_name = obs.answer_concept.fullname rescue ''
+              @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            end
+          end
 
-    diagnoses = session[:observation]
-    if params[:page].blank?
+          if (@age_groups.include?("> 14 TO < 20"))
+            if (PatientService.age(obs.person).to_i >= 14 && PatientService.age(obs.person).to_i < 20)
+              diagnosis_name = obs.answer_concept.fullname rescue ''
+              @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            end
+          end
 
-			min_age, max_age = report_age_range(@age_groups)
+          if (@age_groups.include?("20 TO 30"))
+            if (PatientService.age(obs.person).to_i >= 20 && PatientService.age(obs.person).to_i < 30)
+              diagnosis_name = obs.answer_concept.fullname rescue ''
+              @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            end
+          end
 
-			observation =Observation.find(:all, :include=>{:person=>{}},
-				:conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
-					@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
-					concept_ids])
+          if (@age_groups.include?("30 TO < 40"))
+            if (PatientService.age(obs.person).to_i >= 30 && PatientService.age(obs.person).to_i < 40)
+              diagnosis_name = obs.answer_concept.fullname rescue ''
+              @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            end
+          end
 
-			observation.each do | obs|
+          if (@age_groups.include?("40 TO < 50"))
+            if (PatientService.age(obs.person).to_i >= 40 && PatientService.age(obs.person).to_i < 50)
+              diagnosis_name = obs.answer_concept.fullname rescue ''
+              @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+              @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            end
+          end
 
-				if min_age.blank?
-					next if obs.answer_concept.blank?
-					diagnosis_name = obs.answer_concept.fullname rescue ''
-					@diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-					@diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-					@diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
-				else
-					if (PatientService.age(obs.person, obs.person.date_created).to_i >= min_age && PatientService.age(obs.person, obs.person.date_created).to_i < max_age)
-						diagnosis_name = obs.answer_concept.fullname rescue ''
-						@diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-						@diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-						@diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
-					end
-				end
-
-
-			end
-			diagnoses = @diagnosis_by_address.inject([]){|result,v| result << v; result }
-			session[:observation] = diagnoses
-
-    end
-    @page = diagnoses.paginate(:page => params[:page], :per_page =>10)
-    unless diagnoses.nil?
-			@diagn_address = []
-			@page.each { |diagn|
-				diagnosis = diagn[0]
-				address_total = diagn[1]
-				address_total.each { |address,total|
-					@diagn_address << [diagnosis,address,total]
-				}
-			}
-    end
+          if (@age_groups.include?("ALL"))
+            diagnosis_name = obs.answer_concept.fullname rescue ''
+            @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+          end
+      end
+    @diagn_address = []
+    @diagnosis_by_address.each { |diagn|
+      diagnosis = diagn[0]
+      address_total = diagn[1]
+      address_total.each { |address,total|
+        @diagn_address << [diagnosis,address,total]
+      }
+    }
     render :layout => "report"
   end
 
@@ -1886,76 +1826,55 @@ class CohortToolController < ApplicationController
 
     @report_name = params[:report_name]
     @logo = CoreService.get_global_property_value('logo').to_s
-    session_date = session[:datetime].to_date rescue Date.today
     @current_location_name =Location.current_health_center.name
-    if params[:page].blank?
-
-			session[:people] = nil
-			session[:observation] = nil
-			session[:groups] = params[:age_groups]
-			start_year = params[:start_year]
-			start_month = params[:start_month]
-			start_day = params[:start_day]
-			end_year = params[:end_year]
-			end_month = params[:end_month]
-			end_day = params[:end_day]
-			@required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-			@start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-			@end_date = (end_year + "-" + end_month + "-" + end_day).to_date
-			@disaggregated_diagnosis = {}
-		else
-			@start_date = params[:start_date].to_date
-			@end_date = params[:end_date].to_date
-
-    end
+    start_year = params[:start_year]
+    start_month = params[:start_month]
+    start_day = params[:start_day]
+    end_year = params[:end_year]
+    end_month = params[:end_month]
+    end_day = params[:end_day]
+    @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
+    @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+    @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+    @disaggregated_diagnosis = {}
     @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
     @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
-    concept_ids = ConceptName.find(:all, 
-      :conditions => ["name IN (?)",["Additional diagnosis",
+    concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["Additional diagnosis",
       "Diagnosis", "primary diagnosis","secondary diagnosis"]]).map(&:concept_id)
-    disaggregated_diagnosis = session[:observation]
-    if params[:page].blank?
-			observation =Observation.find(:all,:include=>{:person=>{}},
-				:conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
-					@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
-					concept_ids])
-			observation.each do | obs|
-				next if obs.answer_concept.blank?
-				previous_date = obs.obs_datetime.strftime('%Y-%m-%d').to_date
-				sex = obs.person.gender
-				age = PatientService.age(obs.person, previous_date)
-				diagnosis_name = obs.answer_concept.fullname rescue ''
-				@disaggregated_diagnosis[diagnosis_name]={"U5" =>{"M"=> 0, "F"=>0},
-					"5-14" =>{"M"=> 0, "F"=>0},
-					">14" =>{"M"=> 0, "F"=>0},
-					"< 6 MONTHS" =>{"M"=> 0, "F"=>0}
-				}	if @disaggregated_diagnosis[diagnosis_name].nil?
+           observation =Observation.find(:all,:include=>{:person=>{}},
+              :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
+               @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
+                concept_ids])
+              observation.each do | obs|
+                      next if obs.answer_concept.blank?
+                      previous_date = obs.obs_datetime.strftime('%Y-%m-%d').to_date
+                      sex = obs.person.gender
+                      age = PatientService.age(obs.person, previous_date)
+                      diagnosis_name = obs.answer_concept.fullname rescue ''
+                      @disaggregated_diagnosis[diagnosis_name]={"U5" =>{"M"=> 0, "F"=>0},
+                        "5-14" =>{"M"=> 0, "F"=>0},
+                        ">14" =>{"M"=> 0, "F"=>0},
+                        "< 6 MONTHS" =>{"M"=> 0, "F"=>0}
+                      }	if @disaggregated_diagnosis[diagnosis_name].nil?
 
-				if age.to_i < 1
-					age_in_months = PatientService.age_in_months(obs.person, previous_date)
-					if age_in_months.to_i < 6
-						@disaggregated_diagnosis[diagnosis_name]["< 6 MONTHS"][sex]+=1
-					else age_in_months.to_i >= 6 && age.to_i < 5
-						@disaggregated_diagnosis[diagnosis_name]["U5"][sex]+=1
-					end
-				elsif age.to_i >= 1 and age.to_i <= 14
-					@disaggregated_diagnosis[diagnosis_name]["5-14"][sex]+=1
-				else
-					@disaggregated_diagnosis[diagnosis_name][">14"][sex]+=1
-				end
+                      if age.to_i < 1
+                        age_in_months = PatientService.age_in_months(obs.person, previous_date)
+                        if age_in_months.to_i < 6
+                          @disaggregated_diagnosis[diagnosis_name]["< 6 MONTHS"][sex]+=1
+                        else age_in_months.to_i >= 6 && age.to_i < 5
+                          @disaggregated_diagnosis[diagnosis_name]["U5"][sex]+=1
+                        end
+                      elsif age.to_i >= 1 and age.to_i <= 14
+                        @disaggregated_diagnosis[diagnosis_name]["5-14"][sex]+=1
+                      else
+                        @disaggregated_diagnosis[diagnosis_name][">14"][sex]+=1
+                      end
 
-			end
-			disaggregated_diagnosis = @disaggregated_diagnosis.inject([]){|result,v| result << v; result}
-			session[:observation] = disaggregated_diagnosis
-    end
-    @page= disaggregated_diagnosis.paginate(:page => params[:page], :per_page =>13)
-		unless disaggregated_diagnosis.nil?
-			@diaggregated_paginated = []
-			@page.each { | diag, value |
-				diagnosis = diag
-				@diaggregated_paginated << [diag, value]
-			}
-		end
+            end
+            @diaggregated_paginated = []
+            @disaggregated_diagnosis.each { | diag, value |
+              @diaggregated_paginated << [diag, value]
+            }
 		render :layout => 'report'
 	end
 
@@ -1969,16 +1888,16 @@ class CohortToolController < ApplicationController
       person.patient.encounters.find(:first, :order => "encounter_datetime").encounter_datetime.to_date,
       address, traditional_authority]
 	end
-	
+
 	def report_trasfer_outs_and_refrerrals(report_name)
     report_encounter_name = "OUTPATIENT RECEPTION"
     obs_concept_name = "Referral clinic if referred"
-			
+
     if report_name.upcase == "TRANSFER_OUT"
       report_encounter_name = "TRANSFER OUT"
       obs_concept_name = "Transfer to"
     end
-			
+
     Observation.find(:all, :include=>{:encounter=>{:type=>{}}, :concept=>{:concept_names=>{}}},
       :conditions => ["encounter_type.name = ? AND concept_name.name = ?
 											 									AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)",
@@ -1994,7 +1913,7 @@ class CohortToolController < ApplicationController
     patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  &&
         obs.obs_datetime.month < birth_date.month && person.date_created.year == obs.obs_datetime.year) ? 1 : 0
   end
-  
+
   def age_in_months(person, obs)
     years = (obs.obs_datetime.year - person.birthdate.year)
     months = (obs.obs_datetime.month - person.birthdate.month)
@@ -2004,7 +1923,7 @@ class CohortToolController < ApplicationController
   def name(person)
     "#{person.names.first.given_name} #{person.names.first.family_name}".titleize rescue nil
   end
-  
+
 	def report_patient(patient_bean, person, start_date, end_date)
     obs = patient_bean
     diagnosis_name = obs.answer_concept.fullname rescue ''
@@ -2074,4 +1993,3 @@ class CohortToolController < ApplicationController
 
 	end
 end
-
