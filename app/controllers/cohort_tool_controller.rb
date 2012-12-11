@@ -1515,7 +1515,7 @@ class CohortToolController < ApplicationController
         person = Person.find(person_id)
         name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
         @registered << [name, person.birthdate, person.gender,
-        persondate_created.to_date,
+        person.date_created.to_date,
         person.addresses.first.city_village,
         person.addresses.first.county_district]
       end
