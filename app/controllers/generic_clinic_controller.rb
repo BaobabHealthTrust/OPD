@@ -88,18 +88,72 @@ class GenericClinicController < ApplicationController
     end
 
     @types = CoreService.get_global_property_value("statistics.show_encounter_types") rescue EncounterType.all.map(&:name).join(",")
-    @types = @types.split(/,/)
+    @types = @types.split(/,/).delete_if.each{|t|t.match(/Registration/i)}
+    @types.delete_if.each{|t|t.match(/Appointment/i)}
+    #@types
 
-    @me = Encounter.statistics(@types,
+
+    @me = Encounter.statistics(@types,:joins => {:patient =>{:person => {}}},
       :conditions => ['encounter_datetime BETWEEN ? AND ? AND encounter.creator = ?',
-                      Date.today.strftime('%Y-%m-%d 00:00:00'),
-                      Date.today.strftime('%Y-%m-%d 23:59:59'),
+                      Date.today.strftime('%Y-%m-%d 00:00:00'), Date.today.strftime('%Y-%m-%d 23:59:59'),
                       current_user.user_id])
+    @me_below_14 = Encounter.statistics(@types,:joins => {:patient =>{:person => {}}},
+      :conditions => ['DATEDIFF(NOW(), person.birthdate)/365 < ? AND encounter_datetime BETWEEN ? AND ? AND encounter.creator = ?',
+                      14, Date.today.strftime('%Y-%m-%d 00:00:00'),Date.today.strftime('%Y-%m-%d 23:59:59'),
+                      current_user.user_id])
+
+    @me_above_14 = Encounter.statistics(@types,:joins => {:patient =>{:person => {}}},
+      :conditions => ['DATEDIFF(NOW(), person.birthdate)/365 >= ? AND encounter_datetime BETWEEN ? AND ? AND encounter.creator = ?',
+                      14, Date.today.strftime('%Y-%m-%d 00:00:00'),Date.today.strftime('%Y-%m-%d 23:59:59'),
+                      current_user.user_id])
+
     @today = Encounter.statistics(@types,
       :conditions => ['encounter_datetime BETWEEN ? AND ?',
                       Date.today.strftime('%Y-%m-%d 00:00:00'),
                       Date.today.strftime('%Y-%m-%d 23:59:59')])
+    @today_below_14 = Encounter.statistics(@types,:joins => {:patient =>{:person => {}}},
+      :conditions => ['DATEDIFF(NOW(), person.birthdate)/365 < ? AND encounter_datetime BETWEEN ? AND ?',
+                      14, Date.today.strftime('%Y-%m-%d 00:00:00'), Date.today.strftime('%Y-%m-%d 23:59:59')])
 
+    @today_above_14 = Encounter.statistics(@types,:joins => {:patient =>{:person => {}}},
+      :conditions => ['DATEDIFF(NOW(), person.birthdate)/365 >= ? AND encounter_datetime BETWEEN ? AND ?',
+                      14, Date.today.strftime('%Y-%m-%d 00:00:00'), Date.today.strftime('%Y-%m-%d 23:59:59')])
+    @me_reg_below_14 = Patient.find(:all,:joins => [:person], :conditions => ['DATEDIFF(NOW(),
+       person.birthdate)/365 < ? AND DATE(patient.date_created) =? AND patient.creator =? ',
+        14, Date.today, current_user.user_id]).count
+    @me_reg_above_14 = Patient.find(:all,:joins => [:person], :conditions => ['DATEDIFF(NOW(), 
+       person.birthdate)/365 >= ? AND DATE(patient.date_created) =? AND patient.creator =? ',
+        14, Date.today, current_user.user_id]).count
+    @today_reg_below_14 = Patient.find(:all,:joins => [:person], :conditions => ['DATEDIFF(NOW(),
+       person.birthdate)/365 < ? AND DATE(patient.date_created) =?', 14, Date.today]).count
+    @today_reg_above_14 = Patient.find(:all,:joins => [:person], :conditions => ['DATEDIFF(NOW(),
+       person.birthdate)/365 >= ? AND DATE(patient.date_created) =? ', 14, Date.today]).count
+    
+    @me_ret_pt_below_14 =  Encounter.find(:all, :joins => [:type, [:patient => :person] ],
+      :group=>'patient.patient_id', :conditions => ['encounter_type_id IN (?) AND 
+       DATE(patient.date_created) <> ? AND DATE(encounter.encounter_datetime) =?  AND
+       encounter.creator = ? AND DATEDIFF(NOW(),person.birthdate)/365 < ?',
+       EncounterType.find(:all, :conditions => ['name IN (?)',@types]).map(&:encounter_type_id), 
+       Date.today, Date.today,current_user.user_id,14] ).count
+     #raise  @me_ret_pt_below_14.inspect
+    @me_ret_pt_above_14 =  Encounter.find(:all, :joins => [:type, [:patient => :person] ],
+      :group=>'patient.patient_id', :conditions => ['encounter_type_id IN (?) AND 
+       DATE(patient.date_created) <> ? AND DATE(encounter.encounter_datetime) =?  AND
+       encounter.creator = ? AND DATEDIFF(NOW(),person.birthdate)/365 >= ?',
+       EncounterType.find(:all, :conditions => ['name IN (?)',@types]).map(&:encounter_type_id), 
+       Date.today, Date.today,current_user.user_id,14] ).count
+    @ret_pt_below_14 =  Encounter.find(:all, :joins => [:type, [:patient => :person] ],
+      :group=>'patient.patient_id', :conditions => ['encounter_type_id IN (?) AND
+       DATE(patient.date_created) <> ? AND DATE(encounter.encounter_datetime) =? AND DATEDIFF(NOW(),person.birthdate)/365 < ?',
+       EncounterType.find(:all, :conditions => ['name IN (?)',@types]).map(&:encounter_type_id),
+       Date.today, Date.today,14] ).count
+
+     @ret_pt_above_14 =  Encounter.find(:all, :joins => [:type, [:patient => :person] ],
+      :group=>'patient.patient_id', :conditions => ['encounter_type_id IN (?) AND
+       DATE(patient.date_created) <> ? AND DATE(encounter.encounter_datetime) =? AND DATEDIFF(NOW(),person.birthdate)/365 >= ?',
+       EncounterType.find(:all, :conditions => ['name IN (?)',@types]).map(&:encounter_type_id),
+       Date.today, Date.today,14] ).count
+   
     if !simple_overview
       @year = Encounter.statistics(@types,
         :conditions => ['encounter_datetime BETWEEN ? AND ?',
