@@ -305,12 +305,9 @@ class PatientsController < GenericPatientsController
             if (check_vitals == false)
               label.draw_multi_text("Notes at #{encounter_datetime}",title_header_font)
               label.draw_multi_text("#{obs.join(',')}",concepts_font)
-              #obs.each { | observation |
-                #label.draw_multi_text("#{observation}", concepts_font)
-            #}
             end
 
-            elsif encounter.name.upcase.include?("ADMIT PATIENT")
+          elsif encounter.name.upcase.include?("ADMIT PATIENT")
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             obs = []
             encounter.observations.each do |observation|
@@ -341,13 +338,14 @@ class PatientsController < GenericPatientsController
 
 					elsif encounter.name.upcase.include?("VITALS")
             vital_signs = ["HT","Weight","Heart rate","Temperature","RR","SAO2"]
-            blood_pressure = ["TA", "Diastolic"]
+            #blood_pressure = ["TA", "Diastolic"]
               #SAO2 for oxygen saturation;
               #TA for Systolic blood pressure
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
 						string = []
             obs = []
-            complaints = []
+            complaints = [] #to hold life threatening condition and triage category
+                            #so that they should be printed in different lines
             bp = []
             encounter.observations.each { | observation |
 
@@ -375,7 +373,13 @@ class PatientsController < GenericPatientsController
                 if !vital_signs.include?(concept_name)
                   if !concept_name.match(/TA/i)
                     if !concept_name.match(/DIASTOLIC/i)
-                      obs << observation.answer_string.to_s
+                      if !concept_name.match(/LIFE THREATENING CONDITION/i)
+                        if !concept_name.match(/TRIAGE CATEGORY/i)
+                          obs << observation.answer_string.to_s 
+                        end
+                      end
+                      complaints << concept_name + ':' + observation.answer_string if concept_name.match(/LIFE THREATENING CONDITION/i)
+                      complaints << concept_name + ':' + observation.answer_string if concept_name.match(/TRIAGE CATEGORY/i)
                     end
                   end
                 end
@@ -395,9 +399,13 @@ class PatientsController < GenericPatientsController
               label.draw_multi_text("#{string.join(',')}", concepts_font)
               #label.draw_multi_text("Presenting complaints", title_header_font)
               label.draw_multi_text("Presenting complaints\n #{obs.join(',')}", concepts_font) if !obs.blank?
-              #obs.each { | observation |
-                #label.draw_multi_text("#{observation}", concepts_font)
-              #}
+
+              unless complaints.blank?
+                complaints.each { | complaint |
+                  label.draw_multi_text("#{complaint}", concepts_font)
+                }
+              end
+              
             end
         end
 
@@ -429,8 +437,10 @@ class PatientsController < GenericPatientsController
             label.draw_multi_text("Outcomes : #{outcomes.uniq.join(',')}", concepts_font)
           end
 			end
+      initial = current_user.person.names.last.given_name.first + "."
+      last_name = current_user.person.names.last.family_name
       label.draw_multi_text("___________________________________________________", concepts_font)
-      label.draw_multi_text("Seen by: #{current_user.name} at " +
+      label.draw_multi_text("Seen by: #{initial + last_name} at " +
         " #{Location.current_location.name}", title_font_bottom)
       
       label.print(1)
