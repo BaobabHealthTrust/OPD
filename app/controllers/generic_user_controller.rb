@@ -134,9 +134,7 @@ class GenericUserController < ApplicationController
       flash[:notice] = 'Password Mismatch'
       redirect_to :action => 'new'
       return
-    #  flash[:notice] = nil
       @user_first_name = params[:person_name][:given_name]
-#      @user_middle_name = params[:user][:middle_name]
       @user_last_name = params[:person_name][:family_name]
       @user_role = params[:user_role][:role_id]
       @user_admin_role = params[:user_role_admin][:role]
@@ -145,7 +143,7 @@ class GenericUserController < ApplicationController
 	
 	params[:user][:password] = params[:user][:plain_password]
 	params[:user][:plain_password] = nil
-    person = Person.create()
+    person = Person.create(params[:person])
     person.names.create(params[:person_name])
     params[:user][:user_id] = nil
     @user = RawUser.new(params[:user])
