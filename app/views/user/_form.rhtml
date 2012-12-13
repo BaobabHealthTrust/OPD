@@ -44,6 +44,9 @@
       <p><label for="person_name_family_name">Last name</label><br/>
       <%= text_field 'person_name', 'family_name', :ajaxURL => '/person_names/family_names?search_string=', :value => @user_last_name, :allowFreeText => true%></p>
 
+
+      <%= select_tag "person[gender]", options_for_select({"" => "", "Male" => "M", "Female" => "F"}), {:helpText => "Gender"} %>
+
       <p><label for="user_role_role_id">User Role</label></br>
       <%= text_field 'user_role', 'role_id', :xhelpText => 'User role', :ajaxURL => '/user/role/Role?field=role&value='%></p>
         
