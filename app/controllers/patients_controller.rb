@@ -140,7 +140,8 @@ class PatientsController < GenericPatientsController
 		@links << ["Demographics (Edit)","/patients/edit_demographics?patient_id=#{patient.id}"]
 		@links << ["Patient past visits (View)","/patients/past_visits_summary?patient_id=#{patient.id}"]
 		@links << ["Medical History (View)","/patients/past_diagnoses?patient_id=#{patient.id}"]
-
+    @links << ["Investigation","/encounters/new/lab_orders?show&patient_id=#{patient.id} "]
+    
 		if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
 		  @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]
 		end 

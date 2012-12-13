@@ -80,7 +80,7 @@
 						<% if show_lab_results %>
 						<option link="/lab/results/<%=@patient.id -%>">Lab results</option>
 						<%end%>
-            <option link='/encounters/new/lab_orders?show&patient_id=<%= @patient.id %>'>Investigation</option>
+            
             <option link='/patients/programs_dashboard/<%= @patient.id %>'>Programs</option>
 						<option link='<%= ((session[:datetime].to_date rescue '') != '' ?
 						"/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
