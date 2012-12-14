@@ -1,0 +1,143 @@
+<style>
+.main-container {
+  border-style: solid;
+  border-width: 0px 0px 0px 0px;
+  border-width-color: black;
+  height: 626px;
+  margin: 5px;
+  -moz-user-select: none;
+}
+
+
+.left-container {
+  width: 20%;
+  padding: 5px 0px 5px 0px;
+  float: left;
+  overflow: auto;
+  height: 626px;
+}
+
+.links {
+  padding: 0px 0px 5px 0px;
+  text-align: center;
+  border-style: solid;
+  border-width: 1px;
+  height: 55px;
+}
+
+.links-heading {
+  text-align: left;
+  font-size: 15px;
+  color: white;
+  background-color: teal;
+  padding-left: 5px;
+}
+
+.links-btn-img {
+  float: right;
+  position: relative;
+  top: -20px;
+  width: 20%;
+}
+
+.links-btn-date {
+  width: 60%;
+  position: relative;
+  top: 8px;
+  padding-left: 20px;
+}
+
+.right-container {
+  width: 78%;
+  padding: 5px;
+  float: right;
+  background-color: lightgrey;
+  height: 625px;
+}
+
+.demographics {
+}
+
+.data {
+  -moz-border-radius: 15px;
+  border-radius: 5px;
+  width: 98%;
+  border-style: solid;
+  border-width: 1px;
+  padding-left: 5px;
+  background-color: white;
+}
+
+.data-main {
+  height: 510px;
+  overflow: auto;
+  padding: 5px 0px 5px 0px;
+  border-style: solid;
+  border-width: 1px 0px 1px 0px;
+}
+
+.main-caption {
+  text-align: center;
+  background-color: black;
+  color: white;
+  -moz-user-select: none;
+}
+
+.links-btn a {
+  color: blue;
+  text-decoration: none; 
+}
+</style>
+
+
+<div class="main-caption">
+  <%=@encounter_dates.first.strftime('%A %d %B %Y')%>
+</div>
+
+<div class="main-container">
+
+  <div class="left-container">
+    <%(@encounter_dates || []).each do |date|%>
+      <div class='links'>
+        <div class='links-heading'>
+          <%=date.strftime('%A')%>
+        </div>
+        <div class='links-btn'>
+        <a href="javascript:alert('<%=date%>')">
+        <div class='links-btn-date'>
+            <%=date.strftime('%d  %b %Y')%>&nbsp;
+          </div>
+          <div class='links-btn-img'>
+            <%= image_tag("forward.png", :class => "arrows") %>
+          </div></a>
+        </div>
+      </div><br />
+    <%end%>
+  </div>
+
+  <div class="right-container">
+    <div class="demographics data">
+      <%=@patient_bean.name%>&nbsp;(<%=@patient_bean.sex%>)<br />
+      <b>Birthdate:</b>&nbsp;<%=@patient_bean.birth_date%><br />
+      <b>Age:</b>&nbsp;<%=@patient_bean.age%><br />
+      <b>Address</b>&nbsp;Area 47
+    </div><p />
+
+    <div class="data-main">
+ 
+      <%@encounters.each do |name,values|%>
+ 
+      <div class="data">
+         <b><%=name%></b><br />
+          <%values.each do |value|%>
+            <%=value%><br />
+          <%end%>
+      </div><br />
+
+      <%end%>
+
+    </div>
+
+  </div>
+
+</div>

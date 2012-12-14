@@ -709,6 +709,30 @@ class GenericPatientsController < ApplicationController
     render :layout => "menu"
   end
 
+  def pdash                                                                     
+    @patient_bean = PatientService.get_patient(Person.find(params[:patient_id]))
+    patient = Patient.find(params[:patient_id])
+    last_visit_date = patient.encounters.last.encounter_datetime.to_date rescue Date.today
+    encounters = Encounter.find(:all,:conditions => ["patient_id = ? AND 
+      encounter_datetime >= ? AND encounter_datetime <= ?",patient.patient_id,
+      last_visit_date.strftime('%Y-%m-%d 00:00:00'),
+      last_visit_date.strftime('%Y-%m-%d 23:59:59')])
+
+    @encounter_dates = patient.encounters.collect{|e|e.encounter_datetime.to_date}.uniq.sort
+    @encounter_dates = (@encounter_dates || []).sort{|a,b|b <=> a} 
+    @encounters = {}
+
+    (encounters || []).each do |encounter|
+      next if encounter.name.match(/TREATMENT/i)
+      @encounters[encounter.name.upcase] = encounter.observations.collect{|obs|
+        next if obs.to_s.match(/Workstation/i)
+        obs.to_s 
+      }.compact
+    end
+
+    render :layout => "menu"                                                    
+  end
+
   def treatment_dashboard
 	  @patient_bean = PatientService.get_patient(@patient.person)
     @amount_needed = 0
