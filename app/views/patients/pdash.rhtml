@@ -173,8 +173,13 @@ div {
  
       <div class="data">
          <b><%=name%><span class='time'><%=values[:time]%></span></b><br />
-          <%values[:data].each do |value|%>
-            <%=value%><br />
+          <%values[:data].each do |value|
+            if value.match(/Referred from:/i)                                       
+              val = 'Referred from: ' + Location.find(value.sub('Referred from:','').to_i).name rescue value
+            else                                                                    
+              val ="#{value}"  
+            end%>
+            <%=val%><br />
           <%end%>
       </div><br />
 
@@ -225,7 +230,7 @@ function showHistory(encounterDate,displayDate) {
     }                                                                            
 
     params = patientID + "&date=" + encounterDate;                                                                                
-    xmlhttp.open("GET","/patients/summary?patient_id=" + params  , true);                        
+    xmlhttp.open("GET","/patients/pdash_summary?patient_id=" + params  , true);                        
     xmlhttp.send(); 
 }
 

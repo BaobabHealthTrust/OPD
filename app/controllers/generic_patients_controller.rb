@@ -2712,7 +2712,7 @@ class GenericPatientsController < ApplicationController
     render :text => "Next appointment: #{date.strftime('%d %B %Y')} (#{count})"
   end 
 
-  def summary                                                                     
+  def pdash_summary                                                                     
     latest_encounters = Encounter.find(:all,                                    
       :order => "encounter_datetime ASC,date_created ASC",                      
       :conditions => ["patient_id = ? AND                                       
@@ -2739,7 +2739,11 @@ class GenericPatientsController < ApplicationController
       @html+="<div class='data'>"                                                       
       @html+="<b>#{name}<span class='time'>#{values[:time]}</span></b><br />"     
       values[:data].each do |value|                                    
-        @html+="#{value}<br />"                                                    
+        if value.match(/Referred from:/i)
+          @html+= 'Referred from: ' + Location.find(value.sub('Referred from:','').to_i).name rescue value
+        else
+          @html+="#{value}<br />"                                                    
+        end
       end                                                               
       @html+="</div><br />"                                                              
     end
