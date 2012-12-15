@@ -145,7 +145,7 @@ div {
     <%if @encounter_dates.blank?%>                                                 
       <div class="data" style="width: 189px;">                                                        
         <%unless @show_history %>                                                 
-          <b>.... </b><br />                                                      
+          <b>OPD<br /><%=Location.current_location.name%> ....</b>                                                  
         <%else%>
           <b>Sorry</b><br />                                                      
           There are no encounters yet for this patient ....                       
