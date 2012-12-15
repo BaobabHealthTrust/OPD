@@ -88,7 +88,8 @@ class GenericPeopleController < ApplicationController
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
 				else
-					redirect_to :action => 'confirm', :found_person_id => found_person.id, :relation => params[:relation] and return
+					redirect_to :controller =>'patients',:action => 'pdash', 
+            :found_person_id => found_person.id, :relation => params[:relation] and return
 				end
 			end
 		end
@@ -155,7 +156,7 @@ class GenericPeopleController < ApplicationController
       if params[:relation]
         redirect_to search_complete_url(found_person.id, params[:relation]) and return
       else
-        redirect_to :action => 'confirm',
+        redirect_to :action => 'pdash',:controller =>'patients',
           :found_person_id => found_person.id,
           :relation => params[:relation] and return
       end
@@ -634,7 +635,8 @@ private
 			patient = Person.find(found_person_id).patient
 			show_confirmation = CoreService.get_global_property_value('show.patient.confirmation').to_s == "true" rescue false
 			if show_confirmation
-				url_for(:controller => :people, :action => :confirm , :found_person_id =>found_person_id)
+				#url_for(:controller => :people, :action => :confirm , :found_person_id =>found_person_id)
+				url_for(:controller => :patients , :action => :pdash , :found_person_id =>found_person_id)
 			else
 				next_task(patient)
 			end
