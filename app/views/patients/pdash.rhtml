@@ -25,7 +25,7 @@ div {
   text-align: center;
   border-style: solid;
   border-width: 1px;
-  height: 55px;
+  height: 70px;
 }
 
 .links-heading {
@@ -39,7 +39,7 @@ div {
 .links-btn-img {
   float: right;
   position: relative;
-  top: -20px;
+  top: -47px;
   width: 20%;
 }
 
@@ -99,6 +99,21 @@ div {
   position: relative;
   top: 4px;
 }
+
+.btn-date {
+  background-color: #669999;
+  border-bottom: 1px outset black;
+  border-radius: 7px 7px 7px 7px;
+  border-style: outset;
+  border-top: 1px outset black;
+  color: white;
+  display: block;
+  padding: 10px 16px 10px 10px;
+  text-align: center;
+  text-decoration: none;
+  height: 15px;
+  width: 92px;
+}
 </style>
 
 <script>
@@ -130,12 +145,11 @@ div {
           <%=date.strftime('%A')%>
         </div>
         <div class='links-btn'>
-        <a href="javascript:showHistory('<%=date%>','<%=date.strftime('%A %d %B %Y')%>')">
         <div class='links-btn-date'>
-            <%=date.strftime('%d  %b %Y')%>&nbsp;
+            <a href="javascript:showHistory('<%=date%>','<%=date.strftime('%A %d %B %Y')%>')"><span class='btn-date'><%=date.strftime('%d  %b %Y')%></span></a>&nbsp;
           </div>
           <div class='links-btn-img'>
-            <%= image_tag("forward.png", :class => "arrows") %>
+            <a href="javascript:showHistory('<%=date%>','<%=date.strftime('%A %d %B %Y')%>')"><%= image_tag("forward.png", :class => "arrows") %></a>
           </div></a>
         </div>
       </div><br />
