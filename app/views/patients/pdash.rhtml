@@ -1,11 +1,14 @@
 <style>
+div {
+  -moz-user-select: none;
+}
+
 .main-container {
   border-style: solid;
   border-width: 0px 0px 0px 0px;
   border-width-color: black;
   height: 626px;
   margin: 5px;
-  -moz-user-select: none;
 }
 
 
@@ -80,12 +83,16 @@
   text-align: center;
   background-color: black;
   color: white;
-  -moz-user-select: none;
 }
 
 .links-btn a {
   color: blue;
   text-decoration: none; 
+}
+
+.time {
+  float: right;
+  padding-right: 15px;
 }
 </style>
 
@@ -128,8 +135,8 @@
       <%@encounters.each do |name,values|%>
  
       <div class="data">
-         <b><%=name%></b><br />
-          <%values.each do |value|%>
+         <b><%=name%><span class='time'><%=values[:time]%></span></b><br />
+          <%values[:data].each do |value|%>
             <%=value%><br />
           <%end%>
       </div><br />

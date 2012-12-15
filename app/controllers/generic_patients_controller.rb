@@ -713,23 +713,29 @@ class GenericPatientsController < ApplicationController
     @patient_bean = PatientService.get_patient(Person.find(params[:patient_id]))
     patient = Patient.find(params[:patient_id])
     last_visit_date = patient.encounters.last.encounter_datetime.to_date rescue Date.today
-    encounters = Encounter.find(:all,:conditions => ["patient_id = ? AND 
+    latest_encounters = Encounter.find(:all,
+      :order => "encounter_datetime ASC,date_created ASC",
+      :conditions => ["patient_id = ? AND 
       encounter_datetime >= ? AND encounter_datetime <= ?",patient.patient_id,
       last_visit_date.strftime('%Y-%m-%d 00:00:00'),
       last_visit_date.strftime('%Y-%m-%d 23:59:59')])
 
-    @encounter_dates = patient.encounters.collect{|e|e.encounter_datetime.to_date}.uniq.sort
-    @encounter_dates = (@encounter_dates || []).sort{|a,b|b <=> a} 
     @encounters = {}
 
-    (encounters || []).each do |encounter|
+    (latest_encounters || []).each do |encounter|
       next if encounter.name.match(/TREATMENT/i)
-      @encounters[encounter.name.upcase] = encounter.observations.collect{|obs|
+      @encounters[encounter.name.upcase] = {:data => nil, 
+        :time => encounter.encounter_datetime.strftime('%H:%M:%S')}
+      @encounters[encounter.name.upcase][:data] = encounter.observations.collect{|obs|
         next if obs.to_s.match(/Workstation/i)
         obs.to_s 
       }.compact
     end
 
+    @encounters = @encounters.sort_by { |name, values| values[:time] }
+
+    @encounter_dates = patient.encounters.collect{|e|e.encounter_datetime.to_date}.uniq
+    @encounter_dates = (@encounter_dates || []).sort{|a,b|b <=> a} 
     render :layout => "menu"                                                    
   end
 
