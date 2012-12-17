@@ -46,7 +46,11 @@
 				</select>
 					
 				<select id="links">
-					<option value='/encounters/new/vitals?patient_id=<%= @patient.id %>'>Triage</option>
+                                        <%  if @patient_bean.age.to_i < 14%>
+                                          <option value='/encounters/new/triage_paeds?patient_id=<%= @patient.id %>'>Triage</option>
+                                        <% else  %>
+                                          <option value='/encounters/new/vitals?patient_id=<%= @patient.id %>'>Triage</option>
+                                        <% end %>
 					<option value='/encounters/new/presenting_complaints?patient_id=<%= @patient.id %>'>Clinical Notes</option>
 					<option value='/encounters/new/outpatient_diagnosis?patient_id=<%= @patient.id %>'>Diagnosis</option>
 					<option value='/patients/treatment_dashboard/<%= @patient.id %>'>Treatment</option>
