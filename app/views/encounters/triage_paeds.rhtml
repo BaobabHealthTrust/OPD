@@ -147,29 +147,26 @@
           :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';"
         } %>
 
-
-        <%= touch_select_tag "EMERGENCY SIGNS PAEDS", @patient, options_for_select([]),
-          { 
+       
+        <%= touch_select_tag "EMERGENCY SIGNS PAEDS", @patient, options_for_select(@emergency_signs_paeds),
           :id => 'emergency_signs',
           :multiple => true,
           :condition => "$('triage_category').value.match(/EMERGENCY/i)",
-          :ajaxURL => "/encounters/emergency_signs",
           :helpText => "Select Emergency Signs"
-          } %>
+           %>
 
-        <%= touch_select_tag "PRIORITY SIGNS PAEDS", @patient, options_for_select([]),
+        <%= touch_select_tag "PRIORITY SIGNS PAEDS", @patient, options_for_select(@priority_signs_paeds),
           {
           :id => 'priority_signs',
           :multiple => true,
           :condition => "$('triage_category').value.match(/PRIORITY/i)",
-          :ajaxURL => "/encounters/priority_signs",
           :helpText => "Select Priority Signs"
           } %>
 
         <%= select_tag "vitals_choice",options_for_select(['', 'Yes', 'No']),
           {
           :id => 'vitals_choice',
-          :helpText => "Continue with vitals and presenting complaints?",
+          :helpText => "Continue with vitals/Presenting complaints?",
           :tt_onLoad => "changeAttributes();"
           } %>
 
@@ -295,8 +292,6 @@
               <select class = "multi" style="width: 100%" 
                       name="complaints[]" id="multiple"
                       helptext="Select Complaint(s)" 
-                      tt_onUnLoad = "LoadSelectedComplaints()"
-                      tt_onLoad = "unLoadSelectedComplaints()"
                       condition = "getSelected().match(/PRESENTING COMPLAINTS/i)"
                       multiple="multiple" nested="true" >
                 <option></option>

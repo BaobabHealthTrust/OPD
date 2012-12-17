@@ -1,6 +1,8 @@
 class EncountersController < GenericEncountersController
 
 	def new
+   
+    #raise @priority_signs_paeds.inspect
 		@patient = Patient.find(params[:patient_id] || session[:patient_id])
 		@patient_bean = PatientService.get_patient(@patient.person)
 		session_date = session[:datetime].to_date rescue Date.today
@@ -31,6 +33,27 @@ class EncountersController < GenericEncountersController
 
 		@select_options = select_options
 
+
+    triage_category_set = "PRIORITY SIGNS PAEDS"
+		triage_concept_set = ConceptName.find_by_name(triage_category_set).concept rescue ''
+		triage_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', triage_concept_set.id])
+    @priority_signs_paeds = []
+		triage_concepts.map{|concept|
+      @priority_signs_paeds << concept.fullname rescue nil
+    }.compact
+    @priority_signs_paeds << 'None'
+
+    emergency_signs_set = "EMERGENCY SIGNS PAEDS"
+		emergency_concept_set = ConceptName.find_by_name(emergency_signs_set).concept rescue ''
+		emergency_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', emergency_concept_set.id])
+
+    @emergency_signs_paeds = []
+		emergency_concepts.map{|concept|
+      @emergency_signs_paeds << concept.fullname rescue nil
+    }.compact
+    @emergency_signs_paeds << 'None'
+
+    
     if  ['INPATIENT_DIAGNOSIS', 'OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id
 			diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set_id])	
@@ -115,7 +138,9 @@ class EncountersController < GenericEncountersController
       end
 			 	
 		end
-
+    
+  
+  
 	end
 
 	def select_options
@@ -510,12 +535,14 @@ class EncountersController < GenericEncountersController
     emergency_signs_set = "EMERGENCY SIGNS PAEDS"
 		emergency_concept_set = ConceptName.find_by_name(emergency_signs_set).concept rescue ''
 		emergency_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', emergency_concept_set.id])
+    
     valid_answers = []
+    valid_answers << 'None'
 		emergency_concepts.map{|concept|
       valid_answers << concept.fullname rescue nil
     }.compact
 
-    render :text => "<li></li>" + "<li>" + valid_answers.join("</li><li>") + "</li>"
+    render :text => "<li></li>" + "<li>" + valid_answers.sort.join("</li><li>") + "</li>"
     
   end
 
