@@ -479,19 +479,45 @@ class EncountersController < GenericEncountersController
 
   def triage_category
 
-    search_string = (params[:search_string] || '').upcase   
-    aconcept_set = []        
+    triage_category_set = "TRIAGE CATEGORY"
+		triage_concept_set = ConceptName.find_by_name(triage_category_set).concept rescue ''
+		triage_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', triage_concept_set.id])
+    valid_answers = []
+		triage_concepts.map{|concept|
+      valid_answers << concept.fullname rescue nil
+    }.compact
 
-    common_answers = Observation.find_most_common(ConceptName.find_by_name("Triage category").concept, search_string)
-    concept_set("Triage category").each{|concept| aconcept_set << concept.uniq.to_s rescue "test"}  
-    set = (common_answers + aconcept_set.sort).uniq
-    set.map!{|cc| cc.upcase.include?(search_string)? cc : nil}
-             
-    set = set.sort rescue []
-           
-    render :text => "<li></li>" + "<li>" + set.join("</li><li>") + "</li>"
+    render :text => "<li></li>" + "<li>" + valid_answers.join("</li><li>") + "</li>"
+
   end
 
+  def priority_signs
+    
+    triage_category_set = "PRIORITY SIGNS PAEDS"
+		triage_concept_set = ConceptName.find_by_name(triage_category_set).concept rescue ''
+		triage_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', triage_concept_set.id])
+    valid_answers = []
+		triage_concepts.map{|concept|
+      valid_answers << concept.fullname rescue nil
+    }.compact
+
+    render :text => "<li></li>" + "<li>" + valid_answers.join("</li><li>") + "</li>"
+    
+  end
+
+  def emergency_signs
+
+    emergency_signs_set = "EMERGENCY SIGNS PAEDS"
+		emergency_concept_set = ConceptName.find_by_name(emergency_signs_set).concept rescue ''
+		emergency_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', emergency_concept_set.id])
+    valid_answers = []
+		emergency_concepts.map{|concept|
+      valid_answers << concept.fullname rescue nil
+    }.compact
+
+    render :text => "<li></li>" + "<li>" + valid_answers.join("</li><li>") + "</li>"
+    
+  end
 
   def create_complaints
     #raise params[:complaints].to_yaml
