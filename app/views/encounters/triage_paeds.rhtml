@@ -143,7 +143,8 @@
         <%= touch_select_tag "Triage Category", @patient, nil,
           { :ajaxURL => "/encounters/triage_category?search_string=",
           :helpText => 'Select Triage Category',
-          :id => 'triage_category'
+          :id => 'triage_category',
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none'"
         } %>
 
 
