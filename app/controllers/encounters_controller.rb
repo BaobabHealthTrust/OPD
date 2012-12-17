@@ -30,29 +30,6 @@ class EncountersController < GenericEncountersController
 		@min_height = PatientService.get_patient_attribute_value(@patient, "min_height")
 		@max_height = PatientService.get_patient_attribute_value(@patient, "max_height")
 		@select_options = select_options
-
-		@select_options = select_options
-
-
-    triage_category_set = "PRIORITY SIGNS PAEDS"
-		triage_concept_set = ConceptName.find_by_name(triage_category_set).concept rescue ''
-		triage_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', triage_concept_set.id])
-    @priority_signs_paeds = []
-		triage_concepts.map{|concept|
-      @priority_signs_paeds << concept.fullname rescue nil
-    }.compact
-    @priority_signs_paeds << 'None'
-
-    emergency_signs_set = "EMERGENCY SIGNS PAEDS"
-		emergency_concept_set = ConceptName.find_by_name(emergency_signs_set).concept rescue ''
-		emergency_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', emergency_concept_set.id])
-
-    @emergency_signs_paeds = []
-		emergency_concepts.map{|concept|
-      @emergency_signs_paeds << concept.fullname rescue nil
-    }.compact
-    @emergency_signs_paeds << 'None'
-
     
     if  ['INPATIENT_DIAGNOSIS', 'OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id
@@ -503,13 +480,14 @@ class EncountersController < GenericEncountersController
   end
 
   def triage_category
-
+    search_string = (params[:search_string] || '').upcase
     triage_category_set = "TRIAGE CATEGORY"
 		triage_concept_set = ConceptName.find_by_name(triage_category_set).concept rescue ''
 		triage_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', triage_concept_set.id])
-    valid_answers = []
-		triage_concepts.map{|concept|
-      valid_answers << concept.fullname rescue nil
+
+    valid_answers = triage_concepts.map{|concept|
+      name  =  concept.fullname rescue nil
+      name.upcase.include?(search_string) ? name : nil rescue nil
     }.compact
 
     render :text => "<li></li>" + "<li>" + valid_answers.join("</li><li>") + "</li>"
@@ -517,31 +495,29 @@ class EncountersController < GenericEncountersController
   end
 
   def priority_signs
-    
-    triage_category_set = "PRIORITY SIGNS PAEDS"
-		triage_concept_set = ConceptName.find_by_name(triage_category_set).concept rescue ''
-		triage_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', triage_concept_set.id])
-    valid_answers = []
-		triage_concepts.map{|concept|
-      valid_answers << concept.fullname rescue nil
+    search_string = (params[:search_string] || '').upcase
+    priority_signs_set = "PRIORITY SIGNS PAEDS"
+		priority_signs_concept_set = ConceptName.find_by_name(priority_signs_set).concept rescue ''
+		priority_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', priority_signs_concept_set.id])
+    priority_concepts << 'None'
+    valid_answers = priority_concepts.map{|concept|
+      name  =  concept.fullname rescue nil
+      name.upcase.include?(search_string) ? name : nil rescue nil
     }.compact
-
     render :text => "<li></li>" + "<li>" + valid_answers.join("</li><li>") + "</li>"
     
   end
 
   def emergency_signs
-
+    search_string = (params[:search_string] || '').upcase
     emergency_signs_set = "EMERGENCY SIGNS PAEDS"
 		emergency_concept_set = ConceptName.find_by_name(emergency_signs_set).concept rescue ''
 		emergency_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', emergency_concept_set.id])
-    
-    valid_answers = []
-    valid_answers << 'None'
-		emergency_concepts.map{|concept|
-      valid_answers << concept.fullname rescue nil
+    #emergency_concepts << 'None'
+		valid_answers = emergency_concepts.map{|concept|
+      name  =  concept.fullname rescue nil
+      name.upcase.include?(search_string) ? name : nil rescue nil
     }.compact
-
     render :text => "<li></li>" + "<li>" + valid_answers.sort.join("</li><li>") + "</li>"
     
   end

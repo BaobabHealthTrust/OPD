@@ -9,7 +9,7 @@
 }     
 
 #tt_page_life_threatening_condition .inputFrameClass {
-  height: 480px;
+  height: 366px;
 }
 
 #tt_page_life_threatening_condition .options {
@@ -141,32 +141,32 @@
   %>
 
         <%= touch_select_tag "Triage Category", @patient, nil,
-          { :ajaxURL => "/encounters/triage_category",
+          { :ajaxURL => "/encounters/triage_category?search_string=",
           :helpText => 'Select Triage Category',
-          :id => 'triage_category',
-          :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';"
+          :id => 'triage_category'
         } %>
 
-       
-        <%= touch_select_tag "EMERGENCY SIGNS PAEDS", @patient, options_for_select(@emergency_signs_paeds),
-          :id => 'emergency_signs',
-          :multiple => true,
-          :condition => "$('triage_category').value.match(/EMERGENCY/i)",
-          :helpText => "Select Emergency Signs"
-           %>
 
-        <%= touch_select_tag "PRIORITY SIGNS PAEDS", @patient, options_for_select(@priority_signs_paeds),
+        <%= touch_select_tag "LIFE THREATENING CONDITION", @patient, options_for_select([]),
+          { 
+          :id => 'emergency_signs',
+          :condition => "$('triage_category').value.match(/EMERGENCY/i)",
+          :ajaxURL => "/encounters/emergency_signs?search_string=",
+          :helpText => "Life threatening condition"
+          } %>
+
+        <%= touch_select_tag "LIFE THREATENING CONDITION", @patient, options_for_select([]),
           {
           :id => 'priority_signs',
-          :multiple => true,
           :condition => "$('triage_category').value.match(/PRIORITY/i)",
-          :helpText => "Select Priority Signs"
+          :ajaxURL => "/encounters/priority_signs?search_string=",
+          :helpText => "Life threatening condition"
           } %>
 
         <%= select_tag "vitals_choice",options_for_select(['', 'Yes', 'No']),
           {
           :id => 'vitals_choice',
-          :helpText => "Continue with vitals/Presenting complaints?",
+          :helpText => "Continue with vitals/presenting complaints?",
           :tt_onLoad => "changeAttributes();"
           } %>
 
@@ -277,13 +277,6 @@
 			:validationMessage => "You must enter a number between 0 and 9 (for example: 54<b>.6</b>)",
 			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
 
-
-
-
-  <!--   start -->
-
-
-
     <table cellpadding=5>
           <tr>
             <td>
@@ -322,13 +315,6 @@
           :condition => "getSelected().match(/PRESENTING COMPLAINTS/i)",
           :helpText => "Specific Presenting complaint (optional)"
         }%>
-        <%= touch_select_tag "Life threatening condition", @patient, nil,
-          { :ajaxURL => "/encounters/life_threatening_condition?search_string=",
-          :helpText => 'Life Threatening Condition',
-          :condition => "document.getElementById('vitals_choice').value.match(/YES/i)",
-          :id => 'life threatening condition',
-          :tt_onLoad =>"document.getElementById('keyboard').style.display = 'none';"
-        } %>
 
 <!-- end -->
 
