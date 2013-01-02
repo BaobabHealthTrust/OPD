@@ -30,7 +30,7 @@
 	
 		 				
           // Draw Graph
-          graph = Flotr.draw(container,[d1,d2],{ bars: {show:true, barWidth:0.5}, xaxis: {ticks:markers ,min:0, max: 18}, yaxis:{min:0, max:50}, mouse: {track: true}});
+          graph = Flotr.draw(container,[d1,d2],{title:"Total Registered Bar Chart", bars: {show:true, barWidth:0.5}, xaxis: {ticks:markers ,min:0, max: 18}, yaxis:{min:0, max:50}, mouse: {track: true}});
 								
 				
       };
@@ -45,10 +45,12 @@
           // Draw Graph
       graph = Flotr.draw(container,[{data:[[0,<%=@peoples['Under6M']%>]],label:"Male under 6 months"}, {data:[[0,<%=@peoples['Under6F']%>]], label: 'Female Under 6 months'},{data:[[0,<%=@peoples['Under12MM']%>]],label:"Male 6-12 months"}, {data:[[0,<%=@peoples['Under12MF']%>]], label: 'Female 6-12 months'},{data:[[0,<%=@peoples['Under5YM']%>]],label:"Male 1-5"}, {data:[[0,<%=@peoples['Under5YF']%>]], label: 'Female 1-5'},{data:[[0,<%=@peoples['Under14YM']%>]],label:"Male 5-14"}, {data:[[0,<%=@peoples['Under14YF']%>]], label: 'Female 5-14'},{data:[[0,<%=@peoples['Under20YM']%>]],label:"Male 14-20"}, {data:[[0,<%=@peoples['Under20YF']%>]], label: 'Female 14-20'},{data:[[0,<%=@peoples['Under30YM']%>]],label:"Male 20-30"}, {data:[[0,<%=@peoples['Under30YF']%>]], label: 'Female 20-30'},{data:[[0,<%=@peoples['Under40YM']%>]],label:"Male 30-40"}, {data:[[0,<%=@peoples['Under40YF']%>]], label: 'Female 30-40'},{data:[[0,<%=@peoples['Under50YM']%>]],label:"Male 40-50"}, {data:[[0,<%=@peoples['Under50YF']%>]], label: 'Female 40-50'},{data:[[0,<%=@peoples['Over50YM']%>]],label:"Male Over 50"}, {data:[[0,<%=@peoples['Over50YF']%>]], label: 'Female Over 50'}], {
         HtmlText: false,
+        title:"Total Registered Pie Chart",
         grid: {
             verticalLines: false,
             horizontalLines: false
-        },
+        }
+        ,
         xaxis: {
             showLabels: false
         },
@@ -112,9 +114,9 @@
     <br /><b ><%= @current_location_name %></b><br />
       <b><%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %></b><br />
 
-<b > Dates : <%= "#{@formated_start_date} to #{@formated_end_date}"%> <%= "<br> Total Registered: #{@total_registered.length}" %></b>
+<b > Dates : <%= "#{@formated_start_date} to #{@formated_end_date}"%> <%= "<br> Total Registered: #{@total_registered}" %></b>
 
- </b><br /><br />
+ </b>
 </div>
 
 <div style = "border: 1px solid; height: 480px; width:80%; margin:30px; overflow:none;" id="barChart">

@@ -90,7 +90,7 @@
     # raise qtr.to_yaml
     %>
 
-    <form id="frmReport" action="/cohort_tool/opd_cohort" method="post">
+    <form id="frmReport" action="/cohort_tool/opd_general_graph" method="post">
       <input type="text" id="startAge" name="startAge" helpText="Start Age" value="" field_type="number"
              tt_pageStyleClass="NumbersOnlyWithDecimal" 
              tt_onUnLoad="$('endAge').setAttribute('absoluteMin', $('touchscreenInput'+tstCurrentPage).value)"/>
@@ -100,10 +100,10 @@
 			 tt_onUnload="addoption();" />
 
       <select id="selType" name="selType" helpText="Report Type:"> <!--condition="$('endAge').value <= 15"-->
-        <option value="adults">General Outpatient</option>
-        <option value="paeds">Paediatrics</option>
-        <option value="diagnoses">General Diagnoses</option>
-        <option value="diagnoses_paeds">Paediatrics Diagnoses</option>
+        <option value="general outpatient">General Outpatient</option>
+        <option value="paediatrics">Paediatrics</option>
+        <option value="general diagnoses">General Diagnoses</option>
+        <option value="paediatrics diagnoses">Paediatrics Diagnoses</option>
       </select>
 
       <select id="selSelect" name="selSelect" helpText="Report By:">

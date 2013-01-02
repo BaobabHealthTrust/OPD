@@ -42,9 +42,8 @@
     td = document.getElementById(id);
     if(result == "Graphical Reports")
     {
-    	td.innerHTML = "<a href ='" + path + "' target='" + (target ? target : "_self") + "'>" +  result + "</a>"
-    	td.setAttribute("bgcolor","red")
-
+    	td.innerHTML = "<a href ='" + path + "' target='" + (target ? target : "reports") + "'>" +  result + "</a>"
+      td.setAttribute("bgcolor","Red")
     }
     else
     {

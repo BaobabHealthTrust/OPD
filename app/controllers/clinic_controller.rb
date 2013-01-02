@@ -84,7 +84,7 @@ class ClinicController < GenericClinicController
       						["Referrals", "/cohort_tool/opd_menu?report_name=referals_graph"]
       						
                ] 
- 	    render :layout => 'clinic'
+ 	    render :layout => false
   end
 
   def data_cleaning_tab

@@ -10,16 +10,15 @@
 	
 		 <% @diagnosis_report_paginated.each do |diagnosis,total| %>
 		          d2.push([i,<%= "#{total}".to_json %>]);
-		          if ( highest < <%= "#{total}".to_json %>)
-		              		highest = <%= "#{total}".to_json %> ;
+		          if ( highest < <%= "#{total}".to_i.to_json %>)
+		              		highest = <%= "#{total}".to_i.to_json %> ;
 		          
 		          markers.push([<%= "#{diagnosis}".to_json %>]);
 		          d1.push([i,"D"+i]);
 		          i +=1;
 		  <% end %>
-							
           // Draw Graph
-          graph = Flotr.draw(container,[d2],{ bars: {show:true, barWidth:0.5}, xaxis: { ticks: d1, min:0, max: d2.length}, yaxis:{min:0, max:8000}, mouse: {track: true}});
+          graph = Flotr.draw(container,[d2],{ bars: {show:true, barWidth:0.5}, xaxis: { ticks: d1, min:0, max: d2.length}, yaxis:{min:0, max:highest*15}, mouse: {track: true}});
 				
 				//fill up the legend
 
@@ -33,76 +32,7 @@
       };
 		setTimeout("drawBarChart();",300)      
 		
-		function drawPieChart(){
-					
-		var d2 = [], markers = [], i = 0, highest=0;		
-		var container = document.getElementById('barChart'),graph,d1 = [];
-	
-		 <% @diagnosis_report_paginated.each do |diagnosis,total| %>
-		          d2.push([i,<%= "#{total}" %>]);
-		          markers.push([<%= "#{diagnosis}".to_json %>]);
-		   
-		          i +=1;
-		  <% end %>
-							
-          // Draw Graph
-      graph = Flotr.draw(container,d2, {
-        HtmlText: false,
-        grid: {
-            verticalLines: false,
-            horizontalLines: false
-        },
-        xaxis: {
-            showLabels: false
-        },
-        yaxis: {
-            showLabels: false
-        },
-        pie: {
-            show: true,
-            
-        },
-        mouse: {
-            track: true
-        },
-        legend: {
-            position: 'se',
-            backgroundColor: '#D2E8FF'
-        }
-    });
-				
-
-		};
 		
-		function chartType() {
-			var chart = document.getElementById("type");
-			
-			if (type.innerHTML == "<span>Pie Chart</span>")
-			{
-				type.innerHTML = "<span>Bar Chart</span>"
-				drawPieChart();
-			}
-			else
-			{
-				type.innerHTML = "<span>Pie Chart</span>"
-				drawBarChart();
-			
-			}			
-		
-		}
-		
-		function chartTypeButton() {
-		
-			var button = document.getElementById("buttons");
-			var type = document.createElement("button")
-			type.innerHTML="<span>Pie Chart</span>"
-			type.setAttribute("id", "type")
-			type.setAttribute("class","blue")
-			type.setAttribute("onclick", "chartType()")
-			button.appendChild(type)
-
-		}
-		setTimeout("chartTypeButton();",300)
 </script >
 
 	</head>
