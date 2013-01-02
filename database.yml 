@@ -1,0 +1,27 @@
+production:
+  adapter: mysql2
+  database: bart2_db
+  username: root
+  password: t1m0
+  host: localhost
+  pool: 500
+
+development:
+  adapter: mysql2
+  database: bart2_db
+  username: root
+  password: t1m0
+  host: localhost
+  pool: 500
+
+test: &TEST
+  adapter: mysql2
+  database: opd_database
+  username: username
+  password: password
+  host: localhost
+  pool: 500
+
+cucumber:
+  <<: *TEST
+

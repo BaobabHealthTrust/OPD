@@ -40,7 +40,7 @@ class ClinicController < GenericClinicController
                   ['/clinic/location_management','Location Management']
                 ]
     @landing_dashboard = 'clinic_administration'
-    render :template => 'clinic/administration', :layout => 'clinic' 
+#    render :template => 'clinic/administration', :layout => 'clinic' 
   end
 
   def reports_tab
@@ -55,12 +55,36 @@ class ClinicController < GenericClinicController
       						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered"],
       						["Referrals", "/cohort_tool/opd_menu?report_name=referral"],
       						["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"],
-      						["Shift Report", "/cohort_tool/opd_menu?report_name=shift_report"]
+      						["Shift Report", "/cohort_tool/opd_menu?report_name=shift_report"],
+      						["Graphical Reports", "/clinic/reports_tab_graphs"]
                ] 
         #if allowed_hiv_viewer
         	#@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
         #end
     render :layout => false
+  end
+  
+  def reports_tab_graphs
+	   session[:observation] = nil
+    session[:people] = nil
+    @facility = Location.current_health_center.name rescue ''
+
+    @location = Location.find(session[:location_id]).name rescue ""
+
+    @date = (session[:datetime].to_date rescue Date.today).strftime("%Y-%m-%d")
+
+    @user = current_user.name rescue ""
+
+    @roles = current_user.user_roles.collect{|r| r.role} rescue []
+
+    @reports = [
+						      ["OPD General", "/cohort_tool/opd_report_index_graph"],
+	     						["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report_graph"],
+	     						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered_graph"],
+      						["Referrals", "/cohort_tool/opd_menu?report_name=referals_graph"]
+      						
+               ] 
+ 	    render :layout => 'clinic'
   end
 
   def data_cleaning_tab
