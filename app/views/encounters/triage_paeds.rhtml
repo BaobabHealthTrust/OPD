@@ -137,7 +137,9 @@
 
   <%
     vital_signs = ["","Temperature","Respiratory Rate","Blood Pressure", 
-    "Pulse Rate", "Weight", "Height","Oxygen Saturation","Presenting complaints"]
+    "Pulse Rate", "Weight", "Height","Oxygen Saturation","Presenting complaints",
+    "MUAC"
+    ]
   %>
 
         <%= touch_select_tag "Triage Category", @patient, nil,
@@ -202,6 +204,17 @@
 			:validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
 			:validationMessage => "You must enter a decimal between 0 and 9 (for example: 37<b>.6</b>)",
 			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
+  
+        <%= touch_text_field_tag "MIDDLE UPPER ARM CIRCUMFERENCE (cm)", @patient, nil,
+		{	:id => "muac",
+			:field_type => 'number',
+			:helptext =>"Middle upper arm circumference (cm)",
+			:condition => "getSelected().match(/MUAC/i)",
+			:min => 8,
+			:max => 20,
+			:validationRule => "([0-9]+\\.[0-9])|Unknown$",
+			:validationMessage => "You must enter a decimal between the numbers (for example: 8<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
 
 	<%= touch_text_field_tag "SYSTOLIC BLOOD PRESSURE", @patient, nil,
 		{	:id => "systolic_blood_pressure",
