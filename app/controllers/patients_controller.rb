@@ -338,10 +338,11 @@ class PatientsController < GenericPatientsController
             }
 
 					elsif encounter.name.upcase.include?("VITALS")
-            vital_signs = ["HT","Weight","Heart rate","Temperature","RR","SAO2"]
-            #blood_pressure = ["TA", "Diastolic"]
+            vital_signs = ["HT","Weight","Heart rate","Temperature","RR","SAO2", "MUAC"]
+              #blood_pressure = ["TA", "Diastolic"]
               #SAO2 for oxygen saturation;
               #TA for Systolic blood pressure
+              #MUAC for middle upper arm circumference
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
 						string = []
             obs = []

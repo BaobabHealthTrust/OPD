@@ -155,7 +155,8 @@
           :id => 'emergency_signs',
           :condition => "$('triage_category').value.match(/EMERGENCY/i)",
           :ajaxURL => "/encounters/emergency_signs?search_string=",
-          :helpText => "Life threatening condition"
+          :helpText => "Life threatening condition",
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none' "
           } %>
 
         <%= touch_select_tag "LIFE THREATENING CONDITION", @patient, options_for_select([]),
@@ -163,7 +164,8 @@
           :id => 'priority_signs',
           :condition => "$('triage_category').value.match(/PRIORITY/i)",
           :ajaxURL => "/encounters/priority_signs?search_string=",
-          :helpText => "Life threatening condition"
+          :helpText => "Life threatening condition",
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none' "
           } %>
 
         <%= select_tag "vitals_choice",options_for_select(['', 'Yes', 'No']),
