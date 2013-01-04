@@ -26,6 +26,9 @@
 
   #stats td {
     width: 310px;
+    color: white;
+ 		border-radius: 7px; 
+		cursor:pointer;
   }
 
   #table_div {
@@ -38,12 +41,16 @@
 </style>
 
 <script>
+
   function setInnerHtmlData(id,result,path, target) {
     td = document.getElementById(id);
     if(result == "Graphical Reports")
     {
-    	td.innerHTML = "<a href ='" + path + "' target='" + (target ? target : "reports") + "'>" +  result + "</a>"
-      td.setAttribute("bgcolor","Red")
+    	td.innerHTML =   result 
+      td.setAttribute("bgcolor","purple")
+      td.setAttribute("align","center")
+      td.setAttribute("onClick","window.location = '/clinic/reports_tab_graphs'")
+
     }
     else
     {
@@ -80,10 +87,13 @@
 
       <%
       count = @reports.length  unless @reports.blank?
-      @reports.sort.reverse.map do | name , path | %>
+      @reports.sort.reverse.map do | name , path | 
+      %>
         <script>
-          setInnerHtmlData("<%=count%>","<%=name%>","<%=path%>",
+
+          	setInnerHtmlData("<%=count%>","<%=name%>","<%=path%>",
               "<%= (name.include?("Data Cleaning Tools") || name.include?("Supervision") ? "_self" : "_parent") %>" );
+
         </script>
         <%count-=1%>
       <%end%>
