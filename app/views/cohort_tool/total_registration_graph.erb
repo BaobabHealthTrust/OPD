@@ -6,7 +6,7 @@
 
 	var d1 = [],d2 = [], markers = [0,1,2,4,6,8,10,12,14,16], i = 0, highest=0;
 				
-	var container = document.getElementById('barChart'),graph;
+	var container = document.getElementById('barChart'),graph,series;
 
 				//fill retrieve the data
 				d1.push([0.5, <%= @peoples['Under6M'].to_json %>]);
@@ -28,9 +28,9 @@
 				d1.push([16, <%= @peoples['Over50YM'].to_json %>]);
 				d2.push([16.5, <%= @peoples['Over50YF'].to_json %>]);
 	
-		 				
+		 				series =[{label: "Males", data:d1},{label:"Females", data:d2}]
           // Draw Graph
-          graph = Flotr.draw(container,[d1,d2],{title:"Total Registered Bar Chart", bars: {show:true, barWidth:0.5}, xaxis: {ticks:markers ,min:0, max: 18}, yaxis:{min:0, max:50}, mouse: {track: true}});
+          graph = Flotr.draw(container,series,{title:"Total Registered Bar Chart", bars: {show:true, barWidth:0.5}, xaxis: {ticks:markers ,min:0, max: 18}, yaxis:{min:0, max:<%= @total_registered.to_json %> *0.3},legend:{show:true,position:"left"}, mouse: {track: true}});
 								
 				
       };
@@ -43,9 +43,11 @@
 	
 		 				
           // Draw Graph
-      graph = Flotr.draw(container,[{data:[[0,<%=@peoples['Under6M']%>]],label:"Male under 6 months"}, {data:[[0,<%=@peoples['Under6F']%>]], label: 'Female Under 6 months'},{data:[[0,<%=@peoples['Under12MM']%>]],label:"Male 6-12 months"}, {data:[[0,<%=@peoples['Under12MF']%>]], label: 'Female 6-12 months'},{data:[[0,<%=@peoples['Under5YM']%>]],label:"Male 1-5"}, {data:[[0,<%=@peoples['Under5YF']%>]], label: 'Female 1-5'},{data:[[0,<%=@peoples['Under14YM']%>]],label:"Male 5-14"}, {data:[[0,<%=@peoples['Under14YF']%>]], label: 'Female 5-14'},{data:[[0,<%=@peoples['Under20YM']%>]],label:"Male 14-20"}, {data:[[0,<%=@peoples['Under20YF']%>]], label: 'Female 14-20'},{data:[[0,<%=@peoples['Under30YM']%>]],label:"Male 20-30"}, {data:[[0,<%=@peoples['Under30YF']%>]], label: 'Female 20-30'},{data:[[0,<%=@peoples['Under40YM']%>]],label:"Male 30-40"}, {data:[[0,<%=@peoples['Under40YF']%>]], label: 'Female 30-40'},{data:[[0,<%=@peoples['Under50YM']%>]],label:"Male 40-50"}, {data:[[0,<%=@peoples['Under50YF']%>]], label: 'Female 40-50'},{data:[[0,<%=@peoples['Over50YM']%>]],label:"Male Over 50"}, {data:[[0,<%=@peoples['Over50YF']%>]], label: 'Female Over 50'}], {
+      graph = Flotr.draw(container,[{data:[[0,<%=@peoples['Under6M']%>]],label:"Male under 6 months"}, {data:[[1,<%=@peoples['Under6F']%>]], label: 'Female Under 6 months'},{data:[[2,<%=@peoples['Under12MM']%>]],label:"Male 6-12 months"}, {data:[[3,<%=@peoples['Under12MF']%>]], label: 'Female 6-12 months'},{data:[[4,<%=@peoples['Under5YM']%>]],label:"Male 1-5"}, {data:[[5,<%=@peoples['Under5YF']%>]], label: 'Female 1-5'},{data:[[6,<%=@peoples['Under14YM']%>]],label:"Male 5-14"}, {data:[[7,<%=@peoples['Under14YF']%>]], label: 'Female 5-14'},{data:[[8,<%=@peoples['Under20YM']%>]],label:"Male 14-20"}, {data:[[9,<%=@peoples['Under20YF']%>]], label: 'Female 14-20'},{data:[[10,<%=@peoples['Under30YM']%>]],label:"Male 20-30"}, {data:[[11,<%=@peoples['Under30YF']%>]], label: 'Female 20-30'},{data:[[12,<%=@peoples['Under40YM']%>]],label:"Male 30-40"}, {data:[[13,<%=@peoples['Under40YF']%>]], label: 'Female 30-40'},{data:[[14,<%=@peoples['Under50YM']%>]],label:"Male 40-50"}, {data:[[15,<%=@peoples['Under50YF']%>]], label: 'Female 40-50'},{data:[[16,<%=@peoples['Over50YM']%>]],label:"Male Over 50"}, {data:[[17,<%=@peoples['Over50YF']%>]], label: 'Female Over 50'}], {
         HtmlText: false,
         title:"Total Registered Pie Chart",
+        HtmlText:true,
+        fontSize: 15,
         grid: {
             verticalLines: false,
             horizontalLines: false
@@ -59,13 +61,14 @@
         },
         pie: {
             show: true,
-            explode: 60,            
+        		labelFormatter:function(slice){return ""},
+            explode: 70,            
         },
         mouse: {
             track: true
         },
         legend: {
-            position: 'se',
+            position: 'sw',
             backgroundColor: '#D2E8FF'
         }
     });
@@ -122,9 +125,13 @@
 <div style = "border: 1px solid; height: 480px; width:80%; margin:30px; overflow:none;" id="barChart">
 
 </div>
-<div id = "legend" style = "border:1px solid; height:480px; width:15%; overflow:auto; position: relative; top:-512px; left: 83%;">
-1 = Under 6 Months<br>2 = 6-12 Months<br>4 = 1-5 Years<br>6 = 5-14 Years<br>8 = 14-20 Years<br>10 = 20-30 Years<br>
+<div style = "border:1px solid; height:480px; width:15%; overflow:none; position: relative; top:-512px; left: 83%;">	
+	<b>Legend</b>
+	<div id = "legend" style= "overflow:auto; height: 450px">
+		1 = Under 6 Months<br>2 = 6-12 Months<br>4 = 1-5 Years<br>6 = 5-14 Years<br>8 = 14-20 Years<br>10 = 20-30 Years<br>
 12 = 30-40 Years<br>14 = 40-50 Years<br>16 = Over 50 Years<br>
+
+	</div>	
 </div>
 
 </body>

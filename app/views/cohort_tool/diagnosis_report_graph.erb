@@ -18,7 +18,7 @@
 		          i +=1;
 		  <% end %>
           // Draw Graph
-          graph = Flotr.draw(container,[d2],{ bars: {show:true, barWidth:0.5}, xaxis: { ticks: d1, min:0, max: d2.length}, yaxis:{min:0, max:highest*15}, mouse: {track: true}});
+          graph = Flotr.draw(container,[d2],{title:"Diagnosis Report", bars: {show:true, barWidth:0.5}, xaxis: { ticks: d1, min:0, max: d2.length}, yaxis:{min:0, max:highest*15}, mouse: {track: true}});
 				
 				//fill up the legend
 
@@ -47,14 +47,18 @@
     <%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %>
     <br /> Dates : <%= "#{@formated_start_date} to #{@formated_end_date}"%> 
     <br/>Group (s) : <%= "#{@age_groups.join(' , ').to_s}" %>  </b><br>
-    <span style= "text-align:right;"><b>Legend</b></span>
+  
 </div>
 
 <div style = "border: 1px solid; height: 480px; width:80%; margin-left:30px; overflow:auto;" id="barChart">
 
 </div>
 
-<div id = "legend" style = "border:1px solid; height:480px; width:15%; overflow:auto; position: relative; top:-482px; left: 83%;">
+<div  style = "border:1px solid; height:480px; width:15%; overflow:none; position: relative; top:-482px; left: 83%;">
+	<b>Legend</b>
+	<div id = "legend" style= "overflow:auto; height: 450px">
+	
+	</div>	
 
 </div>
 

@@ -81,7 +81,7 @@ class ClinicController < GenericClinicController
 						      ["OPD General", "/cohort_tool/opd_report_index_graph"],
 	     						["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report_graph"],
 	     						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered_graph"],
-      						["Referrals", "/cohort_tool/opd_menu?report_name=referals_graph"]
+      						["Transfer Out", "/cohort_tool/opd_menu?report_name=referals_graph"]
       						
                ] 
  	    render :layout => false
