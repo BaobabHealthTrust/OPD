@@ -1093,6 +1093,9 @@ class CohortToolController < ApplicationController
 
   def opd_report_index
   end
+  def opd_report_index_graph
+  end
+
 
   def opd_cohort
   	@report_type = params[:selType]
@@ -1159,8 +1162,9 @@ class CohortToolController < ApplicationController
     @specified_period = report.specified_period
 
     # raise @specified_period.to_yaml
+    @diag = Hash.new()
 
-    @hiv_positive = report.hiv_positive
+    @diag['hiv_positive'] = report.hiv_positive
 
     @attendance = report.attendance
 
@@ -1273,6 +1277,179 @@ class CohortToolController < ApplicationController
       end
     end
     render :layout => "opd_cohort"
+  end
+  
+
+  def opd_general_graph
+  	@report_type = params[:selType]
+    @start_date = nil
+    @end_date = nil
+    @logo = CoreService.get_global_property_value('logo').to_s
+    @start_age = params[:startAge]
+    @end_age = params[:endAge]
+    @type = params[:selType]
+
+    case params[:selSelect]
+    when "day"
+      @start_date = params[:day]
+      @end_date = params[:day]
+
+    when "week"
+      if params[:selWeek] != ""
+        if params[:selWeek] == "mon"
+          @start_date = "#{params[:selYear]}-#{Date.today.month.to_s}-01".to_date
+          @end_date = Date.today
+        elsif params[:selWeek] == "lmon"
+          lmon = Date.today.month - 1
+          lmon_days = days_in_month(lmon).to_s
+          @start_date = "#{params[:selYear]}-#{lmon}-01".to_date
+          @end_date = "#{params[:selYear]}-#{lmon}-#{lmon_days}".to_date
+        elsif params[:selWeek] == "all"
+          mon = Date.today.month
+          mon_days = days_in_month(mon).to_s
+          @start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
+      	  @end_date = Date.today
+        else
+          @start_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) -
+            ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
+          @end_date = (("#{params[:selYear]}-01-01".to_date) + (params[:selWeek].to_i * 7)) +
+            6 - ("#{params[:selYear]}-01-01".to_date.strftime("%w").to_i)
+        end
+      else
+        @start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
+        @end_date = ("#{params[:selYear]}-12-31").to_date.strftime("%Y-%m-%d")
+      end
+    when "month"
+      @start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date.strftime("%Y-%m-%d")
+
+      @end_date = ("#{params[:selYear]}-#{params[:selMonth]}-#{ (params[:selMonth].to_i != 12 ?
+        ("#{params[:selYear]}-#{params[:selMonth].to_i + 1}-01".to_date - 1).strftime("%d") : "31") }").to_date.strftime("%Y-%m-%d")
+
+    when "year"
+      @start_date = ("#{params[:selYear]}-01-01").to_date.strftime("%Y-%m-%d")
+      @end_date = ("#{params[:selYear]}-12-31").to_date.strftime("%Y-%m-%d")
+
+    when "quarter"
+      day = params[:selQtr].to_s.match(/^min=(.+)&max=(.+)$/)
+
+      @start_date = (day ? day[1] : Date.today.strftime("%Y-%m-%d"))
+      @end_date = (day ? day[2] : Date.today.strftime("%Y-%m-%d"))
+
+    when "range"
+      @start_date = params[:start_date]
+      @end_date = params[:end_date]
+
+    end
+    @formated_start_date = @start_date.to_date.strftime('%A, %d, %b, %Y')
+    @formated_end_date = @end_date.to_date.strftime('%A, %d, %b, %Y')
+    report = Reports::CohortOpd.new(@start_date, @end_date, @start_age, @end_age, @type)
+
+    @specified_period = report.specified_period
+		@details = []
+    # raise @specified_period.to_yaml
+
+		@details << ["Hiv Positive",report.hiv_positive]
+		@details << ["Attendance",report.attendance]
+		@details << ["Measles Under 5" ,report.measles_u_5]
+
+ 		@details << ["Measles", report.measles]
+
+ 		@details << ["Tuberculosis", report.tb]
+
+ 		@details << ["Upper Respiratory Infections", report.upper_respiratory_infections]
+
+ 		@details << [ "Pnuemonia", report.pneumonia]
+
+		@details << ["Pnuemonia Under 5", report.pneumonia_u_5]
+
+		@details << ["Asthma", report.asthma]
+
+		@details << ["Lower Respiratory Infection", report.lower_respiratory_infection]
+
+		@details << ["Cholera", report.cholera]
+
+		@details << ["Cholera Under 5",report.cholera_u_5]
+
+		@details << ["Dysentery", report.dysentery]
+
+		@details << ["Dysentery Under 5",report.dysentery_u_5]
+
+		@details << ["Diarrhoea",report.diarrhoea]
+
+		@details << ["Diarrhoea Under 5",report.diarrhoea_u_5]
+
+		@details << ["Anaemia", report.anaemia]
+
+		@details << ["Malnutrition", report.malnutrition]
+
+		@details << ["Goitre",report.goitre]
+
+		@details << ["Hypertension",report.hypertension]
+
+		@details << ["Heart",report.heart]
+
+		@details << ["Acute Eye Infection", report.acute_eye_infection]
+
+		@details << ["Epilepsy",report.epilepsy]
+
+		@details << ["Dental Decay",report.dental_decay]
+
+		@details << ["Other Dental Conditions", report.other_dental_conditions]
+
+		@details << ["Scabies",report.scabies]
+
+		@details << ["Skin",report.skin]
+
+		@details << ["Malaria",report.malaria]
+
+		@details << ["STI",report.sti]
+
+		@details << ["Bilharzia",report.bilharzia]
+
+		@details << ["Chicken Pox",report.chicken_pox]
+
+		@details << ["Intestinal Worms" , report.intestinal_worms]
+
+ 		@details << ["Jaundice",report.jaundice]
+
+		@details << ["Meningitis",report.meningitis]
+
+		@details << ["Typhoid",report.typhoid]
+
+ 		@details << ["Rabies",report.rabies]
+
+ 		@details << ["Communicable Diseases" , report.communicable_diseases]
+
+		@details << ["Gynaecological Disorders",report.gynaecological_disorders]
+
+ 		@details << ["Genito Urinary Infections",report.genito_urinary_infections]
+
+ 		@details << ["Musculosketal Pains", report.musculoskeletal_pains]
+
+ 		@details << ["Traumatic Conditions",report.traumatic_conditions]
+
+ 		@details << ["Ear Infection", report.ear_infections]
+
+ 		@details << ["Non-Communicable Diseases",report.non_communicable_diseases]
+
+ 		@details << ["Accident", report.accident]
+
+		@details << ["Diabetes", report.diabetes]
+
+ 		@details << ["Surgicals", report.surgicals]
+
+ 		@details << ["OPD Deaths",report.opd_deaths]
+
+ 		@details << ["Pud", report.pud]
+
+ 		@details << ["Gastritis",report.gastritis]
+    
+    @current_location_name = Location.current_health_center.name
+    if @type == "diagnoses" || @type == "diagnoses_adults" || @type == "diagnoses_paeds"
+      @general = report.general
+    end
+    
+    render :layout => "menu"		
   end
 
   def opd_menu
@@ -1523,6 +1700,121 @@ class CohortToolController < ApplicationController
     render :layout => "report"
   end
 
+	def total_registration_graph
+
+    @report_name = params[:report_name]
+    @logo = CoreService.get_global_property_value('logo').to_s
+    @current_location_name =Location.current_health_center.name
+    start_year = params[:start_year]
+    start_month = params[:start_month]
+    start_day = params[:start_day]
+    end_year = params[:end_year]
+    end_month = params[:end_month]
+    end_day = params[:end_day]
+
+    @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+    @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+    @total_registered = 0
+    @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+    @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
+
+    people = Person.find(:all,:include =>{:patient=>{:encounters=>{:type=>{}}}},
+        :conditions => ["patient.patient_id IS NOT NULL AND encounter_type.name IN (?)
+        AND person.date_created >= TIMESTAMP(?)
+        AND person.date_created  <= TIMESTAMP(?)", ["TREATMENT","OUTPATIENT DIAGNOSIS"],
+        @start_date.strftime('%Y-%m-%d 00:00:00'),
+        @end_date.strftime('%Y-%m-%d 23:59:59')])
+        @peoples = Hash.new(0)
+        people.each do  |person|
+
+
+            if (PatientService.age_in_months(person).to_i < 6 )
+                if(PatientService.sex(person) == 'Male')
+                	@peoples['Under6M'] +=1
+                else
+	                @peoples['Under6F'] +=1
+                end
+
+            end
+
+            if (PatientService.age_in_months(person).to_i >= 6 && PatientService.age(person).to_i < 1)
+                if(PatientService.sex(person) == 'Male')
+                	@peoples['Under12MM'] +=1
+                else
+	                @peoples['Under12MF'] +=1
+                end
+
+            end
+
+            if (PatientService.age(person).to_i >= 1 && PatientService.age(person).to_i < 5)
+                if(PatientService.sex(person) == 'Male')
+                	@peoples['Under5YM'] +=1
+                else
+	                @peoples['Under5YF'] +=1
+                end
+
+            end
+
+            if (PatientService.age(person).to_i >= 5 && PatientService.age(person).to_i < 14)
+                if(PatientService.sex(person) == 'Male')
+                	@peoples['Under14YM'] +=1
+                else
+	                @peoples['Under14YF'] +=1
+                end
+
+            end
+
+            if (PatientService.age(person).to_i >= 14 && PatientService.age(person).to_i < 20)
+                if(PatientService.sex(person) == 'Male')
+                	@peoples['Under20YM'] +=1
+                else
+	                @peoples['Under20YF'] +=1
+                end
+
+            end
+
+            if (PatientService.age(person).to_i >= 20 && PatientService.age(person).to_i < 30)
+                if(PatientService.sex(person) == 'Male')
+                	@peoples['Under30YM'] +=1
+                else
+	                @peoples['Under30YF'] +=1
+                end
+
+            end
+
+            if (PatientService.age(person).to_i >= 30 && PatientService.age(person).to_i < 40)
+                if(PatientService.sex(person) == 'Male')
+                	@peoples['Under40YM'] +=1
+                else
+	                @peoples['Under40YF'] +=1
+                end
+
+            end
+
+            if (PatientService.age(person).to_i >= 40 && PatientService.age(person).to_i < 50)
+                if(PatientService.sex(person) == 'Male')
+                	@peoples['Under50YM'] +=1
+                else
+	                @peoples['Under50YF'] +=1
+                end
+
+            end
+						
+						if (PatientService.age(person).to_i >= 50)
+                if(PatientService.sex(person) == 'Male')
+                	@peoples['Over50YM'] +=1
+                else
+	                @peoples['Over50YF'] +=1
+                end
+
+            end
+    		@total_registered +=1
+        end    
+
+    render :layout => "report"
+  end
+
+
   def diagnosis_report
 
     @report_name = params[:report_name]
@@ -1617,7 +1909,108 @@ class CohortToolController < ApplicationController
     render :layout => "report"
   end
 
+def diagnosis_report_graph
+
+
+    @report_name = params[:report_name]
+    @logo = CoreService.get_global_property_value('logo').to_s
+    @current_location_name =Location.current_health_center.name
+    age_groups = params[:age_groups]
+    start_year = params[:start_year]
+    start_month = params[:start_month]
+    start_day = params[:start_day]
+    end_year = params[:end_year]
+    end_month = params[:end_month]
+    end_day = params[:end_day]
+
+    @age_groups = age_groups.map{|g|g.upcase}
+    @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
+    @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+    @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+    @disaggregated_diagnosis = {}
+    @diagnosis_by_address = {}
+    @diagnosis_name = {}
+    @diagnosis_report = Hash.new(0)
+    @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+    @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
+    concept_ids = ConceptName.find(:all,
+    :conditions => ["name IN (?)",["Additional diagnosis","Diagnosis",
+    "primary diagnosis","secondary diagnosis"]]).map(&:concept_id)
+
+      observation = Observation.find(:all, :include => {:person =>{}},
+        :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime
+        <= TIMESTAMP(?) AND obs.concept_id IN (?)",
+        @start_date.strftime('%Y-%m-%d 00:00:00'),
+        @end_date.strftime('%Y-%m-%d 23:59:59'),concept_ids])
+
+        observation.each do |obs|
+          next if obs.answer_concept.blank?
+          diagnosis_name = obs.answer_concept.fullname rescue ''
+           if (PatientService.age_in_months(obs.person).to_i < 6 )
+              @diagnosis_report[diagnosis_name]+=1
+           end
+
+          if (@age_groups.include?("6 MONTHS TO < 1 YR"))
+            if (PatientService.age_in_months(obs.person).to_i >= 6 && PatientService.age(obs.person).to_i < 1)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("1 TO < 5"))
+            if (PatientService.age(obs.person).to_i >= 1 && PatientService.age(obs.person).to_i < 5)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("5 TO 14"))
+            if (PatientService.age(obs.person).to_i >= 5 && PatientService.age(obs.person).to_i < 14)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("> 14 TO < 20"))
+            if (PatientService.age(obs.person).to_i >= 14 && PatientService.age(obs.person).to_i < 20)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("20 TO 30"))
+            if (PatientService.age(obs.person).to_i >= 20 && PatientService.age(obs.person).to_i < 30)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("30 TO < 40"))
+            if (PatientService.age(obs.person).to_i >= 30 && PatientService.age(obs.person).to_i < 40)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("40 TO < 50"))
+            if (PatientService.age(obs.person).to_i >= 40 && PatientService.age(obs.person).to_i < 50)
+              @diagnosis_report[diagnosis_name]+=1
+            end
+          end
+
+          if (@age_groups.include?("ALL"))
+            @diagnosis_report[diagnosis_name]+=1
+          end
+        end
+
+      @diagnosis_report_paginated = []
+      @diagnosis_report.each { | diag, value |
+        @diagnosis_report_paginated << [diag, value]
+      }
+
+  	@ara = Array.new
+  	@ara = [[0, 3], [4, 8], [8, 5], [9, 13],[2,8],[5,12],[7,15],[1,16]]
+
+    render :layout => 'report'
+  end
+
+
   def patient_level_data
+  
     @report_name = params[:report_name]
     @age_groups = params[:age_groups]
     @logo = CoreService.get_global_property_value('logo').to_s
@@ -1821,6 +2214,26 @@ class CohortToolController < ApplicationController
     render :layout => "report"
   end
 
+  def referals_graph
+    @report_name = params[:report_name]
+    @logo = CoreService.get_global_property_value('logo').to_s
+    session_date = session[:datetime].to_date rescue Date.today
+    @current_location_name =Location.current_health_center.name
+    start_year = params[:start_year]
+    start_month = params[:start_month]
+    start_day = params[:start_day]
+    end_year = params[:end_year]
+    end_month = params[:end_month]
+    end_day = params[:end_day]
+    @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+    @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+    @referral_locations = Hash.new(0)
+    @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+    @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
+    @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
+    report_trasfer_outs_and_refrerrals(@report_name)
+    render :layout => "report"
+  end
 
 	def disaggregated_diagnosis
 

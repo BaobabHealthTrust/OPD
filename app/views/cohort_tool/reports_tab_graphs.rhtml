@@ -40,19 +40,7 @@
 <script>
   function setInnerHtmlData(id,result,path, target) {
     td = document.getElementById(id);
-    if(result == "Graphical Reports")
-    {
-    	td.innerHTML = "<a href ='" + path + "' target='" + (target ? target : "reports") + "'>" +  result + "</a>"
-      td.setAttribute("bgcolor","Red")
-    }
-    else
-    {
-    	td.innerHTML = "<a href ='" + path + "' target='" + (target ? target : "_parent") + "'>" +  result + "</a>"
-    }
-  }
-  
-  function clear() {
-  	alert("ola")
+    td.innerHTML = "<a href ='" + path + "' target='" + (target ? target : "_parent") + "'>" +  result + "</a>"
   }
 </script>
 
