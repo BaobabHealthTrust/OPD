@@ -3,19 +3,26 @@
 <%= stylesheet_link_tag 'extra_buttons' %>
 <link href="/stylesheets/opd_cohort.css" media="screen" rel="stylesheet" type="text/css" />
 <script>
+
   jQuery(document).ready(function($) {
 <% if @report_name.upcase == "DISAGGREGATED_DIAGNOSIS" %>
 	  document.forms[0].action = "disaggregated_diagnosis"
 <% elsif @report_name.upcase == "DIAGNOSIS_REPORT" %>
 	  document.forms[0].action = "diagnosis_report"
+<% elsif @report_name.upcase == "DIAGNOSIS_REPORT_GRAPH" %>
+	  document.forms[0].action = "diagnosis_report_graph"
 <% elsif @report_name.upcase == "DIAGNOSIS_BY_ADDRESS" %>
 	  document.forms[0].action = "diagnosis_by_address"
 <% elsif @report_name.upcase == "TOTAL_REGISTERED" %>
 	  document.forms[0].action = "total_registration"
+<% elsif @report_name.upcase == "TOTAL_REGISTERED_GRAPH" %>
+	  document.forms[0].action = "total_registration_graph"
 <% elsif @report_name.upcase == "PATIENT_LEVEL_DATA" %>
 	  document.forms[0].action = "patient_level_data"
 <% elsif @report_name.upcase == "SHIFT_REPORT" %>
 	  document.forms[0].action = "shift_report"
+ <% elsif @report_name.upcase == "REFERALS_GRAPH" %>
+	  document.forms[0].action = "referals_graph"
 <% else %>
 	  document.forms[0].action = "referals"
 <% end %>
@@ -57,7 +64,7 @@
 	<%= select_tag "end_month", month_names, {:helpText => 'End Month',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date', :tt_onLoad => "__$('keyboard').style.display = 'none'"}%>
 	<%= text_field_tag "end_day",  nil, :field_type => 'number', :helpText => "End Day" ,:validationJS => "validateDOB()",:validationMessage => 'Please enter a valid date'%>
 
-	<% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT"].include?(@report_name.upcase) %>
+	<% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT","DIAGNOSIS_REPORT_GRAPH"].include?(@report_name.upcase) %>
 	  <%= select_tag "age_groups", options_for_select(["", "< 6 months",
 		  "6 months to < 1 yr", "1 to < 5", "5 to 14", "> 14 to < 20", "20 to 30", "30 to < 40", "40 to < 50", "ALL"]),
 		{	:helpText => 'Select Age Group (s)',
@@ -65,8 +72,9 @@
 		:multiple => true } %>
 
 	<% end
-  end
-%>
+	end
+	%>
 
   <%= hidden_field_tag "report_name", @report_name %>
 </form>
+
