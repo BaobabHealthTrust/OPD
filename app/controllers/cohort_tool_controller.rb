@@ -1551,14 +1551,37 @@ class CohortToolController < ApplicationController
       'Ante-natal Ward', 'Ward 1A', 'Ward 2A', 'Gynaecology Ward'
     ]
     @admitted = {}
+    @short_stay_admission = 0
+    @short_stay_patient_ids = []
     wards.each { |ward|
-     total_patients = Encounter.find(:all, :joins => [:type, :observations],\
+     encounters = Encounter.find(:all, :joins => [:type, :observations],\
         :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
         encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
-        ward.to_s]).map{|e| e.patient_id}.uniq.size
+        ward.to_s])
+        total_patients = encounters.map{|e| e.patient_id}.uniq.size
         @admitted[ward] = total_patients
+        @short_stay_admission+=total_patients
+        @short_stay_patient_ids << encounters.map{|e| e.patient_id}
     }
 
+    @short_stay_patient_ids = @short_stay_patient_ids.flatten.uniq
+    
+    #to count total discharges for short stay ward patients
+    discharge_patient_id = EncounterType.find_by_name("DISCHARGE PATIENT").encounter_type_id
+    short_discharge_encounters = Encounter.find(:all, :joins => [:type], :conditions => ['patient_id IN (?) AND
+        encounter_type = ?', @short_stay_patient_ids, discharge_patient_id]).map{|e| e.patient_id}
+
+     @short_stay_discharges = short_discharge_encounters.uniq.count
+
+    other_admissions = Encounter.find(:all, :joins => [:type, :observations],\
+        :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
+        encounter_datetime <= ? AND value_text NOT IN (?)', admission_encounter_id, @start_time, @end_time,
+        wards])
+    @other_admissions = other_admissions.map{|e| e.patient_id}.uniq.size
+
+
+
+    #raise @short_stay_ward_encounters.flatten.inspect
     @total_medical_admissions = 0
     medical_wards = ['Ward 3A', 'Ward 4B', 'Ward 2A','Lepra']
     medical_wards.each { |ward|
