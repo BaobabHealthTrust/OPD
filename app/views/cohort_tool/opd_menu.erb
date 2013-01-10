@@ -49,12 +49,28 @@
 <form name='opd_report' method='post' >
   <% month_names = month_name_options.gsub('<option value="Unknown">Unknown</option>', '') %>
   <% if  @report_name.upcase == "SHIFT_REPORT" %>
-    <input type="text" field_type="date" id="start_date" name="shift_date" value="" helpText="Select Shift Date" />
-	<%= select_tag "shift_type", options_for_select(@shifts), {:helpText => 'Shift Type', :validationMessage => 'Please Select a Shift'}%>
-	<input type="text" field_type="advancedTime" id="start_time" name="start_time" value="" helpText="Select Shift Start Time" condition="$('shift_type').value == 'specific'"/>
-	<input type="text" field_type="advancedTime" id="end_time" name="end_time" value="" helpText="Select Shift End Time" condition="$('shift_type').value == 'specific'"/>
+  <%= text_field_tag "shift_date", nil, {
+          :helpText => 'Select Shift Date',
+          :field_type => 'date',
+          :id => 'start_date'}  %>
 
-  <%else%>
+  <%= select_tag "shift_type", options_for_select(@shifts),{
+          :helpText => 'Shift Type',
+          :validationMessage => 'Please Select a Shift'}%>
+
+  <%= text_field_tag "start_time", nil, {
+          :helpText => 'Select Shift Start Time',
+          :condition => "$('shift_type').value == 'specific'",
+          :field_type => 'advancedTime',
+          :id => 'start_time'}  %>
+
+  <%= text_field_tag "end_time", nil, {
+          :helpText => 'Select Shift End Time',
+          :condition => "$('shift_type').value == 'specific'",
+          :field_type => 'advancedTime',
+          :id => 'end_time'}  %>
+ 
+  <%  else %>
 
 	<%= text_field_tag "start_year", nil, {:helpText => 'Start Year', :field_type => 'number', :absoluteMin => "1890", :min => "1940", :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly",:validationJS => "setDOB();" }  %>
 	<%= select_tag "start_month", month_names, {:helpText => 'Start Month',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date',:tt_onLoad => "__$('keyboard').style.display = 'none'"}%>
