@@ -1464,18 +1464,21 @@ class CohortToolController < ApplicationController
 
 	def shift_report
 		@report_name = params[:report_name]
-
 		@shift_type = params[:shift_type]
 		@shift_date = params[:shift_date]
+    #raise params.inspect
 		if params[:start_time] == ""
 			 if @shift_type == "day"
 				 @start_time = Time.parse(@shift_date + " 7:30:00")
 				 @end_time = Time.parse(@shift_date + " 16:59:59")
-			 elsif @shift_type == "night"
+       end
+
+			 if @shift_type == "night"
 				 @start_time = Time.parse(@shift_date + " 17:00:00")
 				 @end_time= (Time.parse(@shift_date + " 7:30:00")).tomorrow
-				 #@end_time = (next_day + " 7:29:59"
-			 else
+       end
+
+       if @shift_type == "24_hour"
 				 @start_time = Time.parse(@shift_date + " 17:00:00")
 				 @end_time= (Time.parse(@shift_date + " 7:29:59")).tomorrow
 			 end
@@ -1487,35 +1490,108 @@ class CohortToolController < ApplicationController
 		@logo = CoreService.get_global_property_value('logo').to_s
     @current_location_name =Location.current_health_center.name
     @admission = []
-    admission_concepts = ['trauma','fracture','Abortion']
-    admission_concepts.each { | concept |
+
+
+    @outpatient_diagnosis_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+    trauma_concepts = ['trauma','traumatic conditions'] #to find total patients with diagnosis like trauma
+    @total_trauma_patients = 0
+    trauma_concepts.each { |concept|
       condition_string = "name LIKE \"#{concept}\" "
-      @outpatient_diagnosis_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
-			@concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
+      trauma_concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
       #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
-      total = Encounter.find(:all,
+      total_trauma_patients = Encounter.find(:all,
 			:joins => [:type, :observations, [:patient => :person]],\
         :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
 					value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
-          @outpatient_diagnosis_id, @concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
-      @admission << "#{concept + ':' + total.to_s}"
-     }
- raise @admission.inspect
-    @diagnosis = []
-    admission_concepts = ['trauma','fracture','Abortion']
-    admission_concepts.each { | concept |
+          @outpatient_diagnosis_id, trauma_concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
+      @total_trauma_patients+=total_trauma_patients
+    }
+
+
+    surgical_concepts = ['abdomical pain, surgical', 'acute abdomen surgical problem',
+      'all other surgical conditions']
+    @total_surgical_patients = 0
+    surgical_concepts.each { |concept|
       condition_string = "name LIKE \"#{concept}\" "
-      @outpatient_diagnosis_id = EncounterType.find_by_name("ADMIT PATIENT").encounter_type_id
-			@concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
+      surgical_concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
       #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
-      total = Encounter.find(:all,
-			:joins => [:type, :observations, [:patient => :person]],\
+      total_surgical_patients = Encounter.find(:all,
+        :joins => [:type, :observations, [:patient => :person]],\
         :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
-					value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
-          @outpatient_diagnosis_id, @concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
-      @diagnosis << "#{concept + ':' + total.to_s}"
-     }
-  raise @diagnosis.inspect
+				 value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
+         @outpatient_diagnosis_id, surgical_concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
+      @total_surgical_patients+=total_surgical_patients
+    }
+
+    pyschiatric_concepts = ['chronic psychiatric disease', 'psychiatric disorder']
+    @total_psychiatric_patients = 0
+    pyschiatric_concepts.each { |concept|
+      condition_string = "name LIKE \"#{concept}\" "
+      psychiatric_concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
+      #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
+      total_psychiatric_patients = Encounter.find(:all,
+        :joins => [:type, :observations, [:patient => :person]],\
+        :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
+				 value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
+         @outpatient_diagnosis_id, psychiatric_concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
+      @total_psychiatric_patients+=total_psychiatric_patients
+    }
+
+    #As of now there is no diagnosis to categorize a patient as an orthropaedic so we will use ward
+    #Orthropaedic patients are patients admitted in ward 6A.
+    admission_encounter_id = EncounterType.find_by_name("ADMIT PATIENT").encounter_type_id
+    orthro_paedic_ward = 'Ward 6A'
+    @orthro_patients = Encounter.find(:all, :joins => [:type, :observations],\
+        :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
+        encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
+        orthro_paedic_ward]).map{|e| e.patient_id}.uniq.size
+
+
+    wards = ['Ward 3A', 'Ward 4B', 'Ward 5A', 'Ward 5B', 'Ward 6A', 'Labour Ward','Post-natal Ward',
+      'Ante-natal Ward', 'Ward 1A', 'Ward 2A', 'Gynaecology Ward'
+    ]
+    @admitted = {}
+    wards.each { |ward|
+     total_patients = Encounter.find(:all, :joins => [:type, :observations],\
+        :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
+        encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
+        ward.to_s]).map{|e| e.patient_id}.uniq.size
+        @admitted[ward] = total_patients
+    }
+
+    @total_medical_admissions = 0
+    medical_wards = ['Ward 3A', 'Ward 4B', 'Ward 2A','Lepra']
+    medical_wards.each { |ward|
+     total_patients = Encounter.find(:all, :joins => [:type, :observations],\
+        :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
+        encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
+        ward.to_s]).map{|e| e.patient_id}.uniq.size
+        @total_medical_admissions+=total_patients
+    }
+ 
+    surgical_wards = ['Ward 5A', 'Ward 5B', 'Ward 6A', 'Burns']
+    @total_surgical_admissions = 0
+    surgical_wards.each { |ward|
+     total_patients = Encounter.find(:all, :joins => [:type, :observations],\
+        :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
+        encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
+        ward.to_s]).map{|e| e.patient_id}.uniq.size
+        @total_surgical_admissions+=total_patients
+    }
+
+    obs_and_gynae_wards = ['Gynaecology ward', 'Ante-natal ward', 'Post-natal ward', 'Labour ward', 'Ward 1A']
+    @obs_gynae_admissions = 0
+    obs_and_gynae_wards.each { |ward|
+     total_patients = Encounter.find(:all, :joins => [:type, :observations],\
+        :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
+        encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
+        ward.to_s]).map{|e| e.patient_id}.uniq.size
+        @obs_gynae_admissions+=total_patients
+    }
+
+
+    #icu_wards = ['ICU']
+    #raise @admitted['Ward 4B'].inspect
 		render :layout => "report"
   end
 
@@ -1535,78 +1611,7 @@ class CohortToolController < ApplicationController
 										).map{|e| e. patient_id}.uniq.size
 	end
 
-	def report_age_range(age_groups)
-
-		age_range = [nil, nil]
-
-		if ! age_groups.include?("ALL")
-							if age_groups.include?("< 6 MONTHS")
-								 max_age = 6
-								 min_age = 0
-							end
-
-							if age_groups.include?("6 MONTHS TO < 1 YR")
-								 max_age = 1
-								 if min_age.blank?
-										min_age = 0.6
-								 end
-							end
-
-							if age_groups.include?("1 TO < 5")
-								 max_age = 5
-
-								 if min_age.blank?
-											min_age = 1
-								 end
-
-							end
-
-							if age_groups.include?("5 TO 14")
-								max_age = 14
-
-								if min_age.blank?
-											min_age = 5
-								end
-
-							end
-
-							if age_groups.include?("> 14 TO < 20")
-								max_age = 20
-								 if min_age.blank?
-											min_age = 14
-								 end
-							end
-
-							if age_groups.include?("20 TO 30")
-								 max_age = 30
-
-									if min_age.blank?
-												min_age = 20
-									end
-
-							end
-
-							if age_groups.include?("30 TO < 40")
-								max_age = 40
-
-											if min_age.blank?
-														min_age = 30
-											end
-
-							end
-
-							if age_groups.include?("40 TO < 50")
-								 max_age = 50
-											 if min_age.blank?
-																min_age = 40
-											 end
-							end
-
-						  age_range = [min_age, max_age]
-		end
-		return age_range
-	end
-
+	
 	def total_registration
 
     @report_name = params[:report_name]
