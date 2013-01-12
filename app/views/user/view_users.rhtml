@@ -8,6 +8,13 @@
     <%=javascript_include_tag "jquery.table2CSV.min" %>
     <script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
     <script>
+
+      function activeCommand(element) {                                                 
+        user_action = element.getAttribute('user_action')
+        window.location = "/user/manage_user?user_id=" + element.id + '&user_action=' + user_action
+      } 
+
+
        jQuery(document).ready(function($) {
           $('#table_id').dataTable({
             "bAutoWidth": true,
@@ -18,13 +25,6 @@
             "bPaginate": false
           });
     search_box = $('#table_id').dataTable()
-    $(".activate").click(function(event) {
-          user_id = event.target.id;
-          //alert(user_id)
-          user_action = document.getElementById(user_id).getAttribute('user_action')
- 
-          window.location = "/user/manage_user?user_id=" + user_id + '&user_action=' + user_action
-         });
 
    $(".retire_button").click(function(event) {
     user_id = event.target.id;
@@ -234,7 +234,8 @@
       }
       #num{ display:none; }
       #char{ display:none; }
-      .button{
+
+      .activate {
         border-radius: 7px;
         background-color: #669999;
         border-bottom: 1px outset black;
@@ -261,14 +262,13 @@
       <table  id="table_id" class="display"  >
         <thead>
           <tr>
-            <th>status</th>
-            <th>Username</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Date created</th>
-            <th>Creator</th>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
+            <th width='20' style='text-align:center;'>Status</th>
+            <th width='150' style='text-align:left;'>Username</th>
+            <th width='200' style='text-align:left;'>Name</th>
+            <th width='100'>Date created</th>
+            <th width='100' style='text-align:left;'>Creator</th>
+            <th width="10">&nbsp;</th>
+            <th width="10">&nbsp;</th>
           </tr>
         </thead>
         <tbody>
@@ -280,38 +280,29 @@
     <% creator = User.find_by_user_id(creator_id) %>
     <% creator_first_name = creator.person.names.first.given_name.first + '.' rescue '' %>
     <% creator_last_name = creator.person.names.first.family_name rescue '' %>
-    <tr style="line-height: 44px;">
-      <td id="row"><%= user.status %></td>
-      <td id="row"><%= user.username %></td>
-      <td id="row"><%= user_first_name %></td>
-      <td id="row"><%= user_last_name %></td>
-      <td id="row"><%= user_date_registered %></td>
+    <tr style="line-height: 35px;">
+      <td id="row" style='text-align:center;'><%= user.status %></td>
+      <td id="row" style='text-align:left;'><%= user.username %></td>
+      <td id="row" style='text-align:left;'><%= user_first_name%>&nbsp;<%= user_last_name %></td>
+      <td id="row" style='text-align:center;'><%= user_date_registered %></td>
       <td id="row"><%= creator_first_name + ' ' + creator_last_name %></td>
       <% if user.status == 'active' || user.status == '' %>
       <td>
-        <%#= button_to("Block",{},{:class => 'button', :user_action =>'block', :id => user.id}) %>
-        <a href="#" class="button" id ="<%= user.id %>">Block</a>
-        <!--<button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="block"><span>Block</span></button>-->
+        <a href="#" onmousedown="activeCommand(this);" user_action = 'block' class="activate" id ="<%= user.id %>">Block</a>
       </td>
       <% end %>
       <% if user.status == 'blocked' %>
       <td>
-        <%#= button_to("Block",{},{:class => 'button', :user_action =>'activate', :id => user.id}) %>
-        <!--<button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="activate" ><span>Activate</span></button>-->
-        <a href="#" class="activate" id ="<%= user.id %>"> Activate</a>
+        <a href="#" onmousedown="activeCommand(this);" user_action = 'activate' class="activate" id ="<%= user.id %>">Activate</a>
       </td>
       <% end %>
       <% if user.status == 'pending' %>
       <td>
-        <%#= button_to("Activate",{},{:class => 'button', :user_action =>'pending', :id => user.id}) %>
-        <!--<button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="pending" ><span>Activate</span></button>-->
-        <a href="#" class="activate" id ="<%= user.id %>">Activate</a>
+        <a href="#" onmousedown="activeCommand(this);" user_action = 'pending' class="activate" id ="<%= user.id %>">Activate</a>
       </td>
       <% end %>
       <td>
-        <%#= button_to("Retire",{},{:class => 'button', :retire =>'retire', :id => user.id}) %>
-       <!--<button style="width:100%" id = "<%= user.id %>" class = "blue retire_button" retire = "retire" ><span>Retire</span></button>-->
-      <a href="#" class="activate" id ="<%= user.id %>">Retire</a>
+        <a href="#" onmousedown="activeCommand(this);" user_action = 'retire' class="activate" id ="<%= user.id %>">Retire</a>
       </td>
     </tr>
     <%end
