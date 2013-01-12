@@ -82,7 +82,7 @@
 
 	<% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT","DIAGNOSIS_REPORT_GRAPH"].include?(@report_name.upcase) %>
 	  <%= select_tag "age_groups", options_for_select(["", "< 6 months",
-		  "6 months to < 1 yr", "1 to < 5", "5 to 14", "> 14 to < 20", "20 to 30", "30 to < 40", "40 to < 50", "ALL"]),
+		  "6 months to < 1 yr", "1 to < 5", "5 to 14", "> 14 to < 20", "20 to 30", ">30 to < 40", "40 to < 50", "ALL"]),
 		{	:helpText => 'Select Age Group (s)',
 		:id => "age_groups",
 		:multiple => true } %>
