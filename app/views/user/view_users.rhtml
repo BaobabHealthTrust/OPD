@@ -18,7 +18,7 @@
             "bPaginate": false
           });
     search_box = $('#table_id').dataTable()
-    $(".button").click(function(event) {
+    $(".activate").click(function(event) {
           user_id = event.target.id;
           //alert(user_id)
           user_action = document.getElementById(user_id).getAttribute('user_action')
@@ -245,7 +245,7 @@
         padding: 10px 16px 10px 10px;
         text-align: center;
         text-decoration: none;
-        width: 100%;
+        width: 4em;
       }
     </style>
   </head>
@@ -290,24 +290,28 @@
       <% if user.status == 'active' || user.status == '' %>
       <td>
         <%#= button_to("Block",{},{:class => 'button', :user_action =>'block', :id => user.id}) %>
-        <button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="block"><span>Block</span></button>
+        <a href="#" class="button" id ="<%= user.id %>">Block</a>
+        <!--<button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="block"><span>Block</span></button>-->
       </td>
       <% end %>
       <% if user.status == 'blocked' %>
       <td>
         <%#= button_to("Block",{},{:class => 'button', :user_action =>'activate', :id => user.id}) %>
-        <button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="activate" ><span>Activate</span></button>
+        <!--<button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="activate" ><span>Activate</span></button>-->
+        <a href="#" class="activate" id ="<%= user.id %>"> Activate</a>
       </td>
       <% end %>
       <% if user.status == 'pending' %>
       <td>
         <%#= button_to("Activate",{},{:class => 'button', :user_action =>'pending', :id => user.id}) %>
-        <button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="pending" ><span>Activate</span></button>
+        <!--<button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="pending" ><span>Activate</span></button>-->
+        <a href="#" class="activate" id ="<%= user.id %>">Activate</a>
       </td>
       <% end %>
       <td>
         <%#= button_to("Retire",{},{:class => 'button', :retire =>'retire', :id => user.id}) %>
-       <button style="width:100%" id = "<%= user.id %>" class = "blue retire_button" retire = "retire" ><span>Retire</span></button>
+       <!--<button style="width:100%" id = "<%= user.id %>" class = "blue retire_button" retire = "retire" ><span>Retire</span></button>-->
+      <a href="#" class="activate" id ="<%= user.id %>">Retire</a>
       </td>
     </tr>
     <%end
