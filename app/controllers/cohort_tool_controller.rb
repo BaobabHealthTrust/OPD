@@ -1495,129 +1495,264 @@ class CohortToolController < ApplicationController
     @outpatient_diagnosis_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
     trauma_concepts = ['trauma','traumatic conditions'] #to find total patients with diagnosis like trauma
     @total_trauma_patients = 0
+    @trauma_encounter_ids = []
     trauma_concepts.each { |concept|
       condition_string = "name LIKE \"#{concept}\" "
       trauma_concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
       #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
-      total_trauma_patients = Encounter.find(:all,
+      encounters = Encounter.find(:all,
 			:joins => [:type, :observations, [:patient => :person]],\
         :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
 					value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
-          @outpatient_diagnosis_id, trauma_concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
-      @total_trauma_patients+=total_trauma_patients
+          @outpatient_diagnosis_id, trauma_concept_ids, @start_time, @end_time])
+      @total_trauma_patients+=encounters.map{|e| e.patient_id}.uniq.size
+      @trauma_encounter_ids << encounters.map(&:id)
     }
-
+    @trauma_encounter_ids = @trauma_encounter_ids.flatten
 
     surgical_concepts = ['abdomical pain, surgical', 'acute abdomen surgical problem',
       'all other surgical conditions']
     @total_surgical_patients = 0
+    @surgical_encounter_ids = []
     surgical_concepts.each { |concept|
       condition_string = "name LIKE \"#{concept}\" "
       surgical_concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
       #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
-      total_surgical_patients = Encounter.find(:all,
+      encounters = Encounter.find(:all,
         :joins => [:type, :observations, [:patient => :person]],\
         :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
 				 value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
-         @outpatient_diagnosis_id, surgical_concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
-      @total_surgical_patients+=total_surgical_patients
+         @outpatient_diagnosis_id, surgical_concept_ids, @start_time, @end_time])
+      @surgical_encounter_ids << encounters.map(&:id)
+      @total_surgical_patients+=encounters.map{|e| e.patient_id}.uniq.size
     }
-
+    @surgical_encounter_ids = @surgical_encounter_ids.flatten
+    
     pyschiatric_concepts = ['chronic psychiatric disease', 'psychiatric disorder']
     @total_psychiatric_patients = 0
+    @psychiatric_encounter_ids = []
     pyschiatric_concepts.each { |concept|
       condition_string = "name LIKE \"#{concept}\" "
       psychiatric_concept_ids = ConceptName.find_by_sql("SELECT * FROM concept_name WHERE \
       #{condition_string} AND voided = 0" ).map{|c| c.concept_id}
-      total_psychiatric_patients = Encounter.find(:all,
+      encounters = Encounter.find(:all,
         :joins => [:type, :observations, [:patient => :person]],\
         :conditions => ["encounter_type = ? AND encounter.voided = 0 AND\
 				 value_coded IN (?) AND encounter_datetime >= ? AND encounter_datetime <= ?",\
-         @outpatient_diagnosis_id, psychiatric_concept_ids, @start_time, @end_time]).map{|e| e.patient_id}.uniq.size
-      @total_psychiatric_patients+=total_psychiatric_patients
+         @outpatient_diagnosis_id, psychiatric_concept_ids, @start_time, @end_time])
+      @psychiatric_encounter_ids << encounters.map(&:id)
+      @total_psychiatric_patients+=encounters.map{|e| e.patient_id}.uniq.size
     }
-
+    @psychiatric_encounter_ids = @psychiatric_encounter_ids.flatten
     #As of now there is no diagnosis to categorize a patient as an orthropaedic so we will use ward
     #Orthropaedic patients are patients admitted in ward 6A.
     admission_encounter_id = EncounterType.find_by_name("ADMIT PATIENT").encounter_type_id
     orthro_paedic_ward = 'Ward 6A'
-    @orthro_patients = Encounter.find(:all, :joins => [:type, :observations],\
+    @orthro_paedic_encounter_id = []
+    encounters = Encounter.find(:all, :joins => [:type, :observations],\
         :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
         encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
-        orthro_paedic_ward]).map{|e| e.patient_id}.uniq.size
-
+        orthro_paedic_ward])
+     @orthro_paedic_encounter_id = encounters.map(&:id).flatten
+     @orthro_patients = encounters.map{|e| e.patient_id}.uniq.size
 
     wards = ['Ward 3A', 'Ward 4B', 'Ward 5A', 'Ward 5B', 'Ward 6A', 'Labour Ward','Post-natal Ward',
       'Ante-natal Ward', 'Ward 1A', 'Ward 2A', 'Gynaecology Ward'
     ]
     @admitted = {}
     @short_stay_admission = 0
+    @short_stay_admission_encounters_ids = []
     @short_stay_patient_ids = []
+    @ward_encounters_ids = {}
     wards.each { |ward|
      encounters = Encounter.find(:all, :joins => [:type, :observations],\
         :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
         encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
         ward.to_s])
+        @short_stay_admission_encounters_ids << encounters.map(&:id)
         total_patients = encounters.map{|e| e.patient_id}.uniq.size
         @admitted[ward] = total_patients
+        @admitted[:encounter_ids] = 'gdg'
+        @ward_encounters_ids[ward] = encounters.map(&:id)
         @short_stay_admission+=total_patients
         @short_stay_patient_ids << encounters.map{|e| e.patient_id}
     }
 
+    @short_stay_admission_encounters_ids = @short_stay_admission_encounters_ids.flatten
     @short_stay_patient_ids = @short_stay_patient_ids.flatten.uniq
     
     #to count total discharges for short stay ward patients
+    @short_stay_discharges_encounters_ids = []
     discharge_patient_id = EncounterType.find_by_name("DISCHARGE PATIENT").encounter_type_id
     short_discharge_encounters = Encounter.find(:all, :joins => [:type], :conditions => ['patient_id IN (?) AND
-        encounter_type = ?', @short_stay_patient_ids, discharge_patient_id]).map{|e| e.patient_id}
-
-     @short_stay_discharges = short_discharge_encounters.uniq.count
-
+        encounter_type = ?', @short_stay_patient_ids, discharge_patient_id])
+     @short_stay_discharges_encounters_ids = short_discharge_encounters.map(&:id).flatten
+     @short_stay_discharges = short_discharge_encounters.map{|e| e.patient_id}.uniq.count
+    
+    @other_admissions = []
+    @other_admissions_encounters_ids = []
     other_admissions = Encounter.find(:all, :joins => [:type, :observations],\
         :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
         encounter_datetime <= ? AND value_text NOT IN (?)', admission_encounter_id, @start_time, @end_time,
         wards])
+    @other_admissions_encounters_ids = other_admissions.map(&:id)
     @other_admissions = other_admissions.map{|e| e.patient_id}.uniq.size
 
 
 
     #raise @short_stay_ward_encounters.flatten.inspect
     @total_medical_admissions = 0
+    @medical_encounters_ids = []
     medical_wards = ['Ward 3A', 'Ward 4B', 'Ward 2A','Lepra']
     medical_wards.each { |ward|
-     total_patients = Encounter.find(:all, :joins => [:type, :observations],\
+     encounters = Encounter.find(:all, :joins => [:type, :observations],\
         :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
         encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
-        ward.to_s]).map{|e| e.patient_id}.uniq.size
-        @total_medical_admissions+=total_patients
+        ward.to_s])
+    @medical_encounters_ids << encounters.map(&:id)
+        @total_medical_admissions+=encounters.map{|e| e.patient_id}.uniq.size
+        
     }
- 
+    @medical_encounters_ids = @medical_encounters_ids.flatten
+    #raise @medical_encounters_ids.inspect
+    #raise Encounter.find(@medical_patients_encounters.first).patient.inspect
     surgical_wards = ['Ward 5A', 'Ward 5B', 'Ward 6A', 'Burns']
     @total_surgical_admissions = 0
+    @surgical_admissions_encounter_ids = []
     surgical_wards.each { |ward|
-     total_patients = Encounter.find(:all, :joins => [:type, :observations],\
+     encounters = Encounter.find(:all, :joins => [:type, :observations],\
         :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
         encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
-        ward.to_s]).map{|e| e.patient_id}.uniq.size
-        @total_surgical_admissions+=total_patients
+        ward.to_s])
+        @surgical_admissions_encounter_ids << encounters.map(&:id)
+        @total_surgical_admissions+=encounters.map{|e| e.patient_id}.uniq.size
     }
+    @surgical_admissions_encounter_ids = @surgical_admissions_encounter_ids.flatten
 
     obs_and_gynae_wards = ['Gynaecology ward', 'Ante-natal ward', 'Post-natal ward', 'Labour ward', 'Ward 1A']
     @obs_gynae_admissions = 0
+    @obs_gynae_encounter_ids = []
     obs_and_gynae_wards.each { |ward|
-     total_patients = Encounter.find(:all, :joins => [:type, :observations],\
+     encounters = Encounter.find(:all, :joins => [:type, :observations],\
         :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND
         encounter_datetime <= ? AND value_text = ?', admission_encounter_id, @start_time, @end_time,
-        ward.to_s]).map{|e| e.patient_id}.uniq.size
-        @obs_gynae_admissions+=total_patients
+        ward.to_s])
+        @obs_gynae_encounter_ids << encounters.map(&:id)
+        @obs_gynae_admissions+=encounters.map{|e| e.patient_id}.uniq.size
     }
+    @obs_gynae_encounter_ids = @obs_gynae_encounter_ids.flatten
+    
+    transfer_out_encounter_id = EncounterType.find_by_name('TRANSFER OUT').id
+    @brought_in_dead = []
+    @brought_in_dead_encounters_ids = []
+    @assesment_area_dealths = []
+    @assesment_area_dealths_encounters_ids = []
+    @short_stay_ward_dealths = []
+    @short_stay_ward_dealths_encounters_ids = []
+    encounters = Encounter.find(:all, :joins => [:type], :conditions => ['encounter_type_id =? AND
+     encounter_datetime >= ? AND encounter_datetime <= ?', transfer_out_encounter_id, @start_time, @end_time ])
+     encounters.each { | encounter |
+      observations = encounter.observations
+        observations.each { | observation |
+          #next if observation.answer_string.squish.upcase != 'BROUGHT IN DEAD'
+            @brought_in_dead << observation.person.patient if observation.answer_string.squish.upcase == 'BROUGHT IN DEAD'
+            @brought_in_dead_encounters_ids << observation.encounter.id if observation.answer_string.squish.upcase == 'BROUGHT IN DEAD'
+            @assesment_area_dealths << observation.person.patient if observation.answer_string.squish.upcase == 'DIED WHILE AT THE HEALTH FACILITY'
+            @assesment_area_dealths_encounters_ids << observation.encounter.id if observation.answer_string.squish.upcase == 'DIED WHILE AT THE HEALTH FACILITY'
+        }
+     }
+    @brought_in_dead = @brought_in_dead.uniq
+    @assesment_area_dealths = @assesment_area_dealths.uniq
 
-
-    #icu_wards = ['ICU']
-    #raise @admitted['Ward 4B'].inspect
-		render :layout => "report"
+    #to find short stay ward dealths we need first to get encounters of the patients admitted in short stay wards
+		
+    encounters = Encounter.find(:all, :joins => [:type], :conditions => ['encounter_type_id =? AND
+        encounter_datetime >= ? AND encounter_datetime <= ? AND patient_id IN (?)', transfer_out_encounter_id, @start_time,
+        @end_time, @short_stay_patient_ids ])
+    encounters.each { | encounter |
+      observations = encounter.observations
+      observations.each { | observation |
+        next if observation.answer_string.squish.upcase != 'DIED WHILE AT THE HEALTH FACILITY'
+        @short_stay_ward_dealths << observation.person.patient
+        @short_stay_ward_dealths_encounters_ids << observation.encounter.id
+      }
+    }
+    @short_stay_ward_dealths = @short_stay_ward_dealths.uniq
+    render :layout => "report"
   end
 
+  def display_patients
+    @logo = CoreService.get_global_property_value('logo')
+    @current_location_name = Location.current_health_center.name
+    category = params[:category]
+    encounter_ids = params[:encounter_ids]
+    
+    if category.upcase == 'MEDICAL'
+      @report_name = 'Medical ward admission'
+    elsif category.upcase == 'SURGICAL'
+      @report_name = 'Surgical ward admission'
+    elsif category.upcase == 'OBS_GYNAE'
+      @report_name = 'Obsteric and Gynae ward admission'
+    elsif category.upcase == 'SURGICAL PATIENTS'
+      @report_name = 'Surgical patients'
+    elsif category.upcase == 'PSYCHIATRIC PATIENTS'
+      @report_name = 'Psychiatric patients'
+    elsif category.upcase == 'TRAUMA PATIENTS'
+      @report_name = 'Trauma patients'
+    elsif category.upcase == 'ORTHROPAEDIC PATIENTS'
+      @report_name = 'Orthro-paedic patients'
+    elsif category.upcase == 'BROUGHT IN DEAD'
+      @report_name = 'Brought in dead report'
+    elsif category.upcase == 'ASSESMENT AREA'
+      @report_name = 'Assesment area dealth report'
+    elsif category.upcase == 'SHORT STAY ADMISSION'
+      @report_name = 'Short stay ward admission report'
+    elsif category.upcase == 'SHORT STAY DISCHARGE'
+      @report_name = 'Short stay ward discharges report'
+    elsif category.upcase == 'SHORT STAY WARD'
+      @report_name = 'Short stay ward dealth report'
+    elsif category.upcase == '1A'
+      @report_name = 'Ward 1A admission report'
+    elsif category.upcase == '2A'
+      @report_name = 'Ward 2A admission report'
+    elsif category.upcase == '3A'
+      @report_name = 'Ward 3A admission report'
+    elsif category.upcase == '4B'
+      @report_name = 'Ward 4B admission report'
+    elsif category.upcase == '5A'
+      @report_name = 'Ward 5A admission report'
+    elsif category.upcase == '6A'
+      @report_name = 'Ward 6A admission report'
+    elsif category.upcase == '5B'
+      @report_name = 'Ward 3A admission report'
+    elsif category.upcase == 'LABOUR'
+      @report_name = 'Labou ward admission report'
+    elsif category.upcase == 'POST-NATAL'
+      @report_name = 'Post-natal ward admission report'
+    elsif category.upcase == 'ANTE-NATAL'
+      @report_name = 'Ante-natal ward admission report'
+    elsif category.upcase == 'GYNAECOLOGY'
+      @report_name = 'Gynaecology ward admission report'
+    elsif category.upcase == 'OTHER ADMISSIONS'
+      @report_name = 'Other admissions report'
+    end
+
+      @medical_patients = []
+      encounters = Encounter.find(:all, :conditions => ['encounter_id IN (?)',encounter_ids])
+      encounters.each { | encounter |
+       names = encounter.patient.person.names.last
+       first_name = names.given_name.capitalize rescue ''
+       last_name = names.family_name.capitalize rescue ''
+       gender = encounter.patient.person.gender rescue ''
+       age = PatientService.age(encounter.patient.person)
+       village = encounter.patient.person.addresses.last.city_village rescue ''
+       ta = encounter.patient.person.addresses.last.county_district rescue ''
+       @medical_patients << [first_name, last_name, gender, age, village, ta]
+      }
+      @medical_patients = @medical_patients.uniq
+    render :layout => 'report'
+  end
+  
   def count_patient_with_concept(concept, start_date, end_date)
 
 			condition_string = "name LIKE \"#{concept}\" "

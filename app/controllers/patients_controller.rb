@@ -234,8 +234,22 @@ class PatientsController < GenericPatientsController
             }.compact.join("; ")
             label.draw_multi_text("#{procs}", concepts_font)
 
-          elsif encounter.name.upcase.include?('UPDATE HIV STATUS')            
-            label.draw_multi_text("#{ 'HIV Status - ' + PatientService.patient_hiv_status(patient).to_s }", :font_reverse => false)
+          elsif encounter.name.upcase.include?('UPDATE HIV STATUS')
+            hiv_status = []
+            encounter.observations.each do |observation|
+             next if !observation.concept.fullname.match(/HIV STATUS/i)
+             hiv_status << 'HIV Status - ' + observation.answer_string.to_s rescue ''
+            end
+            label.draw_multi_text("#{hiv_status}", :font_reverse => false)
+
+          elsif encounter.name.upcase.include?('LAB ORDERS')
+            lab_orders = []
+            encounter.observations.each do |observation|
+            concept_name = observation.concept.fullname
+            next if concept_name.match(/Workstation location/i)
+               lab_orders << observation.answer_string.to_s
+             end
+             label.draw_multi_text("Lab orders: #{lab_orders.join(',')}", concepts_font)
 
           elsif encounter.name.upcase.include?('DIAGNOSIS')
             encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
