@@ -494,10 +494,10 @@ class GenericEncountersController < ApplicationController
         print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
         return
      elsif params['encounter']['encounter_type_name'].upcase == 'ADMIT PATIENT'
-        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
+        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}",next_task(@patient))
         return
      elsif params['encounter']['encounter_type_name'].upcase == 'DISCHARGE PATIENT'
-        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
+        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}",next_task(@patient))
         return
      elsif params['encounter']['encounter_type_name'].upcase == 'PATIENT SENT HOME'
         print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
