@@ -326,7 +326,7 @@ class GenericEncountersController < ApplicationController
 		  user_person_id = encounter[:provider_id]
 		else
 		  user_person_id = User.find_by_user_id(encounter[:provider_id]).person_id
-		end
+		end rescue user_person_id = current_user.person.person_id
 		encounter.provider_id = user_person_id
 
 		encounter.save
