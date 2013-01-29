@@ -92,9 +92,9 @@ class EncountersController < GenericEncountersController
 
 		redirect_to next_task(@patient) and return unless params[:encounter_type]
 
-
+    ask_vitals_questions_before_diagnosis = CoreService.get_global_property_value('ask.vitals.questions.before.diagnosis').to_s == "true" rescue false
 		if params[:encounter_type].upcase == 'ADMISSION DIAGNOSIS' || params[:encounter_type].upcase == 'DISCHARGE DIAGNOSIS' || params[:encounter_type].upcase == 'OUTPATIENT_DIAGNOSIS'
-			if !is_encounter_available(@patient, 'VITALS', session_date) && @patient_bean.age <= 14
+			if !is_encounter_available(@patient, 'VITALS', session_date) && @patient_bean.age <= 14 && ask_vitals_questions_before_diagnosis
 				session[:original_encounter] = params[:encounter_type]
 				params[:encounter_type] = 'vitals'					
 			else

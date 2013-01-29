@@ -135,18 +135,24 @@ P Please
 	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
 	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
+  <% ask_triage_category_questions = CoreService.get_global_property_value('ask.triage.category.questions').to_s == "true"  %>
+  <% ask_life_threatening_condition_questions = CoreService.get_global_property_value('ask.life.threatening.condition.questions').to_s == "true" %>
+  <% ask_complaints_under_vitals = CoreService.get_global_property_value('ask.complaints.under.vitals').to_s == "true" %>
+
   <%
     vital_signs = ["","Temperature","Respiratory Rate","Blood Pressure", 
     "Pulse Rate", "Weight", "Height","Oxygen Saturation",
-    "MUAC","Presenting complaints"
+    "MUAC"
     ]
   %>
-
+  <% vital_signs << "Presenting complaints" if ask_complaints_under_vitals == true %>
+  
         <%= touch_select_tag "Triage Category", @patient, nil,
           { :ajaxURL => "/encounters/triage_category?search_string=",
           :helpText => 'Select Triage Category',
           :id => 'triage_category',
-          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none'"
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none'",
+          :condition => ask_triage_category_questions == true
         } %>
 
 
@@ -156,7 +162,8 @@ P Please
           :condition => "$('triage_category').value.match(/EMERGENCY/i)",
           :ajaxURL => "/encounters/emergency_signs?search_string=",
           :helpText => "Life threatening condition",
-          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none' "
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none' ",
+          :condition => ask_life_threatening_condition_questions == true
           } %>
 
         <%= touch_select_tag "LIFE THREATENING CONDITION", @patient, options_for_select([]),
@@ -168,7 +175,7 @@ P Please
           :tt_onLoad => "document.getElementById('keyboard').style.display = 'none' "
           } %>
 
-        <%= select_tag "vitals_choice",options_for_select(['', 'Yes', 'No']),
+        <%#= select_tag "vitals_choice",options_for_select(['', 'Yes', 'No']),
           {
           :id => 'vitals_choice',
           :helpText => "Continue with vitals/presenting complaints?",
@@ -178,7 +185,7 @@ P Please
 	<%= select_tag "choice", options_for_select(vital_signs), 
 		{	:helpText => 'Select vital signs', 
 			:id => "choice",
-                        :condition => "document.getElementById('vitals_choice').value.match(/YES/i)",
+                        #:condition => "document.getElementById('vitals_choice').value.match(/YES/i)",
 			:multiple => true } %>
 
 	<%= touch_text_field_tag "TEMPERATURE (C)", @patient, nil,
