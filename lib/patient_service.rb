@@ -779,6 +779,29 @@ EOF
     patient.guardian = art_guardian(person.patient) rescue nil 
     patient
   end
+
+  def self.get_dde_person(person, current_date = Date.today)
+		patient = PatientBean.new('')
+		patient.person_id = 0
+		patient.patient_id = 0
+		patient.address = person["person"]["addresses"]["city_village"]
+		patient.national_id = person["person"]["patient"]["identifiers"]["National id"]
+		patient.national_id_with_dashes = person["person"]["patient"]["identifiers"]["National id"]
+		patient.name = person["person"]["names"]["given_name"] + ' ' + person["person"]["names"]["family_name"] rescue nil
+		patient.first_name = person["person"]["names"]["given_name"] rescue nil
+		patient.last_name = person["person"]["names"]["family_name"] rescue nil
+		patient.sex = person["person"]["gender"]
+		#patient.birth_date = birthdate_formatted(person)
+		patient.home_district = person["filter_district"]
+		patient.traditional_authority = person["filter"]["t_a"]
+    #patient.state_province = person.addresses.first.state_province
+		patient.current_residence = person["person"]["addresses"]["city_village"]
+		patient.landmark = person["person"]["addresses"]["address_1"]
+		patient.occupation = person["person"]["occupation"]
+		patient.cell_phone_number = person["person"]["cell_phone_number"]
+		patient.home_phone_number = person["person"]["home_phone_number"]
+		patient
+	end
   
   def self.art_guardian(patient)
     person_id = Relationship.find(:first,:order => "date_created DESC",
@@ -1056,7 +1079,9 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
     people = PatientIdentifier.find_all_by_identifier(identifier).map{|id| 
       id.patient.person
     } unless identifier.blank? rescue nil
+   
     return people unless people.blank?
+
     create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
     if create_from_dde_server 
       dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
@@ -1064,9 +1089,10 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
       uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
       uri += "?value=#{identifier}"                          
-      p = JSON.parse(RestClient.get(uri)).first rescue nil
+      p = JSON.parse(RestClient.get(uri)) rescue nil
    
       return [] if p.blank?
+      return "found duplicate identifiers" if p.count > 1
  
       birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
       birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
@@ -1109,6 +1135,53 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       return [self.create_from_form(passed["person"])]
     end
     return people
+  end
+
+  def self.search_from_dde_by_identifier(identifier)
+      dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+      dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+      dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+      uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+      uri += "?value=#{identifier}"
+      people = JSON.parse(RestClient.get(uri)) rescue nil
+
+      return [] if people.blank?
+
+      local_people = []
+      people.each do |person|
+        birthdate_year = person["person"]["birthdate"].to_date.year rescue "Unknown"
+        birthdate_month = person["person"]["birthdate"].to_date.month rescue nil
+        birthdate_day = person["person"]["birthdate"].to_date.day rescue nil
+        birthdate_estimated = person["person"]["birthdate_estimated"]
+        gender = person["person"]["gender"] == "F" ? "Female" : "Male"
+
+        passed_person = {
+         "person"=>{"occupation"=>person["person"]["data"]["attributes"]["occupation"],
+         "age_estimate"=>"",
+         "cell_phone_number"=>person["person"]["data"]["attributes"]["cell_phone_number"],
+         "birth_month"=> birthdate_month ,
+         "addresses"=>{"address1"=>person["person"]["data"]["addresses"]["county_district"],
+         "address2"=>person["person"]["data"]["addresses"]["address2"],
+         "city_village"=>person["person"]["data"]["addresses"]["city_village"],
+         "county_district"=>""},
+         "gender"=> gender ,
+         "patient"=>{"identifiers"=>{"National id" => person["person"]["value"]}},
+         "birth_day"=>birthdate_day,
+         "home_phone_number"=>person["person"]["data"]["attributes"]["home_phone_number"],
+         "names"=>{"family_name"=>"Mwale",
+         "given_name"=>person["person"]["given_name"],
+         "middle_name"=>""},
+         "birth_year"=>birthdate_year},
+         "filter_district"=>"Chitipa",
+         "filter"=>{"region"=>"Northern Region",
+         "t_a"=>""},
+         "relation"=>""
+        }
+        
+        local_people << passed_person
+      end
+      #raise local_people.to_yaml
+    return local_people
   end
   
   def self.set_birthdate_by_age(person, age, today = Date.today)
