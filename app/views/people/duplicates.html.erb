@@ -1,0 +1,85 @@
+
+<script>
+  var patient_sets = {}
+  var total_id_hash_key = 0
+  tt_cancel_destination = "/clinic";
+
+  function newID(patient_id) {
+    document.location = "/people/reassign_identifier?patient_id=" + patient_id;
+  }
+
+</script>
+
+<style>
+
+.color_white {
+  background-color:white;
+}
+
+.color_blue {
+  background-color:lightgrey;
+}
+
+td {
+  border-style: solid;
+  border-width: 1px;
+}
+
+table {
+  width: 100%;
+}
+
+div { -moz-user-select: none; }
+
+
+ a {                                                                    
+    background-color: #669999;
+    border-bottom: 1px outset black;
+    border-radius: 7px 7px 7px 7px;
+    border-style: outset;
+    border-top: 1px outset black;
+    color: white;
+    display: block;
+    padding: 10px 16px 10px 10px;
+    text-align: center;
+    text-decoration: none;
+  } 
+</style>
+
+<div>
+
+<h2>Patients with similar identifiers</h2><br />
+<h3>Reassign the patient in front of you a new identifier</h3>
+<table>
+  <tr class="header">
+    <td width="80">ID</td>
+    <td width='200'>Name</td>
+    <td width='50' style="text-align:center;">DOB</td>
+    <td width='50' style="text-align:center;">Gender</td>
+    <td width='50' style="text-align:center;">Age</td>
+    <td width='90'>&nbsp;</td>
+  </tr>
+  <%color = 'white'
+    row_number = 0
+    ( @duplicates || {} ).each do | patient | 
+      if color == 'white'
+        color = 'blue'
+      else
+        color = 'white'
+      end
+      row_number+=1 %>
+  <tr>
+    <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.name || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.birth_date || '&nbsp;' %> </td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
+    <td class="color_<%=color%> row_number_<%=row_number%>">
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.patient_id%>','<%=row_number%>','<%=color%>');">Reassign ID</a>
+  </td>
+  </tr>
+ <%end%>
+</table>
+
+<div>
+

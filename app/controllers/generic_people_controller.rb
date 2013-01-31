@@ -68,7 +68,8 @@ class GenericPeopleController < ApplicationController
 			local_results = PatientService.search_by_identifier(params[:identifier])
 
 			if local_results.length > 1
-				@people = PatientService.person_search(params)
+        redirect_to :action => 'duplicates' ,:search_params => params
+        return
 			elsif local_results.length == 1
 				found_person = local_results.first
 			else
@@ -618,9 +619,26 @@ class GenericPeopleController < ApplicationController
 		@patient_bean = PatientService.get_patient(@person)
 		render :layout => 'menu'
   end
+
+  def duplicates                                                                
+    @duplicates = []
+    PatientService.person_search(params[:search_params]).each do |person|
+      @duplicates << PatientService.get_patient(person)
+    end
+    render :layout => 'menu'                                                    
+  end 
   
+  def reassign_identifier
+    new_national_id = reassign_national_id(params[:patient_id])
+    redirect_to :action => 'search', :identifier => new_national_id 
+  end
+   
 private
   
+  def reassign_national_id(patient_id)
+    PatientService.get_patient(Person.find(patient_id)).national_id
+  end
+   
 	def search_complete_url(found_person_id, primary_person_id)
 		unless (primary_person_id.blank?)
 			# Notice this swaps them!
