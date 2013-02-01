@@ -631,7 +631,7 @@ class GenericPeopleController < ApplicationController
       @dde_duplicates = []
       PatientService.search_from_dde_by_identifier(params[:search_params][:identifier]).each do |person|
         @dde_duplicates << PatientService.get_dde_person(person)
-      end
+      end      
     end
 
     render :layout => 'menu'                                                    

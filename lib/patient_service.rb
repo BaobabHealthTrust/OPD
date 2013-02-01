@@ -781,6 +781,7 @@ EOF
   end
 
   def self.get_dde_person(person, current_date = Date.today)
+    #raise person.to_yaml
 		patient = PatientBean.new('')
 		patient.person_id = 0
 		patient.patient_id = 0
@@ -791,10 +792,10 @@ EOF
 		patient.first_name = person["person"]["names"]["given_name"] rescue nil
 		patient.last_name = person["person"]["names"]["family_name"] rescue nil
 		patient.sex = person["person"]["gender"]
-		#patient.birth_date = birthdate_formatted(person)
+    patient.birth_date = person["person"]["birthdate"].to_date.strftime("%d/%b/%Y")
+    patient.age = age_dde(patient,current_date)
 		patient.home_district = person["filter_district"]
 		patient.traditional_authority = person["filter"]["t_a"]
-    #patient.state_province = person.addresses.first.state_province
 		patient.current_residence = person["person"]["addresses"]["city_village"]
 		patient.landmark = person["person"]["addresses"]["address_1"]
 		patient.occupation = person["person"]["occupation"]
@@ -825,6 +826,20 @@ EOF
     birth_date=person.birthdate
     estimate=person.birthdate_estimated==1
     patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  && 
+        today.month < birth_date.month && person.date_created.year == today.year) ? 1 : 0
+  end
+
+  def self.age_dde(person, today = Date.today)
+    return nil if person.birth_date.nil?
+    birthday = person.birth_date.to_date
+    # This code which better accounts for leap years
+    patient_age = (today.year - birthday.year) + ((today.month - birthday.month) + ((today.day - birthday.day) < 0 ? -1 : 0) < 0 ? -1 : 0)
+
+    # If the birthdate was estimated this year, we round up the age, that way if
+    # it is March and the patient says they are 25, they stay 25 (not become 24)
+    birth_date=birthday
+    estimate=person.birthdate_estimated==1
+    patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  &&
         today.month < birth_date.month && person.date_created.year == today.year) ? 1 : 0
   end
 
@@ -1158,6 +1173,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
         passed_person = {
          "person"=>{"occupation"=>person["person"]["data"]["attributes"]["occupation"],
          "age_estimate"=>"",
+         "birthdate" => person["person"]["birthdate"],
          "cell_phone_number"=>person["person"]["data"]["attributes"]["cell_phone_number"],
          "birth_month"=> birthdate_month ,
          "addresses"=>{"address1"=>person["person"]["data"]["addresses"]["county_district"],
