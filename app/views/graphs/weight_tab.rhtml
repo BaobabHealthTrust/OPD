@@ -67,11 +67,43 @@
     border-bottom:2px solid #fff;
   }
 
-
+#close{
+  position: absolute;
+  padding: 5px 10px;
+  background: white;
+  font-family: Arial, sans-serif;
+  color: black;
+  text-align: center;
+  display: block;
+  cursor: pointer;
+  top: -2px;
+  left: 851px;
+  border-bottom:2px solid #fff;
+  width: 73px;
+  z-index: 11;
+}
+#bigGraph{
+    width: 900px;
+    height: 300px;
+    position: absolute;
+    left: 30px;
+    top: 30px;
+    z-index: 10;
+  
+}
+#bgdiv{
+  position: absolute;
+  width : 950px;
+  top: -7px;
+  left: 1px;
+  background-color: white;
+  height: 337px;
+  z-index: 5;
+}
 </style>
 <div id="graph" class="nav">
   <ul>
-    <li><a class="active" href='#'>Weight</a></li>
+    <li><a onclick="showBigGraph();" class="active" href='#'>Weight</a></li>
     <!-- li><a href='#'>CD4</a></li>
     <li><a href='#'>CRT</a></li -->
   </ul>
@@ -137,4 +169,86 @@
   }
 
   graph();
+
+
+
+
+
+  function bigGraph() {
+    var patient_data = [
+      <% @min = Time.now
+         @max = Time.now
+         @obs = @patient.person.observations.find_by_concept_name("WEIGHT (KG)")
+		 @minWeight = 0
+		 @maxWeight = 0
+         @obs.sort_by{|obs| obs.obs_datetime}.each do |obs|
+			if !obs.answer_string.upcase.match(/UNKNOWN/i)
+				plot_value = obs.answer_string.to_f
+
+				if plot_value <= @minWeight
+					@minWeight = plot_value
+				end
+				if plot_value >= @maxWeight
+					@maxWeight = plot_value
+				end
+		       	@min = obs.obs_datetime if obs.obs_datetime < @min %>
+        		[<%= obs.obs_datetime.to_f -%>, <%= (plot_value rescue 0) -%>],
+			<% end %>
+		<% end %>
+    	];
+    <% @min = @max - 1.year if @min > @max - 1.year %>
+
+    var patient_ticks = [
+    <% @first = Time.mktime(@min.year, @min.month, 1) # move to the start of the month
+     @last = Time.mktime(@max.year + (@max.month == 12 ? 1 : 0), @max.month + (@max.month < 12 ? 1 : -11), 1)
+     while (@first <= @last) do -%>
+    [<%= @first.to_f -%>, "<div class='xLabel'><%= @first.strftime("%b") -%><br/><b><%= @first.strftime("%Y") if @first.month == 1 -%></b></div>"],
+    <% @first = Time.mktime(@first.year + (@first.month == 12 ? 1 : 0), @first.month + (@first.month < 12 ? 1 : -11), 1) -%>
+    <% end -%>
+];
+
+    var range = <%= 1.year.to_f -%>;
+    var min = <%= @min.to_f -%>;
+    var max = <%= @max.to_f -%>;
+    var max_tick = "<%= @max.strftime("%d-%b") -%>";
+//    patient_data.push([max, 0]);
+
+    function get_data(x1, x2) {
+      return [{
+        color: "green",
+        data: patient_data,
+        points: { show: true},
+        lines: { show: true, fill: true, fillColor: "rgb(61,235,61)" },
+        bars: { show: true }
+      }]
+    }
+
+    var plot_options = {
+      grid: { clickable: false, backgroundColor: "white", color:"black" },
+      yaxis: { min: <%= @minWeight %> - 5, max: <%= @maxWeight %> + 5},
+      xaxis: { min: max-range, max: max, ticks: patient_ticks}
+    }
+
+    var plot = jQuery.plot(jQuery("#bigGraph"), get_data(null, null), plot_options);
+  }
+
+  function showBigGraph(){
+    document.getElementById('bgDiv').style.display=""
+    bgraph = document.getElementById('bigGraph');
+    bgraph.style.display = ''
+    close = document.createElement('input')
+    close.type = "button"
+    close.id = 'close'
+    close.style.display = ''
+    close.value = "Close"
+    close.setAttribute("onclick", "hideBigGraph(this);")
+    document.getElementsByTagName('body')[0].appendChild(close);
+    bigGraph();
+  }
+
+  function hideBigGraph(obj){
+    obj.style.display = 'none';
+    document.getElementById('bigGraph').style.setProperty("display","none")
+    document.getElementById('bgDiv').style.setProperty("display","none")
+  }
 </script>
