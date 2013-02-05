@@ -639,13 +639,24 @@ class GenericPeopleController < ApplicationController
   
   def reassign_identifier
     new_national_id = reassign_national_id(params[:patient_id])
-    redirect_to :action => 'search', :identifier => new_national_id 
+    if new_national_id == true
+      person = Person.find(params[:patient_id])
+      print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+    else
+
+    end
   end
    
 private
   
   def reassign_national_id(patient_id)
-    PatientService.get_patient(Person.find(patient_id)).national_id
+    found_person = PatientService.get_patient(Person.find(patient_id))
+    patient = DDEService::Patient.new(Person.find(patient_id).patient)
+    if found_person.national_id.length != 6
+      patient.check_old_national_id(found_person.national_id)
+    else  
+      patient.check_duplicate_national_id
+    end
   end
    
 	def search_complete_url(found_person_id, primary_person_id)

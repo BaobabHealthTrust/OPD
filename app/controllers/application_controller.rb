@@ -3,6 +3,7 @@ COMMON_YEAR_DAYS_IN_MONTH = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 helper_method :allowed_hiv_viewer
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
+
     task = main_next_task(Location.current_location, patient, session_date)
     begin
       return task.url if task.present? && task.url.present?
@@ -72,7 +73,7 @@ helper_method :allowed_hiv_viewer
 	end
   
 	def is_encounter_available(patient, encounter_type, session_date)
-		is_vailable = false
+		is_available = false
 
 		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
 						                           patient.id, EncounterType.find_by_name(encounter_type).id, session_date],
@@ -88,11 +89,11 @@ helper_method :allowed_hiv_viewer
 	end
 
 	def encounter_available_ever(patient, encounter_type)
-		is_vailable = false
-
+		is_available = false
 		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ?",
 						                           patient.id, EncounterType.find_by_name(encounter_type).id],
 						                           :order =>'encounter_datetime DESC', :limit => 1)
+ 
 		if encounter_available.blank?
 			is_available = false
 		else
