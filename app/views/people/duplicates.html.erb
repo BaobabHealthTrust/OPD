@@ -8,6 +8,9 @@
     document.location = "/people/reassign_identifier?patient_id=" + patient_id;
   }
 
+  function selectP(patient_id) {
+    document.location = "/patients/pdash?found_person_id=" + patient_id;
+  }
 </script>
 
 <style>
@@ -67,7 +70,11 @@ div { -moz-user-select: none; }
       else
         color = 'white'
       end
-      row_number+=1 %>
+      row_number+=1 
+      
+      old_identification_number = patient.old_identification_number rescue nil
+      
+      %>
   <tr>
     <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
     <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.name || '&nbsp;' %></td>
@@ -75,8 +82,12 @@ div { -moz-user-select: none; }
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
     <td class="color_<%=color%> row_number_<%=row_number%>">
+    <%if not(patient.national_id == old_identification_number) || old_identification_number.blank?%>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectP('<%=patient.patient_id%>');">Select</a>
+    <%else%>
       <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.patient_id%>','<%=row_number%>','<%=color%>');">Reassign ID</a>
-  </td>
+    <%end%>
+    </td>
   </tr>
  <%end%>
 </table>

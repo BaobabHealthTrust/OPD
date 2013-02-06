@@ -94,20 +94,56 @@ class GenericPeopleController < ApplicationController
 				end
 			end
 		end
-#		records_per_page = CoreService.get_global_property_value('records_per_page') || 5
-		@relation = params[:relation]
-		@people = PatientService.person_search(params)
-		@patients = []
-=begin
-    unless @people.blank?
-			@current_page = @people.paginate(:page => params[:page], :per_page => records_per_page.to_i)
-		end
-=end
-		#(@current_page || []).each do | person |
-    @people.each do | person |
-			patient = PatientService.get_patient(person) rescue nil
-			@patients << patient
-		end
+
+    @relation = params[:relation]                                               
+    @people = PatientService.person_search(params)                              
+    @search_results = {}                                                        
+    @patients = []                                                              
+                                                                                
+    (PatientService.search_from_remote(params) || []).each do |data|            
+      results = PersonSearch.new(data["npid"]["value"])                         
+      results.national_id = data["npid"]["value"]                               
+      results.current_residence =data["person"]["data"]["addresses"]["city_village"]
+      results.person_id = 0                                                     
+      results.home_district = data["person"]["data"]["addresses"]["state_province"]
+      results.traditional_authority =  data["person"]["data"]["addresses"]["county_district"]
+      results.name = data["person"]["data"]["names"]["given_name"] + " " + data["person"]["data"]["names"]["family_name"]
+      gender = data["person"]["data"]["gender"]                                 
+      results.occupation = data["person"]["data"]["occupation"]                 
+      results.sex = (gender == 'M' ? 'Male' : 'Female')                         
+      results.birthdate_estimated = (data["person"]["data"]["birthdate_estimated"]).to_i
+      results.birth_date = birthdate_formatted((data["person"]["data"]["birthdate"]).to_date , results.birthdate_estimated)
+      results.birthdate = (data["person"]["data"]["birthdate"]).to_date         
+      results.age = cul_age(results.birthdate.to_date , results.birthdate_estimated)
+      @search_results[results.national_id] = results                            
+    end if create_from_dde_server
+
+    (@people || []).each do | person |                                          
+      patient = PatientService.get_patient(person) rescue nil                   
+      next if patient.blank?                                                    
+      results = PersonSearch.new(patient.national_id || patient.patient_id)     
+      results.national_id = patient.national_id                                 
+      results.birth_date = patient.birth_date                                   
+      results.current_residence = patient.current_residence                     
+      results.guardian = patient.guardian                                       
+      results.person_id = patient.person_id                                     
+      results.home_district = patient.home_district                             
+      results.traditional_authority = patient.traditional_authority             
+      results.mothers_surname = patient.mothers_surname                         
+      results.dead = patient.dead                                               
+      results.arv_number = patient.arv_number                                   
+      results.eid_number = patient.eid_number                                   
+      results.pre_art_number = patient.pre_art_number                           
+      results.name = patient.name                                               
+      results.sex = patient.sex                                                 
+      results.age = patient.age                                                 
+      @search_results.delete_if{|x,y| x == results.national_id}                 
+      @patients << results                                                      
+    end                                                                         
+                                                                                
+    (@search_results || {}).each do |npid , data |                              
+      @patients << data                                                         
+    end
 	end
 =begin  
   def search
@@ -626,6 +662,17 @@ class GenericPeopleController < ApplicationController
 		@patient_bean = PatientService.get_patient(@person)
 		render :layout => 'menu'
   end
+                                                                              
+  def demographics_remote                                                       
+    identifier = params[:person][:patient][:identifiers]["national_id"]         
+    people = PatientService.search_by_identifier(identifier)                    
+    render :text => "" and return  if people.blank?                             
+    patient = DDEService::Patient.new(people.first.patient)                     
+    patient.check_old_national_id(identifier)                                   
+    render :text => PatientService.remote_demographics(people.first).to_json rescue ""
+    return                                                                      
+  end 
+
 
   def duplicates                                                                
     @duplicates = []
@@ -650,6 +697,7 @@ class GenericPeopleController < ApplicationController
       person = Person.find(params[:patient_id])
       print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
     else
+      #To change this once we update check_old_national_id as in Registration and Radiology
       person = Person.find(params[:patient_id])
       print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
     end
