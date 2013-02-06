@@ -81,7 +81,7 @@ class GenericPeopleController < ApplicationController
 				end
 			end
 			if found_person
-
+       
         patient = DDEService::Patient.new(found_person.patient)
 
         patient.check_old_national_id(params[:identifier])
@@ -643,7 +643,8 @@ class GenericPeopleController < ApplicationController
       person = Person.find(params[:patient_id])
       print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
     else
-
+      person = Person.find(params[:patient_id])
+      print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
     end
   end
    
