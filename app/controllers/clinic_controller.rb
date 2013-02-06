@@ -112,6 +112,7 @@ class ClinicController < GenericClinicController
       ["Ask vitals before diagnosis (kids)", "/properties/creation?value=ask_vitals_questions_before_diagnosis"],
       ["Ask social determinats questions", "/properties/creation?value=ask_social_determinants_questions"],
       ["Ask complaints under vitals", "/properties/creation?value=ask_complaints_under_vitals"],
+      ["Ask complaints before diagnosis", "/properties/creation?value=ask_complaints_before_diagnosis"],
       #["Use Extended Staging Format", "/properties/creation?value=use_extended_staging_format"],
       #["Use User Selected Task(s)", "/properties/creation?value=use_user_selected_activities"],
       #["Use Filing Numbers", "/properties/creation?value=use_filing_numbers"],
