@@ -252,7 +252,14 @@ class GenericPeopleController < ApplicationController
     if params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
 			redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
 		else
-		
+      person = Person.find(params[:person][:id])
+      patient = DDEService::Patient.new(person.patient)
+      patient_id = PatientService.get_patient_identifier(person.patient, "National id")
+      if patient_id.length != 6
+        patient.check_old_national_id(patient_id)
+        print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
+      end
+      
 			redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
 
 			redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
