@@ -162,6 +162,32 @@ module DDEService
         end
       end
     end
+
+    def check_duplicate_national_id
+      given_name = self.person.names.first.given_name
+      family_name = self.person.names.first.family_name
+      gender =  self.person.gender
+      identifier =  self.national_id
+      create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+      if create_from_dde_server
+        if identifier.to_s.strip.length == 6 and identifier == self.national_id
+          dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+          dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+          dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+          uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/replace_national_id"
+          uri += "?identifier=#{identifier}&given_name=#{given_name}&family_name=#{family_name}&gender=#{gender}"
+          national_id = RestClient.get(uri)
+          
+          return false if national_id.blank?
+          national_id = national_id.gsub('"',"")
+          current_national_id = self.get_full_identifier("National id")
+          self.set_identifier("National id", national_id)
+          current_national_id.void("National ID version change")
+          return true
+        end
+      end
+    end
+    
   end
 
   def self.create_remote(received_params)
