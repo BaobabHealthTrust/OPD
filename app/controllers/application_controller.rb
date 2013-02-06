@@ -36,15 +36,17 @@ helper_method :allowed_hiv_viewer
 		end
 
 		patient_bean = PatientService.get_patient((Patient.find(patient.patient_id)).person)
+    ask_complaints_questions_before_diagnosis = CoreService.get_global_property_value('ask.complaints.before_diagnosis').to_s == "true" rescue false
 
 		if !session[:original_encounter].blank?
 			if (session[:original_encounter].upcase == 'ADMISSION DIAGNOSIS' || session[:original_encounter].upcase == 'DISCHARGE DIAGNOSIS' || session[:original_encounter].upcase == 'OUTPATIENT_DIAGNOSIS') && !is_encounter_available(patient, 'PRESENTING COMPLAINTS', session_date)
 				task.encounter_type = 'PRESENTING COMPLAINTS'
-				task.url = "/encounters/new/presenting_complaints?patient_id=#{patient.id}"
+				task.url = "/encounters/new/presenting_complaints?patient_id=#{patient.id}" if ask_complaints_questions_before_diagnosis
 			else
 				task.encounter_type = session[:original_encounter]
 				task.url = "/encounters/new/#{task.encounter_type}?patient_id=#{patient.id}"
 			end
+      session[:original_encounter] = nil
 		end
 
     ask_social_history_questions = CoreService.get_global_property_value('ask.social.history.questions').to_s == "true" rescue false
