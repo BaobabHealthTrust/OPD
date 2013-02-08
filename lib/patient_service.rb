@@ -792,13 +792,12 @@ EOF
   end
 
   def self.get_dde_person(person, current_date = Date.today)
-    #raise person.to_yaml
 		patient = PatientBean.new('')
-		patient.person_id = 0
+		patient.person_id = person["person"]["id"]
 		patient.patient_id = 0
 		patient.address = person["person"]["addresses"]["city_village"]
 		patient.national_id = person["person"]["patient"]["identifiers"]["National id"]
-		patient.national_id_with_dashes = person["person"]["patient"]["identifiers"]["National id"]
+		patient.old_identification_number = person["person"]["patient"]["identifiers"]["Old national id"]
 		patient.name = person["person"]["names"]["given_name"] + ' ' + person["person"]["names"]["family_name"] rescue nil
 		patient.first_name = person["person"]["names"]["given_name"] rescue nil
 		patient.last_name = person["person"]["names"]["family_name"] rescue nil
@@ -812,6 +811,7 @@ EOF
 		patient.occupation = person["person"]["occupation"]
 		patient.cell_phone_number = person["person"]["cell_phone_number"]
 		patient.home_phone_number = person["person"]["home_phone_number"]
+    
 		patient
 	end
   
@@ -1116,16 +1116,16 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
       uri += "?value=#{identifier}"                          
       p = JSON.parse(RestClient.get(uri)) rescue nil
-   
+      #p = pp.first
       return [] if p.blank?
       return "found duplicate identifiers" if p.count > 1
  
       birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
       birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
       birthdate_day = p["person"]["birthdate"].to_date.day rescue nil
-      birthdate_estimated = p["person"]["birthdate_estimated"] 
-      gender = p["person"]["gender"] == "F" ? "Female" : "Male"
-
+      birthdate_estimated = p["person"]["birthdate_estimated"] rescue nil
+      gender = p["person"]["gender"] == "F" ? "Female" : "Male" rescue nil
+     
       passed = {
        "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
        "age_estimate"=>"",
@@ -1139,7 +1139,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
        "patient"=>{"identifiers"=>{"National id" => p["person"]["value"]}},
        "birth_day"=>birthdate_day,
        "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
-       "names"=>{"family_name"=>"Mwale",
+       "names"=>{"family_name"=>p["person"]["family_name"],
        "given_name"=>p["person"]["given_name"],
        "middle_name"=>""},
        "birth_year"=>birthdate_year},
@@ -1170,21 +1170,25 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
       uri += "?value=#{identifier}"
       people = JSON.parse(RestClient.get(uri)) rescue nil
-
       return [] if people.blank?
 
       local_people = []
       people.each do |person|
-        birthdate_year = person["person"]["birthdate"].to_date.year rescue "Unknown"
-        birthdate_month = person["person"]["birthdate"].to_date.month rescue nil
-        birthdate_day = person["person"]["birthdate"].to_date.day rescue nil
-        birthdate_estimated = person["person"]["birthdate_estimated"]
-        gender = person["person"]["gender"] == "F" ? "Female" : "Male"
-
+        #unless person["npid"].blank?
+        national_id = person["npid"]["value"] rescue person["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
+        old_national_id = person["person"]["data"]["patient"]["identifiers"]["old_identification_number"] rescue nil
+        #else
+         # national_id = person["person"]["data"]["patient"]["identifiers"][" old_identification_number"]
+        #end
+        birthdate_year = person["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
+        birthdate_month = person["person"]["data"]["birthdate"].to_date.month rescue nil
+        birthdate_day = person["person"]["data"]["birthdate"].to_date.day rescue nil
+        birthdate_estimated = person["person"]["data"]["birthdate_estimated"]
+        gender = person["person"]["data"]["gender"] == "F" ? "Female" : "Male"
         passed_person = {
          "person"=>{"occupation"=>person["person"]["data"]["attributes"]["occupation"],
-         "age_estimate"=>"",
-         "birthdate" => person["person"]["birthdate"],
+         "age_estimate"=> person["person"]["data"]["birthdate_estimated"],
+         "birthdate" => person["person"]["data"]["birthdate"],
          "cell_phone_number"=>person["person"]["data"]["attributes"]["cell_phone_number"],
          "birth_month"=> birthdate_month ,
          "addresses"=>{"address1"=>person["person"]["data"]["addresses"]["county_district"],
@@ -1192,22 +1196,21 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
          "city_village"=>person["person"]["data"]["addresses"]["city_village"],
          "county_district"=>""},
          "gender"=> gender ,
-         "patient"=>{"identifiers"=>{"National id" => person["person"]["value"]}},
+         "patient"=>{"identifiers"=>{"National id" => national_id ,"Old national id" => old_national_id}},
          "birth_day"=>birthdate_day,
          "home_phone_number"=>person["person"]["data"]["attributes"]["home_phone_number"],
-         "names"=>{"family_name"=>"Mwale",
-         "given_name"=>person["person"]["given_name"],
+         "names"=>{"family_name"=>person["person"]["data"]["names"]["family_name"],
+         "given_name"=>person["person"]["data"]["names"]["given_name"],
          "middle_name"=>""},
-         "birth_year"=>birthdate_year},
-         "filter_district"=>"Chitipa",
-         "filter"=>{"region"=>"Northern Region",
+         "birth_year"=>birthdate_year,
+         "id" => person["person"]["id"]},
+         "filter_district"=>"",
+         "filter"=>{"region"=>"",
          "t_a"=>""},
          "relation"=>""
         }
-        
         local_people << passed_person
       end
-      #raise local_people.to_yaml
     return local_people
   end
   

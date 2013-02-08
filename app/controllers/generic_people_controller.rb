@@ -84,11 +84,15 @@ class GenericPeopleController < ApplicationController
        
         patient = DDEService::Patient.new(found_person.patient)
 
-        patient.check_old_national_id(params[:identifier])
-
+        national_id_replaced = patient.check_old_national_id(params[:identifier])
+        
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
-				else
+				elsif national_id_replaced
+          print_and_redirect("/patients/national_id_label?patient_id=#{found_person.id}", next_task(found_person.patient)) and return
+          redirect_to :controller =>'patients',:action => 'pdash',
+            :found_person_id => found_person.id, :relation => params[:relation] and return
+        else
 					redirect_to :controller =>'patients',:action => 'pdash', 
             :found_person_id => found_person.id, :relation => params[:relation] and return
 				end
@@ -99,10 +103,11 @@ class GenericPeopleController < ApplicationController
     @people = PatientService.person_search(params)                              
     @search_results = {}                                                        
     @patients = []                                                              
-                                                                                
-    (PatientService.search_from_remote(params) || []).each do |data|            
-      results = PersonSearch.new(data["npid"]["value"])                         
-      results.national_id = data["npid"]["value"]                               
+    
+    (PatientService.search_from_remote(params) || []).each do |data|
+      #raise data["legacy_ids"].to_s
+      results = PersonSearch.new(data["npid"]["value"]) rescue PersonSearch.new(data["legacy_ids"])
+      results.national_id =  data["legacy_ids"] #data["npid"]["value"] ||
       results.current_residence =data["person"]["data"]["addresses"]["city_village"]
       results.person_id = 0                                                     
       results.home_district = data["person"]["data"]["addresses"]["state_province"]
@@ -288,8 +293,7 @@ class GenericPeopleController < ApplicationController
     if params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
 			redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
 		else
-      #raise unless params[:person][:id].blank?.to_s
-      unless params[:person][:id] == 0
+      if params[:person][:id] != '0'
         person = Person.find(params[:person][:id])
         patient = DDEService::Patient.new(person.patient)
         patient_id = PatientService.get_patient_identifier(person.patient, "National id")
@@ -298,8 +302,6 @@ class GenericPeopleController < ApplicationController
           print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
         end
       end
-      
-      
 			redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
 
 			redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
@@ -691,11 +693,14 @@ class GenericPeopleController < ApplicationController
         @dde_duplicates << PatientService.get_dde_person(person)
       end      
     end
-
+    
     render :layout => 'menu'                                                    
   end 
   
   def reassign_identifier
+    unless params[:remote].blank?
+      create_and_reassign_national_id(params[:person_id])
+    else
     new_national_id = reassign_national_id(params[:patient_id])
     if new_national_id == true
       person = Person.find(params[:patient_id])
@@ -706,7 +711,13 @@ class GenericPeopleController < ApplicationController
       print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
     end
   end
-   
+  end
+
+  def create_and_reassign_national_id(person_id)
+    person = DDEService.create_from_remote(person_id)
+    print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+  end
+
 private
   
   def reassign_national_id(patient_id)
@@ -714,11 +725,11 @@ private
     patient = DDEService::Patient.new(Person.find(patient_id).patient)
     if found_person.national_id.length != 6
       patient.check_old_national_id(found_person.national_id)
-    else  
+    else
       patient.check_duplicate_national_id
     end
   end
-   
+ 
 	def search_complete_url(found_person_id, primary_person_id)
 		unless (primary_person_id.blank?)
 			# Notice this swaps them!

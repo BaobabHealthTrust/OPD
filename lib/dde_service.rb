@@ -102,17 +102,31 @@ module DDEService
     def check_old_national_id(identifier)
       create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
       if create_from_dde_server
-
-        if identifier.to_s.strip.length != 6 and identifier == self.national_id
-
+        if (identifier.to_s.strip.length != 6 and identifier == self.national_id)
+           replaced_national_id = replace_old_national_id(identifier)
+           return replaced_national_id
+        elsif (identifier.to_s.strip.length >= 6 and identifier != self.national_id)
+           replaced_national_id = replace_old_national_id(self.national_id)
+           return replaced_national_id
+        else
+           return false
+        end 
+      end
+   end
+   
+   def replace_old_national_id(identifier)
           dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
           dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
           dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
           uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
           uri += "?value=#{identifier}"
-          p = JSON.parse(RestClient.get(uri)).first rescue nil
+          output = RestClient.get(uri)
+          results = []
+          results.push output if output and output.match(/person/)
+          result = results.sort{|a,b|b.length <=> a.length}.first
+          result ? p = JSON.parse(result) : nil
 
-          return true if !p.blank?
+          return false unless p.blank?
 
           # birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"]
           person = {"person" => {
@@ -128,8 +142,7 @@ module DDEService
               },
               "patient" => {
                 "identifiers" => {
-                  "diabetes_number" => "",
-                  "old_identification_number" => self.national_id
+                  "old_identification_number" => identifier
                 }
               },
               "attributes" => {
@@ -154,10 +167,9 @@ module DDEService
           self.set_identifier("National id", national_id)
           self.set_identifier("Old Identification Number", current_national_id.identifier)
           current_national_id.void("National ID version change")
-        end
-      end
+          return true
     end
-
+    
     def check_duplicate_national_id
       given_name = self.person.names.first.given_name
       family_name = self.person.names.first.family_name
@@ -183,6 +195,56 @@ module DDEService
       end
     end
     
+  end
+
+  def self.create_from_remote(person_id)
+    dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+    dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+    uri += "?person_id=#{person_id}"
+    output = RestClient.get(uri)
+    p = JSON.parse(output)
+    birthdate_year = p["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
+      birthdate_month = p["person"]["data"]["birthdate"].to_date.month rescue nil
+      birthdate_day = p["person"]["data"]["birthdate"].to_date.day rescue nil
+      birthdate_estimated = p["person"]["birthdate_estimated"]
+      gender = p["person"]["data"]["gender"] == "F" ? "Female" : "Male"
+
+      passed = {
+        "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
+          "age_estimate"=>"",
+          "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
+          "birth_month"=> birthdate_month ,
+          "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
+            "address2"=>p["person"]["data"]["addresses"]["address2"],
+            "city_village"=>p["person"]["data"]["addresses"]["city_village"],
+            "county_district"=>""},
+          "gender"=> gender ,
+          "patient"=>{"identifiers"=>{"National id" => p["npid"]["value"]}},
+          "birth_day"=>birthdate_day,
+          "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
+          "names"=>{"family_name"=>p["person"]["data"]["names"]["family_name"],
+            "given_name"=>p["person"]["data"]["names"]["given_name"],
+            "middle_name"=>""},
+          "birth_year"=>birthdate_year},
+        "filter_district"=>"",
+        "filter"=>{"region"=>"",
+          "t_a"=>""},
+        "relation"=>""
+      }
+
+     person = self.create_from_form(passed["person"])
+=begin
+     if person
+       patient_identifier = PatientIdentifier.new
+			 patient_identifier.type = PatientIdentifierType.find_by_name("Old Identification Number")
+			 patient_identifier.identifier = p["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
+			 patient_identifier.patient = person.patient
+       patient_identifier.save
+     end
+=end
+     return person
   end
 
   def self.create_remote(received_params)
@@ -322,7 +384,6 @@ module DDEService
   end
 
 	def self.create_from_form(params)
-    
 		address_params = params["addresses"]
 		names_params = params["names"]
 		patient_params = params["patient"]
