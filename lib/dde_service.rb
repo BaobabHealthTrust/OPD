@@ -235,15 +235,6 @@ module DDEService
       }
 
      person = self.create_from_form(passed["person"])
-=begin
-     if person
-       patient_identifier = PatientIdentifier.new
-			 patient_identifier.type = PatientIdentifierType.find_by_name("Old Identification Number")
-			 patient_identifier.identifier = p["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
-			 patient_identifier.patient = person.patient
-       patient_identifier.save
-     end
-=end
      return person
   end
 
