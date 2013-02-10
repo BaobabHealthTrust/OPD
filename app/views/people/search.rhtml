@@ -140,6 +140,10 @@ end -%>
       }
       
       addFields();
+      try{                                                                      
+        pos = parseInt(pos) + 1;                                                
+        $('identifier').value = people[pos]['Patient National ID'];             
+      }catch(e){} 
     }
   }
 
