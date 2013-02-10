@@ -106,9 +106,9 @@ class GenericPeopleController < ApplicationController
     @patients = []                                                              
     
     (PatientService.search_from_remote(params) || []).each do |data|
-      #raise data["legacy_ids"].to_s
       results = PersonSearch.new(data["npid"]["value"]) rescue PersonSearch.new(data["legacy_ids"])
-      results.national_id =  data["legacy_ids"] #data["npid"]["value"] ||
+      results.national_id = data["legacy_ids"] 
+      results.national_id = data["npid"]["value"] if results.national_id.blank?
       results.current_residence =data["person"]["data"]["addresses"]["city_village"]
       results.person_id = 0                                                     
       results.home_district = data["person"]["data"]["addresses"]["state_province"]

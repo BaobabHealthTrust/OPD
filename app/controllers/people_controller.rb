@@ -25,6 +25,9 @@ class PeopleController < GenericPeopleController
     success = false
     Person.session_datetime = session[:datetime].to_date rescue Date.today
     identifier = params[:identifier] rescue nil
+    if identifier.blank?
+      identifier = params[:person][:patient][:identifiers]['National id'] 
+    end
 
     if create_from_dde_server
       unless identifier.blank?
@@ -55,14 +58,15 @@ class PeopleController < GenericPeopleController
     end
     
     if params[:person][:patient] && success
-		  	if !params[:identifier].empty?
+=begin
+		  	unless identifier.blank?
 					patient_identifier = PatientIdentifier.new
 					patient_identifier.type = PatientIdentifierType.find_by_name("National id")
-					patient_identifier.identifier = params[:identifier]
+					patient_identifier.identifier = identifier
 					patient_identifier.patient = person.patient
 					patient_identifier.save!
 				end
-
+=end
       PatientService.patient_national_id_label(person.patient)
       unless (params[:relation].blank?)
         redirect_to search_complete_url(person.id, params[:relation]) and return
