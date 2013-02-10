@@ -66,7 +66,6 @@ class GenericPeopleController < ApplicationController
 		found_person = nil
 		if params[:identifier]
 			local_results = PatientService.search_by_identifier(params[:identifier])
-
 			if local_results.length > 1
         redirect_to :action => 'duplicates' ,:search_params => params
         return
@@ -80,15 +79,17 @@ class GenericPeopleController < ApplicationController
 					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.blank?
 				end
 			end
-			if found_person
-       
+			if  found_person
         patient = DDEService::Patient.new(found_person.patient)
-
         national_id_replaced = patient.check_old_national_id(params[:identifier])
+        if national_id_replaced.to_s != "true" and national_id_replaced.to_s !="false"
+          redirect_to :action => 'dde_duplicates' ,:search_params => params
+          return
+        end
         
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
-				elsif national_id_replaced
+				elsif national_id_replaced.to_s == "true"
           print_and_redirect("/patients/national_id_label?patient_id=#{found_person.id}", next_task(found_person.patient)) and return
           redirect_to :controller =>'patients',:action => 'pdash',
             :found_person_id => found_person.id, :relation => params[:relation] and return
@@ -695,11 +696,23 @@ class GenericPeopleController < ApplicationController
     end
     
     render :layout => 'menu'                                                    
-  end 
+  end
+
+  def dde_duplicates
+    if create_from_dde_server
+      @dde_duplicates = []
+      PatientService.search_from_dde_by_identifier(params[:search_params][:identifier]).each do |person|
+        @dde_duplicates << PatientService.get_dde_person(person)
+      end
+    end
+    render :layout => 'menu'
+  end
   
   def reassign_identifier
-    unless params[:remote].blank?
+    if not params[:remote].blank?
       create_and_reassign_national_id(params[:person_id])
+    elsif not params[:local_and_remote].blank?
+      create_and_reassign_national_id(params[:person_id],true)
     else
     new_national_id = reassign_national_id(params[:patient_id])
     if new_national_id == true
@@ -713,8 +726,8 @@ class GenericPeopleController < ApplicationController
   end
   end
 
-  def create_and_reassign_national_id(person_id)
-    person = DDEService.create_from_remote(person_id)
+  def create_and_reassign_national_id(person_id,local=false)
+    person = DDEService.create_from_remote(person_id,local)
     print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
   end
 
