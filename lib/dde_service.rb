@@ -121,11 +121,9 @@ module DDEService
           uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
           uri += "?value=#{identifier}"
           output = RestClient.get(uri)
-          results = []
-          results.push output if output and output.match(/person/)
-          result = results.sort{|a,b|b.length <=> a.length}.first
-          result ? p = JSON.parse(result) : nil
+          p = JSON.parse(output)
 
+          return p.count if p.count > 1
           return false unless p.blank?
 
           # birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"]
@@ -197,7 +195,7 @@ module DDEService
     
   end
 
-  def self.create_from_remote(person_id)
+  def self.create_from_remote(person_id,local)
     dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
     dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
     dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
@@ -208,18 +206,17 @@ module DDEService
     birthdate_year = p["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
       birthdate_month = p["person"]["data"]["birthdate"].to_date.month rescue nil
       birthdate_day = p["person"]["data"]["birthdate"].to_date.day rescue nil
-      birthdate_estimated = p["person"]["birthdate_estimated"]
+      birthdate_estimated = p["person"]["data"]["birthdate_estimated"]
       gender = p["person"]["data"]["gender"] == "F" ? "Female" : "Male"
-
       passed = {
         "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
-          "age_estimate"=>"",
+          "age_estimate"=> birthdate_estimated,
           "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
           "birth_month"=> birthdate_month ,
           "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
             "address2"=>p["person"]["data"]["addresses"]["address2"],
             "city_village"=>p["person"]["data"]["addresses"]["city_village"],
-            "county_district"=>""},
+            "county_district"=>p["person"]["data"]["addresses"]["state_province"]},
           "gender"=> gender ,
           "patient"=>{"identifiers"=>{"National id" => p["npid"]["value"]}},
           "birth_day"=>birthdate_day,
@@ -233,9 +230,32 @@ module DDEService
           "t_a"=>""},
         "relation"=>""
       }
+      
+     if local
+       old_national_id = p["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
+       current_national_id = PatientIdentifier.find_by_identifier(old_national_id)
 
-     person = self.create_from_form(passed["person"])
-     return person
+       patient_identifier = PatientIdentifier.new
+       patient_identifier.type = PatientIdentifierType.find_by_name("National id")
+       patient_identifier.identifier = p["npid"]["value"]
+       patient_identifier.patient = current_national_id.patient
+			 patient_identifier.save!
+
+       patient_identifier = PatientIdentifier.new
+       patient_identifier.type = PatientIdentifierType.find_by_name("Old Identification Number")
+       patient_identifier.identifier = current_national_id.identifier
+       patient_identifier.patient = current_national_id.patient
+			 patient_identifier.save!
+
+       current_national_id.voided = true
+       current_national_id.voided_by = 1
+       current_national_id.void_reason = "National ID version change"
+       current_national_id.date_voided =  Time.now()
+       return current_national_id.patient.person
+     else
+       person = self.create_from_form(passed["person"])
+       return person
+     end
   end
 
   def self.create_remote(received_params)
@@ -348,7 +368,7 @@ module DDEService
 
       passed = {
         "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
-          "age_estimate"=>"",
+          "age_estimate"=>  birthdate_estimated,
           "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
           "birth_month"=> birthdate_month ,
           "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
@@ -363,8 +383,8 @@ module DDEService
             "given_name"=>p["person"]["given_name"],
             "middle_name"=>""},
           "birth_year"=>birthdate_year},
-        "filter_district"=>"Chitipa",
-        "filter"=>{"region"=>"Northern Region",
+        "filter_district"=>"",
+        "filter"=>{"region"=>"",
           "t_a"=>""},
         "relation"=>""
       }

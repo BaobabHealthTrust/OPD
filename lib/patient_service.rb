@@ -1105,7 +1105,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
     people = PatientIdentifier.find_all_by_identifier(identifier).map{|id| 
       id.patient.person
     } unless identifier.blank? rescue nil
-   
+    
     return people unless people.blank?
 
     create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
@@ -1115,50 +1115,56 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
       uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
       uri += "?value=#{identifier}"                          
-      p = JSON.parse(RestClient.get(uri)) rescue nil
-      #p = pp.first
-      return [] if p.blank?
-      return "found duplicate identifiers" if p.count > 1
- 
-      birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
-      birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
-      birthdate_day = p["person"]["birthdate"].to_date.day rescue nil
-      birthdate_estimated = p["person"]["birthdate_estimated"] rescue nil
+      output = JSON.parse(RestClient.get(uri)) rescue nil
+      return [] if output.blank?
+      return "found duplicate identifiers" if output.count > 1
+      p = output.first
+      unless p.include?"npid"
+        person_id =  p["person"]["id"]
+        load "dde_service.rb"
+        person = DDEService.create_from_remote(person_id,false)
+        return person
+      else
+      birthdate_year = p["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
+      birthdate_month = p["person"]["data"]["birthdate"].to_date.month rescue nil
+      birthdate_day = p["person"]["data"]["birthdate"].to_date.day rescue nil
+      birthdate_estimated = p["person"]["data"]["birthdate_estimated"] rescue nil
       gender = p["person"]["gender"] == "F" ? "Female" : "Male" rescue nil
-     
+
       passed = {
        "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
-       "age_estimate"=>"",
+       "age_estimate"=> birthdate_estimated,
        "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
        "birth_month"=> birthdate_month ,
        "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
        "address2"=>p["person"]["data"]["addresses"]["address2"],
        "city_village"=>p["person"]["data"]["addresses"]["city_village"],
-       "county_district"=>""},
+       "county_district"=> p["person"]["data"]["addresses"]["state_province"]},
        "gender"=> gender ,
-       "patient"=>{"identifiers"=>{"National id" => p["person"]["value"]}},
+       "patient"=>{"identifiers"=>{"National id" => p["npid"]["value"]}},
        "birth_day"=>birthdate_day,
        "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
-       "names"=>{"family_name"=>p["person"]["family_name"],
-       "given_name"=>p["person"]["given_name"],
+       "names"=>{"family_name"=>p["person"]["data"]["names"]["family_name"],
+       "given_name"=>p["person"]["data"]["names"]["given_name"],
        "middle_name"=>""},
        "birth_year"=>birthdate_year},
-       "filter_district"=>"Chitipa",
-       "filter"=>{"region"=>"Northern Region",
+       "filter_district"=>"",
+       "filter"=>{"region"=>"",
        "t_a"=>""},
        "relation"=>""
       }
 
+        raise passed["person"].to_yaml
+      #passed_national_id = (passed["person"]["patient"]["identifiers"]["National id"])
 
-      passed_national_id = (passed["person"]["patient"]["identifiers"]["National id"])
-                                                                                
-      unless passed_national_id.blank?                                          
-        patient = PatientIdentifier.find(:first,                                
-          :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
-        return [patient.person] unless patient.blank?                           
+      #unless passed_national_id.blank?
+      #  patient = PatientIdentifier.find(:first,
+      #    :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
+      #  return [patient.person] unless patient.blank?
+      #end
+
+      #return [self.create_from_form(passed["person"])]
       end
-
-      return [self.create_from_form(passed["person"])]
     end
     return people
   end
@@ -1187,7 +1193,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
         gender = person["person"]["data"]["gender"] == "F" ? "Female" : "Male"
         passed_person = {
          "person"=>{"occupation"=>person["person"]["data"]["attributes"]["occupation"],
-         "age_estimate"=> person["person"]["data"]["birthdate_estimated"],
+         "age_estimate"=> birthdate_estimated ,
          "birthdate" => person["person"]["data"]["birthdate"],
          "cell_phone_number"=>person["person"]["data"]["attributes"]["cell_phone_number"],
          "birth_month"=> birthdate_month ,
