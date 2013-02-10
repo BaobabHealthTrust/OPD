@@ -12,8 +12,8 @@
     document.location = "/patients/pdash?found_person_id=" + patient_id;
   }
 
-  function assignNewID(person_id,remote){
-   document.location = "/people/reassign_identifier?person_id=" + person_id + "&local_and_remote="+ remote;
+  function assignNewID(person_id,remote,patient_id){
+   document.location = "/people/reassign_identifier?person_id=" + person_id + "&local_and_remote="+ remote + "&patient_id=" + patient_id;
   }
 
   function selectByIdentifier(identifier) {
@@ -71,7 +71,6 @@ div { -moz-user-select: none; }
 <div>
 
 
-<% unless @duplicates.blank? %>
 <h2>Patients with similar identifiers</h2><br />
 <h3>Reassign the patient in front of you a new identifier</h3>
 <table>
@@ -81,20 +80,10 @@ div { -moz-user-select: none; }
     <td width='50' style="text-align:center;">DOB</td>
     <td width='50' style="text-align:center;">Gender</td>
     <td width='50' style="text-align:center;">Age</td>
-    <td width='90'>&nbsp;</td>
   </tr>
   <%color = 'white'
-    row_number = 0
-    ( @duplicates || {} ).each do | patient | 
-      if color == 'white'
-        color = 'blue'
-      else
-        color = 'white'
-      end
-      row_number+=1 
-      
-      old_identification_number = patient.old_identification_number rescue nil
-      
+    patient = @duplicate
+    row_number = 1
       %>
   <tr>
     <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
@@ -102,17 +91,9 @@ div { -moz-user-select: none; }
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.birth_date || '&nbsp;' %> </td>
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
-    <td class="color_<%=color%> row_number_<%=row_number%>">
-    <%if not(patient.national_id == old_identification_number) || old_identification_number.blank?%>
-      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectP('<%=patient.patient_id%>');">Select</a>
-    <%else%>
-      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.patient_id%>','<%=row_number%>','<%=color%>');">Reassign ID</a>
-    <%end%>
-    </td>
   </tr>
- <%end%>
 </table>
-<%else @dde_duplicates%>
+<%if @dde_duplicates%>
 <h2>Patients with similar identifiers</h2><br />
 <h3>Select a patient whose id you want to change</h3>
 <table>
@@ -152,7 +133,7 @@ div { -moz-user-select: none; }
           <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectP('<%=patient.patient_id%>');">Select</a>
         <%end%>
     <%else%>
-      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="assignNewID('<%=patient.person_id%>','<%=remote %>','<%=row_number%>','<%=color%>');">Reassign ID</a>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="assignNewID('<%=patient.person_id%>','<%=remote %>','<%=@duplicate.patient_id%>','<%=row_number%>','<%=color%>');">Reassign ID</a>
     <%end%>
     </td>
   </tr>
