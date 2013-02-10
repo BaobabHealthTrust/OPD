@@ -122,10 +122,24 @@ module DDEService
           uri += "?value=#{identifier}"
           output = RestClient.get(uri)
           p = JSON.parse(output)
-
           return p.count if p.count > 1
+          if  p.count == 1
+            p = p.first
+            person_id = p["person"]["id"]
+            uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+            uri += "?person_id=#{person_id}"
+            output = RestClient.get(uri)
+            person = JSON.parse(output)
+            national_id = person["npid"]["value"]
+            current_national_id = self.get_full_identifier("National id")
+            self.set_identifier("National id", national_id)
+            self.set_identifier("Old Identification Number", current_national_id.identifier)
+            current_national_id.void("National ID version change")
+            return true
+          end unless p.blank?
+          
           return false unless p.blank?
-
+          
           # birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"]
           person = {"person" => {
               "birthdate_estimated" => (self.person.birthdate_estimated rescue nil),
@@ -195,7 +209,7 @@ module DDEService
     
   end
 
-  def self.create_from_remote(person_id,local)
+  def self.create_from_remote(person_id,local,patient_id)
     dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
     dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
     dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
@@ -230,21 +244,21 @@ module DDEService
           "t_a"=>""},
         "relation"=>""
       }
-      
-     if local
-       old_national_id = p["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
-       current_national_id = PatientIdentifier.find_by_identifier(old_national_id)
-
+     if local and patient_id
+       current_national_id = PatientIdentifier.find(:first,
+                            :conditions => ["patient_id = ? AND voided = 0 AND
+                            identifier_type = ?",patient_id , 3])
+  
        patient_identifier = PatientIdentifier.new
        patient_identifier.type = PatientIdentifierType.find_by_name("National id")
        patient_identifier.identifier = p["npid"]["value"]
-       patient_identifier.patient = current_national_id.patient
+       patient_identifier.patient_id = patient_id
 			 patient_identifier.save!
 
        patient_identifier = PatientIdentifier.new
        patient_identifier.type = PatientIdentifierType.find_by_name("Old Identification Number")
        patient_identifier.identifier = current_national_id.identifier
-       patient_identifier.patient = current_national_id.patient
+       patient_identifier.patient_id = patient_id
 			 patient_identifier.save!
 
        current_national_id.voided = true

@@ -217,7 +217,7 @@ module PatientService
   end
 
   def self.initial_encounter
-    Encounter.find_by_sql("SELECT * FROM encounter ORDER BY encounter_datetime LIMIT 1").first
+  	 Encounter.find_by_sql("SELECT * FROM encounter ORDER BY encounter_datetime LIMIT 1").first
   end
   
   def self.create_remote_person(received_params)
