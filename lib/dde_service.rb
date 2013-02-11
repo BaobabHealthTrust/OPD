@@ -248,7 +248,7 @@ module DDEService
        current_national_id = PatientIdentifier.find(:first,
                             :conditions => ["patient_id = ? AND voided = 0 AND
                             identifier_type = ?",patient_id , 3])
-  
+
        patient_identifier = PatientIdentifier.new
        patient_identifier.type = PatientIdentifierType.find_by_name("National id")
        patient_identifier.identifier = p["npid"]["value"]
@@ -265,6 +265,7 @@ module DDEService
        current_national_id.voided_by = 1
        current_national_id.void_reason = "National ID version change"
        current_national_id.date_voided =  Time.now()
+       current_national_id.save!
        return current_national_id.patient.person
      else
        person = self.create_from_form(passed["person"])

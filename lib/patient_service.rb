@@ -14,14 +14,15 @@ module PatientService
                                                                                 
     return JSON.parse(RestClient.post(uri,params))                              
   end
-
+  
   def self.create_patient_from_dde(params)
+    create_new = params["create_new"]
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
 		patient_params = params["person"]["patient"]
     birthday_params = params["person"]
 		params_to_process = params.reject{|key,value| 
-      key.match(/identifiers|addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) 
+      key.match(/identifiers|addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy|create_new|patient_id/)
     }
 		birthday_params = params_to_process["person"].reject{|key,value| key.match(/gender/) }
 		person_params = params_to_process["person"].reject{|key,value| key.match(/birth_|age_estimate|occupation/) }
@@ -81,7 +82,9 @@ module PatientService
           "names"=>{"family_name"=> names_params["family_name"], 
             "given_name"=> names_params["given_name"]
           }}}}
-
+    unless create_new.blank?
+      passed_params.merge!({"create_new" => true})
+    end
     if !params["remote"]
       
       @dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
@@ -92,16 +95,44 @@ module PatientService
     
       uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"                          
       recieved_params = RestClient.post(uri,passed_params)      
-                                          
+   
       national_id = JSON.parse(recieved_params)["npid"]["value"]
     else
       national_id = params["person"]["patient"]["identifiers"]["National_id"]
     end
+    
+    if create_new == "true"
+      patient_id = params["patient_id"]
+      person = Person.find(patient_id)
       
-	  person = self.create_from_form(params[:person])
-    identifier_type = PatientIdentifierType.find_by_name("National id") || PatientIdentifierType.find_by_name("Unknown id")
-    person.patient.patient_identifiers.create("identifier" => national_id, 
+      current_national_id = PatientIdentifier.find(:first,
+                            :conditions => ["patient_id = ? AND voided = 0 AND
+                            identifier_type = ?",patient_id , 3])
+
+      patient_identifier = PatientIdentifier.new
+      patient_identifier.type = PatientIdentifierType.find_by_name("National id")
+      patient_identifier.identifier = national_id
+      patient_identifier.patient_id = patient_id
+			patient_identifier.save!
+
+      patient_identifier = PatientIdentifier.new
+      patient_identifier.type = PatientIdentifierType.find_by_name("Old Identification Number")
+      patient_identifier.identifier = current_national_id.identifier
+      patient_identifier.patient_id = patient_id
+			patient_identifier.save!
+
+      current_national_id.voided = true
+      current_national_id.voided_by = 1
+      current_national_id.void_reason = "National ID version change"
+      current_national_id.date_voided =  Time.now()
+      current_national_id.save!
+    else
+      person = self.create_from_form(params[:person])
+      identifier_type = PatientIdentifierType.find_by_name("National id") || PatientIdentifierType.find_by_name("Unknown id")
+      person.patient.patient_identifiers.create("identifier" => national_id,
       "identifier_type" => identifier_type.patient_identifier_type_id) unless national_id.blank?
+    end
+
     return person
   end
 
@@ -812,7 +843,6 @@ EOF
 		patient.occupation = person["person"]["occupation"]
 		patient.cell_phone_number = person["person"]["cell_phone_number"]
 		patient.home_phone_number = person["person"]["home_phone_number"]
-    
 		patient
 	end
   
