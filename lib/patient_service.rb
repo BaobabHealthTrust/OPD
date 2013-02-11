@@ -2,7 +2,8 @@ module PatientService
 	include CoreService
 	require 'bean'
 	require 'json'
-	require 'rest_client'                                                           
+	require 'rest_client'
+  require 'dde_service'
   
   def self.search_from_remote(params)                                           
     return [] if params[:given_name].blank?                                     
@@ -1121,7 +1122,6 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       p = output.first
       unless p.include?"npid"
         person_id =  p["person"]["id"]
-        load "dde_service.rb"
         person = DDEService.create_from_remote(person_id,false)
         return person
       else
@@ -1154,16 +1154,14 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
        "relation"=>""
       }
 
-        raise passed["person"].to_yaml
-      #passed_national_id = (passed["person"]["patient"]["identifiers"]["National id"])
+      passed_national_id = (passed["person"]["patient"]["identifiers"]["National id"])
 
-      #unless passed_national_id.blank?
-      #  patient = PatientIdentifier.find(:first,
-      #    :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
-      #  return [patient.person] unless patient.blank?
-      #end
-
-      #return [self.create_from_form(passed["person"])]
+      unless passed_national_id.blank?
+        patient = PatientIdentifier.find(:first,
+          :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
+        return [patient.person] unless patient.blank?
+      end
+      return [self.create_from_form(passed["person"])]
       end
     end
     return people
