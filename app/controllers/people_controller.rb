@@ -27,13 +27,16 @@ class PeopleController < GenericPeopleController
     identifier = params[:identifier] rescue nil
     if identifier.blank?
       identifier = params[:person][:patient][:identifiers]['National id'] 
-    end
+    end rescue nil
 
     if create_from_dde_server
       unless identifier.blank?
-        if identifier.length == 6
-            success = true
-            person = PatientService.create_from_form(params[:person])
+        params[:person].merge!({"identifiers" => {"National id" => identifier}})
+        success = true
+        person = PatientService.create_from_form(params[:person])
+        if identifier.length != 6
+           patient = DDEService::Patient.new(person.patient)
+           national_id_replaced = patient.check_old_national_id(identifier)
         end
       else
         person = PatientService.create_patient_from_dde(params)

@@ -173,7 +173,7 @@ module DDEService
               }
             }
           }
-
+          
           current_national_id = self.get_full_identifier("National id")
           national_id = DDEService.create_patient_from_dde(person, true)
           self.set_identifier("National id", national_id)
@@ -604,7 +604,7 @@ module DDEService
           },
           "patient"=>
             {"identifiers"=>
-              {"diabetes_number"=>""}},
+              {"old_identification_number" => params["person"]["patient"]["identifiers"]["old_identification_number"]}},
           "gender"=> person_params["gender"],
           "birthdate"=> birthdate,
           "birthdate_estimated"=> birthdate_estimated ,

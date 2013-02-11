@@ -291,7 +291,7 @@ class GenericPeopleController < ApplicationController
 
 	# This method is just to allow the select box to submit, we could probably do this better
 	def select
-    if not params[:identifier].blank?
+    if !params[:identifier].blank? && !params[:given_name].blank? && !params[:family_name].blank?
 			redirect_to :action => :search, :identifier => params[:identifier]
     elsif params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
 			redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
