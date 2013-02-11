@@ -27,7 +27,7 @@ class PeopleController < GenericPeopleController
     identifier = params[:identifier] rescue nil
     if identifier.blank?
       identifier = params[:person][:patient][:identifiers]['National id'] 
-    end
+    end rescue nil
 
     if create_from_dde_server
       unless identifier.blank?
