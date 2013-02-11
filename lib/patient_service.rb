@@ -1157,7 +1157,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       unless p.include?"npid"
         person_id =  p["person"]["id"]
         person = DDEService.create_from_remote(person_id,false)
-        return person
+        return [person]
       else
       birthdate_year = p["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
       birthdate_month = p["person"]["data"]["birthdate"].to_date.month rescue nil

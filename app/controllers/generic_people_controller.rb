@@ -79,7 +79,7 @@ class GenericPeopleController < ApplicationController
 					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.blank?
 				end
 			end
-			if  found_person
+			if found_person
         patient = DDEService::Patient.new(found_person.patient)
         national_id_replaced = patient.check_old_national_id(params[:identifier])
         if national_id_replaced.to_s != "true" and national_id_replaced.to_s !="false"
