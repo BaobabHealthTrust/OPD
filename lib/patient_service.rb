@@ -1213,7 +1213,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       local_people = []
       people.each do |person|
         #unless person["npid"].blank?
-        national_id = person["npid"]["value"] rescue person["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
+        national_id = person['person']["value"] rescue person["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
         old_national_id = person["person"]["data"]["patient"]["identifiers"]["old_identification_number"] rescue nil
         #else
          # national_id = person["person"]["data"]["patient"]["identifiers"][" old_identification_number"]

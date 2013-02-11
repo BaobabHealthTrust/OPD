@@ -70,6 +70,19 @@ class GenericPeopleController < ApplicationController
         redirect_to :action => 'duplicates' ,:search_params => params
         return
 			elsif local_results.length == 1
+        if create_from_dde_server
+          dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+          dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+          dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+          uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+          uri += "?value=#{params[:identifier]}"                                         
+          output = RestClient.get(uri)                                          
+          p = JSON.parse(output)                                                
+          if p.count > 1 
+            redirect_to :action => 'dde_duplicates' ,:search_params => params
+            return
+          end
+        end
 				found_person = local_results.first
 			else
 				# TODO - figure out how to write a test for this
@@ -80,13 +93,15 @@ class GenericPeopleController < ApplicationController
 				end
 			end
 			if found_person
-        patient = DDEService::Patient.new(found_person.patient)
-        national_id_replaced = patient.check_old_national_id(params[:identifier])
-        if national_id_replaced.to_s != "true" and national_id_replaced.to_s !="false"
-          redirect_to :action => 'dde_duplicates' ,:search_params => params
-          return
+        if params[:identifier].length != 6
+          patient = DDEService::Patient.new(found_person.patient)
+          national_id_replaced = patient.check_old_national_id(params[:identifier])
+          if national_id_replaced.to_s != "true" and national_id_replaced.to_s !="false"
+            redirect_to :action => 'dde_duplicates' ,:search_params => params
+            return
+          end
         end
-    
+
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
 				elsif national_id_replaced.to_s == "true"
