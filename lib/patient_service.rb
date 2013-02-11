@@ -2,7 +2,18 @@ module PatientService
 	include CoreService
 	require 'bean'
 	require 'json'
-	require 'rest_client'                                                           
+	require 'rest_client'
+  require 'dde_service'
+  
+  def self.search_from_remote(params)                                           
+    return [] if params[:given_name].blank?                                     
+    dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+    dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json/"
+                                                                                
+    return JSON.parse(RestClient.post(uri,params))                              
+  end
 
   def self.create_patient_from_dde(params)
 	  address_params = params["person"]["addresses"]
@@ -207,7 +218,7 @@ module PatientService
   end
 
   def self.initial_encounter
-    Encounter.find_by_sql("SELECT * FROM encounter ORDER BY encounter_datetime LIMIT 1").first
+  	 Encounter.find_by_sql("SELECT * FROM encounter ORDER BY encounter_datetime LIMIT 1").first
   end
   
   def self.create_remote_person(received_params)
@@ -777,8 +788,33 @@ EOF
     patient.office_phone_number = get_attribute(person, 'Office phone number')
     patient.home_phone_number = get_attribute(person, 'Home phone number')
     patient.guardian = art_guardian(person.patient) rescue nil 
+    patient.old_identification_number = get_patient_identifier(person.patient,"Old Identification Number")
     patient
   end
+
+  def self.get_dde_person(person, current_date = Date.today)
+		patient = PatientBean.new('')
+		patient.person_id = person["person"]["id"]
+		patient.patient_id = 0
+		patient.address = person["person"]["addresses"]["city_village"]
+		patient.national_id = person["person"]["patient"]["identifiers"]["National id"]
+		patient.old_identification_number = person["person"]["patient"]["identifiers"]["Old national id"]
+		patient.name = person["person"]["names"]["given_name"] + ' ' + person["person"]["names"]["family_name"] rescue nil
+		patient.first_name = person["person"]["names"]["given_name"] rescue nil
+		patient.last_name = person["person"]["names"]["family_name"] rescue nil
+		patient.sex = person["person"]["gender"]
+    patient.birth_date = person["person"]["birthdate"].to_date.strftime("%d/%b/%Y")
+    patient.age = age_dde(patient,current_date)
+		patient.home_district = person["filter_district"]
+		patient.traditional_authority = person["filter"]["t_a"]
+		patient.current_residence = person["person"]["addresses"]["city_village"]
+		patient.landmark = person["person"]["addresses"]["address_1"]
+		patient.occupation = person["person"]["occupation"]
+		patient.cell_phone_number = person["person"]["cell_phone_number"]
+		patient.home_phone_number = person["person"]["home_phone_number"]
+    
+		patient
+	end
   
   def self.art_guardian(patient)
     person_id = Relationship.find(:first,:order => "date_created DESC",
@@ -802,6 +838,20 @@ EOF
     birth_date=person.birthdate
     estimate=person.birthdate_estimated==1
     patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  && 
+        today.month < birth_date.month && person.date_created.year == today.year) ? 1 : 0
+  end
+
+  def self.age_dde(person, today = Date.today)
+    return nil if person.birth_date.nil?
+    birthday = person.birth_date.to_date
+    # This code which better accounts for leap years
+    patient_age = (today.year - birthday.year) + ((today.month - birthday.month) + ((today.day - birthday.day) < 0 ? -1 : 0) < 0 ? -1 : 0)
+
+    # If the birthdate was estimated this year, we round up the age, that way if
+    # it is March and the patient says they are 25, they stay 25 (not become 24)
+    birth_date=birthday
+    estimate=person.birthdate_estimated==1
+    patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  &&
         today.month < birth_date.month && person.date_created.year == today.year) ? 1 : 0
   end
 
@@ -1056,7 +1106,9 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
     people = PatientIdentifier.find_all_by_identifier(identifier).map{|id| 
       id.patient.person
     } unless identifier.blank? rescue nil
+    
     return people unless people.blank?
+
     create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
     if create_from_dde_server 
       dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
@@ -1064,51 +1116,106 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
       uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
       uri += "?value=#{identifier}"                          
-      p = JSON.parse(RestClient.get(uri)).first rescue nil
-   
-      return [] if p.blank?
- 
-      birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
-      birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
-      birthdate_day = p["person"]["birthdate"].to_date.day rescue nil
-      birthdate_estimated = p["person"]["birthdate_estimated"] 
-      gender = p["person"]["gender"] == "F" ? "Female" : "Male"
+      output = JSON.parse(RestClient.get(uri)) rescue nil
+      return [] if output.blank?
+      return "found duplicate identifiers" if output.count > 1
+      p = output.first
+      unless p.include?"npid"
+        person_id =  p["person"]["id"]
+        person = DDEService.create_from_remote(person_id,false)
+        return person
+      else
+      birthdate_year = p["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
+      birthdate_month = p["person"]["data"]["birthdate"].to_date.month rescue nil
+      birthdate_day = p["person"]["data"]["birthdate"].to_date.day rescue nil
+      birthdate_estimated = p["person"]["data"]["birthdate_estimated"] rescue nil
+      gender = p["person"]["gender"] == "F" ? "Female" : "Male" rescue nil
 
       passed = {
        "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
-       "age_estimate"=>"",
+       "age_estimate"=> birthdate_estimated,
        "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
        "birth_month"=> birthdate_month ,
        "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
        "address2"=>p["person"]["data"]["addresses"]["address2"],
        "city_village"=>p["person"]["data"]["addresses"]["city_village"],
-       "county_district"=>""},
+       "county_district"=> p["person"]["data"]["addresses"]["state_province"]},
        "gender"=> gender ,
-       "patient"=>{"identifiers"=>{"National id" => p["person"]["value"]}},
+       "patient"=>{"identifiers"=>{"National id" => p["npid"]["value"]}},
        "birth_day"=>birthdate_day,
        "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
-       "names"=>{"family_name"=>"Mwale",
-       "given_name"=>p["person"]["given_name"],
+       "names"=>{"family_name"=>p["person"]["data"]["names"]["family_name"],
+       "given_name"=>p["person"]["data"]["names"]["given_name"],
        "middle_name"=>""},
        "birth_year"=>birthdate_year},
-       "filter_district"=>"Chitipa",
-       "filter"=>{"region"=>"Northern Region",
+       "filter_district"=>"",
+       "filter"=>{"region"=>"",
        "t_a"=>""},
        "relation"=>""
       }
 
-
       passed_national_id = (passed["person"]["patient"]["identifiers"]["National id"])
-                                                                                
-      unless passed_national_id.blank?                                          
-        patient = PatientIdentifier.find(:first,                                
-          :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
-        return [patient.person] unless patient.blank?                           
-      end
 
+      unless passed_national_id.blank?
+        patient = PatientIdentifier.find(:first,
+          :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
+        return [patient.person] unless patient.blank?
+      end
       return [self.create_from_form(passed["person"])]
+      end
     end
     return people
+  end
+
+  def self.search_from_dde_by_identifier(identifier)
+      dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+      dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+      dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+      uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+      uri += "?value=#{identifier}"
+      people = JSON.parse(RestClient.get(uri)) rescue nil
+      return [] if people.blank?
+
+      local_people = []
+      people.each do |person|
+        #unless person["npid"].blank?
+        national_id = person["npid"]["value"] rescue person["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
+        old_national_id = person["person"]["data"]["patient"]["identifiers"]["old_identification_number"] rescue nil
+        #else
+         # national_id = person["person"]["data"]["patient"]["identifiers"][" old_identification_number"]
+        #end
+        birthdate_year = person["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
+        birthdate_month = person["person"]["data"]["birthdate"].to_date.month rescue nil
+        birthdate_day = person["person"]["data"]["birthdate"].to_date.day rescue nil
+        birthdate_estimated = person["person"]["data"]["birthdate_estimated"]
+        gender = person["person"]["data"]["gender"] == "F" ? "Female" : "Male"
+        passed_person = {
+         "person"=>{"occupation"=>person["person"]["data"]["attributes"]["occupation"],
+         "age_estimate"=> birthdate_estimated ,
+         "birthdate" => person["person"]["data"]["birthdate"],
+         "cell_phone_number"=>person["person"]["data"]["attributes"]["cell_phone_number"],
+         "birth_month"=> birthdate_month ,
+         "addresses"=>{"address1"=>person["person"]["data"]["addresses"]["county_district"],
+         "address2"=>person["person"]["data"]["addresses"]["address2"],
+         "city_village"=>person["person"]["data"]["addresses"]["city_village"],
+         "county_district"=>""},
+         "gender"=> gender ,
+         "patient"=>{"identifiers"=>{"National id" => national_id ,"Old national id" => old_national_id}},
+         "birth_day"=>birthdate_day,
+         "home_phone_number"=>person["person"]["data"]["attributes"]["home_phone_number"],
+         "names"=>{"family_name"=>person["person"]["data"]["names"]["family_name"],
+         "given_name"=>person["person"]["data"]["names"]["given_name"],
+         "middle_name"=>""},
+         "birth_year"=>birthdate_year,
+         "id" => person["person"]["id"]},
+         "filter_district"=>"",
+         "filter"=>{"region"=>"",
+         "t_a"=>""},
+         "relation"=>""
+        }
+        local_people << passed_person
+      end
+    return local_people
   end
   
   def self.set_birthdate_by_age(person, age, today = Date.today)
