@@ -719,7 +719,7 @@ class GenericPeopleController < ApplicationController
     elsif not params[:local_and_remote].blank?
       create_and_reassign_national_id(params[:person_id],true,params[:patient_id])
     else
-    new_national_id = reassign_national_id(params[:patient_id])
+    new_national_id = reassign_national_id(params[:patient_id],params[:create_new])
     if new_national_id == true
       person = Person.find(params[:patient_id])
       print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
@@ -738,13 +738,20 @@ class GenericPeopleController < ApplicationController
 
 private
   
-  def reassign_national_id(patient_id)
-    found_person = PatientService.get_patient(Person.find(patient_id))
-    patient = DDEService::Patient.new(Person.find(patient_id).patient)
-    if found_person.national_id.length != 6
-      patient.check_old_national_id(found_person.national_id)
+  def reassign_national_id(patient_id,create_new)
+    if create_new == "true"
+      found_person = Person.find(patient_id)
+      person_demographics = PatientService.demographics(found_person)
+      person_demographics.merge!({"create_new" => create_new,"patient_id" => patient_id})
+      person = PatientService.create_patient_from_dde(person_demographics)
     else
-      patient.check_duplicate_national_id
+      found_person = PatientService.get_patient(Person.find(patient_id))
+      patient = DDEService::Patient.new(Person.find(patient_id).patient)
+      if found_person.national_id.length != 6
+        patient.check_old_national_id(found_person.national_id)
+      else
+        patient.check_duplicate_national_id
+    end
     end
   end
  
