@@ -957,7 +957,6 @@ EOF
   
 	def self.create_from_form(params)
     return nil if params.blank?
-
 		address_params = params["addresses"]
 		names_params = params["names"]
 		patient_params = params["patient"]
@@ -1005,13 +1004,18 @@ EOF
 
 		if (!patient_params.nil?)
 		  patient = person.create_patient
-      
+       params["identifiers"].each{|identifier_type_name, identifier|
+        next if identifier.blank?
+        identifier_type = PatientIdentifierType.find_by_name(identifier_type_name) || PatientIdentifierType.find_by_name("Unknown id")
+        patient.patient_identifiers.create("identifier" => identifier, "identifier_type" => identifier_type.patient_identifier_type_id)
+		  } if params["identifiers"]
+=begin
 		  patient_params["identifiers"].each{|identifier_type_name, identifier|
         next if identifier.blank?
         identifier_type = PatientIdentifierType.find_by_name(identifier_type_name) || PatientIdentifierType.find_by_name("Unknown id")
         patient.patient_identifiers.create("identifier" => identifier, "identifier_type" => identifier_type.patient_identifier_type_id)
 		  } if patient_params["identifiers"]
-
+=end
 		  # This might actually be a national id, but currently we wouldn't know
 		  #patient.patient_identifiers.create("identifier" => patient_params["identifier"], "identifier_type" => PatientIdentifierType.find_by_name("Unknown id")) unless params["identifier"].blank?
 		end
