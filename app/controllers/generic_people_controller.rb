@@ -79,7 +79,7 @@ class GenericPeopleController < ApplicationController
           output = RestClient.get(uri)                                          
           p = JSON.parse(output)                                                
           if p.count > 1 
-            redirect_to :action => 'dde_duplicates' ,:search_params => params
+            redirect_to :action => 'duplicates' ,:search_params => params
             return
           end
         end
@@ -688,6 +688,95 @@ class GenericPeopleController < ApplicationController
 		@patient_bean = PatientService.get_patient(@person)
 		render :layout => 'menu'
   end
+
+
+  def duplicates
+    if create_from_dde_server
+      person_id = PatientService.person_search(params[:search_params])
+      person = Person.find_by_person_id(person_id)
+      @duplicate = PatientService.get_patient(person)
+      person_name = @duplicate.name.soundex
+      @dde_duplicates = []
+      PatientService.search_from_dde_by_identifier(params[:search_params][:identifier]).each do |person|
+        dde_person_name = person["person"]["names"]["given_name"] 
+        dde_person_name += person["person"]["names"]["family_name"]
+        dde_person_sex =  person["person"]["gender"]
+        if person_name == dde_person_name.soundex and (dde_person_sex == @duplicate.sex)
+          person.merge!({"current_app_national_id" => params[:search_params][:identifier]})
+        else
+          person.merge!({"current_app_national_id" => ''})
+        end
+        @dde_duplicates << PatientService.get_dde_person(person)
+      end
+      @selected_identifier = params[:search_params][:identifier]
+    end
+    render :layout => 'menu'
+  end
+  
+  def reassign_identifier
+    if not params[:remote].blank?
+      create_and_reassign_national_id(params[:person_id])
+    elsif not params[:local_and_remote].blank?
+      create_and_reassign_national_id(params[:person_id],true,params[:patient_id])
+    else
+    new_national_id = reassign_national_id(params[:patient_id],params[:create_new])
+    if new_national_id == true
+      person = Person.find(params[:patient_id])
+      print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+    else
+      #To change this once we update check_old_national_id as in Registration and Radiology
+      person = Person.find(params[:patient_id])
+      print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+    end
+  end
+  end
+
+  def create_and_reassign_national_id(dde_person_id,local=false,local_person_id=nil)
+    person = DDEService.reassign_dde_identication(dde_person_id,local,local_person_id)
+    print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+  end
+
+  def reassign_dde_national_id
+    person = DDEService.reassign_dde_identication(params[:dde_person_id],params[:local_person_id])
+    print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+  end
+
+  def remote_duplicates
+    @primary_patient = PatientService.get_patient(Person.find(params[:patient_id]))
+    @dde_duplicates = []
+    if create_from_dde_server
+      PatientService.search_from_dde_by_identifier(params[:identifier]).each do |person|
+        @dde_duplicates << PatientService.get_dde_person(person)
+      end
+    end
+    render :layout => 'menu'
+  end
+
+  def reassign_national_identifier
+    patient = Patient.find(params[:person_id])
+    if create_from_dde_server
+      passed_params = PatientService.demographics(patient.person)
+      new_npid = PatientService.create_from_dde_server_only(passed_params)
+      npid = PatientIdentifier.new()
+      npid.patient_id = patient.id
+      npid.identifier_type = PatientIdentifierType.find_by_name('National ID')
+      npid.identifier = new_npid
+      npid.save
+    else
+      PatientIdentifierType.find_by_name('National ID').next_identifier({:patient => patient})
+    end
+    npid = PatientIdentifier.find(:first,
+           :conditions => ["patient_id = ? AND identifier = ? 
+           AND voided = 0", patient.id,params[:identifier]])
+    npid.voided = 1
+    npid.void_reason = "Given another national ID"
+    npid.date_voided = Time.now()
+    npid.voided_by = current_user.id
+    npid.save
+    
+    print_and_redirect("/patients/national_id_label?patient_id=#{patient.id}", next_task(patient))
+  end
+
   
 private
   

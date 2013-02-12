@@ -13,7 +13,114 @@ module PatientService
                                                                                 
     return JSON.parse(RestClient.post(uri,params))                              
   end
- 
+
+  def self.search_from_dde_by_identifier(identifier)
+      dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+      dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+      dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+      uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+      uri += "?value=#{identifier}"
+      people = JSON.parse(RestClient.get(uri)) rescue nil
+      return [] if people.blank?
+
+      local_people = []
+      people.each do |person|
+        national_id = person['person']["value"] rescue person["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
+        old_national_id = person["person"]["data"]["patient"]["identifiers"]["old_identification_number"] rescue nil
+
+        birthdate_year = person["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
+        birthdate_month = person["person"]["data"]["birthdate"].to_date.month rescue nil
+        birthdate_day = person["person"]["data"]["birthdate"].to_date.day rescue nil
+        birthdate_estimated = person["person"]["data"]["birthdate_estimated"]
+        gender = person["person"]["data"]["gender"] == "F" ? "Female" : "Male"
+        passed_person = {
+         "person"=>{"occupation"=>person["person"]["data"]["attributes"]["occupation"],
+         "age_estimate"=> birthdate_estimated ,
+         "birthdate" => person["person"]["data"]["birthdate"],
+         "cell_phone_number"=>person["person"]["data"]["attributes"]["cell_phone_number"],
+         "birth_month"=> birthdate_month ,
+         "addresses"=>{"address1"=>person["person"]["data"]["addresses"]["county_district"],
+         "address2"=>person["person"]["data"]["addresses"]["address2"],
+         "city_village"=>person["person"]["data"]["addresses"]["city_village"],
+         "county_district"=>""},
+         "gender"=> gender ,
+         "patient"=>{"identifiers"=>{"National id" => national_id ,"Old national id" => old_national_id}},
+         "birth_day"=>birthdate_day,
+         "home_phone_number"=>person["person"]["data"]["attributes"]["home_phone_number"],
+         "names"=>{"family_name"=>person["person"]["data"]["names"]["family_name"],
+         "given_name"=>person["person"]["data"]["names"]["given_name"],
+         "middle_name"=>""},
+         "birth_year"=>birthdate_year,
+         "id" => person["person"]["id"]},
+         "filter_district"=>"",
+         "filter"=>{"region"=>"",
+         "t_a"=>""},
+         "relation"=>""
+        }
+        local_people << passed_person
+      end
+    return local_people
+  end 
+
+
+  def self.get_dde_person(person, current_date = Date.today)
+    patient = PatientBean.new('')
+    patient.person_id = person["person"]["id"]
+    patient.patient_id = 0
+    patient.address = person["person"]["addresses"]["city_village"]
+    patient.national_id = person["person"]["patient"]["identifiers"]["National id"]
+    patient.name = person["person"]["names"]["given_name"] + ' ' + person["person"]["names"]["family_name"] rescue nil
+    patient.first_name = person["person"]["names"]["given_name"] rescue nil
+    patient.last_name = person["person"]["names"]["family_name"] rescue nil
+    patient.sex = person["person"]["gender"]
+    patient.birthdate = person["person"]["birthdate"].to_date
+    patient.birthdate_estimated =  person["person"]["age_estimate"].to_i rescue 0
+    date_created =  person["person"]["date_created"].to_date rescue Date.today
+    patient.age = self.cul_age(patient.birthdate , patient.birthdate_estimated , date_created, Date.today)
+    patient.birth_date = self.get_birthdate_formatted(patient.birthdate,patient.birthdate_estimated)
+    patient.home_district = person["filter_district"]
+    patient.traditional_authority = person["filter"]["t_a"]
+    patient.current_residence = person["person"]["addresses"]["city_village"]
+    patient.landmark = person["person"]["addresses"]["address_1"]
+    patient.occupation = person["person"]["occupation"]
+    patient.cell_phone_number = person["person"]["cell_phone_number"]
+    patient.home_phone_number = person["person"]["home_phone_number"]
+    patient.old_identification_number = person["person"]["patient"]["identifiers"]["Old national id"]
+
+    patient
+  end
+
+
+  def self.cul_age(birthdate , birthdate_estimated , date_created = Date.today, today = Date.today)
+                                                                                
+    # This code which better accounts for leap years                            
+    patient_age = (today.year - birthdate.year) + ((today.month - birthdate.month) + ((today.day - birthdate.day) < 0 ? -1 : 0) < 0 ? -1 : 0)
+                                                                                
+    # If the birthdate was estimated this year, we round up the age, that way if
+    # it is March and the patient says they are 25, they stay 25 (not become 24)
+    birth_date = birthdate                                                      
+    estimate = birthdate_estimated == 1                                         
+    patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  &&
+        today.month < birth_date.month && date_created.year == today.year) ? 1 : 0
+    end                                                                           
+                                                                              
+  def self.get_birthdate_formatted(birthdate,birthdate_estimated)                        
+    if birthdate_estimated == 1                                                 
+      if birthdate.day == 1 and birthdate.month == 7                            
+        birthdate.strftime("??/???/%Y")                                         
+      elsif birthdate.day == 15                                                 
+        birthdate.strftime("??/%b/%Y")                                          
+      elsif birthdate.day == 1 and birthdate.month == 1                         
+        birthdate.strftime("??/???/%Y")                                         
+      end                                                                       
+    else                                                                        
+      birthdate.strftime("%d/%b/%Y")                                            
+    end                                                                         
+  end 
+  #............................................................. new code
+  
+  
+   
   def self.create_patient_from_dde(params)
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
