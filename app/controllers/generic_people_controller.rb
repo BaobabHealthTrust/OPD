@@ -666,12 +666,8 @@ class GenericPeopleController < ApplicationController
   end
   
   def dde_search
-    # result = '[{"person":{"created_at":"2012-01-06T10:08:37Z","data":{"addresses":{"state_province":"Balaka","address2":"Hospital","city_village":"New Lines Houses","county_district":"Kalembo"},"birthdate":"1989-11-02","attributes":{"occupation":"Police","cell_phone_number":"0999925666"},"birthdate_estimated":"0","patient":{"identifiers":{"diabetes_number":""}},"gender":"M","names":{"family_name":"Banda","given_name":"Laz"}},"birthdate":"1989-11-02","creator_site_id":"1","birthdate_estimated":false,"updated_at":"2012-01-06T10:08:37Z","creator_id":"1","gender":"M","id":1,"family_name":"Banda","given_name":"Laz","remote_version_number":null,"version_number":"0","national_id":null}}]'
-    
     @dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
-    
     @dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
-    
     @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
     
     url = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}" + 
@@ -698,11 +694,6 @@ class GenericPeopleController < ApplicationController
     render :layout => 'menu'
   end
  
-  def create_and_reassign_national_id(dde_person_id,local=false,local_person_id=nil)
-    person = DDEService.reassign_dde_identication(dde_person_id,local,local_person_id)
-    print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
-  end
-
   def reassign_dde_national_id
     person = DDEService.reassign_dde_identication(params[:dde_person_id],params[:local_person_id])
     print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
