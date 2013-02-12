@@ -4,8 +4,8 @@
   var total_id_hash_key = 0
   tt_cancel_destination = "/clinic";
 
-  function newID(patient_id,create) {
-    document.location = "/people/reassign_identifier?patient_id=" + patient_id + "&create_new=" + create;
+  function newID(patient_id,identifier) {
+    document.location = "/people/remote_duplicates?patient_id=" + patient_id + "&identifier=" + identifier;
   }
 
   function selectP(patient_id) {
@@ -124,7 +124,7 @@ div { -moz-user-select: none; }
     <%if not(patient.national_id == old_identification_number) || old_identification_number.blank?%>
       <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectP('<%=patient.patient_id%>');">Select</a>
     <%else%>
-      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.patient_id%>','<%= create_new[patient.national_id] %>','<%=row_number%>','<%=color%>');">Reassign ID</a>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.patient_id%>','<%= patient.national_id %>');">Reassign ID</a>
     <%end%>
     </td>
   </tr>
