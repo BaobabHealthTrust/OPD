@@ -36,18 +36,21 @@ helper_method :allowed_hiv_viewer
 		end
 
 		patient_bean = PatientService.get_patient((Patient.find(patient.patient_id)).person)
+    ask_complaints_questions_before_diagnosis = CoreService.get_global_property_value('ask.complaints.before_diagnosis').to_s == "true" rescue false
 
 		if !session[:original_encounter].blank?
 			if (session[:original_encounter].upcase == 'ADMISSION DIAGNOSIS' || session[:original_encounter].upcase == 'DISCHARGE DIAGNOSIS' || session[:original_encounter].upcase == 'OUTPATIENT_DIAGNOSIS') && !is_encounter_available(patient, 'PRESENTING COMPLAINTS', session_date)
 				task.encounter_type = 'PRESENTING COMPLAINTS'
-				task.url = "/encounters/new/presenting_complaints?patient_id=#{patient.id}"
+				task.url = "/encounters/new/presenting_complaints?patient_id=#{patient.id}" if ask_complaints_questions_before_diagnosis
 			else
 				task.encounter_type = session[:original_encounter]
 				task.url = "/encounters/new/#{task.encounter_type}?patient_id=#{patient.id}"
 			end
+      session[:original_encounter] = nil
 		end
 
     ask_social_history_questions = CoreService.get_global_property_value('ask.social.history.questions').to_s == "true" rescue false
+    ask_social_determinants_questions = CoreService.get_global_property_value('ask.social.determinants.questions').to_s == "true" rescue false
 
 		if !encounter_available_ever(patient, 'SOCIAL HISTORY') && patient_bean.age > 14 
 			task.encounter_type = 'SOCIAL HISTORY'
@@ -57,7 +60,7 @@ helper_method :allowed_hiv_viewer
 		if !encounter_available_ever(patient, 'SOCIAL DETERMINANTS') && patient_bean.age <= 14 
 			task.encounter_type = 'SOCIAL DETERMINANTS'
 			task.url = "/encounters/new/social_determinants?patient_id=#{patient.id}"
-		end
+		end if ask_social_determinants_questions
 
 		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true') 
 			task.encounter_type = 'OUTPATIENT RECEPTION'

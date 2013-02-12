@@ -92,17 +92,17 @@ class EncountersController < GenericEncountersController
 
 		redirect_to next_task(@patient) and return unless params[:encounter_type]
 
+    ask_vitals_questions_before_diagnosis = CoreService.get_global_property_value('ask.vitals.questions.before.diagnosis').to_s == "true" rescue false
 
 		if params[:encounter_type].upcase == 'ADMISSION DIAGNOSIS' || params[:encounter_type].upcase == 'DISCHARGE DIAGNOSIS' || params[:encounter_type].upcase == 'OUTPATIENT_DIAGNOSIS'
-			if !is_encounter_available(@patient, 'VITALS', session_date) && @patient_bean.age <= 14
-				session[:original_encounter] = params[:encounter_type]
-				params[:encounter_type] = 'vitals'					
-			else
-				#if !is_encounter_available(@patient, 'PRESENTING COMPLAINTS', session_date)
-				#	session[:original_encounter] = params[:encounter_type]
-				#	params[:encounter_type] = 'presenting_complaints'					
-				#end
-			end
+      if (ask_vitals_questions_before_diagnosis)
+       if( @patient_bean.age <= 14)
+        if !is_encounter_available(@patient, 'VITALS', session_date)
+            session[:original_encounter] = params[:encounter_type]
+            params[:encounter_type] = 'vitals'
+        end
+       end
+      end
 		end
 		
 		if (params[:encounter_type].upcase rescue '') == 'HIV_STAGING' and  (CoreService.get_global_property_value('use.extended.staging.questions').to_s == "true" rescue false)
