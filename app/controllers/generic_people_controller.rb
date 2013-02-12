@@ -308,14 +308,24 @@ class GenericPeopleController < ApplicationController
 
 	# This method is just to allow the select box to submit, we could probably do this better
 	def select
-    if params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
-			redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
-		else
-		
-			redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
+    if !params[:identifier].blank? && !params[:given_name].blank? && !params[:family_name].blank?
+      redirect_to :action => :search, :identifier => params[:identifier]
+    elsif params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
+      redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
+    else
+      if params[:person][:id] != '0'
+        person = Person.find(params[:person][:id])
+        patient = DDEService::Patient.new(person.patient)
+        patient_id = PatientService.get_patient_identifier(person.patient, "National id")
+        if patient_id.length != 6
+          patient.check_old_national_id(patient_id)
+          print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
+        end
+      end
+      redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
 
-			redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
-		end
+      redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
+    end
 	end
  
   def create
@@ -702,5 +712,32 @@ private
 			end
 		end
 	end
+
+  def cul_age(birthdate , birthdate_estimated , date_created = Date.today, today = Date.today)
+                                                                                
+    # This code which better accounts for leap years                            
+    patient_age = (today.year - birthdate.year) + ((today.month - birthdate.month) + ((today.day - birthdate.day) < 0 ? -1 : 0) < 0 ? -1 : 0)
+                                                                                
+    # If the birthdate was estimated this year, we round up the age, that way if
+    # it is March and the patient says they are 25, they stay 25 (not become 24)
+    birth_date = birthdate                                                      
+    estimate = birthdate_estimated == 1                                         
+    patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  &&
+        today.month < birth_date.month && date_created.year == today.year) ? 1 : 0
+  end                                                                           
+                                                                                
+  def birthdate_formatted(birthdate,birthdate_estimated)                        
+    if birthdate_estimated == 1                                                 
+      if birthdate.day == 1 and birthdate.month == 7                            
+        birthdate.strftime("??/???/%Y")                                         
+      elsif birthdate.day == 15                                                 
+        birthdate.strftime("??/%b/%Y")                                          
+      elsif birthdate.day == 1 and birthdate.month == 1                         
+        birthdate.strftime("??/???/%Y")                                         
+      end                                                                       
+    else                                                                        
+      birthdate.strftime("%d/%b/%Y")                                            
+    end                                                                         
+  end 
 end
  

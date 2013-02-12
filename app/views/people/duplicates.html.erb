@@ -1,2 +1,181 @@
-<h1>People#duplicates</h1>
-<p>Find me in app/views/people/duplicates.html.erb</p>
+
+<script>
+  var patient_sets = {}
+  var total_id_hash_key = 0
+  tt_cancel_destination = "/clinic";
+
+  function newID(patient_id,identifier) {
+    document.location = "/people/remote_duplicates?patient_id=" + patient_id + "&identifier=" + identifier;
+  }
+
+  function selectP(patient_id) {
+    document.location = "/patients/pdash?found_person_id=" + patient_id;
+  }
+
+  function assignNewID(person_id,remote){
+   document.location = "/people/reassign_identifier?person_id=" + person_id + "&remote="+ remote;
+  }
+
+  function selectByIdentifier(identifier) {
+    new_form = document.createElement("FORM");
+    new_form.setAttribute("type", "hidden");
+    document.body.appendChild(new_form);
+    new_form.method = "POST";
+
+    newElement = document.createElement("input");
+    newElement.setAttribute("name", "identifier");
+    newElement.setAttribute("type", "hidden");
+    newElement.value = identifier;
+    new_form.appendChild(newElement);
+    new_form.action = "/people/search";
+    new_form.submit();
+  }
+</script>
+
+<style type="text/css">
+
+.color_white {
+  background-color:white;
+}
+
+.color_blue {
+  background-color:lightgrey;
+}
+
+td {
+  border-style: solid;
+  border-width: 1px;
+}
+
+table {
+  width: 100%;
+}
+
+div { -moz-user-select: none; }
+
+
+ a {                                                                    
+    background-color: #669999;
+    border-bottom: 1px outset black;
+    border-radius: 7px 7px 7px 7px;
+    border-style: outset;
+    border-top: 1px outset black;
+    color: white;
+    display: block;
+    padding: 10px 16px 10px 10px;
+    text-align: center;
+    text-decoration: none;
+ }
+ .heading,.msg{
+   margin-left: 20px;
+   padding-left: 5px;
+}
+</style>
+
+<div>
+
+
+<% unless @duplicates.blank? %>
+<h2 class="heading">The following patients have the same national identifier</h2>
+<h3 class="msg">Replace the national identifier or Select the patient in front of you</h3>
+<table>
+  <tr class="header">
+    <td width="80">National ID</td>
+    <td width='200'>Patient Name</td>
+    <td width='50' style="text-align:center;">DOB</td>
+    <td width='50' style="text-align:center;">Gender</td>
+    <td width='50' style="text-align:center;">Age</td>
+    <td width='90'>&nbsp;</td>
+  </tr>
+  <%
+     create_new = {}
+    (@duplicates || {} ).each do | patient |
+      old_identification_number = patient.old_identification_number rescue nil
+      if patient.national_id == old_identification_number 
+        create_new[patient.national_id] = true
+      elsif patient.national_id.length != 6 and old_identification_number.blank?
+        create_new[patient.national_id] = true
+      else
+        create_new[patient.national_id] = false
+      end
+    end
+  %>
+  <%color = 'white'
+    row_number = 0
+    ( @duplicates || {} ).each do | patient | 
+      if color == 'white'
+        color = 'blue'
+      else
+        color = 'white'
+      end
+      row_number+=1 
+      
+      old_identification_number = patient.old_identification_number rescue nil
+
+
+      %>
+  <tr>
+    <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.name || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.birth_date || '&nbsp;' %> </td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
+    <td class="color_<%=color%> row_number_<%=row_number%>">
+    <%if not(patient.national_id == old_identification_number) || old_identification_number.blank?%>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectP('<%=patient.patient_id%>');">Select</a>
+    <%else%>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.patient_id%>','<%= patient.national_id %>');">Reassign ID</a>
+    <%end%>
+    </td>
+  </tr>
+ <%end%>
+</table>
+<%else @dde_duplicates%>
+<h2 class="heading">The following patients have the same national identifier</h2>
+<h3 class="msg">Replace the current national identifier or Select the patient in front of you</h3>
+<table>
+  <tr class="header">
+    <td width="80">National ID</td>
+    <td width='200'>Patient Name</td>
+    <td width='50' style="text-align:center;">DOB</td>
+    <td width='50' style="text-align:center;">Gender</td>
+    <td width='50' style="text-align:center;">Age</td>
+    <td width='90'>&nbsp;</td>
+  </tr>
+  <%color = 'white'
+    row_number = 0
+    ( @dde_duplicates || {} ).each do | patient |
+      if color == 'white'
+        color = 'blue'
+      else
+        color = 'white'
+      end
+      row_number+=1
+      remote = true
+ 
+      old_identification_number = patient.old_identification_number rescue nil
+
+      %>
+  <tr>
+    <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.name || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.birth_date || '&nbsp;' %> </td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
+    <td class="color_<%=color%> row_number_<%=row_number%>">
+    <%if not(patient.national_id == old_identification_number) || old_identification_number.blank? 
+        if patient.patient_id = 0%>
+          <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectByIdentifier('<%=patient.national_id%>');">Select</a>
+        <%else%>
+          <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectP('<%=patient.patient_id%>');">Select</a>
+        <%end%>
+    <%else%>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="assignNewID('<%=patient.person_id%>','<%=remote %>','<%=row_number%>','<%=color%>');">Replace ID</a>
+    <%end%>
+    </td>
+  </tr>
+ <%end%>
+</table>
+<%end%>
+
+</div>
