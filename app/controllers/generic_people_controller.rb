@@ -713,24 +713,6 @@ class GenericPeopleController < ApplicationController
     render :layout => 'menu'
   end
   
-  def reassign_identifier
-    if not params[:remote].blank?
-      create_and_reassign_national_id(params[:person_id])
-    elsif not params[:local_and_remote].blank?
-      create_and_reassign_national_id(params[:person_id],true,params[:patient_id])
-    else
-    new_national_id = reassign_national_id(params[:patient_id],params[:create_new])
-    if new_national_id == true
-      person = Person.find(params[:patient_id])
-      print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
-    else
-      #To change this once we update check_old_national_id as in Registration and Radiology
-      person = Person.find(params[:patient_id])
-      print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
-    end
-  end
-  end
-
   def create_and_reassign_national_id(dde_person_id,local=false,local_person_id=nil)
     person = DDEService.reassign_dde_identication(dde_person_id,local,local_person_id)
     print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
