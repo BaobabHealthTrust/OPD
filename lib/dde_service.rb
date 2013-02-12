@@ -539,4 +539,30 @@ module DDEService
     end
   end
 
+  #.............. new code
+  def self.reassign_dde_identication(dde_person_id,local_person_id)
+    dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+    dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/reassign_identication.json"
+    uri += "?person_id=#{dde_person_id}"
+    new_npid = RestClient.get(uri)
+
+    current_national_id = PatientIdentifier.find(:first,
+                        :conditions => ["patient_id = ? AND voided = 0 AND
+                        identifier_type = ?",local_person_id , 3])
+
+    patient_identifier = PatientIdentifier.new
+    patient_identifier.type = PatientIdentifierType.find_by_name("National id")
+    patient_identifier.identifier = new_npid
+    patient_identifier.patient_id = local_person_id
+    patient_identifier.save!
+
+    current_national_id.voided = true
+    current_national_id.voided_by = 1
+    current_national_id.void_reason = "Given new national ID: #{new_npid}"
+    current_national_id.date_voided =  Time.now()
+    current_national_id.save!
+    return current_national_id.patient.person
+  end
 end
