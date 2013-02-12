@@ -689,30 +689,15 @@ class GenericPeopleController < ApplicationController
 		render :layout => 'menu'
   end
 
-
   def duplicates
-    if create_from_dde_server
-      person_id = PatientService.person_search(params[:search_params])
-      person = Person.find_by_person_id(person_id)
-      @duplicate = PatientService.get_patient(person)
-      person_name = @duplicate.name.soundex
-      @dde_duplicates = []
-      PatientService.search_from_dde_by_identifier(params[:search_params][:identifier]).each do |person|
-        dde_person_name = person["person"]["names"]["given_name"] 
-        dde_person_name += person["person"]["names"]["family_name"]
-        dde_person_sex =  person["person"]["gender"]
-        if person_name == dde_person_name.soundex and (dde_person_sex == @duplicate.sex)
-          person.merge!({"current_app_national_id" => params[:search_params][:identifier]})
-        else
-          person.merge!({"current_app_national_id" => ''})
-        end
-        @dde_duplicates << PatientService.get_dde_person(person)
-      end
-      @selected_identifier = params[:search_params][:identifier]
+    @duplicates = []
+    PatientService.search_by_identifier(params[:search_params][:identifier]).each do |person|
+      @duplicates << PatientService.get_patient(person)
     end
+    @selected_identifier = params[:search_params][:identifier]
     render :layout => 'menu'
   end
-  
+ 
   def create_and_reassign_national_id(dde_person_id,local=false,local_person_id=nil)
     person = DDEService.reassign_dde_identication(dde_person_id,local,local_person_id)
     print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))

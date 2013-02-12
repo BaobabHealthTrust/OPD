@@ -57,6 +57,9 @@ table{
 </style>
 
 <script>
+  var tt_cancel_destination = "/clinic"; 
+
+
   function newNpid(local_person_id,remote_person_id) {
     document.location = "/people/reassign_dde_national_id?dde_person_id=" + remote_person_id + "&local_person_id=" + local_person_id;
   }

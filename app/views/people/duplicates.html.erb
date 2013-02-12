@@ -1,38 +1,14 @@
 
 <script>
-  var patient_sets = {}
-  var total_id_hash_key = 0
   tt_cancel_destination = "/clinic";
 
-  function newID(patient_id,identifier) {
-    document.location = "/people/remote_duplicates?patient_id=" + patient_id + "&identifier=" + identifier;
+  function newID(patient_id,national_id) {
+    document.location = "/people/remote_duplicates?patient_id=" + patient_id + "&identifier=" + national_id;
   }
 
-  function selectP(patient_id) {
-    document.location = "/patients/pdash?found_person_id=" + patient_id;
-  }
-
-  function assignNewID(person_id,remote){
-   document.location = "/people/reassign_identifier?person_id=" + person_id + "&remote="+ remote;
-  }
-
-  function selectByIdentifier(identifier) {
-    new_form = document.createElement("FORM");
-    new_form.setAttribute("type", "hidden");
-    document.body.appendChild(new_form);
-    new_form.method = "POST";
-
-    newElement = document.createElement("input");
-    newElement.setAttribute("name", "identifier");
-    newElement.setAttribute("type", "hidden");
-    newElement.value = identifier;
-    new_form.appendChild(newElement);
-    new_form.action = "/people/search";
-    new_form.submit();
-  }
 </script>
 
-<style type="text/css">
+<style>
 
 .color_white {
   background-color:white;
@@ -65,7 +41,7 @@ div { -moz-user-select: none; }
     padding: 10px 16px 10px 10px;
     text-align: center;
     text-decoration: none;
- }
+  }
  .heading,.msg{
    margin-left: 20px;
    padding-left: 5px;
@@ -74,9 +50,11 @@ div { -moz-user-select: none; }
 
 <div>
 
+<!--
 
-<h2 class="heading">The following patients have the same national identifier</h2>
-<h3 class="msg">Replace the national identifier or Select the patient in front of you</h3>
+-->
+<%if @duplicates%>
+<h3 class="msg">Select patient to continue ....</h3>
 <table>
   <tr class="header">
     <td width="80">National ID</td>
@@ -86,32 +64,15 @@ div { -moz-user-select: none; }
     <td width='50' style="text-align:center;">Age</td>
     <td width='90'>&nbsp;</td>
   </tr>
-  <%
-     create_new = {}
-    (@duplicates || {} ).each do | patient |
-      old_identification_number = patient.old_identification_number rescue nil
-      if patient.national_id == old_identification_number 
-        create_new[patient.national_id] = true
-      elsif patient.national_id.length != 6 and old_identification_number.blank?
-        create_new[patient.national_id] = true
-      else
-        create_new[patient.national_id] = false
-      end
-    end
-  %>
   <%color = 'white'
     row_number = 0
-    ( @duplicates || {} ).each do | patient | 
+    ( @duplicates || {} ).each do | patient |
       if color == 'white'
         color = 'blue'
       else
         color = 'white'
       end
-      row_number+=1 
-      
-      old_identification_number = patient.old_identification_number rescue nil
-
-
+      row_number+=1
       %>
   <tr>
     <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
@@ -120,18 +81,11 @@ div { -moz-user-select: none; }
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
     <td class="color_<%=color%> row_number_<%=row_number%>">
-    <%if not(patient.national_id == old_identification_number) || old_identification_number.blank?%>
-      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectP('<%=patient.patient_id%>');">Select</a>
-    <%else%>
-      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.patient_id%>','<%= patient.national_id %>');">Reassign ID</a>
-    <%end%>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.person_id%>','<%=patient.national_id%>');">Select</a>
     </td>
   </tr>
  <%end%>
-
-
-
-
-
 </table>
+<%end%>
+
 </div>
