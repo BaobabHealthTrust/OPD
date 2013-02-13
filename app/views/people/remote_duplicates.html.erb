@@ -72,7 +72,13 @@ table{
 
 
 <div id='primary_patient_div'>                                                  
-  <div><h4>Patient(s) with similar national identifier as the patient below:</h4></div>
+  <div><h4>
+    <%if @dde_duplicates.blank?%>
+      Give the patient below a new national identifier:
+    <%else%>
+      Patient(s) with similar national identifier as the patient below:
+    <%end%>
+  </h4></div>
   <div><hr /></div>
   <div><b>Name:</b><%=@primary_patient.name%>&nbsp;(<%=@primary_patient.sex%>)</div>  
   <div><b>Age</b>&nbsp;<%=@primary_patient.age%></div>
