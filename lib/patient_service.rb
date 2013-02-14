@@ -60,9 +60,86 @@ module PatientService
         local_people << passed_person
       end
     return local_people
-  end 
+  end
+
+  def self.create_from_dde_server_only(params)
+    address_params = params["person"]["addresses"]
+    names_params = params["person"]["names"]
+    patient_params = params["person"]["patient"]
+    birthday_params = params["person"]
+    params_to_process = params.reject{|key,value|
+      key.match(/identifiers|addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/)
+    }
+    birthday_params = params_to_process["person"].reject{|key,value| key.match(/gender/) }
+    person_params = params_to_process["person"].reject{|key,value| key.match(/birth_|age_estimate|occupation/) }
 
 
+    if person_params["gender"].to_s == "Female"
+      person_params["gender"] = 'F'
+    elsif person_params["gender"].to_s == "Male"
+      person_params["gender"] = 'M'
+    end
+
+    unless birthday_params.empty?
+      if birthday_params["birth_year"] == "Unknown"
+        birthdate = Date.new(Date.today.year - birthday_params["age_estimate"].to_i, 7, 1)
+        birthdate_estimated = 1
+      else
+        year = birthday_params["birth_year"]
+        month = birthday_params["birth_month"]
+        day = birthday_params["birth_day"]
+
+        month_i = (month || 0).to_i
+        month_i = Date::MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
+        month_i = Date::ABBR_MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
+
+        if month_i == 0 || month == "Unknown"
+          birthdate = Date.new(year.to_i,7,1)
+          birthdate_estimated = 1
+        elsif day.blank? || day == "Unknown" || day == 0
+          birthdate = Date.new(year.to_i,month_i,15)
+          birthdate_estimated = 1
+        else
+          birthdate = Date.new(year.to_i,month_i,day.to_i)
+          birthdate_estimated = 0
+        end
+      end
+    else
+      birthdate_estimated = 0
+    end
+
+
+    passed_params = {"person"=>
+        {"data" =>
+          {"addresses"=>
+            {"state_province"=> address_params["address2"],
+            "address2"=> address_params["address1"],
+            "city_village"=> address_params["city_village"],
+            "county_district"=> address_params["county_district"]
+          },
+          "attributes"=>
+            {"occupation"=> params["person"]["occupation"],
+            "cell_phone_number" => params["person"]["cell_phone_number"] },
+          "patient"=>
+            {"identifiers"=>
+              {"diabetes_number"=>""}},
+          "gender"=> person_params["gender"],
+          "birthdate"=> birthdate,
+          "birthdate_estimated"=> birthdate_estimated ,
+          "names"=>{"family_name"=> names_params["family_name"],
+            "given_name"=> names_params["given_name"]
+          }}}}
+
+      @dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+      @dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+      @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+
+      uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"
+      received_params = RestClient.post(uri,passed_params)
+
+      return JSON.parse(received_params)["npid"]["value"]
+  end
+  
   def self.get_dde_person(person, current_date = Date.today)
     patient = PatientBean.new('')
     patient.person_id = person["person"]["id"]
@@ -119,8 +196,6 @@ module PatientService
   end 
   #............................................................. new code
   
-  
-   
   def self.create_patient_from_dde(params)
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
