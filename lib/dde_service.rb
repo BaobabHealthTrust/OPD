@@ -166,8 +166,6 @@ module DDEService
   def check_old_national_id(identifier)
       create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
       if create_from_dde_server
-        national_id = self.national_id(false) || ''
-        return true if national_id.length == 6
         if (identifier.to_s.strip.length != 6 and identifier == self.national_id)
            replaced_national_id = replace_old_national_id(identifier)
            return replaced_national_id
