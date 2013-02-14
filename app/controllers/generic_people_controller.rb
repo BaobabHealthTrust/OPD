@@ -97,7 +97,7 @@ class GenericPeopleController < ApplicationController
           patient = DDEService::Patient.new(found_person.patient)
           national_id_replaced = patient.check_old_national_id(params[:identifier])
           if national_id_replaced.to_s != "true" and national_id_replaced.to_s !="false"
-            redirect_to :action => 'dde_duplicates' ,:search_params => params
+            redirect_to :action => 'remote_duplicates' ,:search_params => params
             return
           end
         end
