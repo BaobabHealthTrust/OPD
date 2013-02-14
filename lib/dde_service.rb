@@ -98,7 +98,7 @@ module DDEService
       id ||= PatientIdentifierType.find_by_name("National id").next_identifier(:patient => self.patient).identifier
       id
     end
-
+=begin
     def check_old_national_id(identifier)
       create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
       if create_from_dde_server
@@ -161,6 +161,91 @@ module DDEService
 
         end
       end
+    end
+=end
+  def check_old_national_id(identifier)
+      create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+      if create_from_dde_server
+        national_id = self.national_id(false) || ''
+        return true if national_id.length == 6
+        if (identifier.to_s.strip.length != 6 and identifier == self.national_id)
+           replaced_national_id = replace_old_national_id(identifier)
+           return replaced_national_id
+        elsif (identifier.to_s.strip.length >= 6 and identifier != self.national_id)
+           replaced_national_id = replace_old_national_id(self.national_id)
+           return replaced_national_id
+        else
+           return false
+        end
+      end
+   end
+
+   def replace_old_national_id(identifier)
+          dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+          dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+          dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+          uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+          uri += "?value=#{identifier}"
+          output = RestClient.get(uri)
+          p = JSON.parse(output)
+          return p.count if p.count > 1
+          if  p.count == 1
+            p = p.first
+            person_id = p["person"]["id"]
+            uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+            uri += "?person_id=#{person_id}"
+            output = RestClient.get(uri)
+            person = JSON.parse(output)
+            national_id = person["npid"]["value"]
+            current_national_id = self.get_full_identifier("National id")
+            self.set_identifier("National id", national_id)
+            self.set_identifier("Old Identification Number", current_national_id.identifier)
+            current_national_id.void("National ID version change")
+            return true
+          end unless p.blank?
+
+          return false unless p.blank?
+
+          # birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"]
+          person = {"person" => {
+              "birthdate_estimated" => (self.person.birthdate_estimated rescue nil),
+              "gender" => (self.person.gender rescue nil),
+              "birthdate" => (self.person.birthdate rescue nil),
+              "birth_year" => (self.person.birthdate.to_date.year rescue nil),
+              "birth_month" => (self.person.birthdate.to_date.month rescue nil),
+              "birth_day" => (self.person.birthdate.to_date.date rescue nil),
+              "names" => {
+                "given_name" => self.first_name,
+                "family_name" => self.last_name
+              },
+              "patient" => {
+                "identifiers" => {
+                  "old_identification_number" => identifier
+                }
+              },
+              "attributes" => {
+                "occupation" => (self.get_full_attribute("Occupation").value rescue nil),
+                "cell_phone_number" => (self.get_full_attribute("Cell Phone Number").value rescue nil),
+                "citizenship" => (self.get_full_attribute("Citizenship").value rescue nil),
+                "race" => (self.get_full_attribute("Race").value rescue nil)
+              },
+              "addresses" => {
+                "address1" => (self.current_address1 rescue nil),
+                "city_village" => (self.current_address2 rescue nil),
+                "address2" => (self.current_district rescue nil),
+                "subregion" => (self.home_district rescue nil),
+                "county_district" => (self.home_ta rescue nil),
+                "neighborhood_cell" => (self.home_village rescue nil)
+              }
+            }
+          }
+
+          current_national_id = self.get_full_identifier("National id")
+          national_id = DDEService.create_patient_from_dde(person, true)
+          self.set_identifier("National id", national_id)
+          self.set_identifier("Old Identification Number", current_national_id.identifier)
+          current_national_id.void("National ID version change")
+          return true
     end
   end
 
