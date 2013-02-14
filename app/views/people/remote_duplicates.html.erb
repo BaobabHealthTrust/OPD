@@ -73,8 +73,13 @@ table{
 
 <div id='primary_patient_div'>                                                  
   <div><h4>
-    <%if @dde_duplicates.blank?%>
-      Give the patient below a new national identifier:
+    <%if @dde_duplicates.length < 2
+        if @dde_duplicates.blank?
+      %>
+          Give the patient below a new national identifier:
+      <%else%>
+          Give the patient below a new national identifier or merge with the remote patient on your right:
+      <%end%>
     <%else%>
       Patient(s) with similar national identifier as the patient below:
     <%end%>
@@ -86,7 +91,7 @@ table{
   <div><b>National ID:</b>&nbsp;<%=@primary_patient.national_id_with_dashes%></div>  
   <div><b>Home district:</b>&nbsp;<%=@primary_patient.home_district%></div>  
   <div><b>Current address:</b>&nbsp;<%=@primary_patient.address%></div>  
-  <%if @dde_duplicates.blank?%>
+  <%if @dde_duplicates.length < 2%>
     <div>&nbsp;</div>
     <div style="margin-left:-4px;" class="reassign_btn">
       <a href="javascript:newLocalID('<%=@primary_patient.patient_id%>','<%=@primary_patient.national_id%>')">Reassign National ID</a>
