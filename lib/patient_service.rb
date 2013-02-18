@@ -25,8 +25,8 @@ module PatientService
 
       local_people = []
       people.each do |person|
-        national_id = person['person']["value"] rescue person["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
-        old_national_id = person["person"]["data"]["patient"]["identifiers"]["old_identification_number"] rescue nil
+        national_id = person['person']["value"] rescue nil
+        old_national_id = person["person"]["old_identification_number"] rescue nil
 
         birthdate_year = person["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
         birthdate_month = person["person"]["data"]["birthdate"].to_date.month rescue nil
@@ -163,7 +163,7 @@ module PatientService
     patient.cell_phone_number = person["person"]["cell_phone_number"]
     patient.home_phone_number = person["person"]["home_phone_number"]
     patient.old_identification_number = person["person"]["patient"]["identifiers"]["Old national id"]
-
+    patient.national_id  = patient.old_identification_number if patient.national_id.blank?
     patient
   end
 

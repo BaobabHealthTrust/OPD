@@ -700,7 +700,6 @@ class GenericPeopleController < ApplicationController
     end
 
     @selected_identifier = params[:search_params][:identifier]
-
     render :layout => 'menu'
   end
  
@@ -721,6 +720,10 @@ class GenericPeopleController < ApplicationController
       PatientService.search_from_dde_by_identifier(params[:identifier]).each do |person|
         @dde_duplicates << PatientService.get_dde_person(person)
       end
+    end
+
+    if @primary_patient.blank? and @dde_duplicates.blank?
+      redirect_to :action => 'search',:identifier => params[:identifier] and return
     end
     render :layout => 'menu'
   end
