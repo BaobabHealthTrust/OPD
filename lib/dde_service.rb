@@ -657,12 +657,11 @@ module DDEService
     uri += "?person_id=#{dde_person_id}"
     p = JSON.parse(RestClient.get(uri)) rescue nil
     return [] if p.blank?
-
-    birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
-    birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
-    birthdate_day = p["person"]["birthdate"].to_date.day rescue nil
-    birthdate_estimated = p["person"]["birthdate_estimated"]
-    gender = p["person"]["gender"] == "F" ? "Female" : "Male"
+    birthdate_year = p["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
+    birthdate_month = p["person"]["data"]["birthdate"].to_date.month rescue nil
+    birthdate_day = p["person"]["data"]["birthdate"].to_date.day rescue nil
+    birthdate_estimated = p["person"]["data"]["birthdate_estimated"]
+    gender = p["person"]["data"]["gender"] == "F" ? "Female" : "Male"
 
     passed = {
      "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
@@ -677,8 +676,8 @@ module DDEService
      "patient"=>{"identifiers"=>{"National id" => p["npid"]["value"]}},
      "birth_day"=>birthdate_day,
      "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
-     "names"=>{"family_name"=>p["person"]["family_name"],
-     "given_name"=>p["person"]["given_name"],
+     "names"=>{"family_name"=>p["person"]["data"]["names"]["family_name"],
+     "given_name"=>p["person"]["data"]["names"]["given_name"],
      "middle_name"=>""},
      "birth_year"=>birthdate_year},
      "filter_district"=>"",
@@ -687,8 +686,7 @@ module DDEService
      "relation"=>""
     }
 
-    passed["person"].merge!("identifiers" => {"National id" => p["npid"]["value"]})
-    
+    passed["person"].merge!("identifiers" => {"National id" => p["npid"]["value"]})    
     return PatientService.create_from_form(passed["person"])
   end
 
