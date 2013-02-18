@@ -687,10 +687,20 @@ class GenericPeopleController < ApplicationController
 
   def duplicates
     @duplicates = []
-    PatientService.search_by_identifier(params[:search_params][:identifier]).each do |person|
+    people = PatientService.person_search(params[:search_params])
+    people.each do |person|
       @duplicates << PatientService.get_patient(person)
+    end unless people == "found duplicate identifiers"
+
+    if create_from_dde_server
+      @duplicates = []
+      PatientService.search_from_dde_by_identifier(params[:search_params][:identifier]).each do |person|
+        @duplicates << PatientService.get_dde_person(person)
+      end
     end
+
     @selected_identifier = params[:search_params][:identifier]
+
     render :layout => 'menu'
   end
  
