@@ -648,4 +648,49 @@ module DDEService
     current_national_id.save!
     return current_national_id.patient.person
   end
-end
+
+  def self.get_remote_person(dde_person_id)
+    dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+    dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/post_back_person.json"
+    uri += "?person_id=#{dde_person_id}"
+    p = JSON.parse(RestClient.get(uri)) rescue nil
+    return [] if p.blank?
+
+    birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
+    birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
+    birthdate_day = p["person"]["birthdate"].to_date.day rescue nil
+    birthdate_estimated = p["person"]["birthdate_estimated"]
+    gender = p["person"]["gender"] == "F" ? "Female" : "Male"
+
+    passed = {
+     "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
+     "age_estimate"=> birthdate_estimated,
+     "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
+     "birth_month"=> birthdate_month ,
+     "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
+     "address2"=>p["person"]["data"]["addresses"]["address2"],
+     "city_village"=>p["person"]["data"]["addresses"]["city_village"],
+     "county_district"=>""},
+     "gender"=> gender ,
+     "patient"=>{"identifiers"=>{"National id" => p["npid"]["value"]}},
+     "birth_day"=>birthdate_day,
+     "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
+     "names"=>{"family_name"=>p["person"]["family_name"],
+     "given_name"=>p["person"]["given_name"],
+     "middle_name"=>""},
+     "birth_year"=>birthdate_year},
+     "filter_district"=>"",
+     "filter"=>{"region"=>"",
+     "t_a"=>""},
+     "relation"=>""
+    }
+
+    passed["person"].merge!("identifiers" => {"National id" => p["npid"]["value"]})
+    
+    return PatientService.create_from_form(passed["person"])
+  end
+
+ end
+
