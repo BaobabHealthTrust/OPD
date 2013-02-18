@@ -693,9 +693,9 @@ class GenericPeopleController < ApplicationController
     end unless people == "found duplicate identifiers"
 
     if create_from_dde_server
-      @duplicates = []
+      @remote_duplicates = []
       PatientService.search_from_dde_by_identifier(params[:search_params][:identifier]).each do |person|
-        @duplicates << PatientService.get_dde_person(person)
+        @remote_duplicates << PatientService.get_dde_person(person)
       end
     end
 
@@ -710,7 +710,12 @@ class GenericPeopleController < ApplicationController
   end
 
   def remote_duplicates
-    @primary_patient = PatientService.get_patient(Person.find(params[:patient_id]))
+    if params[:patient_id]
+      @primary_patient = PatientService.get_patient(Person.find(params[:patient_id]))
+    else
+      @primary_patient = nil
+    end
+    
     @dde_duplicates = []
     if create_from_dde_server
       PatientService.search_from_dde_by_identifier(params[:identifier]).each do |person|
@@ -743,6 +748,10 @@ class GenericPeopleController < ApplicationController
     npid.save
     
     print_and_redirect("/patients/national_id_label?patient_id=#{patient.id}", next_task(patient))
+  end
+
+  def create_person_from_dde
+    
   end
 
   

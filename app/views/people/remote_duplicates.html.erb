@@ -67,6 +67,10 @@ table{
   function newLocalID(patient_id,national_id) {
     document.location = "/people/reassign_national_identifier?person_id=" + patient_id + "&identifier=" + national_id;
   }
+
+  function createPersonLocally(person_id) {
+    document.location = "/people/create_person_from_dde?person_id=" + person_id;
+  }
 </script>
 </head>
 
@@ -85,6 +89,7 @@ table{
     <%end%>
   </h4></div>
   <div><hr /></div>
+  <%if @primary_patient%>
   <div><b>Name:</b><%=@primary_patient.name%>&nbsp;(<%=@primary_patient.sex%>)</div>  
   <div><b>Age</b>&nbsp;<%=@primary_patient.age%></div>
   <div><b>Birthdate:</b>&nbsp;<%=@primary_patient.birth_date%></div>  
@@ -96,6 +101,7 @@ table{
     <div style="margin-left:-4px;" class="reassign_btn">
       <a href="javascript:newLocalID('<%=@primary_patient.patient_id%>','<%=@primary_patient.national_id%>')">Reassign National ID</a>
     </div>
+  <%end%>
   <%end%>
 </div>                                                                          
 <div id='second_patient_div'>                                                   
@@ -109,7 +115,11 @@ table{
     <div><b>Current address:</b>&nbsp;<%=person.current_residence%></div>  
     <div>&nbsp;</div>
     <div class="reassign_btn">
-      <a href="javascript:newNpid('<%=@primary_patient.patient_id%>','<%=person.person_id%>')">Merge/Reassign National ID</a>
+      <%if @primary_patient%>
+        <a href="javascript:newNpid('<%=@primary_patient.patient_id%>','<%=person.person_id%>')">Merge/Reassign National ID</a>
+      <%else%>
+        <a href="javascript:createPersonLocally('<%=person.person_id%>')">Reassign National ID</a>
+      <%end%>
     </div>
     <div><hr /></div>
   <%end%>

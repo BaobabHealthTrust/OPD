@@ -6,6 +6,10 @@
     document.location = "/people/remote_duplicates?patient_id=" + patient_id + "&identifier=" + national_id;
   }
 
+  function remoteNewID(patient_id,national_id) {
+    document.location = "/people/remote_duplicates?remote_person_id=" + patient_id + "&identifier=" + national_id;
+  }
+
 </script>
 
 <style>
@@ -53,7 +57,6 @@ div { -moz-user-select: none; }
 <!--
 
 -->
-<%if @duplicates%>
 <h3 class="msg">Select patient to continue ....</h3>
 <table>
   <tr class="header">
@@ -85,7 +88,29 @@ div { -moz-user-select: none; }
     </td>
   </tr>
  <%end%>
+  <%
+    row_number = 0
+    ( @remote_duplicates || {} ).each do | patient |
+      if color == 'white'
+        color = 'blue'
+      else
+        color = 'white'
+      end
+      row_number+=1
+      %>
+  <tr>
+    <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.name || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.birth_date || '&nbsp;' %> </td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
+    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
+    <td class="color_<%=color%> row_number_<%=row_number%>">
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="remoteNewID('<%=patient.person_id%>','<%=patient.national_id%>');">Select</a>
+    </td>
+  </tr>
+ <%end%>
+
 </table>
-<%end%>
+
 
 </div>
