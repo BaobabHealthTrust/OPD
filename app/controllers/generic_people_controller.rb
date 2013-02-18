@@ -751,7 +751,9 @@ class GenericPeopleController < ApplicationController
   end
 
   def create_person_from_dde
-    
+    person = DDEService.get_remote_person(params[:remote_person_id])
+
+    print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
   end
 
   
