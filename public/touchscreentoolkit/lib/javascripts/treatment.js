@@ -761,12 +761,14 @@ function ajaxDFRequest(aUrl) {
 function handleDFResult(aXMLHttpRequest) {
     if (!aXMLHttpRequest) return;
 
-    if (aXMLHttpRequest.readyState == 4 && aXMLHttpRequest.status == 200) {
-        var dosesFreqs = JSON.parse(aXMLHttpRequest.responseText);
-
+    if (aXMLHttpRequest.readyState == 4) {
+        //var dosesFreqs = JSON.parse(aXMLHttpRequest.responseText);
+        var dosesFreqs = aXMLHttpRequest.responseText
+        //alert(dosesFreqs)
         var existingDoses = {};
 
         for(var i = 0; i < dosesFreqs.length; i++){
+            alert(dosesFreqs[i])
             var li = document.createElement("li");
             li.id = "option" + dosesFreqs[i][0];
             li.innerHTML = dosesFreqs[i][0];
