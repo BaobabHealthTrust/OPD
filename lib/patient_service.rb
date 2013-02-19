@@ -14,14 +14,15 @@ module PatientService
                                                                                 
     return JSON.parse(RestClient.post(uri,params))                              
   end
-
+  
   def self.create_patient_from_dde(params)
+    create_new = params["create_new"]
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
 		patient_params = params["person"]["patient"]
     birthday_params = params["person"]
 		params_to_process = params.reject{|key,value| 
-      key.match(/identifiers|addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) 
+      key.match(/identifiers|addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy|create_new|patient_id/)
     }
 		birthday_params = params_to_process["person"].reject{|key,value| key.match(/gender/) }
 		person_params = params_to_process["person"].reject{|key,value| key.match(/birth_|age_estimate|occupation/) }
@@ -81,7 +82,9 @@ module PatientService
           "names"=>{"family_name"=> names_params["family_name"], 
             "given_name"=> names_params["given_name"]
           }}}}
-
+    unless create_new.blank?
+      passed_params.merge!({"create_new" => true})
+    end
     if !params["remote"]
       
       @dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
@@ -92,16 +95,44 @@ module PatientService
     
       uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"                          
       recieved_params = RestClient.post(uri,passed_params)      
-                                          
+   
       national_id = JSON.parse(recieved_params)["npid"]["value"]
     else
       national_id = params["person"]["patient"]["identifiers"]["National_id"]
     end
+    
+    if create_new == "true"
+      patient_id = params["patient_id"]
+      person = Person.find(patient_id)
       
-	  person = self.create_from_form(params[:person])
-    identifier_type = PatientIdentifierType.find_by_name("National id") || PatientIdentifierType.find_by_name("Unknown id")
-    person.patient.patient_identifiers.create("identifier" => national_id, 
+      current_national_id = PatientIdentifier.find(:first,
+                            :conditions => ["patient_id = ? AND voided = 0 AND
+                            identifier_type = ?",patient_id , 3])
+
+      patient_identifier = PatientIdentifier.new
+      patient_identifier.type = PatientIdentifierType.find_by_name("National id")
+      patient_identifier.identifier = national_id
+      patient_identifier.patient_id = patient_id
+			patient_identifier.save!
+
+      patient_identifier = PatientIdentifier.new
+      patient_identifier.type = PatientIdentifierType.find_by_name("Old Identification Number")
+      patient_identifier.identifier = current_national_id.identifier
+      patient_identifier.patient_id = patient_id
+			patient_identifier.save!
+
+      current_national_id.voided = true
+      current_national_id.voided_by = 1
+      current_national_id.void_reason = "National ID version change"
+      current_national_id.date_voided =  Time.now()
+      current_national_id.save!
+    else
+      person = self.create_from_form(params[:person])
+      identifier_type = PatientIdentifierType.find_by_name("National id") || PatientIdentifierType.find_by_name("Unknown id")
+      person.patient.patient_identifiers.create("identifier" => national_id,
       "identifier_type" => identifier_type.patient_identifier_type_id) unless national_id.blank?
+    end
+
     return person
   end
 
@@ -803,8 +834,12 @@ EOF
 		patient.first_name = person["person"]["names"]["given_name"] rescue nil
 		patient.last_name = person["person"]["names"]["family_name"] rescue nil
 		patient.sex = person["person"]["gender"]
-    patient.birth_date = person["person"]["birthdate"].to_date.strftime("%d/%b/%Y")
+    patient.birthdate = person["person"]["birthdate"].to_date
     patient.age = age_dde(patient,current_date)
+    patient.birthdate_estimated =  person["person"]["age_estimate"].to_i rescue 0
+    date_created =  person["person"]["date_created"].to_date rescue Date.today
+    patient.age = self.cul_age(patient.birthdate , patient.birthdate_estimated , date_created, Date.today)
+    patient.birth_date = self.get_birthdate_formatted(patient.birthdate,patient.birthdate_estimated)
 		patient.home_district = person["filter_district"]
 		patient.traditional_authority = person["filter"]["t_a"]
 		patient.current_residence = person["person"]["addresses"]["city_village"]
@@ -812,7 +847,7 @@ EOF
 		patient.occupation = person["person"]["occupation"]
 		patient.cell_phone_number = person["person"]["cell_phone_number"]
 		patient.home_phone_number = person["person"]["home_phone_number"]
-    
+		patient.current_app_national_id = person["current_app_national_id"]
 		patient
 	end
   
@@ -1127,7 +1162,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       unless p.include?"npid"
         person_id =  p["person"]["id"]
         person = DDEService.create_from_remote(person_id,false)
-        return person
+        return [person]
       else
       birthdate_year = p["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
       birthdate_month = p["person"]["data"]["birthdate"].to_date.month rescue nil
@@ -1183,7 +1218,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       local_people = []
       people.each do |person|
         #unless person["npid"].blank?
-        national_id = person["npid"]["value"] rescue person["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
+        national_id = person['person']["value"] rescue person["person"]["data"]["patient"]["identifiers"]["old_identification_number"]
         old_national_id = person["person"]["data"]["patient"]["identifiers"]["old_identification_number"] rescue nil
         #else
          # national_id = person["person"]["data"]["patient"]["identifiers"][" old_identification_number"]
@@ -1220,6 +1255,85 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
         local_people << passed_person
       end
     return local_people
+  end
+
+
+  def self.create_from_dde_server_only(params)
+    address_params = params["person"]["addresses"]
+    names_params = params["person"]["names"]
+    patient_params = params["person"]["patient"]
+    birthday_params = params["person"]
+    params_to_process = params.reject{|key,value| 
+      key.match(/identifiers|addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) 
+    }
+    birthday_params = params_to_process["person"].reject{|key,value| key.match(/gender/) }
+    person_params = params_to_process["person"].reject{|key,value| key.match(/birth_|age_estimate|occupation/) }
+
+
+    if person_params["gender"].to_s == "Female"
+      person_params["gender"] = 'F'
+    elsif person_params["gender"].to_s == "Male"
+      person_params["gender"] = 'M'
+    end
+    
+    unless birthday_params.empty?
+      if birthday_params["birth_year"] == "Unknown"
+        birthdate = Date.new(Date.today.year - birthday_params["age_estimate"].to_i, 7, 1) 
+        birthdate_estimated = 1
+      else
+        year = birthday_params["birth_year"]
+        month = birthday_params["birth_month"]
+        day = birthday_params["birth_day"]
+
+        month_i = (month || 0).to_i                                                 
+        month_i = Date::MONTHNAMES.index(month) if month_i == 0 || month_i.blank?   
+        month_i = Date::ABBR_MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
+                                                                                    
+        if month_i == 0 || month == "Unknown"                                       
+          birthdate = Date.new(year.to_i,7,1)                                
+          birthdate_estimated = 1
+        elsif day.blank? || day == "Unknown" || day == 0                            
+          birthdate = Date.new(year.to_i,month_i,15)                         
+          birthdate_estimated = 1
+        else                                                                        
+          birthdate = Date.new(year.to_i,month_i,day.to_i)                   
+          birthdate_estimated = 0
+        end
+      end
+    else
+      birthdate_estimated = 0
+    end
+
+
+    passed_params = {"person"=> 
+        {"data" => 
+          {"addresses"=> 
+            {"state_province"=> address_params["address2"], 
+            "address2"=> address_params["address1"], 
+            "city_village"=> address_params["city_village"],
+            "county_district"=> address_params["county_district"]
+          }, 
+          "attributes"=> 
+            {"occupation"=> params["person"]["occupation"], 
+            "cell_phone_number" => params["person"]["cell_phone_number"] },
+          "patient"=> 
+            {"identifiers"=> 
+              {"diabetes_number"=>""}}, 
+          "gender"=> person_params["gender"], 
+          "birthdate"=> birthdate, 
+          "birthdate_estimated"=> birthdate_estimated , 
+          "names"=>{"family_name"=> names_params["family_name"], 
+            "given_name"=> names_params["given_name"]
+          }}}}
+
+      @dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+      @dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+      @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    
+      uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"                          
+      received_params = RestClient.post(uri,passed_params)
+                                          
+      return JSON.parse(received_params)["npid"]["value"]
   end
   
   def self.set_birthdate_by_age(person, age, today = Date.today)
@@ -1500,5 +1614,32 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       "#{id[0..2]}-#{id[3..(id.length-1)]}"
     end
   end
+
+  def self.cul_age(birthdate , birthdate_estimated , date_created = Date.today, today = Date.today)
+                                                                                
+    # This code which better accounts for leap years                            
+    patient_age = (today.year - birthdate.year) + ((today.month - birthdate.month) + ((today.day - birthdate.day) < 0 ? -1 : 0) < 0 ? -1 : 0)
+                                                                                
+    # If the birthdate was estimated this year, we round up the age, that way if
+    # it is March and the patient says they are 25, they stay 25 (not become 24)
+    birth_date = birthdate                                                      
+    estimate = birthdate_estimated == 1                                         
+    patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  &&
+        today.month < birth_date.month && date_created.year == today.year) ? 1 : 0
+    end                                                                           
+                                                                              
+  def self.get_birthdate_formatted(birthdate,birthdate_estimated)                        
+    if birthdate_estimated == 1                                                 
+      if birthdate.day == 1 and birthdate.month == 7                            
+        birthdate.strftime("??/???/%Y")                                         
+      elsif birthdate.day == 15                                                 
+        birthdate.strftime("??/%b/%Y")                                          
+      elsif birthdate.day == 1 and birthdate.month == 1                         
+        birthdate.strftime("??/???/%Y")                                         
+      end                                                                       
+    else                                                                        
+      birthdate.strftime("%d/%b/%Y")                                            
+    end                                                                         
+  end 
 
 end

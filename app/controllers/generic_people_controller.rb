@@ -70,6 +70,19 @@ class GenericPeopleController < ApplicationController
         redirect_to :action => 'duplicates' ,:search_params => params
         return
 			elsif local_results.length == 1
+        if create_from_dde_server
+          dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+          dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+          dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+          uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+          uri += "?value=#{params[:identifier]}"                                         
+          output = RestClient.get(uri)                                          
+          p = JSON.parse(output)                                                
+          if p.count > 1 
+            redirect_to :action => 'dde_duplicates' ,:search_params => params
+            return
+          end
+        end
 				found_person = local_results.first
 			else
 				# TODO - figure out how to write a test for this
@@ -79,14 +92,16 @@ class GenericPeopleController < ApplicationController
 					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.blank?
 				end
 			end
-			if  found_person
-        patient = DDEService::Patient.new(found_person.patient)
-        national_id_replaced = patient.check_old_national_id(params[:identifier])
-        if national_id_replaced.to_s != "true" and national_id_replaced.to_s !="false"
-          redirect_to :action => 'dde_duplicates' ,:search_params => params
-          return
+			if found_person
+        if params[:identifier].length != 6 and create_from_dde_server
+          patient = DDEService::Patient.new(found_person.patient)
+          national_id_replaced = patient.check_old_national_id(params[:identifier])
+          if national_id_replaced.to_s != "true" and national_id_replaced.to_s !="false"
+            redirect_to :action => 'dde_duplicates' ,:search_params => params
+            return
+          end
         end
-    
+
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
 				elsif national_id_replaced.to_s == "true"
@@ -106,9 +121,11 @@ class GenericPeopleController < ApplicationController
     @patients = []                                                              
     
     (PatientService.search_from_remote(params) || []).each do |data|
-      results = PersonSearch.new(data["npid"]["value"]) rescue PersonSearch.new(data["legacy_ids"])
-      results.national_id = data["legacy_ids"] 
-      results.national_id = data["npid"]["value"] if results.national_id.blank?
+      national_id = data["npid"]["value"] rescue nil
+      national_id = data["legacy_ids"] if national_id.blank?
+      next if national_id.blank?
+      results = PersonSearch.new(national_id)
+      results.national_id = national_id
       results.current_residence =data["person"]["data"]["addresses"]["city_village"]
       results.person_id = 0                                                     
       results.home_district = data["person"]["data"]["addresses"]["state_province"]
@@ -707,10 +724,20 @@ class GenericPeopleController < ApplicationController
       person_id = PatientService.person_search(params[:search_params])
       person = Person.find_by_person_id(person_id)
       @duplicate = PatientService.get_patient(person)
+      person_name = @duplicate.name.soundex
       @dde_duplicates = []
       PatientService.search_from_dde_by_identifier(params[:search_params][:identifier]).each do |person|
+        dde_person_name = person["person"]["names"]["given_name"] 
+        dde_person_name += person["person"]["names"]["family_name"]
+        dde_person_sex =  person["person"]["gender"]
+        if person_name == dde_person_name.soundex and (dde_person_sex == @duplicate.sex)
+          person.merge!({"current_app_national_id" => params[:search_params][:identifier]})
+        else
+          person.merge!({"current_app_national_id" => ''})
+        end
         @dde_duplicates << PatientService.get_dde_person(person)
       end
+      @selected_identifier = params[:search_params][:identifier]
     end
     render :layout => 'menu'
   end
@@ -721,7 +748,7 @@ class GenericPeopleController < ApplicationController
     elsif not params[:local_and_remote].blank?
       create_and_reassign_national_id(params[:person_id],true,params[:patient_id])
     else
-    new_national_id = reassign_national_id(params[:patient_id])
+    new_national_id = reassign_national_id(params[:patient_id],params[:create_new])
     if new_national_id == true
       person = Person.find(params[:patient_id])
       print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
@@ -733,20 +760,68 @@ class GenericPeopleController < ApplicationController
   end
   end
 
-  def create_and_reassign_national_id(person_id,local=false,patient_id=nil)
-    person = DDEService.create_from_remote(person_id,local,patient_id)
+  def create_and_reassign_national_id(dde_person_id,local=false,local_person_id=nil)
+    person = DDEService.reassign_dde_identication(dde_person_id,local,local_person_id)
     print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+  end
+
+  def reassign_dde_national_id
+    person = DDEService.reassign_dde_identication(params[:dde_person_id],params[:local_person_id])
+    print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+  end
+
+  def remote_duplicates
+    @primary_patient = PatientService.get_patient(Person.find(params[:patient_id]))
+    @dde_duplicates = []
+    if create_from_dde_server
+      PatientService.search_from_dde_by_identifier(params[:identifier]).each do |person|
+        @dde_duplicates << PatientService.get_dde_person(person)
+      end
+    end
+    render :layout => 'menu'
+  end
+
+  def reassign_national_identifier
+    patient = Patient.find(params[:person_id])
+    if create_from_dde_server
+      passed_params = PatientService.demographics(patient.person)
+      new_npid = PatientService.create_from_dde_server_only(passed_params)
+      npid = PatientIdentifier.new()
+      npid.patient_id = patient.id
+      npid.identifier_type = PatientIdentifierType.find_by_name('National ID')
+      npid.identifier = new_npid
+      npid.save
+    else
+      PatientIdentifierType.find_by_name('National ID').next_identifier({:patient => patient})
+    end
+    npid = PatientIdentifier.find(:first,
+           :conditions => ["patient_id = ? AND identifier = ? 
+           AND voided = 0", patient.id,params[:identifier]])
+    npid.voided = 1
+    npid.void_reason = "Given another national ID"
+    npid.date_voided = Time.now()
+    npid.voided_by = current_user.id
+    npid.save
+    
+    print_and_redirect("/patients/national_id_label?patient_id=#{patient.id}", next_task(patient))
   end
 
 private
   
-  def reassign_national_id(patient_id)
-    found_person = PatientService.get_patient(Person.find(patient_id))
-    patient = DDEService::Patient.new(Person.find(patient_id).patient)
-    if found_person.national_id.length != 6
-      patient.check_old_national_id(found_person.national_id)
+  def reassign_national_id(patient_id,create_new)
+    if create_new == "true"
+      found_person = Person.find(patient_id)
+      person_demographics = PatientService.demographics(found_person)
+      person_demographics.merge!({"create_new" => create_new,"patient_id" => patient_id})
+      person = PatientService.create_patient_from_dde(person_demographics)
     else
-      patient.check_duplicate_national_id
+      found_person = PatientService.get_patient(Person.find(patient_id))
+      patient = DDEService::Patient.new(Person.find(patient_id).patient)
+      if found_person.national_id.length != 6
+        patient.check_old_national_id(found_person.national_id)
+      else
+        patient.check_duplicate_national_id
+    end
     end
   end
  

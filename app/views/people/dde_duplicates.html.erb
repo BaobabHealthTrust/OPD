@@ -13,7 +13,7 @@
   }
 
   function assignNewID(person_id,remote,patient_id){
-   document.location = "/people/reassign_identifier?person_id=" + person_id + "&local_and_remote="+ remote + "&patient_id=" + patient_id;
+   document.location = "/people/reassign_dde_national_id?dde_person_id=" + person_id + "&local_person_id=" + patient_id;
   }
 
   function selectByIdentifier(identifier) {
@@ -118,9 +118,7 @@ div { -moz-user-select: none; }
       end
       row_number+=1
       remote = true
- 
-      old_identification_number = patient.old_identification_number rescue nil
-
+      
       %>
   <tr>
     <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
@@ -129,8 +127,8 @@ div { -moz-user-select: none; }
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
     <td class="color_<%=color%> row_number_<%=row_number%>">
-    <%if not(patient.national_id == old_identification_number) || old_identification_number.blank? 
-        if patient.patient_id = 0%>
+    <%if patient.current_app_national_id == @selected_identifier
+        if patient.patient_id == 0%>
           <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectByIdentifier('<%=patient.national_id%>');">Select</a>
         <%else%>
           <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectP('<%=patient.patient_id%>');">Select</a>
