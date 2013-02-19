@@ -683,7 +683,9 @@ class GenericPeopleController < ApplicationController
   end 
 
 
-  def duplicates                                                                
+  def duplicates
+    @logo = CoreService.get_global_property_value('logo').to_s
+    @current_location_name = Location.current_health_center.name
     @duplicates = []
     people = PatientService.person_search(params[:search_params])
     people.each do |person|
