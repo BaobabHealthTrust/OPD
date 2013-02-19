@@ -169,7 +169,7 @@ module DDEService
         if (identifier.to_s.strip.length != 6 and identifier == self.national_id)
            replaced_national_id = replace_old_national_id(identifier)
            return replaced_national_id
-        elsif (identifier.to_s.strip.length >= 6 and identifier != self.national_id)
+        elsif (identifier.to_s.strip.length >= 6 and identifier != self.national_id and self.national_id.length != 6)
            replaced_national_id = replace_old_national_id(self.national_id)
            return replaced_national_id
         else
