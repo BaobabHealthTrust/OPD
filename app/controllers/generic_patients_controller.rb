@@ -709,7 +709,7 @@ class GenericPatientsController < ApplicationController
     render :layout => "menu"
   end
 
-  def pdash                      
+  def patient_dashboard
     session_date = session[:datetime].to_date rescue Date.today
     @patient_bean = PatientService.get_patient(Person.find(params[:patient_id] || params[:found_person_id]))
     patient = Patient.find(params[:patient_id] || params[:found_person_id])

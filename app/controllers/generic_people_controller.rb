@@ -106,10 +106,10 @@ class GenericPeopleController < ApplicationController
           redirect_to search_complete_url(found_person.id, params[:relation]) and return
         elsif national_id_replaced.to_s == "true"
           print_and_redirect("/patients/national_id_label?patient_id=#{found_person.id}", next_task(found_person.patient)) and return
-          redirect_to :controller =>'patients',:action => 'pdash',
+          redirect_to :controller =>'patients',:action => 'patient_dashboard',
             :found_person_id => found_person.id, :relation => params[:relation] and return
         else
-          redirect_to :controller =>'patients',:action => 'pdash', 
+          redirect_to :controller =>'patients',:action => 'patient_dashboard',
             :found_person_id => found_person.id, :relation => params[:relation] and return
         end
       end
@@ -216,7 +216,7 @@ class GenericPeopleController < ApplicationController
       if params[:relation]
         redirect_to search_complete_url(found_person.id, params[:relation]) and return
       else
-        redirect_to :action => 'pdash',:controller =>'patients',
+        redirect_to :action => 'patient_dashboard',:controller =>'patients',
           :found_person_id => found_person.id,
           :relation => params[:relation] and return
       end
@@ -777,7 +777,7 @@ private
 			show_confirmation = CoreService.get_global_property_value('show.patient.confirmation').to_s == "true" rescue false
 			if show_confirmation
 				#url_for(:controller => :people, :action => :confirm , :found_person_id =>found_person_id)
-				url_for(:controller => :patients , :action => :pdash , :found_person_id =>found_person_id)
+				url_for(:controller => :patients , :action => :patient_dashboard , :found_person_id =>found_person_id)
 			else
 				next_task(patient)
 			end
