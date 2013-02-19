@@ -207,7 +207,17 @@ class GenericPrescriptionsController < ApplicationController
 		render :layout => 'application'
 	end
   
-  
+  def load_frequencies_and_dosages
+		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
+    drugs = Drug.find(:all,	:conditions => ["concept_id = ?", params[:concept_id]])
+    drug_formulations = {}
+    drugs.each { | drug |
+      drug_formulations[drug.name] = [drug.dose_strength, drug.units]
+    }
+    raise drug_formulations.inspect
+		#render :layout => 'application'
+	end
+
 	def create_advanced_prescription
 		@patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
 		encounter  = MedicationService.current_treatment_encounter(@patient)
