@@ -326,7 +326,7 @@ class GenericEncountersController < ApplicationController
 		  user_person_id = encounter[:provider_id]
 		else
 		  user_person_id = User.find_by_user_id(encounter[:provider_id]).person_id
-		end
+		end rescue user_person_id = current_user.person.person_id
 		encounter.provider_id = user_person_id
 
 		encounter.save
@@ -494,10 +494,10 @@ class GenericEncountersController < ApplicationController
         print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
         return
      elsif params['encounter']['encounter_type_name'].upcase == 'ADMIT PATIENT'
-        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
+        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}",next_task(@patient))
         return
      elsif params['encounter']['encounter_type_name'].upcase == 'DISCHARGE PATIENT'
-        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")
+        print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}",next_task(@patient))
         return
      elsif params['encounter']['encounter_type_name'].upcase == 'PATIENT SENT HOME'
         print_and_redirect("/patients/print_opd_visit_summary/#{params[:encounter]['patient_id']}","/patients/show/#{params[:encounter]['patient_id']}")

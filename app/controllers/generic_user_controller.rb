@@ -475,12 +475,12 @@ class GenericUserController < ApplicationController
   end
 
   def view_users
+    @report_name = 'View users'
     logged_user = current_user
-    users = User.find(:all, 
+    @users = User.find(:all,
       :conditions => ['user_id !=? AND retired = 0',logged_user.id],
       :order => "date_created DESC")
-    @users = users.paginate(:page => params[:page], :per_page => 7)
-    render:layout => false
+    render:layout => 'report'
   end
 
   def retire_reason

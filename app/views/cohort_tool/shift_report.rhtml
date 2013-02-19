@@ -15,9 +15,8 @@
 		border-width:1px;
 		position:absolute;
 		top:39px;
-		left:0%;
 		margin-top:-40px;
-		width:99% !important;
+		width:120%;
 	  }
 
 	  th {
@@ -58,7 +57,19 @@
 		left:8.5%;
 		margin-top:-40px;
 	  }
-
+          .link {
+                border-radius: 7px;
+		background-color: #669999;
+		border-bottom: 1px outset black;
+		border-style: outset;
+		border-top: 1px outset black;
+		color: white;
+		display: block;
+		padding: 10px 16px 10px 10px;
+		text-align: center;
+		text-decoration: none;
+                width:100%;
+          }
     </style>
   </head>
   <body >
@@ -74,10 +85,10 @@
 	  &nbsp;
 	<div> 
 	</div>
-	<div style="position:relative; width:100%; overflow-y:scroll;" class='scrollTableContainer'>
+	<div style="position:relative; width:100%; overflow:auto" class='scrollTableContainer'>
 
 
-	  <table align="left" valign ="top">
+	  <table align="left">
 
 
 		<tr >
@@ -86,40 +97,43 @@
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Trauma patients </td>
-		  <td style = "text-align:right;"><%= @referal["trauma"] %></td>
+		  <td style = "text-align:right;"><%= button_to("#{@total_trauma_patients}",{:action => 'display_patients',:category => 'trauma patients', :encounter_ids => @trauma_encounters_ids},{:class =>'link'})%></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Orthropaedic patients</td>
-		  <td style = "text-align:right;"><%=  @referal["orthropaedic"] %></td>
+		  <td style = "text-align:right;"><%= button_to("#{@orthro_patients}",{:action => 'display_patients',:category => 'orthropaedic patients', :encounter_ids => @orthro_paedic_encounter_id},{:class =>'link'})%></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Surgical patients</td>
-		  <td style = "text-align:right;"><%= @referal["surgical"] %></td>
+		  <td style = "text-align:right;"><%= button_to("#{@total_surgical_patients}",{:action => 'display_patients',:category => 'surgical patients', :encounter_ids => @surgical_encounter_ids},{:class =>'link'})%></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Psychiatric patients</td>
-		  <td style = "text-align:right;"><%=  @referal["psychiatric"] %></td>
+		  <td style = "text-align:right;"> <%= button_to("#{@total_psychiatric_patients}",{:action => 'display_patients',:category => 'psychiatric patients', :encounter_ids => @psychiatric_encounter_ids},{:class =>'link'})%></td>
 		</tr>
 
 		<tr>
-		  <th style = "text-align:left;" colspan="3">Total Admissons</th>
+		  <th style = "text-align:left;" colspan="3">Total Admissions</th>
 		  <th>&nbsp;</th>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Medical </td>
-		  <td style = "text-align:right;"><%= @admission["medical"] %></td>
+		  <td style = "text-align:right;"> <%= button_to("#{@total_medical_admissions}",{:action => 'display_patients',:category => 'medical', :encounter_ids => @medical_encounters_ids},{:class =>'link'})%></td>
+                  
 		</tr>
 		<tr>
-		  <td style = "text-align:left;" colspan="3">Surgica</td>
-		  <td style = "text-align:right;"><%= @admission["surgical"] rescue 0 %></td>
+		  <td style = "text-align:left;" colspan="3">Surgical</td>
+		  <td style = "text-align:right;"><%= button_to("#{@total_surgical_admissions}",{:action => 'display_patients',:category => 'surgical', :encounter_ids => @surgical_admissions_encounter_ids},{:class =>'link'})%></td>
+
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Obstetric and Gynae</td>
-		  <td style = "text-align:right;"><%= @admission["obstetric"] rescue 0 %></td>
+		  <td style = "text-align:right;"><%= button_to("#{@obs_gynae_admissions}",{:action => 'display_patients',:category => 'obs_gynae', :encounter_ids => @obs_gynae_encounter_ids},{:class =>'link'})%></td>
+                  
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">ICU</td>
-		  <td style = "text-align:right;"><%= @admission["ICU"] rescue 0 %></td>
+		  <td style = "text-align:right;"><%= 'N/A'%></td>
 		</tr>
 
 
@@ -129,89 +143,102 @@
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Admissions </td>
-		  <td style = "text-align:right;"><%= @admitted["total"] rescue 0 %></td>
+		  <td style = "text-align:right;"><%= button_to("#{@short_stay_admission}",{:action => 'display_patients',:category => 'short stay admission', :encounter_ids => @short_stay_admission_encounters_ids},{:class =>'link'})%></td>
+         
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Discharges</td>
-		  <td style = "text-align:right;"><%= @admission["surgical"] rescue 0 %></td>
+		  <td style = "text-align:right;"><%= button_to("#{@short_stay_discharges}",{:action => 'display_patients',:category => 'short stay discharge', :encounter_ids => @short_stay_discharges_encounters_ids},{:class =>'link'})%></td>
+                  
 		</tr>
 		<tr>
-		  <td style = "text-align:left;" colspan="4">Transfer Out : (Circle)</td>
+		  <td style = "text-align:left;" colspan="3">Transfer Out : (Circle)</td>
+                  <td style = "text-align:right;"><%= 'N/A'%></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="4">Medical</td>
 		</tr>
 		<tr><td colspan="2"></td>
-		  <td style = "text-align:left;" colspan="1">3B:</td>
-		  <td style = "text-align:right;"><%=  @admitted["ward 3B"] rescue 0 %> </td>
+		  <td style = "text-align:left;" colspan="1">3A:</td>
+		  <td style = "text-align:right;"><%= button_to("#{@admitted["Ward 3A"]}",{:action => 'display_patients',:category => '3A', :encounter_ids => @ward_encounters_ids["Ward 3A"]},{:class =>'link', :method => :post})%> </td>
+                  
 		</tr>
 		<tr><td colspan="2"></td>
-		  <td style = "text-align:left;" colspan="1">4A:</td>
-		  <td style = "text-align:right;"><%=  @admitted["ward 4A"] rescue 0 %></td>
+		  <td style = "text-align:left;" colspan="1">4B:</td>
+		  <td style = "text-align:right;"><%= button_to("#{@admitted["Ward 4B"]}",{:action => 'display_patients',:category => '4B', :encounter_ids => @ward_encounters_ids["Ward 4B"]},{:class =>'link'})%></td>
+                  
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="4">Surgical</td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">5A:</td>
-		  <td style = "text-align:right;"><%=  @admitted["ward 5A"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= button_to("#{@admitted["Ward 5A"]}",{:action => 'display_patients',:category => '5A', :encounter_ids => @ward_encounters_ids["Ward 5A"]},{:class =>'link'})%> </td>
+                  
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">5B:</td>
-		  <td style = "text-align:right;"><%=  @admitted["ward 5A"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= button_to("#{@admitted["Ward 5B"]}",{:action => 'display_patients',:category => '5B', :encounter_ids => @ward_encounters_ids["Ward 5B"]},{:class =>'link'})%> </td>
+                  
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">6A:</td>
-		  <td style = "text-align:right;"><%=  @admitted["ward 6A"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= button_to("#{@admitted["Ward 6A"]}",{:action => 'display_patients',:category => '6A', :encounter_ids => @ward_encounters_ids["Ward 6A"]},{:class =>'link'})%> </td>
+                  
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="4">Obstetrics</td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">LW:</td>
-		  <td style = "text-align:right;">&nbsp; </td>
+		  <td style = "text-align:right;"><%= button_to("#{@admitted['Labour Ward']}",{:action => 'display_patients',:category => 'labour', :encounter_ids => @ward_encounters_ids["Labour Ward"]},{:class =>'link'})%></td>
+                  
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">PNW</td>
-		  <td style = "text-align:right;">&nbsp; </td>
+		  <td style = "text-align:right;"><%= button_to("#{@admitted['Post-natal Ward']}",{:action => 'display_patients',:category => 'post-natal', :encounter_ids => @ward_encounters_ids["Post-natal Ward"]},{:class =>'link'})%></td>
+                  
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">ANW</td>
-		  <td style = "text-align:right;">&nbsp; </td>
+		  <td style = "text-align:right;"><%= button_to("#{@admitted['Ante-natal Ward']}",{:action => 'display_patients',:category => 'ante-natal', :encounter_ids => @ward_encounters_ids["Ante-natal Ward"]},{:class =>'link'})%></td>
+                  
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Gyanecology:</td>
-		  <td style = "text-align:right;"><%= @admitted["Gynaecology Ward"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= button_to("#{@admitted["Gynaecology Ward"]}",{:action => 'display_patients',:category => 'gynaecology', :encounter_ids => @ward_encounters_ids["Gynaecology Ward"]},{:class =>'link'})%> </td>
+                  
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Intensive Care Unit(ICU):</td>
-		  <td style = "text-align:right;">&nbsp; </td>
+		  <td style = "text-align:right;"><%= 'N/A' %></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="4">Paying</td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">1A:</td>
-		  <td style = "text-align:right;"><%=  @admitted["ward 1A"] rescue 0 %> </td>
+		  <td style = "text-align:right;"> <%= button_to("#{@admitted["Ward 1A"]}",{:action => 'display_patients',:category => '1A', :encounter_ids => @ward_encounters_ids["Ward 1A"]},{:class =>'link'})%> </td>
+                 
+
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">2A</td>
-		  <td style = "text-align:right;"><%=  @admitted["Ward 2A"] rescue 0 %></td>
+		  <td style = "text-align:right;"><%= button_to("#{@admitted["Ward 2A"]}",{:action => 'display_patients',:category => '2A', :encounter_ids => @ward_encounters_ids["Ward 2A"]},{:class =>'link'})%></td>
+                   
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Other:</td>
-		  <td style = "text-align:right;"><%=  @admitted["other"] rescue 0 %> </td>
-		</tr>
-
-		</td>
+		  <td style = "text-align:right;"><%= button_to("#{@other_admissions}",{:action => 'display_patients',:category => 'other admissions', :encounter_ids => @other_admissions_encounters_ids},{:class =>'link'})%> </td>
+                  
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Patients awaiting review</td>
-		  <td style = "text-align:right;"><%= @admitted["awaiting_review"] rescue 0 %></td>
+		  <td style = "text-align:right;"><%= 'N/A' %></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">ICU</td>
-		  <td style = "text-align:right;"><%= @admitted["ICU"] rescue 0 %></td>
+		  <td style = "text-align:right;"><%= 'N/A' %></td>
 		</tr>
 		<tr>
 		  <th style = "text-align:left;" colspan="3">Resusciation  Area</th>
@@ -219,7 +246,7 @@
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Admited</td>
-		  <td style = "text-align:right;"><%= @admitted["total"] rescue 0 %></td>
+		  <td style = "text-align:right;"><%= 'N/A' %></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="4">Transfer Out : (Circle)</td>
@@ -228,65 +255,65 @@
 		  <td style = "text-align:left;" colspan="4">Medical</td>
 		</tr>
 		<tr><td colspan="2"></td>
-		  <td style = "text-align:left;" colspan="1">3B:</td>
-		  <td style = "text-align:right;"><%= @admitted["Ward 3B"] rescue 0 %> </td>
+		  <td style = "text-align:left;" colspan="1">3A:</td>
+		  <td style = "text-align:right;"><%= 'N/A' %> </td>
 		</tr>
 		<tr><td colspan="2"></td>
-		  <td style = "text-align:left;" colspan="1">4A:</td>
-		  <td style = "text-align:right;"><%= @admitted["Ward 4A"] rescue 0 %></td>
+		  <td style = "text-align:left;" colspan="1">4B:</td>
+		  <td style = "text-align:right;"><%= 'N/A' %></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="4">Surgical</td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">5A:</td>
-		  <td style = "text-align:right;"><%= @admitted["Ward 5A"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= 'N/A' %> </td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">5B:</td>
-		  <td style = "text-align:right;"><%= @admitted["Ward 5B"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= 'N/A' %> </td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">6A:</td>
-		  <td style = "text-align:right;"><%= @admitted["Ward 6A"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= 'N/A' %> </td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="4">Obstetrics</td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">LW:</td>
-		  <td style = "text-align:right;">&nbsp; </td>
+		  <td style = "text-align:right;"><%= 'N/A' %></td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">PNW</td>
-		  <td style = "text-align:right;">&nbsp; </td>
+		  <td style = "text-align:right;"><%= 'N/A' %></td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">ANW</td>
-		  <td style = "text-align:right;">&nbsp; </td>
+		  <td style = "text-align:right;"><%= 'N/A' %></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Gyanecology:</td>
-		  <td style = "text-align:right;"><%= @admitted["Gynaecology Ward"] rescue 0 %></td>
+		  <td style = "text-align:right;"><%= 'N/A' %></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Intensive Care Unit(ICU):</td>
-		  <td style = "text-align:right;"><%= @admitted["ICU"] rescue 0 %></td>
+		  <td style = "text-align:right;"><%= 'N/A' %></td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="4">Paying</td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">1A:</td>
-		  <td style = "text-align:right;"><%= @admitted["Ward 1A"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= 'N/A' %> </td>
 		</tr>
 		<tr><td colspan="2"></td>
 		  <td style = "text-align:left;" colspan="1">2A</td>
-		  <td style = "text-align:right;"><%= @admitted["Ward 2A"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= 'N/A' %> </td>
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Other:</td>
-		  <td style = "text-align:right;"><%= @admitted["Other"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%#= @admitted["Other"] rescue 0 %> </td>
 		</tr>
 		<tr>
 		  <th style = "text-align:left;" colspan="3">Deaths</th>
@@ -294,19 +321,23 @@
 		</tr>
 		<tr>
 		  <td style = "text-align:left;" colspan="3">Brought in Dead</td>
-		  <td style = "text-align:right;"><%=  @dead["dead"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= button_to("#{@brought_in_dead.count}",{:action => 'display_patients',:category => 'brought in dead', :encounter_ids => @brought_in_dead_encounters_ids},{:class =>'link'})%> </td>
+                  
+                  
 		</tr>
         <tr>
 		  <td style = "text-align:left;" colspan="3">Assessment area</td>
-		  <td style = "text-align:right;"><%=  @dead["Assessment area"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= button_to("#{@assesment_area_dealths.count}",{:action => 'display_patients',:category => 'assesment area', :encounter_ids => @assesment_area_dealths_encounters_ids},{:class =>'link'})%> </td>
+                  
 		</tr>
         <tr>
 		  <td style = "text-align:left;" colspan="3">Short stay ward</td>
-		  <td style = "text-align:right;"><%=  @dead["Short stay ward"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%= button_to("#{@short_stay_ward_dealths.count}",{:action => 'display_patients',:category => 'short stay ward', :encounter_ids => @short_stay_ward_dealths_encounters_ids},{:class =>'link'})%> </td>
+                  
 		</tr>
         <tr>
 		  <td style = "text-align:left;" colspan="3">Resusciation section</td>
-		  <td style = "text-align:right;"><%=  @dead["Resusciation"] rescue 0 %> </td>
+		  <td style = "text-align:right;"><%=  'N/A' %> </td>
 		</tr>
 	  </table>
 	</div>

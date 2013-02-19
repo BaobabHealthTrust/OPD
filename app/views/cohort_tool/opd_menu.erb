@@ -49,12 +49,28 @@
 <form name='opd_report' method='post' >
   <% month_names = month_name_options.gsub('<option value="Unknown">Unknown</option>', '') %>
   <% if  @report_name.upcase == "SHIFT_REPORT" %>
-    <input type="text" field_type="date" id="start_date" name="shift_date" value="" helpText="Select Shift Date" />
-	<%= select_tag "shift_type", options_for_select(@shifts), {:helpText => 'Shift Type', :validationMessage => 'Please Select a Shift'}%>
-	<input type="text" field_type="advancedTime" id="start_time" name="start_time" value="" helpText="Select Shift Start Time" condition="$('shift_type').value == 'specific'"/>
-	<input type="text" field_type="advancedTime" id="end_time" name="end_time" value="" helpText="Select Shift End Time" condition="$('shift_type').value == 'specific'"/>
+  <%= text_field_tag "shift_date", nil, {
+          :helpText => 'Select Shift Date',
+          :field_type => 'date',
+          :id => 'start_date'}  %>
 
-  <%else%>
+  <%= select_tag "shift_type", options_for_select(@shifts),{
+          :helpText => 'Shift Type',
+          :validationMessage => 'Please Select a Shift'}%>
+
+  <%= text_field_tag "start_time", nil, {
+          :helpText => 'Select Shift Start Time',
+          :condition => "$('shift_type').value == 'specific'",
+          :field_type => 'advancedTime',
+          :id => 'start_time'}  %>
+
+  <%= text_field_tag "end_time", nil, {
+          :helpText => 'Select Shift End Time',
+          :condition => "$('shift_type').value == 'specific'",
+          :field_type => 'advancedTime',
+          :id => 'end_time'}  %>
+ 
+  <%  else %>
 
 	<%= text_field_tag "start_year", nil, {:helpText => 'Start Year', :field_type => 'number', :absoluteMin => "1890", :min => "1940", :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly",:validationJS => "setDOB();" }  %>
 	<%= select_tag "start_month", month_names, {:helpText => 'Start Month',:validationJS => "validateDOB();",:validationMessage => 'Please enter a valid date',:tt_onLoad => "__$('keyboard').style.display = 'none'"}%>
@@ -66,7 +82,7 @@
 
 	<% if ["TOTAL_REGISTERED", "DIAGNOSIS_BY_ADDRESS", "PATIENT_LEVEL_DATA", "DIAGNOSIS_REPORT","DIAGNOSIS_REPORT_GRAPH"].include?(@report_name.upcase) %>
 	  <%= select_tag "age_groups", options_for_select(["", "< 6 months",
-		  "6 months to < 1 yr", "1 to < 5", "5 to 14", "> 14 to < 20", "20 to 30", "30 to < 40", "40 to < 50", "ALL"]),
+		  "6 months to < 1 yr", "1 to < 5", "5 to 14", "> 14 to < 20", "20 to 30", ">30 to < 40", "40 to < 50", "ALL"]),
 		{	:helpText => 'Select Age Group (s)',
 		:id => "age_groups",
 		:multiple => true } %>

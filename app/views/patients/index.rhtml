@@ -81,12 +81,13 @@
 			
 					<select id="navigation_links">
 						<option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Outcomes</option>
-						<% if show_lab_results %>
+						<!--<% if show_lab_results %>
 						<option link="/lab/results/<%=@patient.id -%>">Lab results</option>
-						<%end%>
-            
+						<%end%>-->
             <option link='/patients/programs_dashboard/<%= @patient.id %>'>Programs</option>
-						<option link='<%= ((session[:datetime].to_date rescue '') != '' ?
+            <option link="/encounters/new/lab_orders?patient_id=<%= @patient.id -%>" ttSize = "160px">Investigation</option>
+
+            <option link='<%= ((session[:datetime].to_date rescue '') != '' ?
 						"/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
 						<%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
 					</select>

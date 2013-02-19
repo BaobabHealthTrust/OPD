@@ -1,22 +1,22 @@
 <style>
 
 #tt_page_select_vital_signs .inputFrameClass {                    
-  height: 495px;                                                          
+  height: 552px;
 }                                                                         
-                                                              
-#tt_page_select_vital_signs .options {                            
-  height: 19em;                                                           
-}     
+
+#tt_page_select_vital_signs .inputFrameClass .options{
+  height: 22em;
+}    
 
 #tt_page_life_threatening_condition .inputFrameClass {
-  height: 366px;
+  height: 558px;
 }
 
 #tt_page_life_threatening_condition .options {
-  height: 17em;
+  height: 485px;
 }
 
-
+P Please
 
 #tt_page_select_triage_category .inputFrameClass {
   height: 11em;
@@ -129,22 +129,30 @@
 
 </script>
 
-<form action="/encounters/create_complaints">
+<form action="/encounters/create_complaints" method="post">
 	<%= hidden_field_tag "encounter[encounter_type_name]", "VITALS" %>
 	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
 	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
 	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
+  <% ask_triage_category_questions = CoreService.get_global_property_value('ask.triage.category.questions').to_s == "true"  %>
+  <% ask_life_threatening_condition_questions = CoreService.get_global_property_value('ask.life.threatening.condition.questions').to_s == "true" %>
+  <% ask_complaints_under_vitals = CoreService.get_global_property_value('ask.complaints.under.vitals').to_s == "true" %>
+
   <%
     vital_signs = ["","Temperature","Respiratory Rate","Blood Pressure", 
-    "Pulse Rate", "Weight", "Height","Oxygen Saturation","Presenting complaints"]
+    "Pulse Rate", "Weight", "Height","Oxygen Saturation",
+    "MUAC"
+    ]
   %>
-
+  <% vital_signs << "Presenting complaints" if ask_complaints_under_vitals == true %>
+  
         <%= touch_select_tag "Triage Category", @patient, nil,
           { :ajaxURL => "/encounters/triage_category?search_string=",
           :helpText => 'Select Triage Category',
           :id => 'triage_category',
-          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none'"
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none'",
+          :condition => ask_triage_category_questions == true
         } %>
 
 
@@ -153,7 +161,9 @@
           :id => 'emergency_signs',
           :condition => "$('triage_category').value.match(/EMERGENCY/i)",
           :ajaxURL => "/encounters/emergency_signs?search_string=",
-          :helpText => "Life threatening condition"
+          :helpText => "Life threatening condition",
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none' ",
+          :condition => ask_life_threatening_condition_questions == true
           } %>
 
         <%= touch_select_tag "LIFE THREATENING CONDITION", @patient, options_for_select([]),
@@ -161,10 +171,11 @@
           :id => 'priority_signs',
           :condition => "$('triage_category').value.match(/PRIORITY/i)",
           :ajaxURL => "/encounters/priority_signs?search_string=",
-          :helpText => "Life threatening condition"
+          :helpText => "Life threatening condition",
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none' "
           } %>
 
-        <%= select_tag "vitals_choice",options_for_select(['', 'Yes', 'No']),
+        <%#= select_tag "vitals_choice",options_for_select(['', 'Yes', 'No']),
           {
           :id => 'vitals_choice',
           :helpText => "Continue with vitals/presenting complaints?",
@@ -174,7 +185,7 @@
 	<%= select_tag "choice", options_for_select(vital_signs), 
 		{	:helpText => 'Select vital signs', 
 			:id => "choice",
-                        :condition => "document.getElementById('vitals_choice').value.match(/YES/i)",
+                        #:condition => "document.getElementById('vitals_choice').value.match(/YES/i)",
 			:multiple => true } %>
 
 	<%= touch_text_field_tag "TEMPERATURE (C)", @patient, nil,
@@ -202,6 +213,17 @@
 			:validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
 			:validationMessage => "You must enter a decimal between 0 and 9 (for example: 37<b>.6</b>)",
 			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
+  
+        <%= touch_text_field_tag "MIDDLE UPPER ARM CIRCUMFERENCE (cm)", @patient, nil,
+		{	:id => "muac",
+			:field_type => 'number',
+			:helptext =>"Middle upper arm circumference (cm)",
+			:condition => "getSelected().match(/MUAC/i)",
+			:min => 8,
+			:max => 20,
+			:validationRule => "([0-9]+\\.[0-9])|Unknown$",
+			:validationMessage => "You must enter a decimal between the numbers (for example: 8<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
 
 	<%= touch_text_field_tag "SYSTOLIC BLOOD PRESSURE", @patient, nil,
 		{	:id => "systolic_blood_pressure",

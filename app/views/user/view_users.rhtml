@@ -7,215 +7,327 @@
     <%= stylesheet_link_tag 'jquery.dataTables' %>
     <%=javascript_include_tag "jquery.table2CSV.min" %>
     <script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="/javascripts/FixedColumns.min.js"></script>
-    <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer="true"></script>
-    <script type="text/javascript">
-  /*
- * Example initialisation
- */
-$(document).ready( function () {
-        
- 	var oTable = $('#user').dataTable( {
-                "bAutoWidth": false,
- 		"sScrollY": "600px",
-		"sScrollX": "100%",
-		"sScrollXInner": "1200px",
-		"bScrollCollapse": true,
-		"bPaginate": false
- 	} );
-        new FixedColumns( oTable, {
-		"iLeftColumns": 2,
-                "iRightColumns":2
-		
-	} );
-        $(".button").click(function(event) {
-          user_id = event.target.id;
-          user_action = document.getElementById(user_id).getAttribute('user_action')
-          window.location = "/user/manage_user?user_id=" + user_id + '&user_action=' + user_action
-         });
-         
-         $(".retire_button").click(function(event) {
-          user_id = event.target.id;
-          user_action = document.getElementsByClassName('retire_button')[0].getAttribute('retire')
-          window.location = "/user/manage_user?user_id=" + user_id + '&user_action=' + user_action
-         });
-        //$('#button').click(function(){
-          //var x = document.getElementById('button').getAttribute("name");
-          //window.location = "/user/manage_user?name=" + x
-        //})
-        var buttondiv = document.getElementById("buttons");
-      buttondiv.innerHTML+= ' <%= will_paginate @users, :page_links => false %>'
-      if (document.getElementsByClassName('disabled prev_page').length == 1){
-        next_link = document.getElementsByClassName('next_page')[0].getAttribute('href')
-        prev_link = null
-        buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
-        buttondiv.innerHTML+= "<button id='disabled prev_page' class='gray'><span>Previous</span></button>"
+    <script>
+
+      function activeCommand(element) {                                                 
+        user_action = element.getAttribute('user_action')
+        window.location = "/user/manage_user?user_id=" + element.id + '&user_action=' + user_action
+      } 
+
+
+       jQuery(document).ready(function($) {
+          $('#table_id').dataTable({
+            "bAutoWidth": true,
+            "bPaginate": false,
+            "bProcessing": true,
+            "sScrollY": "400px",
+            "bInfo": true,
+            "bPaginate": false
+          });
+    search_box = $('#table_id').dataTable()
+
+   $(".retire_button").click(function(event) {
+    user_id = event.target.id;
+    user_action = document.getElementsByClassName('retire_button')[0].getAttribute('retire')
+    window.location = "/user/manage_user?user_id=" + user_id + '&user_action=' + user_action
+   });
+    search = document.getElementsByTagName("input")[0];
+    search.setAttribute("id","search");
+    document.getElementById('search').setAttribute("onclick","showKeyboard();");
+    document.getElementById("find").innerHTML = "<span>Back</span>";
+    document.getElementById("find").style.cssFloat = "left";
+    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    keyboard = document.getElementsByClassName("keypad")[0]
+    function getCharButtonSetID(character,id){
+      return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' +"<span style='width:32px'>"+character+"</span>"+ "</button>";
+    }
+    function getButtonString(id,string){
+      return "<button \
+                            onMouseDown='press(this.id);' \
+                            class='keyboardButton' \
+                            id='"+id+"'>"+
+        string +
+        "</button>";
+    }
+
+    function getButtons(chars){
+      var buttonLine = "";
+      for(var i=0; i<chars.length; i++){
+        character = chars.substring(i,i+1)
+        buttonLine += getCharButtonSetID(character,character)
       }
-      else if (document.getElementsByClassName('disabled next_page').length == 1){
-        prev_link = document.getElementsByClassName('prev_page')[0].getAttribute('href');
-        next_link = null
-        buttondiv.innerHTML+= "<button id='disabled next_page' class='gray'><span>Next</span></button>"
-        buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
-      }
-      else if (document.getElementsByClassName('next_page').length == 1 && document.getElementsByClassName('prev_page').length == 1) {
-        prev_link = document.getElementsByClassName('prev_page')[0].getAttribute('href');
-        next_link = document.getElementsByClassName('next_page')[0].getAttribute('href');
-        buttondiv.innerHTML+= "<button id='nextButton' class='blue'><span>Next</span></button>"
-        buttondiv.innerHTML+= "<button id='prevButton' class='blue'><span>Previous</span></button>"
-      }
-      $('#nextButton').click(function() {
-      window.location = next_link;
-    })
-    $('#prevButton').click(function() {
-      window.location = prev_link;
-    })
-    $('#finish').click(function(){
-          window.location = "/clinic"
-        });
-        
-        
- } );
+      return buttonLine;
+    }
+
+    showAlphaKeypad();
+
+    function showAlphaKeypad(){
+      document.getElementById("keypad").style.height = "280";
+      keyboard.innerHTML= getButtons("0123456789") + "</br>"
+      keyboard.innerHTML+= getButtons("QWERTYUIOP") + "</br>"
+      keyboard.innerHTML+= getButtons("ASDFGHJKL:") + "</br>"
+      keyboard.innerHTML+= getButtons("ZXCVBNM,.?")
+      keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
+      keyboard.innerHTML+= getButtonString('Space','<span>Space</span>')
+      keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
+    }
+
+    function showNumericKeypad(){
+      document.getElementById("keypad").style.height = "145";
+      keyboard.innerHTML = getButtons("123")
+      keyboard.innerHTML+= getButtons("456")
+      keyboard.innerHTML+= getButtons("7890")
+      keyboard.innerHTML+= getButtonString('space','<span>Space</span>')
+      keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
+      keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
+      keyboard.innerHTML+= getButtonString('abc','<span>abc</span>')
+      keyboard.innerHTML+= getButtonString('dash','<span>-</span>')
+      keyboard.innerHTML+= getButtonString('slash','<span>/</span>')
+    }
+
+    data_table_length =document.getElementsByName('table_id_length')[0];
+    data_table_length.setAttribute("style","font-size:20px;");
+
+    table_length = document.getElementById("table_id_length");
+    table_length.setAttribute("style","width:100px;");
+
+  })
     </script>
-  
-  <style type="text/css">
-    .mytable{
-      width:950px;
-      margin-left:20px;
-      bottom: 20px;
-      position: relative;
-      }
-    /*
-    table.curvedEdges
-    {
-      border:10px blueviolet;
-      -webkit-border-radius:13px;
-      -moz-border-radius:13px;
-      -ms-border-radius:13px;
-      -o-border-radius:13px;
-      border-radius:13px;
-    }
-    table.curvedEdges td, table.curvedEdges th {
-      border-bottom:1px dotted black;
-      padding:5px;
-    }
-   
-     a {
-      background-color: cornflowerblue;
-      border-bottom: 1px outset #EEEEEE;
-      border-style: outset;
-      color: white;
-      padding: 10px 20px 10px 20px;
-      text-align: right;
-      text-decoration: none;
-      font-weight: bold;
-      max-width: 50px;
-      min-width: 50px;
-      }
-       */
-       #row{
-         border-bottom: 1px outset #EEEEEE;
-         border-style: outset;
-         padding: 10px 20px 10px 20px;
-         width:100px;
-    }
-      
-       .link{
-       text-decoration: none;
-       color:white;
-       font-weight:bold;
+
+    <script>
+
+      function showKeyboard(){
+        key = document.getElementById("keypad")
+        if(key.style.display == 'none' || key.style.display == ""){
+          key.style.display = "inline";
+          return
         }
-        .pagination{
+
+        key.style.display = "none";
+      }
+
+      function press(pressedChar){
+        switch (pressedChar) {
+          case 'backspace':
+            search.value = search.value.substring(0,search.value.length-1);
+            search_box.fnFilter(search.value)
+            return;
+          case 'Space':
+            search.value+= " "
+            search_box.fnFilter(search.value)
+            return
+          case 'clear':
+            search.value = ""
+            search_box.fnFilter(search.value)
+            return
+          case 'num':
+            showNumericKeypad();
+            return
+          case 'slash':
+            search.value+= "/"
+            search_box.fnFilter(search.value)
+            return
+          case 'dash':
+            search.value+= "-"
+            search_box.fnFilter(search.value)
+            return
+          case 'abc':
+            showAlphaKeypad();
+            return
+        }
+        search.value+= pressedChar
+        search_box.fnFilter(search.value)
+      }
+      //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    </script>
+
+    <style>
+
+      #backspace{
+        position:absolute;
+        left:100px;
+        bottom:2px;
+      }
+
+      #Space{
+        position:absolute;
+        left:220px;
+        bottom:2px;
+        width:200px;
+      }
+
+      #clear{
+        position:absolute;
+        left:470px;
+        bottom:2px;
+      }
+       #num{
+        position:absolute;
+        left:470px;
+        bottom:2px;
+        width:200px;
+      }
+      #keypad{
+        background-color: #FFFFFF;
+        border: 2px solid #9999FF;
+        border-radius: 15px 15px 15px 15px;
+        display: none;
+        height: 304px;
+        padding: 5px;
+        position: absolute;
+        right: 13px;
+        top: 194px;
+        width: 672px;
+      }
+    </style>
+    <style>
+       div {
+        -moz-user-select: none;
+        position: relative;
+       
+      }
+      .basic_span {
+        position:relative;
+        width:50%;
+        display:block;
+        float:left;
+      }
+
+      .logo {
+        float:left
+      }
+
+      #table_id {
+        width: 100%;
+      }
+
+      #table_id_filter{
+        position:absolute;
+        top:0px;
+        right:1%;
+        margin-top:-40px;
+      }
+
+      #table_id_filter input{
+        padding:0.5em;
+      }
+
+
+      .dataTables_length select {
+        font-size: 25px;
+      }
+      .horizontal_line hr{
+        position:absolute;
+        bottom:-50px;
+      }
+      #table_id_info{
+        left: 10px;
+        position: absolute;
+        top: 490px;
+        font-weight:bold;
+      }
+      #table_id_length{
         display:none;
       }
-      #user_filter{
-      display: none;
+       #table_id_paginate{
+        display:none;
       }
-      #user_info{
-      display: none;
-      }
+      #num{ display:none; }
+      #char{ display:none; }
 
-      th {
-        text-align: left;
+      .activate {
+        border-radius: 7px;
+        background-color: #669999;
+        border-bottom: 1px outset black;
+        border-style: outset;
+        border-top: 1px outset black;
+        color: white;
+        display: block;
+        padding: 10px 16px 10px 10px;
+        text-align: center;
+        text-decoration: none;
+        width: 4em;
       }
-
-      td {
-        text-align: left;
-      }
-
-      #content {
-        -moz-user-select: none;
-      }
-
-  </style>
+    </style>
   </head>
-  
-  <body>
-  <div id="content">
-    <h2 style="margin-left:40px"><%=Location.current_health_center.name%><br />OPD registered users</h2><br />
-    <div id="details" style="float:none; width:97%;">
-      <div class="mytable">
-    <table id="user" class="display">
-     <thead>
-    <tr>
-      <th>status</th>
-      <th>Username</th>
-      <th>First Name</th>
-      <th>Last Name</th>
-      <th>Date created</th>
-      <th>Creator</th>
-      <th>&nbsp;</th>
-      <th>&nbsp;</th>
-    </tr>
-    </thead>
-    <tbody>
-    <% (@users || []).each do |user| %>
+  <body >
+    <% @logo = CoreService.get_global_property_value('logo').to_s %>
+    <%= image_tag(@logo, :class => "logo")%>
+    <br /><b style="margin-left:75px"><%= @current_location_name %></b><br />
+
+      <b style="position:relative; top:0px;margin-left:75px"><%= 'OPD registered users' %></b><br />
+
+
+    <div >
+      <table  id="table_id" class="display"  >
+        <thead>
+          <tr>
+            <th width='20' style='text-align:center;'>Status</th>
+            <th width='150' style='text-align:left;'>Username</th>
+            <th width='200' style='text-align:left;'>Name</th>
+            <th width='100'>Date created</th>
+            <th width='100' style='text-align:left;'>Creator</th>
+            <th width="10">&nbsp;</th>
+            <th width="10">&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+<% (@users || []).each do |user| %>
     <% user_first_name = user.person.names.first.given_name rescue '' %>
     <% user_last_name = user.person.names.first.family_name rescue '' %>
     <% user_date_registered = user.date_created.strftime("%d-%m-%Y") %>
     <% creator_id = user.creator %>
     <% creator = User.find_by_user_id(creator_id) %>
-    <% creator_first_name = creator.person.names.first.given_name rescue '' %>
+    <% creator_first_name = creator.person.names.first.given_name.first + '.' rescue '' %>
     <% creator_last_name = creator.person.names.first.family_name rescue '' %>
-    <tr style="line-height: 44px;">
-      <td id="row"><%= user.status %></td>
-      <td id="row"><%= user.username %></td>
-      <td id="row"><%= user_first_name %></td>
-      <td id="row"><%= user_last_name %></td>
-      <td id="row"><%= user_date_registered %></td>
+    <tr style="line-height: 35px;">
+      <td id="row" style='text-align:center;'><%= user.status %></td>
+      <td id="row" style='text-align:left;'><%= user.username %></td>
+      <td id="row" style='text-align:left;'><%= user_first_name%>&nbsp;<%= user_last_name %></td>
+      <td id="row" style='text-align:center;'><%= user_date_registered %></td>
       <td id="row"><%= creator_first_name + ' ' + creator_last_name %></td>
       <% if user.status == 'active' || user.status == '' %>
       <td>
-        <button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="block"><span>Block</span></button>
+        <a href="#" onmousedown="activeCommand(this);" user_action = 'block' class="activate" id ="<%= user.id %>">Block</a>
       </td>
       <% end %>
       <% if user.status == 'blocked' %>
       <td>
-        <button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="activate" ><span>Activate</span></button>
+        <a href="#" onmousedown="activeCommand(this);" user_action = 'activate' class="activate" id ="<%= user.id %>">Activate</a>
       </td>
       <% end %>
       <% if user.status == 'pending' %>
       <td>
-        <button style="width:100%" id = "<%= user.id %>" class = "blue button" user_action="pending" ><span>Activate</span></button>
+        <a href="#" onmousedown="activeCommand(this);" user_action = 'pending' class="activate" id ="<%= user.id %>">Activate</a>
       </td>
       <% end %>
       <td>
-       <button style="width:100%" id = "<%= user.id %>" class = "blue retire_button" retire = "retire" ><span>Retire</span></button>
+        <a href="#" onmousedown="activeCommand(this);" user_action = 'retire' class="activate" id ="<%= user.id %>">Retire</a>
       </td>
     </tr>
-    <%end 
-      if @users.blank? 
+    <%end
+      if @users.blank?
         1.upto(8).each do |n|%>
           <td id="row">&nbsp;</td>
       <%end
     end%>
 
-    </tbody>
-  </table>
-      </div>
-  </div>
-    <div id="buttons" class="buttonsDiv">
-      <button id="finish" class="green left" style="position :relative; float:right;"><span>Finish</span></button>
+
+
+
+          
+        </tbody>
+      </table>
     </div>
+    <div class="horizontal_line">
+      <hr width="100%" color="gray"/>
+    </div>
+    <div id="keypad">
+      <span class="keypad">
+      </span>
+    </center>
+
   </div>
-  </body>
+
+</body>
 </html>

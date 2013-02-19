@@ -24,10 +24,24 @@ class PeopleController < GenericPeopleController
   def create
     success = false
     Person.session_datetime = session[:datetime].to_date rescue Date.today
+    identifier = params[:identifier] rescue nil
+    if identifier.blank?
+      identifier = params[:person][:patient][:identifiers]['National id'] 
+    end rescue nil
 
     if create_from_dde_server
-      person = PatientService.create_patient_from_dde(params)
-      success = true
+      unless identifier.blank?
+        params[:person].merge!({"identifiers" => {"National id" => identifier}})
+        success = true
+        person = PatientService.create_from_form(params[:person])
+        if identifier.length != 6
+           patient = DDEService::Patient.new(person.patient)
+           national_id_replaced = patient.check_old_national_id(identifier)
+        end
+      else
+        person = PatientService.create_patient_from_dde(params)
+        success = true
+      end
 
     #for now BART2 will use BART1 for patient/person creation until we upgrade BART1 to 2
     #if GlobalProperty.find_by_property('create.from.remote') and property_value == 'yes'
@@ -45,8 +59,17 @@ class PeopleController < GenericPeopleController
       success = true
       person = PatientService.create_from_form(params[:person])
     end
-
+    
     if params[:person][:patient] && success
+=begin
+		  	unless identifier.blank?
+					patient_identifier = PatientIdentifier.new
+					patient_identifier.type = PatientIdentifierType.find_by_name("National id")
+					patient_identifier.identifier = identifier
+					patient_identifier.patient = person.patient
+					patient_identifier.save!
+				end
+=end
       PatientService.patient_national_id_label(person.patient)
       unless (params[:relation].blank?)
         redirect_to search_complete_url(person.id, params[:relation]) and return
@@ -60,6 +83,7 @@ class PeopleController < GenericPeopleController
          tb_session = true
        end
 
+        #raise use_filing_number.to_yaml
         if use_filing_number and not tb_session
           PatientService.set_patient_filing_number(person.patient) 
           archived_patient = PatientService.patient_to_be_archived(person.patient)
