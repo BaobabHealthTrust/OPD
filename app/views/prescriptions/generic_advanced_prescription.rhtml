@@ -12,7 +12,7 @@ url = url[url.index("/"), url.length - url.index("/")]
 
 	//var generic_drugs = <%= @generics.sort.to_json %>;
         //var generics = <%= @generics.sort.to_json %>
-	//var drugslist = <%= @formulations.to_json %>;
+	var drugslist = <%= @formulations.to_json %>;
 	//var frequencies = <%= @frequencies.to_json %>;
 	//var diagnosisList = <%= @diagnosis.to_json %>;
 	//var patient_id = <%= params[:patient_id] rescue "" %>;
@@ -25,9 +25,6 @@ url = url[url.index("/"), url.length - url.index("/")]
         var patient_id = <%= params[:patient_id] rescue "" %>;
         var search_path = "/prescriptions/load_frequencies_and_dosages";
 
-        function alert(){
-          document.getElementById("ulDoses").innerHTML = 'Here';
-        }
 </script>
 
 <script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/treatment.js" defer></script>
@@ -99,5 +96,4 @@ url = url[url.index("/"), url.length - url.index("/")]
   </button-->
 </div>
 <script type="text/javascript" language="javascript">
-alert();
 </script>

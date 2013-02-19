@@ -202,20 +202,21 @@ class GenericPrescriptionsController < ApplicationController
 			}
 			@formulations[generic[1]] = drug_formulations			
 		}
-
+    session[:formulations] = @formulations
 		@diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []
 		render :layout => 'application'
 	end
   
   def load_frequencies_and_dosages
-		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
-    drugs = Drug.find(:all,	:conditions => ["concept_id = ?", params[:concept_id]])
+    concept_id = params[:concept_id]
+    @formulations = {}
+    drugs = Drug.find(:all,	:conditions => ["concept_id = ?", concept_id])
     drug_formulations = {}
-    drugs.each { | drug |
-      drug_formulations[drug.name] = [drug.dose_strength, drug.units]
-    }
-    raise drug_formulations.inspect
-		#render :layout => 'application'
+			drugs.each { | drug |
+				drug_formulations[drug.name] = [drug.dose_strength, drug.units]
+			}
+    @formulations[concept_id] = drug_formulations
+    render :json => @formulations
 	end
 
 	def create_advanced_prescription
