@@ -580,7 +580,7 @@ module DDEService
           },
           "patient"=>
             {"identifiers"=>
-              {"diabetes_number"=>""}},
+              {"old_identification_number" => params["person"]["patient"]["identifiers"]["old_identification_number"]}},
           "gender"=> person_params["gender"],
           "birthdate"=> birthdate,
           "birthdate_estimated"=> birthdate_estimated ,
@@ -600,9 +600,9 @@ module DDEService
       @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
 
       uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"
-      recieved_params = RestClient.post(uri,passed_params)
+      received_params = RestClient.post(uri,passed_params)
 
-      national_id = JSON.parse(recieved_params)["npid"]["value"]
+      national_id = JSON.parse(received_params)["npid"]["value"]
 
     else
       national_id = params["person"]["patient"]["identifiers"]["National_id"]
