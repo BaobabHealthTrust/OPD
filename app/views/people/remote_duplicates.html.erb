@@ -71,6 +71,10 @@ table{
   function createPersonLocally(person_id) {
     document.location = "/people/create_person_from_dde?remote_person_id=" + person_id;
   }
+
+  function remoteNewID(patient_id,national_id) {
+    document.location = "/people/remote_duplicates?remote_person_id=" + patient_id + "&identifier=" + national_id;
+  }
 </script>
 </head>
 
@@ -117,7 +121,9 @@ table{
     <div class="reassign_btn">
       <%if @primary_patient%>
         <a href="javascript:newNpid('<%=@primary_patient.patient_id%>','<%=person.person_id%>')">Merge/Reassign National ID</a>
-      <%else%>
+      <%elsif person.national_id != params[:identifier] %>
+        <a href="javascript:remoteNewID('<%=person.person_id%>','<%=person.national_id%>')">Select</a>
+       <%else%>
         <a href="javascript:createPersonLocally('<%=person.person_id%>')">Reassign National ID</a>
       <%end%>
     </div>
