@@ -2,7 +2,8 @@ module PatientService
 	include CoreService
 	require 'bean'
 	require 'json'
-	require 'rest_client'                                                           
+	require 'rest_client'
+  require 'dde_service'
   
   def self.search_from_remote(params)                                           
     return [] if params[:given_name].blank?                                     
@@ -1375,7 +1376,13 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       p = JSON.parse(RestClient.get(uri)) rescue nil
       return [] if p.blank?
       return "found duplicate identifiers" if p.count > 1
-      
+      p = p.first
+
+      passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
+      if passed_national_id.blank?
+       return [DDEService.get_remote_person(p["person"]["id"])]
+      end
+
       birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
       birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
       birthdate_day = p["person"]["birthdate"].to_date.day rescue nil
@@ -1405,15 +1412,13 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
        "relation"=>""
       }
 
-
-      passed_national_id = (passed["person"]["patient"]["identifiers"]["National id"])
-                                                                                
       unless passed_national_id.blank?                                          
         patient = PatientIdentifier.find(:first,                                
           :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
         return [patient.person] unless patient.blank?                           
       end
-
+      
+      passed["person"].merge!("identifiers" => {"National id" => passed_national_id})
       return [self.create_from_form(passed["person"])]
     end
     return people
