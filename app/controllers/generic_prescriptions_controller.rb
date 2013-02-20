@@ -192,7 +192,7 @@ class GenericPrescriptionsController < ApplicationController
 	def generic_advanced_prescription
 		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
 		@generics = MedicationService.generic
-		@frequencies = MedicationService.fully_specified_frequencies	
+		@frequencies = MedicationService.fully_specified_frequencies
 		@formulations = {}
 		@generics.each { | generic |
 			drugs = Drug.find(:all,	:conditions => ["concept_id = ?", generic[1]])
@@ -218,7 +218,6 @@ class GenericPrescriptionsController < ApplicationController
 	end
 
 	def create_advanced_prescription
-    
 		@patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
 		encounter  = MedicationService.current_treatment_encounter(@patient)
     if !(params[:prescriptions].blank?)
