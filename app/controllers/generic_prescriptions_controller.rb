@@ -209,22 +209,56 @@ class GenericPrescriptionsController < ApplicationController
   
   def load_frequencies_and_dosages
     concept_id = params[:concept_id]
-    @formulations = {}
     drugs = Drug.find(:all,	:conditions => ["concept_id = ?", concept_id])
-    drug_formulations = {}
+    drug_formulations = []
 			drugs.each { | drug |
-				drug_formulations[drug.name] = [drug.dose_strength, drug.units]
+				drug_formulations << drug.name + ':' + drug.dose_strength.to_s + ':' + drug.units.to_s + ';'
 			}
-    @formulations[concept_id] = drug_formulations
-    render :json => @formulations
+    render :text => drug_formulations
 	end
 
 	def create_advanced_prescription
+    
 		@patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
 		encounter  = MedicationService.current_treatment_encounter(@patient)
+    if !(params[:prescriptions].blank?)
+
+      (params[:prescriptions] || []).each{ | prescription |
+				prescription[:encounter_id]  = encounter.encounter_id
+				prescription[:obs_datetime]  = encounter.encounter_datetime || (session[:datetime] ||  Time.now())
+				prescription[:person_id]     = encounter.patient_id
+
+				formulation = (prescription[:dosage] || '').upcase
+
+				drug = Drug.find_by_name(formulation) rescue nil
+
+				unless drug
+					flash[:notice] = "No matching drugs found for formulation #{prescription[:formulation]}"
+					render :new
+					return
+				end
+
+				start_date = session[:datetime].to_date rescue nil
+        start_date = Time.now() if start_date.blank?
+        prn = "no"
+				auto_expire_date = start_date + prescription[:duration].to_i.days
+
+					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:strength],
+						prescription[:frequency], prn)
+
+			}
+
+    if(@patient)
+			redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
+		else
+			redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
+		end
+
+    end
+
     
 		if params[:prescription].blank?
-			next if params[:formulation].blank?
+			#next if params[:formulation].blank?
           	formulation = (params[:formulation] || '').upcase
 			drug = Drug.find_by_name(formulation) rescue nil
 			unless drug
@@ -244,7 +278,9 @@ class GenericPrescriptionsController < ApplicationController
 				DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
 					prescription[:frequency], prn)
 			end
-		else
+    end
+
+		unless params[:prescription].blank?
 			(params[:prescription] || []).each{ | prescription |      
 				prescription[:encounter_id]  = encounter.encounter_id
 				prescription[:obs_datetime]  = encounter.encounter_datetime || (session[:datetime] ||  Time.now())
