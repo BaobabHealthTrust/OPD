@@ -760,7 +760,7 @@ class GenericPeopleController < ApplicationController
   end
 
   
-private
+protected
   
 	def search_complete_url(found_person_id, primary_person_id)
 		unless (primary_person_id.blank?)
