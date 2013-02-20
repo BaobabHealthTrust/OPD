@@ -516,7 +516,6 @@ function generateGenerics(){
                     if(selectedGenerics[current_diagnosis][current_generic]){
                         if(selectedGenerics[current_diagnosis][current_generic]["frequency"] ==
                             $('ulFreqs').childNodes[j].innerHTML.toUpperCase()){
-
                             $('ulFreqs').childNodes[j].style.backgroundColor = "yellowgreen";
                             $('ulFreqs').childNodes[j].style.color = "#fff";
                         }
@@ -558,7 +557,7 @@ function generateGenerics(){
     for(var d = 0; d < frequencies.length; d++){
         var li = document.createElement("li");
         li.id = "option" + frequencies[d];
-        li.innerHTML = frequencies[d];
+        li.innerHTML = frequencies[d][1].split("(")[0];
         li.style.padding = "15px";
 
         if(d%2>0){

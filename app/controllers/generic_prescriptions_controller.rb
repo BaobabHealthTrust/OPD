@@ -190,7 +190,7 @@ class GenericPrescriptionsController < ApplicationController
 	end
 
 	def generic_advanced_prescription
-		@option = CoreService.get_global_property_value("use_column_interface").to_s
+		@use_col_interface = CoreService.get_global_property_value("use.column.interface").to_s
 		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
 		@generics = MedicationService.generic
 		@frequencies = MedicationService.fully_specified_frequencies	
