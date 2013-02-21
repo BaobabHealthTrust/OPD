@@ -1,29 +1,29 @@
-<html>                                                                          
-<head>                                                                          
-<%= javascript_include_tag "prototype" %>                                       
+<html>
+<head>
+<%= javascript_include_tag "prototype" %>
 
-<style>                                                                         
-#second_patient_div {                                                         
-  float:right;                                                                
-  width:49%;                                                                  
+<style>
+#second_patient_div {
+  float:right;
+  width:49%;
   border-style: solid;
   border-width: 1px;
   margin: 10px;
   padding-left: 5px;
-  height:85%;                                                                  
+  height:85%;
   overflow:auto;
-}                                                                             
-                                                                              
-#primary_patient_div {                                                        
-  float:left;                                                                 
-  width:45%;                                                                  
-  height:85%;                                                                  
+}
+
+#primary_patient_div {
+  float:left;
+  width:45%;
+  height:85%;
   border-style: solid;
   border-width: 1px;
   margin: 10px;
   padding-left: 5px;
-}                                                                             
-                                                                              
+}
+
 table{
  font-size:20px;
  padding-left:10px;
@@ -41,7 +41,7 @@ table{
  width:413px;
  -moz-user-select:none
 }
-    
+
 .reassign_btn a{
   background-color: #669999;
   border-bottom: 1px outset black;
@@ -53,11 +53,11 @@ table{
   padding: 10px 16px 10px 10px;
   text-align: center;
   text-decoration: none;
-}                                               
+}
 </style>
 
 <script>
-  var tt_cancel_destination = "/clinic"; 
+  var tt_cancel_destination = "/clinic";
 
 
   function newNpid(local_person_id,remote_person_id) {
@@ -89,11 +89,14 @@ table{
     */
     document.location = "/people/select?identifier=" + national_id;
   }
+  function postToSelect(national_id) {
+    document.location = "/people/search?identifier=" + national_id;
+  }
 </script>
 </head>
 
 
-<div id='primary_patient_div'>                                                  
+<div id='primary_patient_div'>
   <div><h4>
     <%if @dde_duplicates.length < 2
         if @dde_duplicates.blank?
@@ -108,12 +111,12 @@ table{
   </h4></div>
   <div><hr /></div>
   <%if @primary_patient%>
-  <div><b>Name:</b><%=@primary_patient.name%>&nbsp;(<%=@primary_patient.sex%>)</div>  
+  <div><b>Name:</b><%=@primary_patient.name%>&nbsp;(<%=@primary_patient.sex%>)</div>
   <div><b>Age</b>&nbsp;<%=@primary_patient.age%></div>
-  <div><b>Birthdate:</b>&nbsp;<%=@primary_patient.birth_date%></div>  
-  <div><b>National ID:</b>&nbsp;<%=@primary_patient.national_id_with_dashes%></div>  
-  <div><b>Home district:</b>&nbsp;<%=@primary_patient.home_district%></div>  
-  <div><b>Current address:</b>&nbsp;<%=@primary_patient.address%></div>  
+  <div><b>Birthdate:</b>&nbsp;<%=@primary_patient.birth_date%></div>
+  <div><b>National ID:</b>&nbsp;<%=@primary_patient.national_id_with_dashes%></div>
+  <div><b>Home district:</b>&nbsp;<%=@primary_patient.home_district%></div>
+  <div><b>Current address:</b>&nbsp;<%=@primary_patient.address%></div>
   <%if @dde_duplicates.length < 2%>
     <div>&nbsp;</div>
     <div style="margin-left:-4px;" class="reassign_btn">
@@ -121,16 +124,16 @@ table{
     </div>
   <%end%>
   <%end%>
-</div>                                                                          
-<div id='second_patient_div'>                                                   
+</div>
+<div id='second_patient_div'>
   <%(@dde_duplicates || []).each do |person| %>
-    <div><b>Name:</b>&nbsp;<%=person.name%>&nbsp;(<%=person.sex%>)</div>  
+    <div><b>Name:</b>&nbsp;<%=person.name%>&nbsp;(<%=person.sex%>)</div>
     <div><b>Age:</b>&nbsp;<%=person.age%>&nbsp;</div>
-    <div><b>Birthdate:</b>&nbsp;<%=person.birth_date%></div>  
-    <div><b>National ID:</b>&nbsp;<%=person.national_id %></div>  
-    <div><b>Home district:</b>&nbsp;<%=person.home_district%></div>  
-    <div><b>TA:</b>&nbsp;<%=person.traditional_authority%></div>  
-    <div><b>Current address:</b>&nbsp;<%=person.current_residence%></div>  
+    <div><b>Birthdate:</b>&nbsp;<%=person.birth_date%></div>
+    <div><b>National ID:</b>&nbsp;<%=person.national_id %></div>
+    <div><b>Home district:</b>&nbsp;<%=person.home_district%></div>
+    <div><b>TA:</b>&nbsp;<%=person.traditional_authority%></div>
+    <div><b>Current address:</b>&nbsp;<%=person.current_residence%></div>
     <div>&nbsp;</div>
     <div class="reassign_btn">
       <%if @primary_patient%>

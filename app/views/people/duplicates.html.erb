@@ -10,6 +10,10 @@
     document.location = "/people/remote_duplicates?remote_person_id=" + patient_id + "&identifier=" + national_id;
   }
 
+ function postToSelect(national_id) {
+    document.location = "/people/search?identifier=" + national_id;
+  }
+
 </script>
 
 <style>
@@ -34,7 +38,7 @@ table {
 div { -moz-user-select: none; }
 
 
- a {                                                                    
+ a {
     background-color: #669999;
     border-bottom: 1px outset black;
     border-radius: 7px 7px 7px 7px;
@@ -84,7 +88,11 @@ div { -moz-user-select: none; }
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
     <td class="color_<%=color%> row_number_<%=row_number%>">
+	<% if @selected_identifier != patient.national_id %>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="postToSelect('<%=patient.national_id%>');">Select</a>
+	<%else%>
       <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.person_id%>','<%=patient.national_id%>');">Select</a>
+	<%end%>
     </td>
   </tr>
  <%end%>
@@ -105,7 +113,13 @@ div { -moz-user-select: none; }
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
     <td class="color_<%=color%> row_number_<%=row_number%>">
+
+	<% if @selected_identifier != patient.national_id %>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="postToSelect('<%=patient.national_id%>');">Select</a>
+	<%else%>
       <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="remoteNewID('<%=patient.person_id%>','<%=patient.national_id%>');">Select</a>
+	<%end%>
+
     </td>
   </tr>
  <%end%>
