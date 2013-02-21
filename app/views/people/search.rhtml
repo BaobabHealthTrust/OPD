@@ -89,7 +89,7 @@ end -%>
     __$('nextButton').innerHTML = "<span>" + text + "</span>";
    
     if(pos && (person_id == 0)){
-      document.forms[0].action = "create";
+      document.forms[0].action = "select";
       __$('nextButton').onmousedown = function(){
         document.forms[0].submit();
       }

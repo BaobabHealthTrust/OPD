@@ -61,6 +61,10 @@ table{
 
 
   function newNpid(local_person_id,remote_person_id) {
+    /*
+    If a user selects this method,that means that the selected patient is the same
+    patient on the 'left' side of the screen ...
+    */
     document.location = "/people/reassign_dde_national_id?dde_person_id=" + remote_person_id + "&local_person_id=" + local_person_id;
   }
 
@@ -69,11 +73,21 @@ table{
   }
 
   function createPersonLocally(person_id) {
+    /*
+    If a user selects this method,that means that the selected patient is currently
+    not on the server but on the proxy.
+    NOTE: the patient will be created locally with a new version 4 number
+    */
     document.location = "/people/create_person_from_dde?remote_person_id=" + person_id;
   }
 
-  function remoteNewID(patient_id,national_id) {
-    document.location = "/people/remote_duplicates?remote_person_id=" + patient_id + "&identifier=" + national_id;
+  function remoteNewID(national_id) {
+    /*
+    If a user selects this method,that means that the selected patient is a 
+    different patient all together - the patient on the 'left' side of the screen 
+    and the selected patient are different...
+    */
+    document.location = "/people/select?identifier=" + national_id;
   }
 </script>
 </head>
@@ -120,9 +134,9 @@ table{
     <div>&nbsp;</div>
     <div class="reassign_btn">
       <%if @primary_patient%>
-        <a href="javascript:newNpid('<%=@primary_patient.patient_id%>','<%=person.person_id%>')">Merge/Reassign National ID</a>
+        <a href="javascript:newNpid('<%=@primary_patient.patient_id%>','<%=person.person_id%>')">Reassign National ID</a>
       <%elsif person.national_id != params[:identifier] %>
-        <a href="javascript:remoteNewID('<%=person.person_id%>','<%=person.national_id%>')">Select</a>
+        <a href="javascript:remoteNewID('<%=person.national_id%>')">Select</a>
        <%else%>
         <a href="javascript:createPersonLocally('<%=person.person_id%>')">Reassign National ID</a>
       <%end%>
