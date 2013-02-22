@@ -1973,7 +1973,12 @@ class CohortToolController < ApplicationController
             end
     		@total_registered +=1
         end    
-
+    @highest = 0
+		@peoples.each do |highest|
+			if @highest < highest[1].to_i
+				@highest = highest[1].to_i
+			end
+		end
     render :layout => "report"
   end
 

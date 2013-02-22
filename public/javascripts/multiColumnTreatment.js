@@ -557,8 +557,8 @@ function generateGenerics(){
     // Create frequencies list
     for(var d = 0; d < frequencies.length; d++){
         var li = document.createElement("li");
-        li.id = "option" + frequencies[d];
-        li.innerHTML = frequencies[d];
+        li.id = frequencies[d][0];
+        li.innerHTML = frequencies[d][1];
         li.style.padding = "15px";
 
         if(d%2>0){
@@ -585,11 +585,11 @@ function generateGenerics(){
 
                 if(selectedGenerics[current_diagnosis]){
                     if(selectedGenerics[current_diagnosis][current_generic]) {
-                        selectedGenerics[current_diagnosis][current_generic]["frequency"] = this.innerHTML.toUpperCase();
+                        selectedGenerics[current_diagnosis][current_generic]["frequency"] = this.id.toUpperCase();
                     } else {
                         selectedGenerics[current_diagnosis][current_generic] = {
                             "dosage":[],
-                            "frequency":this.innerHTML.toUpperCase(),
+                            "frequency":this.id.toUpperCase(),
                             "duration":null
                         };
                     }
@@ -597,7 +597,7 @@ function generateGenerics(){
                     selectedGenerics[current_diagnosis] = {};
                     selectedGenerics[current_diagnosis][current_generic] = {
                         "dosage":[],
-                        "frequency":this.innerHTML.toUpperCase(),
+                        "frequency":this.id.toUpperCase(),
                         "duration":null
                     };
                 }
@@ -688,7 +688,7 @@ function searchDrug(){
                     if(selectedGenerics[current_diagnosis]){
                         if(selectedGenerics[current_diagnosis][current_generic]){
                             if(selectedGenerics[current_diagnosis][current_generic]["frequency"] ==
-                                $('ulFreqs').childNodes[j].innerHTML.toUpperCase()){
+                                $('ulFreqs').childNodes[j].id.toUpperCase()){
 
                                 $('ulFreqs').childNodes[j].style.backgroundColor = "yellowgreen";
                                 $('ulFreqs').childNodes[j].style.color = "#fff";
@@ -761,17 +761,17 @@ function ajaxDFRequest(aUrl) {
 function handleDFResult(aXMLHttpRequest) {
     if (!aXMLHttpRequest) return;
 
-    if (aXMLHttpRequest.readyState == 4 && aXMLHttpRequest.status == 200) {
-        var dosesFreqs = JSON.parse(aXMLHttpRequest.responseText);
-
+    if (aXMLHttpRequest.readyState == 4) {
+        var dosesFreqs = aXMLHttpRequest.responseText.split(";")
         var existingDoses = {};
 
-        for(var i = 0; i < dosesFreqs.length; i++){
+        for(var i = 0; i < dosesFreqs.length - 1; i++){
             var li = document.createElement("li");
-            li.id = "option" + dosesFreqs[i][0];
-            li.innerHTML = dosesFreqs[i][0];
-            li.setAttribute("strength", dosesFreqs[i][1]);
-            li.setAttribute("units", dosesFreqs[i][2]);
+            df = dosesFreqs[i].split(":")
+            li.id = "option" + df[0];
+            li.innerHTML = df[0];
+            li.setAttribute("strength", df[1]);
+            li.setAttribute("units", df[2]);
             li.style.padding = "15px";
 
             if(i%2>0){
@@ -781,9 +781,9 @@ function handleDFResult(aXMLHttpRequest) {
 
             if(selectedGenerics[current_diagnosis]){
                 if(selectedGenerics[current_diagnosis][current_generic]){
-                    if(selectedGenerics[current_diagnosis][current_generic]["dosage"] == [dosesFreqs[i][0].toUpperCase(),
-                        dosesFreqs[i][1].toUpperCase(),
-                        dosesFreqs[i][2].toUpperCase()]){
+                    if(selectedGenerics[current_diagnosis][current_generic]["dosage"] == [df[0].toUpperCase(),
+                        df[1].toUpperCase(),
+                        df[2].toUpperCase()]){
                         li.style.backgroundColor = "yellowgreen";
                         li.style.color = "#fff";
                     }
@@ -823,9 +823,9 @@ function handleDFResult(aXMLHttpRequest) {
                 this.style.backgroundColor = "lightblue";
             }
 
-            if(!existingDoses[dosesFreqs[i][0].toUpperCase()]){
+            if(!existingDoses[df[0].toUpperCase()]){
                 $('ulDoses').appendChild(li);
-                existingDoses[dosesFreqs[i][0].toUpperCase()] = true;
+                existingDoses[df[0].toUpperCase()] = true;
             }
         }
     }
