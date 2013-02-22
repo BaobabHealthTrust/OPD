@@ -191,8 +191,9 @@ module DDEService
     passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
     passed_national_id = (p["person"]["value"]) if passed_national_id.blank? rescue nil
 
-    if passed_national_id.blank?
-      return [DDEService.get_remote_person(p["person"]["id"])]
+    unless passed_national_id.blank?
+      [DDEService.get_remote_person(p["person"]["id"])]
+      return true
     end
 
     person = {"person" => {
@@ -227,7 +228,7 @@ module DDEService
           }
         }
       }
-
+      
       current_national_id = self.get_full_identifier("National id")
       national_id = DDEService.create_patient_from_dde(person, true)
       self.set_identifier("National id", national_id)
