@@ -39,7 +39,7 @@ pos = 1
     }
 
     try {
-      people[<%= pos %>]["Home District"] = "<%=h person.home_district -%>";
+      people[<%= pos %>]["Home District"] = "<%=h person.home_district.squish-%>";
     }catch(e){
       people[<%= pos %>]["Home District"] = null;
     }
@@ -127,7 +127,7 @@ end -%>
           createControlAndAssignValue("person_birth_month", "person[birth_month]","<%=data.birthdate.month%>")
           createControlAndAssignValue("person_birth_day", "person[birth_day]","<%=data.birthdate.day%>")
           createControlAndAssignValue("birthdate_estimated", "person[birthdate_estimated]", "<%=data.birthdate_estimated%>");
-          createControlAndAssignValue("state_province", "person[addresses][state_province]","<%=data.home_district%>")
+          createControlAndAssignValue("state_province", "person[addresses][state_province]","<%=data.home_district.squish-%>")
           createControlAndAssignValue("city_village", "person[addresses][city_village]","<%=data.current_residence%>")
           createControlAndAssignValue("county_district", "person[addresses][county_district]","<%=data.traditional_authority%>")
           createControlAndAssignValue("occupation", "person[occupation]","<%=data.occupation%>")
@@ -143,7 +143,9 @@ end -%>
       try{
         pos = parseInt(pos) + 1;
         $('identifier').value = people[pos]['Patient National ID'];
-      }catch(e){}
+      }catch(e){
+        $('identifier').value = null;
+      }
     }
   }
 
@@ -231,7 +233,7 @@ end -%>
 
       people[pos]["Age"] = "<%=data.age%>";
 
-      people[pos]["Home District"] = "<%=data.home_district%>"
+      people[pos]["Home District"] = "<%=data.home_district.squish-%>"
 
       people[pos]["Ancestral Traditional Authority(T/A)"] = "<%=data.traditional_authority%>"
 
@@ -244,8 +246,7 @@ end -%>
       li.className = ((i + 1)/2 > 0 ? "odd" : "even");
       li.setAttribute("tstvalue", <%=data.person_id%>);
       li.setAttribute("pos", i);
-      li.innerHTML = people[pos]["Name"] + " (" + people[pos]["Gender"] + ") " +
-        people[pos]["Birthdate"] + ", " + people[pos]["Home District"];
+      li.innerHTML = people[pos]["Name"] + " (" + people[pos]["Gender"] + ") " +people[pos]["Birthdate"] + ", " + people[pos]["Home District"];
       li.setAttribute("tag", ((i + 1)/2 > 0 ? "odd" : "even"));
       li.onmousedown = function(){
         changeNextButtonText('Select Patient', this.getAttribute("pos"), <%=data.person_id%>);
