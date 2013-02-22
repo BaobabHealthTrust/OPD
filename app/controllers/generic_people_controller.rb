@@ -164,11 +164,7 @@ class GenericPeopleController < ApplicationController
       results.age = patient.age                                                 
       @search_results.delete_if{|x,y| x == results.national_id}                 
       @patients << results                                                      
-    end                                                                         
-                                                                                
-    (@search_results || {}).each do |npid , data |                              
-      @patients << data                                                         
-    end
+    end                                                                          
 	end
 =begin  
   def search
