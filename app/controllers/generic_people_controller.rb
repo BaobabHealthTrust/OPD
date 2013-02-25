@@ -123,6 +123,7 @@ class GenericPeopleController < ApplicationController
     (PatientService.search_from_remote(params) || []).each do |data|
       national_id = data["person"]["data"]["patient"]["identifiers"]["National id"] rescue nil
       national_id = data["person"]["value"] if national_id.blank? rescue nil
+      national_id = data["npid"]["value"] if national_id.blank? rescue nil
       national_id = data["person"]["data"]["patient"]["identifiers"]["old_identification_number"] if national_id.blank? rescue nil
       
       next if national_id.blank?
@@ -162,9 +163,13 @@ class GenericPeopleController < ApplicationController
       results.name = patient.name                                               
       results.sex = patient.sex                                                 
       results.age = patient.age                                                 
-      @search_results.delete_if{|x,y| x == results.national_id}                 
+      @search_results.delete_if{|x,y| x == results.national_id }                 
       @patients << results                                                      
     end                                                                          
+
+		(@search_results || {}).each do | npid , data |
+			@patients << data 
+		end
 	end
 =begin  
   def search
