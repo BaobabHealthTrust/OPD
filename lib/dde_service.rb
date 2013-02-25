@@ -188,11 +188,11 @@ module DDEService
     p = JSON.parse(output)
     return p.count if p.count > 1
     p = p.first rescue nil
-    passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
+    passed_national_id = (p["person"]["patient"]["identifiers"]["National id"]) rescue nil
     passed_national_id = (p["person"]["value"]) if passed_national_id.blank? rescue nil
-
+    
     if passed_national_id.blank? and not p.blank?
-      [DDEService.get_remote_person(p["person"]["id"])]
+      DDEService.reassign_identication(p["person"]["id"], self.patient.patient_id)
       return true
     end
 
@@ -622,9 +622,11 @@ module DDEService
     uri += "?person_id=#{dde_person_id}"
     new_npid = RestClient.get(uri)
 
+    identifier_type = PatientIdentifierType.find_by_name("National id")
+
     current_national_id = PatientIdentifier.find(:first,
                         :conditions => ["patient_id = ? AND voided = 0 AND
-                        identifier_type = ?",local_person_id , 3])
+                        identifier_type = ?",local_person_id , identifier_type.id])
 
     patient_identifier = PatientIdentifier.new
     patient_identifier.type = PatientIdentifierType.find_by_name("National id")
