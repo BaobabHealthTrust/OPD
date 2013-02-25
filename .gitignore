@@ -14,4 +14,8 @@ mockups
 rerun.txt
 nbproject
 Gemfile.lock
+<<<<<<< HEAD
 tmp
+=======
+*.lock
+>>>>>>> prescription

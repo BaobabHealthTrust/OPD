@@ -38,7 +38,7 @@
 			<% end %>
 		
 		    // Draw Graph
-      graph = Flotr.draw(container,[d1],{title: "OPD General Report Graph", bars: {show:true, barWidth:0.5}, xaxis: { ticks: d2, min:0, max: d1.length, title: "Diagnosis"}, yaxis:{min:0, max:highest+20}, mouse: {track: true}});
+      graph = Flotr.draw(container,[d1],{title: "OPD General Report Graph", bars: {show:true, barWidth:0.5}, xaxis: { ticks: d2, min:0, max: d1.length, title: "Diagnosis"}, yaxis:{min:0, max:highest+20, titleAngle:30}, mouse: {track: true}});
 				
 				//fill up the legend
 
@@ -74,7 +74,7 @@
 		
 </div>
 
-<div  style = "border:1px solid; height:480px; width:15%; overflow:none; position: relative; top:-482px; left: 83%;">
+<div  style = "border:1px solid; height:480px; width:15%; overflow:auto; position: relative; top:-482px; left: 84%;">
 	<b>Legend</b>
 	<div id = "legend" style= "overflow:auto; height: 450px">
 	

@@ -117,6 +117,7 @@ class ClinicController < GenericClinicController
       #["Use User Selected Task(s)", "/properties/creation?value=use_user_selected_activities"],
       #["Use Filing Numbers", "/properties/creation?value=use_filing_numbers"],
       ["Show Lab Results", "/properties/creation?value=show_lab_results"],
+      ["Show Column prescrp. interfeace", "/properties/creation?value=use_column_interface"],
       #["Set Appointment Limit", "/properties/set_appointment_limit"]
     ]
     render :layout => false

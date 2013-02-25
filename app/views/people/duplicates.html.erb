@@ -1,22 +1,252 @@
+<%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag 'jquery' %>
+    <%= stylesheet_link_tag 'extra_buttons' %>
+    <%= javascript_include_tag 'jquery_data_table.js' %>
+    <%= stylesheet_link_tag 'jquery.dataTables' %>
+    <%=javascript_include_tag "jquery.table2CSV.min" %>
+    <script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
+    <script>
+      jQuery(document).ready(function($) {
+          $('#table_id').dataTable({
+            "bAutoWidth": true,
+            "bProcessing": true,
+            "sScrollY": "400px",
+            "bInfo": true,
+            "bPaginate": false
+          });
+    search_box = $('#table_id').dataTable()
+    search = document.getElementsByTagName("input")[0];
+    search.setAttribute("id","search");
+    document.getElementById('search').setAttribute("onclick","showKeyboard();");
+    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    keyboard = document.getElementsByClassName("keypad")[0]
+    function getCharButtonSetID(character,id){
+      return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' +"<span style='width:32px'>"+character+"</span>"+ "</button>";
+    }
+    function getButtonString(id,string){
+      return "<button \
+                            onMouseDown='press(this.id);' \
+                            class='keyboardButton' \
+                            id='"+id+"'>"+
+        string +
+        "</button>";
+    }
+
+    function getButtons(chars){
+      var buttonLine = "";
+      for(var i=0; i<chars.length; i++){
+        character = chars.substring(i,i+1)
+        buttonLine += getCharButtonSetID(character,character)
+      }
+      return buttonLine;
+    }
+
+    showAlphaKeypad();
+
+    function showAlphaKeypad(){
+      document.getElementById("keypad").style.height = "280";
+      keyboard.innerHTML= getButtons("0123456789") + "</br>"
+      keyboard.innerHTML+= getButtons("QWERTYUIOP") + "</br>"
+      keyboard.innerHTML+= getButtons("ASDFGHJKL:") + "</br>"
+      keyboard.innerHTML+= getButtons("ZXCVBNM,.?")
+      keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
+      keyboard.innerHTML+= getButtonString('Space','<span>Space</span>')
+      keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
+    }
+
+    function showNumericKeypad(){
+      document.getElementById("keypad").style.height = "145";
+      keyboard.innerHTML = getButtons("123")
+      keyboard.innerHTML+= getButtons("456")
+      keyboard.innerHTML+= getButtons("7890")
+      keyboard.innerHTML+= getButtonString('space','<span>Space</span>')
+      keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
+      keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
+      keyboard.innerHTML+= getButtonString('abc','<span>abc</span>')
+      keyboard.innerHTML+= getButtonString('dash','<span>-</span>')
+      keyboard.innerHTML+= getButtonString('slash','<span>/</span>')
+    }
+   
+  })
+    </script>
+
+    <script>
+
+      function showKeyboard(){
+        key = document.getElementById("keypad")
+        if(key.style.display == 'none' || key.style.display == ""){
+          key.style.display = "inline";
+          return
+        }
+
+        key.style.display = "none";
+      }
+
+      function press(pressedChar){
+        switch (pressedChar) {
+          case 'backspace':
+            search.value = search.value.substring(0,search.value.length-1);
+            search_box.fnFilter(search.value)
+            return;
+          case 'Space':
+            search.value+= " "
+            search_box.fnFilter(search.value)
+            return
+          case 'clear':
+            search.value = ""
+            search_box.fnFilter(search.value)
+            return
+          case 'num':
+            showNumericKeypad();
+            return
+          case 'slash':
+            search.value+= "/"
+            search_box.fnFilter(search.value)
+            return
+          case 'dash':
+            search.value+= "-"
+            search_box.fnFilter(search.value)
+            return
+          case 'abc':
+            showAlphaKeypad();
+            return
+        }
+        search.value+= pressedChar
+        search_box.fnFilter(search.value)
+      }
+      //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    </script>
+
+    <style>
+
+      #backspace{
+        position:absolute;
+        left:100px;
+        bottom:2px;
+      }
+
+      #Space{
+        position:absolute;
+        left:220px;
+        bottom:2px;
+        width:200px;
+      }
+
+      #clear{
+        position:absolute;
+        left:470px;
+        bottom:2px;
+      }
+       #num{
+        position:absolute;
+        left:470px;
+        bottom:2px;
+        width:200px;
+      }
+      #keypad{
+        background-color: #FFFFFF;
+        border: 2px solid #9999FF;
+        border-radius: 15px 15px 15px 15px;
+        display: none;
+        height: 329px;
+        padding: 5px;
+        position: absolute;
+        right: 13px;
+        top: 194px;
+        width: 637px;
+      }
+    </style>
+    <style>
+      div {
+        -moz-user-select: none;
+      }
+      .basic_span {
+        position:relative;
+        width:50%;
+        display:block;
+        float:left;
+      }
+
+      .logo {
+        float:left
+      }
+
+      #table_id {
+        width: 100%;
+      }
+
+      #table_id_filter{
+        position:absolute;
+        top:0px;
+        right:1%;
+        margin-top:-40px;
+      }
+
+      #table_id_filter input{
+        padding:0.5em;
+      }
+
+
+      .dataTables_length select {
+        font-size: 25px;
+      }
+      .horizontal_line hr{
+        position:absolute;
+        bottom:104px;
+      }
+      #table_id_info{
+        left: 10px;
+        position: absolute;
+        top: 490px;
+        font-weight:bold;
+      }
+      #table_id_length{
+        display:none;
+      }
+       #table_id_paginate{
+        display:none;
+      }
+      #num{ display:none; }
+      #char{ display:none; }
+
+    </style>
+
+
 
 <script>
+  var patient_sets = {}
+  var total_id_hash_key = 0
   tt_cancel_destination = "/clinic";
 
-  function newID(patient_id,national_id) {
-    document.location = "/people/remote_duplicates?patient_id=" + patient_id + "&identifier=" + national_id;
+  function newID(patient_id) {
+    document.location = "/people/reassign_identifier?patient_id=" + patient_id;
   }
 
-  function remoteNewID(patient_id,national_id) {
-    document.location = "/people/remote_duplicates?remote_person_id=" + patient_id + "&identifier=" + national_id;
+  function selectP(patient_id) {
+    document.location = "/patients/pdash?found_person_id=" + patient_id;
   }
 
- function postToSelect(national_id) {
-    document.location = "/people/search?identifier=" + national_id;
+  function assignNewID(person_id,remote){
+   document.location = "/people/reassign_identifier?person_id=" + person_id + "&remote="+ remote;
   }
 
+  function selectByIdentifier(identifier) {
+    new_form = document.createElement("FORM");
+    new_form.setAttribute("type", "hidden");
+    document.body.appendChild(new_form);
+    new_form.method = "POST";
+
+    newElement = document.createElement("input");
+    newElement.setAttribute("name", "identifier");
+    newElement.setAttribute("type", "hidden");
+    newElement.value = identifier;
+    new_form.appendChild(newElement);
+    new_form.action = "/people/search";
+    new_form.submit();
+  }
 </script>
 
-<style>
+<style type="text/css">
 
 .color_white {
   background-color:white;
@@ -38,7 +268,7 @@ table {
 div { -moz-user-select: none; }
 
 
- a {
+ a {                                                                    
     background-color: #669999;
     border-bottom: 1px outset black;
     border-radius: 7px 7px 7px 7px;
@@ -49,7 +279,7 @@ div { -moz-user-select: none; }
     padding: 10px 16px 10px 10px;
     text-align: center;
     text-decoration: none;
-  }
+ }
  .heading,.msg{
    margin-left: 20px;
    padding-left: 5px;
@@ -57,12 +287,14 @@ div { -moz-user-select: none; }
 </style>
 
 <div>
+<%= image_tag(@logo, :class => "logo")%>
+    <br /><b style="margin-left:75px"><%= @current_location_name %></b><br />
+    <b style="margin-left:75px">National Identifier Duplicates</b><br />
+    <b style="margin-left:75px">Total Duplicates : <%= @duplicates.count %></b><br />
 
-<!--
-
--->
-<h3 class="msg">Select patient to continue ....</h3>
-<table>
+<% unless @duplicates.blank? %>
+<table id="table_id">
+  <thead>
   <tr class="header">
     <td width="80">National ID</td>
     <td width='200'>Patient Name</td>
@@ -71,15 +303,20 @@ div { -moz-user-select: none; }
     <td width='50' style="text-align:center;">Age</td>
     <td width='90'>&nbsp;</td>
   </tr>
+  </thead>
+  <tbody>
   <%color = 'white'
     row_number = 0
-    ( @duplicates || {} ).each do | patient |
+    ( @duplicates || {} ).each do | patient | 
       if color == 'white'
         color = 'blue'
       else
         color = 'white'
       end
-      row_number+=1
+      row_number+=1 
+      
+      old_identification_number = patient.old_identification_number rescue nil
+      
       %>
   <tr>
     <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
@@ -88,43 +325,75 @@ div { -moz-user-select: none; }
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
     <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
     <td class="color_<%=color%> row_number_<%=row_number%>">
-	<% if @selected_identifier != patient.national_id %>
-      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="postToSelect('<%=patient.national_id%>');">Select</a>
-	<%else%>
-      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.person_id%>','<%=patient.national_id%>');">Select</a>
-	<%end%>
+    <%if not(patient.national_id == old_identification_number) || old_identification_number.blank?%>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectP('<%=patient.patient_id%>');">Select</a>
+    <%else%>
+      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="newID('<%=patient.patient_id%>','<%=row_number%>','<%=color%>');">Reassign ID</a>
+    <%end%>
     </td>
   </tr>
  <%end%>
-  <%
-    row_number = 0
-    ( @remote_duplicates || {} ).each do | patient |
-      if color == 'white'
-        color = 'blue'
-      else
-        color = 'white'
-      end
-      row_number+=1
-      %>
-  <tr>
-    <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
-    <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.name || '&nbsp;' %></td>
-    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.birth_date || '&nbsp;' %> </td>
-    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
-    <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
-    <td class="color_<%=color%> row_number_<%=row_number%>">
-
-	<% if @selected_identifier != patient.national_id %>
-      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="postToSelect('<%=patient.national_id%>');">Select</a>
-	<%else%>
-      <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="remoteNewID('<%=patient.person_id%>','<%=patient.national_id%>');">Select</a>
-	<%end%>
-
-    </td>
-  </tr>
- <%end%>
-
+  </tbody>
 </table>
+<%else @dde_duplicates%>
+<h2 class="heading">The following patients have the same national identifier</h2>
+<h3 class="msg">Replace the current national identifier or Select the patient in front of you</h3>
+<table id="table_id">
+  <thead>
+    <tr class="header">
+      <td width="80">National ID</td>
+      <td width='200'>Patient Name</td>
+      <td width='50' style="text-align:center;">DOB</td>
+      <td width='50' style="text-align:center;">Gender</td>
+      <td width='50' style="text-align:center;">Age</td>
+      <td width='90'>&nbsp;</td>
+    </tr>
+  </thead>
+  <tbody>
+  <%color = 'white'
+    row_number = 0
+    ( @dde_duplicates || {} ).each do | patient |
+      if color == 'white'
+        color = 'blue'
+      else
+        color = 'white'
+      end
+      row_number+=1
+      remote = true
+ 
+      old_identification_number = patient.old_identification_number rescue nil
 
-
+      %>
+    <tr>
+      <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.national_id || '&nbsp;' %></td>
+      <td class="color_<%=color%> row_number_<%=row_number%>"><%= patient.name || '&nbsp;' %></td>
+      <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.birth_date || '&nbsp;' %> </td>
+      <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.sex || '&nbsp;' %></td>
+      <td class="color_<%=color%> row_number_<%=row_number%>" style="text-align:center;"><%= patient.age || '&nbsp;' %> </td>
+      <td class="color_<%=color%> row_number_<%=row_number%>">
+      <%if not(patient.national_id == old_identification_number) || old_identification_number.blank?
+          if patient.patient_id = 0%>
+            <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectByIdentifier('<%=patient.national_id%>');">Select</a>
+          <%else%>
+            <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="selectP('<%=patient.patient_id%>');">Select</a>
+          <%end%>
+      <%else%>
+        <a href="#" id = '<%=patient.patient_id%>' class ='merge button_row_<%=row_number%>' onmousedown="assignNewID('<%=patient.person_id%>','<%=remote %>','<%=row_number%>','<%=color%>');">Replace ID</a>
+      <%end%>
+      </td>
+    </tr>
+   <%end%>
+  </tbody>
+</table>
+<%end%>
 </div>
+
+
+    <div class="horizontal_line">
+      <hr width="100%" color="gray"/>
+    </div>
+    <div id="keypad">
+      <span class="keypad">
+      </span>
+
+  </div>
