@@ -714,7 +714,7 @@ class GenericPeopleController < ApplicationController
   end
  
   def reassign_dde_national_id
-    person = DDEService.reassign_dde_identication(params[:dde_person_id],params[:local_person_id])
+    person = DDEService.reassign_dde_identification(params[:dde_person_id],params[:local_person_id])
     print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
   end
 
