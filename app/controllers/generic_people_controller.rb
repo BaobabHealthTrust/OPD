@@ -710,6 +710,7 @@ class GenericPeopleController < ApplicationController
     end
 
     @selected_identifier = params[:search_params][:identifier]
+    @logo = CoreService.get_global_property_value("logo")
     render :layout => 'menu'
   end
  
