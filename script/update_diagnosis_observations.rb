@@ -2,7 +2,8 @@
 # and also creating vitals encounters and their observations
 # then change all the diagnosis encounter_type to outpatient diagnosis
 
-start_time = Time.now
+#start_time = Time.now()
+start_time = Time.now().strftime('%Y-%m-%d %H:%M:%S')
 puts "Start Time: #{start_time}\n\n"
 logger = Logger.new(Rails.root.join("log",'update_diagnosis_observations.log')) #,3,5*1024*1024)
 logger.info "Start Time: #{start_time}"
@@ -15,8 +16,14 @@ specific_primary_diagnosis_concept_id = ConceptName.find_by_name('SPECIFIC PRIMA
 weight_concept_id = ConceptName.find_by_name('WEIGHT').concept_id
 vitals_encounter_type_id = EncounterType.find_by_name('VITALS').encounter_type_id
 
-diagnosis_obs = Observation.find_by_sql(" SELECT o.*, e.provider_id, e.form_id, e.encounter_datetime FROM encounter e
-                                            LEFT JOIN obs o ON o.encounter_id = e.encounter_id
+#diagnosis_obs = Observation.find_by_sql("SELECT o.*, e.provider_id, e.form_id, e.encounter_datetime FROM encounter e
+#                                          LEFT JOIN obs o ON o.encounter_id = e.encounter_id
+#                                          WHERE e.encounter_type = 41
+#                                          AND e.voided = 0
+#                                          AND o.voided = 0")
+
+diagnosis_obs = Observation.find_by_sql("SELECT o.*, e.provider_id, e.form_id, e.encounter_datetime FROM encounter e
+                                          LEFT JOIN obs o ON o.encounter_id = e.encounter_id
                                           WHERE e.encounter_type = 41
                                           AND e.voided = 0
                                           AND o.voided = 0")
@@ -142,9 +149,14 @@ outpatient_diagnosis_encounter_type_id = EncounterType.find_by_name('OUTPATIENT 
 diagnosis_encounter_type = EncounterType.find_by_name('DIAGNOSIS').encounter_type_id
 
 #pull out all diagnosis encounters that are not voided
-diagnosis_encounters = Encounter.find_by_sql(" SELECT * FROM encounter
-                                               WHERE encounter_type = #{diagnosis_encounter_type} 
-                                               AND voided = 0 ")
+
+#diagnosis_encounters = Encounter.find_by_sql(" SELECT * FROM encounter
+#                                               WHERE encounter_type = #{diagnosis_encounter_type}
+#                                               AND voided = 0 ")
+
+diagnosis_encounters = Encounter.find_by_sql("SELECT * FROM encounter
+                                              WHERE encounter_type = #{diagnosis_encounter_type} 
+                                              AND voided = 0 ")
 
 diagnosis_encounters.each do |aDiagnosis_encounter|
   #change the diagnosis encounter_type_id to outpatient_diagnosis encounter_type_id
@@ -153,7 +165,7 @@ diagnosis_encounters.each do |aDiagnosis_encounter|
   aDiagnosis_encounter.save
 end
 
-end_time = Time.now
+end_time = Time.now().strftime('%Y-%m-%d %H:%M:%S')
 
 logger.info "End Time: #{end_time}"
 puts "Start Time: #{end_time}\n\n"
