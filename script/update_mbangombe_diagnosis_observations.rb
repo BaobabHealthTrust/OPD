@@ -66,6 +66,7 @@ diagnosis_encounters.each do |aDiagnosis_encounter|
 end
 
 end_time = Time.now().strftime('%Y-%m-%d %H:%M:%S')
+#end_time = Time.now()
 
 logger.info "End Time : #{end_time}"
 puts "Start Time : #{end_time}\n\n"
