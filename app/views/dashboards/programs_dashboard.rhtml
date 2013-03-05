@@ -47,7 +47,7 @@
                  <span value="<%= @reason_for_art_eligibility rescue "" %>">Reason for Starting</span>
                <% end %>
 
-               <% if (@arv_number rescue nil) != nil && (@arv_number) != " " %>
+               <% if (@arv_number rescue nil) != nil && (@arv_number) != " " && allowed_hiv_viewer %>
 
                   <span value="<%= @arv_number rescue "" %>">ARV Number</span>
 

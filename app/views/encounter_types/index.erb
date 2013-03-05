@@ -1,9 +1,24 @@
+<style>
+
+.tt_controls_select_task .keyboard { display: none !important; }             
+
+#tt_page_select_task .inputFrameClass {                          
+  height: 480px;                                                                
+}                                                                               
+                                                                                
+#tt_page_select_task .options {                                  
+  height: 17em;                                                                 
+} 
+
+</style>
+
+
 <script>
   var tt_cancel_destination = "/patients/show/<%= params[:patient_id] %>"
 </script>
 <form action="/encounter_types/show">
   <%= hidden_field_tag "patient_id", params[:patient_id] %>
-  <label for="encounter_type">Select Task</label>
+  <label for="encounter_type">Select Outcome</label>
   <select name="encounter_type" id="encounter_type">
     <% @available_encounter_types.each do |encounter_type| %>
       <% if encounter_type.upcase.include?('HIV') %>
@@ -13,5 +28,13 @@
       <% end %>
     <% end %>
   </select>
+  <% referral_type = ['Internal Referral','External Referral']  %>
+  <%= select_tag 'referral', options_for_select(referral_type),
+      {:id => 'initial_state',
+       :field_type => 'alpha',
+       :helpText => "Select Referral Type",
+       :tt_pageStyleClass => "NoKeyboard",
+       :condition => "document.getElementById('encounter_type').value.match(/REFERRAL/i)",
+       :allowFreeText => false } %>
   <%= submit_tag "Finish" %>    
 </form>

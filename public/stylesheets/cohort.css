@@ -39,11 +39,6 @@
   width:100%;
   }
 
-  html>/**/body div.scrollTableContainer table>tbody {
-  overflow: auto;
-  height: 509px;
-  overflow-x: hidden;
-  }
 
   div.scrollTableContainer thead tr {
   /*position:relative;*/

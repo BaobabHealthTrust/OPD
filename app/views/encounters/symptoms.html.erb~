@@ -1,0 +1,49 @@
+<script>
+  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>";
+  
+  function getSelected(){
+    var choices = "";
+
+    for(var o = 0; o < __$('choice').options.length; o++){
+      if(__$('choice').options[o].selected == true){
+        choices += __$('choice').options[o].innerHTML + " ";
+      }
+    }
+
+    return choices;
+  }
+  
+</script>
+
+<form action="/encounters/create/symptoms" >
+	<%= hidden_field_tag "encounter[encounter_type_name]", "SYMPTOMS" %>
+	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+
+	<%= select_tag "choice", options_for_select(["Chest Pains", "Dizziness", 
+		"Headache", "Abdominal pain", "Shortness of breath(SOB)", "Nausea", "Vomitting","Sweating","Weakness","Other"]), 
+		{	:helpText => 'Select Symptoms', 
+			:id => "choice", 
+			:multiple => true } %>
+
+	<%= touch_text_field_tag "Other", @patient, nil,
+		{	:id => "Other",
+			:field_type => 'alpha',
+			:helptext =>"Specify",
+			:allowFreeText => 'true',
+			:condition => '$("choice").value == "Other"'} 
+			%>
+
+	<label for='showSummary'>Summary </label>
+	<%#= text_field_tag :showSummary, nil, { :tt_onLoad => "growthIndicators()", :optional => "true", :tt_pageStyleClass => "NoControls" } %>
+
+	<% if @retrospective %>
+		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+		<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+	<% else %>
+		<%= hidden_field_tag "filter[provider]", nil %>
+	<% end %>
+		
+	<%= submit_tag "Finish" %>    
+</form>

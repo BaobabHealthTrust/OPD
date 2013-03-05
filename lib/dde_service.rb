@@ -98,7 +98,7 @@ module DDEService
       id ||= PatientIdentifierType.find_by_name("National id").next_identifier(:patient => self.patient).identifier
       id
     end
-
+=begin
     def check_old_national_id(identifier)
       create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
       if create_from_dde_server
@@ -150,17 +150,91 @@ module DDEService
           }
 
           current_national_id = self.get_full_identifier("National id")
+          
+          national_id = DDEService.create_patient_from_dde(person, true)
+
+          self.set_identifier("National id", national_id)
 
           self.set_identifier("Old Identification Number", current_national_id.identifier)
 
           current_national_id.void("National ID version change")
 
-          national_id = DDEService.create_patient_from_dde(person, true)
-
-          self.set_identifier("National id", national_id)
-
         end
       end
+    end
+=end
+  def check_old_national_id(identifier)
+      create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+      if create_from_dde_server
+        if (identifier.to_s.strip.length != 6 and identifier == self.national_id)
+           replaced_national_id = replace_old_national_id(identifier)
+           return replaced_national_id
+        elsif (identifier.to_s.strip.length >= 6 and identifier != self.national_id and self.national_id.length != 6)
+           replaced_national_id = replace_old_national_id(self.national_id)
+           return replaced_national_id
+        else
+           return false
+        end
+      end
+   end
+
+ def replace_old_national_id(identifier)
+    dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+    dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+    uri += "?value=#{identifier}"
+    output = RestClient.get(uri)
+    p = JSON.parse(output)
+    return p.count if p.count > 1
+    p = p.first rescue nil
+    passed_national_id = (p["person"]["patient"]["identifiers"]["National id"]) rescue nil
+    passed_national_id = (p["person"]["value"]) if passed_national_id.blank? rescue nil
+    
+    if passed_national_id.blank? and not p.blank?
+      DDEService.reassign_dde_identification(p["person"]["id"], self.patient.patient_id)
+      return true
+    end
+
+    person = {"person" => {
+          "birthdate_estimated" => (self.person.birthdate_estimated rescue nil),
+          "gender" => (self.person.gender rescue nil),
+          "birthdate" => (self.person.birthdate rescue nil),
+          "birth_year" => (self.person.birthdate.to_date.year rescue nil),
+          "birth_month" => (self.person.birthdate.to_date.month rescue nil),
+          "birth_day" => (self.person.birthdate.to_date.date rescue nil),
+          "names" => {
+            "given_name" => self.first_name,
+            "family_name" => self.last_name
+          },
+          "patient" => {
+            "identifiers" => {
+              "old_identification_number" => identifier
+            }
+          },
+          "attributes" => {
+            "occupation" => (self.get_full_attribute("Occupation").value rescue nil),
+            "cell_phone_number" => (self.get_full_attribute("Cell Phone Number").value rescue nil),
+            "citizenship" => (self.get_full_attribute("Citizenship").value rescue nil),
+            "race" => (self.get_full_attribute("Race").value rescue nil)
+          },
+          "addresses" => {
+            "address1" => (self.current_address1 rescue nil),
+            "city_village" => (self.current_address2 rescue nil),
+            "address2" => (self.current_district rescue nil),
+            "subregion" => (self.home_district rescue nil),
+            "county_district" => (self.home_ta rescue nil),
+            "neighborhood_cell" => (self.home_village rescue nil)
+          }
+        }
+      }
+      
+      current_national_id = self.get_full_identifier("National id")
+      national_id = DDEService.create_patient_from_dde(person, true)
+      self.set_identifier("National id", national_id)
+      self.set_identifier("Old Identification Number", current_national_id.identifier)
+      current_national_id.void("National ID version change")
+      return true
     end
   end
 
@@ -497,7 +571,7 @@ module DDEService
           },
           "patient"=>
             {"identifiers"=>
-              {"diabetes_number"=>""}},
+              {"old_identification_number" => params["person"]["patient"]["identifiers"]["old_identification_number"]}},
           "gender"=> person_params["gender"],
           "birthdate"=> birthdate,
           "birthdate_estimated"=> birthdate_estimated ,
@@ -517,9 +591,9 @@ module DDEService
       @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
 
       uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"
-      recieved_params = RestClient.post(uri,passed_params)
+      received_params = RestClient.post(uri,passed_params)
 
-      national_id = JSON.parse(recieved_params)["npid"]["value"]
+      national_id = JSON.parse(received_params)["npid"]["value"]
 
     else
       national_id = params["person"]["patient"]["identifiers"]["National_id"]
@@ -539,4 +613,75 @@ module DDEService
     end
   end
 
-end
+  #.............. new code
+  def self.reassign_dde_identification(dde_person_id,local_person_id)
+    dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+    dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/reassign_identication.json"
+    uri += "?person_id=#{dde_person_id}"
+    new_npid = RestClient.get(uri)
+
+    identifier_type = PatientIdentifierType.find_by_name("National id")
+
+    current_national_id = PatientIdentifier.find(:first,
+                        :conditions => ["patient_id = ? AND voided = 0 AND
+                        identifier_type = ?",local_person_id , identifier_type.id])
+
+    patient_identifier = PatientIdentifier.new
+    patient_identifier.type = PatientIdentifierType.find_by_name("National id")
+    patient_identifier.identifier = new_npid
+    patient_identifier.patient_id = local_person_id
+    patient_identifier.save!
+
+    current_national_id.voided = true
+    current_national_id.voided_by = 1
+    current_national_id.void_reason = "Given new national ID: #{new_npid}"
+    current_national_id.date_voided =  Time.now()
+    current_national_id.save!
+    return current_national_id.patient.person
+  end
+
+  def self.get_remote_person(dde_person_id)
+    dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+    dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/post_back_person.json"
+    uri += "?person_id=#{dde_person_id}"
+    p = JSON.parse(RestClient.get(uri)) rescue nil
+    return [] if p.blank?
+    birthdate_year = p["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
+    birthdate_month = p["person"]["data"]["birthdate"].to_date.month rescue nil
+    birthdate_day = p["person"]["data"]["birthdate"].to_date.day rescue nil
+    birthdate_estimated = p["person"]["data"]["birthdate_estimated"]
+    gender = p["person"]["data"]["gender"] == "F" ? "Female" : "Male"
+
+    passed = {
+     "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
+     "age_estimate"=> birthdate_estimated,
+     "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
+     "birth_month"=> birthdate_month ,
+     "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
+     "address2"=>p["person"]["data"]["addresses"]["address2"],
+     "city_village"=>p["person"]["data"]["addresses"]["city_village"],
+     "county_district"=>""},
+     "gender"=> gender ,
+     "patient"=>{"identifiers"=>{"National id" => p["npid"]["value"]}},
+     "birth_day"=>birthdate_day,
+     "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
+     "names"=>{"family_name"=>p["person"]["data"]["names"]["family_name"],
+     "given_name"=>p["person"]["data"]["names"]["given_name"],
+     "middle_name"=>""},
+     "birth_year"=>birthdate_year},
+     "filter_district"=>"",
+     "filter"=>{"region"=>"",
+     "t_a"=>""},
+     "relation"=>""
+    }
+
+    passed["person"].merge!("identifiers" => {"National id" => p["npid"]["value"]})    
+    return PatientService.create_from_form(passed["person"])
+  end
+
+ end
+

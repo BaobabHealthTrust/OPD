@@ -116,8 +116,8 @@ function createMonth(date, selected, initialdate, startweekdate, endweekdate){
     if(typeof(endweekdate) != "undefined"){                    
         end_week_date = endweekdate;
     }
-                
-    if(typeof(date) != "undefined" && date != null){
+         
+    if(typeof(date) != "undefined" && date != "" && date != null){
         selected_date = new Date(date);
         current_year = selected_date.getFullYear();
         current_month = monthNames[selected_date.getMonth()];        

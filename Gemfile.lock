@@ -8,6 +8,8 @@ GEM
       rack (~> 1.0.0)
     activerecord (2.3.5)
       activesupport (= 2.3.5)
+    activerecord-mysql2-adapter (0.0.3)
+      mysql2
     activeresource (2.3.5)
       activesupport (= 2.3.5)
     activesupport (2.3.5)
@@ -26,10 +28,12 @@ GEM
       ntlm-http (~> 0.1, >= 0.1.1)
       webrobots (~> 0.0, >= 0.0.9)
     mime-types (1.19)
+    mysql2 (0.2.18)
     net-http-digest_auth (1.2.1)
     net-http-persistent (2.6)
     nokogiri (1.5.2)
     ntlm-http (0.1.1)
+    paginate (1.0.1)
     rack (1.0.1)
     rails (2.3.5)
       actionmailer (= 2.3.5)
@@ -54,10 +58,13 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activerecord-mysql2-adapter (= 0.0.3)
   devise
   fastercsv
   json (= 1.5.0)
   mechanize
+  mysql2
+  paginate
   rails (= 2.3.5)
   rest-client
   settingslogic

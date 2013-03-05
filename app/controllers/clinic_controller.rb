@@ -40,10 +40,12 @@ class ClinicController < GenericClinicController
                   ['/clinic/location_management','Location Management']
                 ]
     @landing_dashboard = 'clinic_administration'
-    render :template => 'clinic/administration', :layout => 'clinic' 
+#    render :template => 'clinic/administration', :layout => 'clinic' 
   end
 
   def reports_tab
+    session[:observation] = nil
+    session[:people] = nil
     @reports = [
 						      ["OPD General", "/cohort_tool/opd_report_index"],
 						      ["Disaggregated Diagnosis", "/cohort_tool/opd_menu?report_name=disaggregated_diagnosis"],
@@ -52,12 +54,37 @@ class ClinicController < GenericClinicController
       						["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report"],
       						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered"],
       						["Referrals", "/cohort_tool/opd_menu?report_name=referral"],
-      						["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"]
+      						["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"],
+      						["Shift Report", "/cohort_tool/opd_menu?report_name=shift_report"],
+      						["Graphical Reports", "/clinic/reports_tab_graphs"]
                ] 
-        if allowed_hiv_viewer
-        	@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
-        end
+        #if allowed_hiv_viewer
+        	#@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
+        #end
     render :layout => false
+  end
+  
+  def reports_tab_graphs
+	   session[:observation] = nil
+    session[:people] = nil
+    @facility = Location.current_health_center.name rescue ''
+
+    @location = Location.find(session[:location_id]).name rescue ""
+
+    @date = (session[:datetime].to_date rescue Date.today).strftime("%Y-%m-%d")
+
+    @user = current_user.name rescue ""
+
+    @roles = current_user.user_roles.collect{|r| r.role} rescue []
+
+    @reports = [
+						      ["OPD General", "/cohort_tool/opd_report_index_graph"],
+	     						["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report_graph"],
+	     						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered_graph"],
+      						["Transfer Out", "/cohort_tool/opd_menu?report_name=referals_graph"]
+      						
+               ] 
+ 	    render :layout => false
   end
 
   def data_cleaning_tab
@@ -79,10 +106,18 @@ class ClinicController < GenericClinicController
       #["Set Clinic Holidays","/properties/set_clinic_holidays"],
       #["Set Site Code", "/properties/site_code"],
       ["Manage Roles", "/properties/set_role_privileges"],
+      ["Ask social history questions", "/properties/creation?value=ask_social_history_questions"],
+      ["Ask Life threatening questions", "/properties/creation?value=ask_life_threatening_condition_questions"],
+      ["Ask triage category questions", "/properties/creation?value=ask_triage_category_questions"],
+      ["Ask vitals before diagnosis (kids)", "/properties/creation?value=ask_vitals_questions_before_diagnosis"],
+      ["Ask social determinats questions", "/properties/creation?value=ask_social_determinants_questions"],
+      ["Ask complaints under vitals", "/properties/creation?value=ask_complaints_under_vitals"],
+      ["Ask complaints before diagnosis", "/properties/creation?value=ask_complaints_before_diagnosis"],
       #["Use Extended Staging Format", "/properties/creation?value=use_extended_staging_format"],
       #["Use User Selected Task(s)", "/properties/creation?value=use_user_selected_activities"],
       #["Use Filing Numbers", "/properties/creation?value=use_filing_numbers"],
       ["Show Lab Results", "/properties/creation?value=show_lab_results"],
+      ["Show Column prescrp. interfeace", "/properties/creation?value=use_column_interface"],
       #["Set Appointment Limit", "/properties/set_appointment_limit"]
     ]
     render :layout => false

@@ -1,7 +1,9 @@
 class ApplicationController < GenericApplicationController
-
+COMMON_YEAR_DAYS_IN_MONTH = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+helper_method :allowed_hiv_viewer
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
+
     task = main_next_task(Location.current_location, patient, session_date)
     begin
       return task.url if task.present? && task.url.present?
@@ -14,7 +16,8 @@ class ApplicationController < GenericApplicationController
   # Try to find the next task for the patient at the given location
 	def main_next_task(location, patient, session_date = Date.today)
 		encounter_available = nil
-		task = Task.first rescue Task.new()
+		task = Task.first rescue nil
+    task = Task.new() if task.blank?
 		
 		task.encounter_type = 'NONE'
 		task.url = "/patients/show/#{patient.id}"
@@ -34,26 +37,31 @@ class ApplicationController < GenericApplicationController
 		end
 
 		patient_bean = PatientService.get_patient((Patient.find(patient.patient_id)).person)
+    ask_complaints_questions_before_diagnosis = CoreService.get_global_property_value('ask.complaints.before_diagnosis').to_s == "true" rescue false
 
 		if !session[:original_encounter].blank?
 			if (session[:original_encounter].upcase == 'ADMISSION DIAGNOSIS' || session[:original_encounter].upcase == 'DISCHARGE DIAGNOSIS' || session[:original_encounter].upcase == 'OUTPATIENT_DIAGNOSIS') && !is_encounter_available(patient, 'PRESENTING COMPLAINTS', session_date)
 				task.encounter_type = 'PRESENTING COMPLAINTS'
-				task.url = "/encounters/new/presenting_complaints?patient_id=#{patient.id}"
+				task.url = "/encounters/new/presenting_complaints?patient_id=#{patient.id}" if ask_complaints_questions_before_diagnosis
 			else
 				task.encounter_type = session[:original_encounter]
 				task.url = "/encounters/new/#{task.encounter_type}?patient_id=#{patient.id}"
 			end
+      session[:original_encounter] = nil
 		end
+
+    ask_social_history_questions = CoreService.get_global_property_value('ask.social.history.questions').to_s == "true" rescue false
+    ask_social_determinants_questions = CoreService.get_global_property_value('ask.social.determinants.questions').to_s == "true" rescue false
 
 		if !encounter_available_ever(patient, 'SOCIAL HISTORY') && patient_bean.age > 14 
 			task.encounter_type = 'SOCIAL HISTORY'
 			task.url = "/encounters/new/social_history?patient_id=#{patient.id}"
-		end
+		end if ask_social_history_questions
 
 		if !encounter_available_ever(patient, 'SOCIAL DETERMINANTS') && patient_bean.age <= 14 
 			task.encounter_type = 'SOCIAL DETERMINANTS'
 			task.url = "/encounters/new/social_determinants?patient_id=#{patient.id}"
-		end
+		end if ask_social_determinants_questions
 
 		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true') 
 			task.encounter_type = 'OUTPATIENT RECEPTION'
@@ -68,7 +76,7 @@ class ApplicationController < GenericApplicationController
 	end
   
 	def is_encounter_available(patient, encounter_type, session_date)
-		is_vailable = false
+		is_available = false
 
 		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
 						                           patient.id, EncounterType.find_by_name(encounter_type).id, session_date],
@@ -84,11 +92,11 @@ class ApplicationController < GenericApplicationController
 	end
 
 	def encounter_available_ever(patient, encounter_type)
-		is_vailable = false
-
+		is_available = false
 		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ?",
 						                           patient.id, EncounterType.find_by_name(encounter_type).id],
 						                           :order =>'encounter_datetime DESC', :limit => 1)
+ 
 		if encounter_available.blank?
 			is_available = false
 		else
@@ -99,8 +107,11 @@ class ApplicationController < GenericApplicationController
 	end
 
 	def allowed_hiv_viewer
-	 allowed = current_user_roles.include?("Doctor" || "Nurse" || "Superuser") rescue nil 
-	 return allowed
+				allowed = false
+				user_roles = current_user_roles.collect{|role| role.to_s.upcase}
+				if user_roles.include?("DOCTOR") || user_roles.include?("NURSE") || user_roles.include?("SUPERUSER")
+						allowed = true
+				end
   end 	
   
   def hiv_program
@@ -117,7 +128,9 @@ class ApplicationController < GenericApplicationController
     non_art_encounters = []
     hiv_encounters_list = [ "HIV STAGING", "HIV CLINIC REGISTRATION", 
                             "HIV RECEPTION","HIV CLINIC CONSULTATION",
-                            "EXIT FROM HIV CARE"
+                            "EXIT FROM HIV CARE","ART ADHERENCE",
+                            "ART_FOLLOWUP","ART ENROLLMENT",
+                            "UPDATE HIV STATUS","APPOINTMENT"
                           ]
     if type.to_s.downcase == 'encounter'
       all_encounters.each{|encounter|
@@ -149,6 +162,11 @@ class ApplicationController < GenericApplicationController
     
     return non_art_encounters
     
+  end
+  
+  def days_in_month(month, year = Time.now.year)
+   	return 29 if month == 2 && Date.gregorian_leap?(year)
+   	COMMON_YEAR_DAYS_IN_MONTH[month]
   end
   
   def check_for_arvs_presence(encounter)

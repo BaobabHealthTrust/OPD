@@ -11,42 +11,55 @@
     -moz-user-select:none;
   }
 
-  #stats a {
-    background-color: grey;
-    border-bottom: 1px outset black;
-    border-style: outset;
-    border-top: 1px outset black;
-    color: white;
-    display: block;
-    padding: 10px 16px 10px 10px;
-    text-align: center;
-    text-decoration: none;
-    -moz-user-select:none;
-  }
+	#stats a {
+		border-radius: 7px; 
+		background-color: #669999;
+		border-bottom: 1px outset black;
+		border-style: outset;
+		border-top: 1px outset black;
+		color: white;
+		display: block;
+		padding: 10px 16px 10px 10px;
+		text-align: center;
+		text-decoration: none;
+	}
 
   #stats td {
     width: 310px;
-    -moz-user-select:none;
+ 		border-radius: 7px; 
+ 		color:white;
+		cursor:pointer;
   }
 
   #table_div {
     overflow:auto;
-    height: 320px;
+    height: 280px;
     background-color: white;
-    border: solid 1px #eee;
+    border: 1px #eee solid;
     border-width: 1px;
-    -moz-user-select:none;
-  }
-
-  #tab {
-    -moz-user-select:none;
   }
 </style>
 
 <script>
+
   function setInnerHtmlData(id,result,path, target) {
     td = document.getElementById(id);
-    td.innerHTML = "<a href ='" + path + "' target='" + (target ? target : "_parent") + "'>" +  result + "</a>"
+    if(result == "Graphical Reports")
+    {
+    	td.innerHTML =   result 
+      td.setAttribute("bgcolor","darkgoldenrod")
+      td.setAttribute("align","center")
+      td.setAttribute("onClick","window.location = '/clinic/reports_tab_graphs'")
+
+    }
+    else
+    {
+    	td.innerHTML = "<a href ='" + path + "' target='" + (target ? target : "_parent") + "'>" +  result + "</a>"
+    }
+  }
+  
+  function clear() {
+  	alert("ola")
   }
 </script>
 
@@ -74,10 +87,13 @@
 
       <%
       count = @reports.length  unless @reports.blank?
-      @reports.sort.reverse.map do | name , path | %>
+      @reports.sort.reverse.map do | name , path | 
+      %>
         <script>
-          setInnerHtmlData("<%=count%>","<%=name%>","<%=path%>",
+
+          	setInnerHtmlData("<%=count%>","<%=name%>","<%=path%>",
               "<%= (name.include?("Data Cleaning Tools") || name.include?("Supervision") ? "_self" : "_parent") %>" );
+
         </script>
         <%count-=1%>
       <%end%>

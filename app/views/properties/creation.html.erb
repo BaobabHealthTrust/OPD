@@ -26,6 +26,23 @@
       property = 'use.filing.number'
     when 'show_lab_results'
       property = 'show.lab.results'
+    when 'ask_social_history_questions'
+      property = 'ask.social.history.questions'
+    when 'ask_life_threatening_condition_questions'
+      property = 'ask.life.threatening.condition.questions'
+    when 'ask_triage_category_questions'
+      property = 'ask.triage.category.questions'
+    when 'ask_vitals_questions_before_diagnosis'
+      property = 'ask.vitals.questions.before.diagnosis'
+    when 'ask_social_determinants_questions'
+      property = 'ask.social.determinants.questions'
+    when 'ask_complaints_under_vitals'
+      property = 'ask.complaints.under.vitals'
+    when 'ask_complaints_before_diagnosis'
+      property = 'ask.complaints.before_diagnosis'
+    when 'use_column_interface'
+    	property = 'use.column.interface'
+
   end
 %>
   <%= hidden_field_tag "property", property %>

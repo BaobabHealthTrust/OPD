@@ -134,9 +134,7 @@ class GenericUserController < ApplicationController
       flash[:notice] = 'Password Mismatch'
       redirect_to :action => 'new'
       return
-    #  flash[:notice] = nil
       @user_first_name = params[:person_name][:given_name]
-#      @user_middle_name = params[:user][:middle_name]
       @user_last_name = params[:person_name][:family_name]
       @user_role = params[:user_role][:role_id]
       @user_admin_role = params[:user_role_admin][:role]
@@ -145,13 +143,18 @@ class GenericUserController < ApplicationController
 	
 	params[:user][:password] = params[:user][:plain_password]
 	params[:user][:plain_password] = nil
-    person = Person.create()
+    person = Person.create(params[:person])
     person.names.create(params[:person_name])
     params[:user][:user_id] = nil
     @user = RawUser.new(params[:user])
     @user.person_id = person.id
     if @user.save
-     # if params[:user_role_admin][:role] == "Yes"  
+     user = UserActivation.new
+     user.user_id = @user.id
+     user.system_id = CoreService.get_global_property_value('application.name').upcase rescue ''
+     user.status = 'pending'
+     user.save
+      # if params[:user_role_admin][:role] == "Yes"
       #  @roles = Array.new.push params[:user_role][:role_id] 
        # @roles << "superuser"
        # @roles.each{|role|
@@ -469,5 +472,76 @@ class GenericUserController < ApplicationController
   
   def users
   		@users = User.find(:all)
+  end
+
+  def view_users
+    @report_name = 'View users'
+    logged_user = current_user
+    @users = User.find(:all,
+      :conditions => ['user_id !=? AND retired = 0',logged_user.id],
+      :order => "date_created DESC")
+    render:layout => 'report'
+  end
+
+  def retire_reason
+    
+  end
+  
+  def manage_user
+    user_status = ['pending','blocked','active']
+    user_id = params[:user_id]
+    action = params[:user_action]
+    app_name = CoreService.get_global_property_value('application.name') rescue ''
+    if !app_name.blank?
+      application_name = app_name.upcase
+    end
+    
+    if action == 'block'
+      user_has_status = UserActivation.find_by_user_id(user_id)
+      if user_has_status
+        user_has_status.update_attribute(:status, user_status[1])
+      else
+        @user_status = UserActivation.new
+        @user_status.user_id = user_id
+        @user_status.system_id = application_name
+        @user_status.status = user_status[1]
+        @user_status.save
+      end
+      redirect_to("/user/view_users")
+    end
+
+    if action == 'pending'
+      user_has_status = UserActivation.find_by_user_id(user_id)
+      if user_has_status
+        user_has_status.update_attribute(:status, user_status[2])
+        redirect_to("/user/view_users")
+      end
+    end
+
+    if action == 'activate'
+     @user_status = UserActivation.find_by_user_id(user_id)
+     @user_status.update_attribute(:status, user_status[2])
+     redirect_to("/user/view_users")
+    end
+
+    if action == 'retire'
+      session[:user_id] = params[:user_id]
+      session[:action] = params[:user_action]
+      redirect_to(:action => "retire_reason")
+    end
+    
+    if params[:retire_reason]
+      current_user_id = current_user.id
+      retire_reason = params[:retire_reason]
+      retire_time = Time.now
+      @user = User.find(session[:user_id])
+      @user.retired = 1
+      @user.retired_by = current_user_id
+      @user.date_retired = retire_time
+      @user.retire_reason = retire_reason
+      @user.save
+      redirect_to("/user/view_users")
+    end
+
   end
 end

@@ -6,9 +6,12 @@
 
   #stats {
     width:98%;
-    border:1px solid #eee;
+    border:none;
     margin:10px;
     background:white;
+    top:2em;
+    position: absolute;
+    left: 0em;
   }
   #stats td, #stats th {
     text-align:center;
@@ -19,31 +22,65 @@
 
   #table_div {
     overflow:auto;
-    height: 320px;
+    height: 340px;
     background-color: white;
-    border: solid 1px #eee;
+    border: none;
     border-width: 1px;
     overflow: hidden;
   }
-
+  .header{
+    background-color: #669999;
+    border-bottom: 1px outset black;
+    border-top: 1px outset black;
+}
+h2{
+  position: absolute;
+  top: -1em;
+  left: 14em;
+}
 </style>
-<div id="tab" style="">
+<div id="tab" style="margin-top:24px">
   <h2>Current patient statistics</h2>
     <div id="table_div">
 
     <table id="stats" cellpadding="14">
-      <tr style="color: #fff; background-color: #666;">
-        <th style="text-align:left;">Task Type</th>
-        <th><%= @user rescue 'Me'%></th>
-        <th>Today</th>
+      <tr>
+        <th >&nbsp;</th>
+         <th class="header" colspan="2"  style="color: #fff"><%= @user rescue 'Me'%></th>
+         <th class="header" colspan="2"  style="color: #fff">Today</th>
+      </tr>
+      <tr  " style="color: #fff; background-color: #666;">
+        <th class="header" style="text-align:left;">Task Type</th>
+        <!--<th><%= @user rescue 'Me'%></th>-->
+         <th class="header">14 and below</th>
+         <th class="header">Above 14</th>
+         <th class="header">14 and below</th>
+         <th class="header">Above 14</th>
+        <!--<th>Today</th>-->
        <!-- <th>This Year</th>
         <th>Total to Date</th> -->
+      </tr>
+      <tr  class="<%= cycle('even', 'odd') %>">
+          <td style="text-align:left;">New registration </td>
+          <td><%= @me_reg_below_14 %></td>
+          <td><%=@me_reg_above_14 %></td>
+          <td><%=@today_reg_below_14 %></td>
+          <td><%=@today_reg_above_14 %></td>
+      </tr>
+      <tr  class="<%= cycle('even', 'odd') %>">
+          <td style="text-align:left;">Returning patients </td>
+          <td><%= @me_ret_pt_below_14 %></td>
+          <td><%= @me_ret_pt_above_14 %></td>
+          <td><%= @ret_pt_below_14 %></td>
+          <td><%= @ret_pt_above_14  %></td>
       </tr>
       <% @types.each do |type| %>
         <tr class="<%= cycle('even', 'odd') %>">
           <td style="text-align:left;"><%= type.capitalize.humanize.gsub('hiv','HIV').gsub('Hiv','HIV').gsub('art','ART').gsub('Art','ART') %></td>
-          <td><%= @me[type].to_i %></td>
-          <td><%= @today[type].to_i %></td>
+          <td><%= @me_below_14[type].to_i %></td>
+          <td><%= @me_above_14[type].to_i %></td>
+          <td><%= @today_below_14[type].to_i %></td>
+          <td><%= @today_above_14[type].to_i %></td>
         </tr>
       <% end %>
     </table>

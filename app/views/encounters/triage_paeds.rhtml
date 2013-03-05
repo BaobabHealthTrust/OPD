@@ -1,0 +1,355 @@
+<style>
+
+#tt_page_select_vital_signs .inputFrameClass {                    
+  height: 552px;
+}                                                                         
+
+#tt_page_select_vital_signs .inputFrameClass .options{
+  height: 22em;
+}    
+
+#tt_page_life_threatening_condition .inputFrameClass {
+  height: 558px;
+}
+
+#tt_page_life_threatening_condition .options {
+  height: 485px;
+}
+
+P Please
+
+#tt_page_select_triage_category .inputFrameClass {
+  height: 11em;
+}
+
+#tt_page_select_triage_category .options {
+  height: 17em;
+}
+
+/* ................................ */
+
+#summary_container {                                                   
+    bottom: 124px;                                                              
+    font-size: 20px;                                                            
+    left: 25px;                                                                 
+    position: absolute;                                                         
+    z-index: 600;                                                               
+    border-radius: 10px 10px 10px 10px;                                         
+    width: 47.2em;                                                                 
+    border-style: solid;                                                        
+    border-width: 1px;                                                          
+    background-color: lightgrey;                                                
+    display: none;
+    -moz-user-select: none;
+    height: 18em;
+    overflow: auto;
+  }                                                                             
+                                                                                
+  .summary {
+    font-size: 27px;
+    padding-left: 15px;
+  }
+
+  .data {
+    color: white;
+    font-size: 25px;
+  }
+
+  .header {
+    font-size: 27px;
+    color: white;
+    padding-left: 30px;
+    border-style: solid;
+    border-width: 0px 0px 1px 0px;
+  }
+
+</style>
+
+<script>
+  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>";
+  
+  function getSelected(){
+    var choices = "";
+
+    for(var o = 0; o < __$('choice').options.length; o++){
+      if(__$('choice').options[o].selected == true){
+        choices += __$('choice').options[o].innerHTML + " ";
+      }
+    }
+
+    return choices;
+  }
+
+  function calculateBP(pos){
+    var bp;
+
+    if(!$('bp')){
+      var div = document.createElement("div");
+      div.id = "bp";
+      div.className = "statusLabel";
+
+      $("inputFrame" + tstCurrentPage).appendChild(div);
+    }
+
+    if(pos == 1){
+      bp = ($("touchscreenInput" + tstCurrentPage).value.trim().length > 0 ? $("touchscreenInput" +
+        tstCurrentPage).value.trim() : "?") +
+        "/" + ($("diastolic_blood_pressure").value.trim().length > 0 ? $("diastolic_blood_pressure").value.trim() : "?");
+    } else if(pos == 2){
+      bp = ($("systolic_blood_pressure").value.trim().length > 0 ? $("systolic_blood_pressure").value.trim() : "?") +
+        "/" + ($("touchscreenInput" + tstCurrentPage).value.trim().length > 0 ? $("touchscreenInput" +
+        tstCurrentPage).value.trim() : "?");
+    }
+
+    $("bp").innerHTML = "Blood Pressure: <i style='font-size: 1.2em; float: right;'>" + bp + "</i>";
+
+    timedEvent = setTimeout('calculateBP(' + pos + ')', 500);
+  }
+
+ function changeButton(element){
+   if (element.getAttribute('tstvalue')=='No')
+      $('nextButton').innerHTML = "<span>Finish</span>";
+    else if(element.getAttribute('tstvalue')=='Yes'){
+            $('nextButton').innerHTML = "<span>Next</span>";
+    }
+
+  }
+ 
+  function changeAttributes() {
+    var opt = document.getElementsByTagName('li')
+    for(i=0;i<opt.length;i++){
+      opt[i].setAttribute("onclick", "null; updateTouchscreenInputForSelect(this); changeButton(this);")
+    }
+  }
+      /*  ..................... */
+
+
+     /* .......................... */
+  /* end */
+
+</script>
+
+<form action="/encounters/create_complaints" method="post">
+	<%= hidden_field_tag "encounter[encounter_type_name]", "VITALS" %>
+	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+
+  <% ask_triage_category_questions = CoreService.get_global_property_value('ask.triage.category.questions').to_s == "true"  %>
+  <% ask_life_threatening_condition_questions = CoreService.get_global_property_value('ask.life.threatening.condition.questions').to_s == "true" %>
+  <% ask_complaints_under_vitals = CoreService.get_global_property_value('ask.complaints.under.vitals').to_s == "true" %>
+
+  <%
+    vital_signs = ["","Temperature","Respiratory Rate","Blood Pressure", 
+    "Pulse Rate", "Weight", "Height","Oxygen Saturation",
+    "MUAC"
+    ]
+  %>
+  <% vital_signs << "Presenting complaints" if ask_complaints_under_vitals == true %>
+  
+        <%= touch_select_tag "Triage Category", @patient, nil,
+          { :ajaxURL => "/encounters/triage_category?search_string=",
+          :helpText => 'Select Triage Category',
+          :id => 'triage_category',
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none'",
+          :condition => ask_triage_category_questions == true
+        } %>
+
+
+        <%= touch_select_tag "LIFE THREATENING CONDITION", @patient, options_for_select([]),
+          { 
+          :id => 'emergency_signs',
+          :condition => "$('triage_category').value.match(/EMERGENCY/i)",
+          :ajaxURL => "/encounters/emergency_signs?search_string=",
+          :helpText => "Life threatening condition",
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none' ",
+          :condition => ask_life_threatening_condition_questions == true
+          } %>
+
+        <%= touch_select_tag "LIFE THREATENING CONDITION", @patient, options_for_select([]),
+          {
+          :id => 'priority_signs',
+          :condition => "$('triage_category').value.match(/PRIORITY/i)",
+          :ajaxURL => "/encounters/priority_signs?search_string=",
+          :helpText => "Life threatening condition",
+          :tt_onLoad => "document.getElementById('keyboard').style.display = 'none' "
+          } %>
+
+        <%#= select_tag "vitals_choice",options_for_select(['', 'Yes', 'No']),
+          {
+          :id => 'vitals_choice',
+          :helpText => "Continue with vitals/presenting complaints?",
+          :tt_onLoad => "changeAttributes();"
+          } %>
+
+	<%= select_tag "choice", options_for_select(vital_signs), 
+		{	:helpText => 'Select vital signs', 
+			:id => "choice",
+                        #:condition => "document.getElementById('vitals_choice').value.match(/YES/i)",
+			:multiple => true } %>
+
+	<%= touch_text_field_tag "TEMPERATURE (C)", @patient, nil,
+		{	:id => "temperature",
+			:field_type => 'number',
+			:helptext =>"Temperature (<sup>o</sup>C)",
+			:allowFreeText => 'true',
+			:condition => "getSelected().match(/TEMPERATURE/i)",
+			:min => 35,
+			:max => 41,
+			:units => 'Degrees Celcius',  
+			:validationRule => "([0-9]+\\.[0-9])|Unknown$",
+			:validationMessage => "You must enter a decimal between 0 and 9 (for example: 36<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
+
+	<%= touch_text_field_tag "RESPIRATORY RATE", @patient,  nil,
+		{	:id => "respiratory_rate",
+			:field_type => 'number',
+			:helptext => 'Respiratory Rate (Breaths per Minute)',
+			:min => 8,
+			:max => 65,
+			:condition => "getSelected().match(/RESPIRATORY\sRATE/i)",
+			:absoluteMin => 0,
+			:absoluteMax => 250,
+			:validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
+			:validationMessage => "You must enter a decimal between 0 and 9 (for example: 37<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
+  
+        <%= touch_text_field_tag "MIDDLE UPPER ARM CIRCUMFERENCE (cm)", @patient, nil,
+		{	:id => "muac",
+			:field_type => 'number',
+			:helptext =>"Middle upper arm circumference (cm)",
+			:condition => "getSelected().match(/MUAC/i)",
+			:min => 8,
+			:max => 20,
+			:validationRule => "([0-9]+\\.[0-9])|Unknown$",
+			:validationMessage => "You must enter a decimal between the numbers (for example: 8<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
+
+	<%= touch_text_field_tag "SYSTOLIC BLOOD PRESSURE", @patient, nil,
+		{	:id => "systolic_blood_pressure",
+			:helptext => "Systolic Blood Pressure (?/Y)",
+			:field_type => "number",
+			:tt_pageStyleClass => "NumbersWithUnknown",
+			:tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100);",
+			:tt_onUnLoad => "clearTimeout(timedEvent);",
+			:condition => "getSelected().match(/BLOOD\sPRESSURE/i)",
+			:absoluteMin => 0,
+			:max => 250 } %>
+
+	<%= touch_text_field_tag "DIASTOLIC BLOOD PRESSURE", @patient, nil,
+		{	:id => "diastolic_blood_pressure",
+			:helptext => "Diastolic Blood Pressure",
+			:field_type => "number",
+			:tt_pageStyleClass => "NumbersWithUnknown",
+			:tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100);",
+			:tt_onUnLoad => "clearTimeout(timedEvent);",
+			:condition => "getSelected().match(/BLOOD\sPRESSURE/i)",
+			:absoluteMin => 0,
+			:max => 180 } %>
+
+	<%= touch_text_field_tag "PULSE", @patient, nil,
+		{	:id => "pulse",
+			:helptext => 'Pulse Rate (Beats per Minute)',
+			:field_type => 'number',
+			:min => 50,
+			:max => 120,
+			:condition => "getSelected().match(/PULSE\sRATE/i)",
+			:units => 'bpm',
+			:validationRule => "([0-9]+)|Unknown$",
+			:validationMessage => "You must enter a number between 0 and 9 (for example: 54)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
+
+	<%= touch_text_field_tag "WEIGHT (KG)", @patient, nil,
+		{	:id => "weight",
+			:field_type => 'number',
+			:helptext => 'Weight (KG)',
+			:min => number_with_precision(@min_weight, :precision => 1),
+			:max => number_with_precision(@max_weight, :precision => 1),
+			:condition => "getSelected().match(/WEIGHT/i)",
+			:absoluteMin => 0,
+			:absoluteMax => 250,
+			:units => 'kg',
+			:validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
+			:validationMessage => "You must enter a number between 0 and 9 (for example: 54<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
+
+	<%= touch_text_field_tag "HEIGHT (CM)", @patient, nil,
+		{	:id => "height",
+			:helptext => "Height (CM)",
+			:field_type => 'number',
+			# :min => number_with_precision(@patient.min_height, :precision => 1),
+			# :max => number_with_precision(@patient.max_height, :precision => 1),
+			:condition => "getSelected().match(/HEIGHT/i)",
+			:min => 50,
+			:max => 180,
+			:units => 'cm',
+			:validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
+			:validationMessage => "You must enter a number between 0 and 9 (for example: 154<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal" } %>
+
+	<%= touch_text_field_tag "BLOOD OXYGEN SATURATION", @patient, nil,
+		{	:id => "oxygen",
+			:helptext => 'Blood Oxygen Saturation (%)',
+			:field_type => 'number',
+			:min => 85,
+			:max => 100,
+			:condition => "getSelected().match(/OXYGEN\sSATURATION/i)",
+			:absoluteMin => 0,
+			:absoluteMax => 250,
+			:validationRule => "([0-9]+(\\.[0-9])?)|Unknown$",
+			:validationMessage => "You must enter a number between 0 and 9 (for example: 54<b>.6</b>)",
+			:tt_pageStyleClass => "Numeric NumbersWithUnknownAndDecimal"} %>
+
+    <table cellpadding=5>
+          <tr>
+            <td>
+            </td>
+            <td>
+              <select class = "multi" style="width: 100%" 
+                      name="complaints[]" id="multiple"
+                      helptext="Select Complaint(s)" 
+                      condition = "getSelected().match(/PRESENTING COMPLAINTS/i)"
+                      multiple="multiple" nested="true" >
+                <option></option>
+                <%complaints_set = concept_set('presenting complaint')%>
+                <%if complaints_set%>
+                  <%complaints_set.sort.each do |concept|%>
+                    <%if concept_set(concept).size > 0 %>
+                      <optgroup id ="<%=concept%>" label="<%=concept%>">
+                        <%complaint_sub_set = concept_set(concept)%>
+                        <%if complaint_sub_set %>
+                          <%complaint_sub_set.sort.each do |value|%>
+                            <option id ="<%=value%>$<%=concept%>" value="<%=concept%>:<%=value%>"><%=value%> <%= '('%><%= concept %><%= ')'%></option>
+                          <%end%>
+                        <%end%>
+                      </optgroup>
+                    <%else%>
+                      <option id ="<%=concept%>"><%=concept%></option>
+                    <%end%>
+                  <%end%>
+                <%end%>
+              </select>
+            </td>
+          </tr>
+        </table>
+        <%= touch_text_area_tag "SPECIFIC PRESENTING COMPLAINT", @patient, nil,
+          { :id => "other",
+          :optional => true,
+          :condition => "getSelected().match(/PRESENTING COMPLAINTS/i)",
+          :helpText => "Specific Presenting complaint (optional)"
+        }%>
+
+<!-- end -->
+
+	<% if @retrospective %>
+		<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+		<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+	<% else %>
+		<%= hidden_field_tag "filter[provider]", nil %>
+	<% end %>
+		
+	<%= submit_tag "Finish" %>    
+</form>
+
+  <div id = "summary_container">                                           
+  </div>

@@ -40,7 +40,7 @@ class User < ActiveRecord::Base
 		  :class_name => 'UserProperty',
 		  :foreign_key => :user_id,
 		  :conditions => ['property = ?', 'Activities'] 
-
+  has_one :user_activation
 	# Custom search method for our custom login attribute
 	def self.find_for_database_authentication(warden_conditions)
 		conditions = warden_conditions.dup
@@ -116,6 +116,10 @@ class User < ActiveRecord::Base
 		admin = user_roles.map{|user_role| user_role.role }.include? 'Superuser' unless admin
 		admin
 	end  
+  
+  def program_manager?
+		user_roles.map{|user_role| user_role.role }.include? 'Program Manager'
+  end
       
 	# Encrypts plain data with the salt.
 	# Digest::SHA1.hexdigest("#{plain}#{salt}") would be equivalent to
@@ -169,4 +173,9 @@ class User < ActiveRecord::Base
 	def self.current=(user)
 		Thread.current[:user] = user
 	end
+
+  def status
+  user_status = self.user_activation.status rescue ''
+  return user_status
+  end
 end

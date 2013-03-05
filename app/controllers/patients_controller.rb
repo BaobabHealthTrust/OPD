@@ -1,45 +1,45 @@
 class PatientsController < GenericPatientsController
 
 	def tab_social_history
-    @alcohol = nil
-    @smoke = nil
-    @nutrition = nil
-    
-    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
-    
-    @alcohol = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Patient currently consumes alcohol').concept_id]).answer_string rescue nil
+		@alcohol = nil
+		@smoke = nil
+		@nutrition = nil
 
-    @smokes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Patient currently smokes').concept_id]).answer_string rescue nil
+		@patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 
-    @nutrition = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Nutrition status').concept_id]).answer_string rescue nil
+		@alcohol = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			@patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			ConceptName.find_by_name('Patient currently consumes alcohol').concept_id]).answer_string rescue nil
+
+		@smokes = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			@patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			ConceptName.find_by_name('Patient currently smokes').concept_id]).answer_string rescue nil
+
+		@nutrition = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			@patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			ConceptName.find_by_name('Nutrition status').concept_id]).answer_string rescue nil
+
+		@civil = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			@patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			ConceptName.find_by_name('Civil status').concept_id]).answer_string.titleize rescue nil
+
+		@civil_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			  @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			  ConceptName.find_by_name('Other Civil Status Comment').concept_id]).answer_string rescue nil) if @civil == "Other"
+
+		@religion = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			@patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
+			ConceptName.find_by_name('Religion').concept_id]).answer_string.titleize rescue nil
+
+		@religion_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
+			  @patient.id, Encounter.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
+				  @patient.id, EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|e| e.encounter_id},
+			  ConceptName.find_by_name('Other').concept_id]).answer_string rescue nil) if @religion == "Other"
+
+		render :layout => false
+	end
   
-    @civil = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Civil status').concept_id]).answer_string.titleize rescue nil
-  
-    @civil_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('Other Civil Status Comment').concept_id]).answer_string rescue nil) if @civil == "Other"
-  
-    @religion = Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-        @patient.id, Encounter.find(:all, :conditions => ["patient_id = ?", @patient.id]).collect{|e| e.encounter_id},
-        ConceptName.find_by_name('Religion').concept_id]).answer_string.titleize rescue nil
-  
-    @religion_other = (Observation.find(:last, :conditions => ["person_id = ? AND encounter_id IN (?) AND concept_id = ?",
-          @patient.id, Encounter.find(:all, :conditions => ["patient_id = ? AND encounter_type = ?", 
-              @patient.id, EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|e| e.encounter_id},
-          ConceptName.find_by_name('Other').concept_id]).answer_string rescue nil) if @religion == "Other"
-  
-    render :layout => false
-  end
-  
-  def show
+	def show
 		session[:mastercard_ids] = []
 		session_date = session[:datetime].to_date rescue Date.today
 		@patient_bean = PatientService.get_patient(@patient.person)
@@ -48,11 +48,11 @@ class PatientsController < GenericPatientsController
 		@prescriptions = @patient.orders.unfinished.prescriptions.all
 		@programs = @patient.patient_programs.all
 		@alerts = alerts(@patient, session_date) rescue nil
-	
+
 		if !session[:location].blank?
 			session["category"] = (session[:location] == "Paeds A and E" ? "paeds" : "adults")
 		end
-	
+
 		#find the user priviledges
 		@super_user = false
 		@clinician  = false
@@ -63,7 +63,7 @@ class PatientsController < GenericPatientsController
 
 
 		@user = current_user
-	
+
 		user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role.downcase}
 		inherited_roles = RoleRole.find(:all,:conditions => ["child_role IN (?)", user_roles]).collect{|r|r.parent_role.downcase}
 		user_roles = user_roles + inherited_roles
@@ -72,7 +72,7 @@ class PatientsController < GenericPatientsController
 		if user_roles.include?("superuser")
 			@super_user = true
 		end
-	
+
 		if user_roles.include?("clinician")
 			@clinician  = true
 		end
@@ -84,33 +84,33 @@ class PatientsController < GenericPatientsController
 		if user_roles.include?("regstration_clerk")
 			@regstration_clerk  = true
 		end
-	
+
 		if user_roles.include?("adults")
 			@adults  = true
 		end
-	
+
 		if user_roles.include?("paediatrics")
 			@paediatrics  = true
 		end
-	
+
 		if user_roles.include?("hmis lab order")
 			@hmis_lab_order  = true
 		end
-	
+
 		if user_roles.include?("spine clinician")
 			@spine_clinician  = true
 		end
-	
+
 		if user_roles.include?("lab")
 			@lab  = true
 		end
-       
-    if ! allowed_hiv_viewer
-      @show_hiv_tab = false
-    else
-      @show_hiv_tab = true
-    end
-   
+
+		if ! allowed_hiv_viewer
+		@show_hiv_tab = false
+		else
+		@show_hiv_tab = true
+		end
+
 		@restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
 
 		@restricted.each do |restriction|
@@ -127,154 +127,339 @@ class PatientsController < GenericPatientsController
 		@hiv_status = PatientService.patient_hiv_status(@patient)
 		@reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
 		@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
-       
+
 		render :template => 'patients/index', :layout => false
-  end
+	end
 
-  def personal
-    @links = []
-    patient = Patient.find(params[:id])
+	def personal
+		@links = []
+		patient = Patient.find(params[:id])
 
-    @links << ["Visit Summary (Print)","/patients/dashboard_print_opd_visit/#{patient.id}"]
-    @links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
+		@links << ["Visit Summary (Print)","/patients/dashboard_print_opd_visit/#{patient.id}"]
+		@links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
+		@links << ["Demographics (Edit)","/patients/edit_demographics?patient_id=#{patient.id}"]
+		@links << ["Patient past visits (View)","/patients/past_visits_summary?patient_id=#{patient.id}"]
+		@links << ["Medical History (View)","/patients/past_diagnoses?patient_id=#{patient.id}"]
+    @links << ["Investigation","/encounters/new/lab_orders?show&patient_id=#{patient.id} "]
+    
+		if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
+		  @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]
+		end 
 
-    if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
-      @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]
-    end 
+		if use_filing_number and PatientService.get_patient_identifier(patient, 'Filing Number').blank?
+		  @links << ["Filing Number (Create)","/patients/set_filing_number/#{patient.id}"]
+		end 
 
-    if use_filing_number and PatientService.get_patient_identifier(patient, 'Filing Number').blank?
-      @links << ["Filing Number (Create)","/patients/set_filing_number/#{patient.id}"]
-    end 
+		if use_user_selected_activities
+		  @links << ["Change User Activities","/user/activities/#{current_user.id}?patient_id=#{patient.id}"]
+		end
 
-    if use_user_selected_activities
-      @links << ["Change User Activities","/user/activities/#{current_user.id}?patient_id=#{patient.id}"]
-    end
+		@links << ["Recent Lab Orders Label","/patients/recent_lab_orders?patient_id=#{patient.id}"]
 
-    @links << ["Recent Lab Orders Label","/patients/recent_lab_orders?patient_id=#{patient.id}"]
-
-    render :template => 'dashboards/personal_tab', :layout => false
-  end
+		render :template => 'dashboards/personal_tab', :layout => false
+	end
   
-  def dashboard_print_opd_visit
-    print_and_redirect("/patients/opd_visit_label/?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")
-  end
+	def dashboard_print_opd_visit
+		print_and_redirect("/patients/opd_visit_label/?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")
+	end
  
-  def opd_visit_label
-    session_date = session[:datetime].to_date rescue Date.today
-    print_string = opd_patient_visit_label(@patient, session_date) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
-    send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
-  end
+	def opd_visit_label
+		session_date = session[:datetime].to_date rescue Date.today
+		print_string = opd_patient_visit_label(@patient, session_date) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
+		send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
+	end
 	
 	def mastercard
-    @type = params[:type]
-    
-    #the parameter are used to re-construct the url when the mastercard is called from a Data cleaning report
-    @quarter = params[:quarter]
-    @arv_start_number = params[:arv_start_number]
-    @arv_end_number = params[:arv_end_number]
-    @show_mastercard_counter = false
+		@type = params[:type]
 
-    if params[:patient_id].blank?
+		#the parameter are used to re-construct the url when the mastercard is called from a Data cleaning report
+		@quarter = params[:quarter]
+		@arv_start_number = params[:arv_start_number]
+		@arv_end_number = params[:arv_end_number]
+		@show_mastercard_counter = false
 
-      @patient_id = session[:mastercard_ids][session[:mastercard_counter]]
-       
-    elsif session[:mastercard_ids].length.to_i != 0
-      @patient_id = params[:patient_id]
-    else
-      @patient_id = params[:patient_id]
-    end
+		if params[:patient_id].blank?
 
-    unless params.include?("source")
-      @source = params[:source] rescue nil
-    else
-      @source = nil
-    end
+		  @patient_id = session[:mastercard_ids][session[:mastercard_counter]]
+		   
+		elsif session[:mastercard_ids].length.to_i != 0
+		  @patient_id = params[:patient_id]
+		else
+		  @patient_id = params[:patient_id]
+		end
 
-    render :layout => false
-    
-  end
+		unless params.include?("source")
+		  @source = params[:source] rescue nil
+		else
+		  @source = nil
+		end
+
+		render :layout => false
+	end
 
   def opd_patient_visit_label(patient, date = Date.today)
-    result = Location.current_location.name.match(/outpatient/i).nil?
-
-    if result == false
-      return mastercard_visit_label(patient,date)
-    else
       label = ZebraPrinter::StandardLabel.new
       label.font_size = 3
       label.font_horizontal_multiplier = 1
       label.font_vertical_multiplier = 1
       label.left_margin = 50
+      title_header_font = {:font_reverse => false,:font_size => 4, :font_horizontal_multiplier => 1, :font_vertical_multiplier => 1}
+      concepts_font = {:font_reverse => false, :font_size => 3, :font_horizontal_multiplier => 1, :font_vertical_multiplier => 1 }
+      title_font_top_bottom = {:font_reverse => false, :font_size => 4, :font_horizontal_multiplier => 1, :font_vertical_multiplier => 1}
+      title_font_bottom = {:font_reverse => false, :font_size => 2, :font_horizontal_multiplier => 1, :font_vertical_multiplier => 1}
       units = {"WEIGHT"=>"kg", "HT"=>"cm"}
-      encs = patient.encounters.find(:all,:conditions =>["DATE(encounter_datetime) = ?",date])
+      encs = patient.encounters.find(:all, :order => 'encounter_datetime ASC', :conditions =>["DATE(encounter_datetime) = ?",date])
       return nil if encs.blank?
-
       label.draw_multi_text("Visit: #{encs.first.encounter_datetime.strftime("%d/%b/%Y %H:%M")}" +
-    " - #{encs.last.encounter_datetime.strftime("%d/%b/%Y %H:%M")}", :font_reverse => true)
-
+    " - #{encs.last.encounter_datetime.strftime("%d/%b/%Y %H:%M")}", title_font_top_bottom)
+      label.draw_line(20,60,800,2,0)
+      outcomes = []
+      vitals = []
+      notes = []
+      check_vitals = encs.map(&:name).include?('VITALS')
+      check_notes = encs.map(&:name).include?('NOTES')
       encs.each {|encounter|
-
           if encounter.name.upcase.include?('TREATMENT')
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
             o = encounter.orders.collect{|order| order.to_s if order.order_type_id == OrderType.find_by_name('Drug Order').order_type_id}.join("\n")
             o = "No prescriptions have been made" if o.blank?
             o = "TREATMENT NOT DONE" if treatment_not_done(encounter.patient, date)
-            label.draw_multi_text("#{o}", :font_reverse => false)
+            label.draw_multi_text("Prescriptions at #{encounter_datetime}", title_header_font)
+            label.draw_multi_text("#{o}", concepts_font)
 
           elsif encounter.name.upcase.include?("PROCEDURES DONE")
             procs = ["Procedures - "]
             procs << encounter.observations.collect{|observation| 
               observation.answer_string.squish if !observation.concept.fullname.match(/Workstation location/i)
             }.compact.join("; ")
-            label.draw_multi_text("#{procs}", :font_reverse => false)
+            label.draw_multi_text("#{procs}", concepts_font)
 
-          elsif encounter.name.upcase.include?('UPDATE HIV STATUS')            
-            label.draw_multi_text("#{ 'HIV Status - ' + PatientService.patient_hiv_status(patient).to_s }", :font_reverse => false)
+          elsif encounter.name.upcase.include?('UPDATE HIV STATUS')
+            hiv_status = []
+            encounter.observations.each do |observation|
+             next if !observation.concept.fullname.match(/HIV STATUS/i)
+             hiv_status << 'HIV Status - ' + observation.answer_string.to_s rescue ''
+            end
+            label.draw_multi_text("#{hiv_status}", :font_reverse => false)
+
+          elsif encounter.name.upcase.include?('LAB ORDERS')
+            lab_orders = []
+            encounter.observations.each do |observation|
+            concept_name = observation.concept.fullname
+            next if concept_name.match(/Workstation location/i)
+               lab_orders << observation.answer_string.to_s
+             end
+             label.draw_multi_text("Lab orders: #{lab_orders.join(',')}", concepts_font)
 
           elsif encounter.name.upcase.include?('DIAGNOSIS')
-            obs = ["Diagnoses - "]
-            obs << encounter.observations.collect{|observe|
-              "#{observe.answer_string}".squish rescue nil if observe.concept.fullname.upcase.include?('DIAGNOSIS')}.compact.join("; ")
-            obs
-            label.draw_multi_text("#{obs}", :font_reverse => false)
- 
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
+            obs = []
+            encounter.observations.each{|observation|
+            concept_name = observation.concept.fullname
+            next if concept_name.match(/Workstation location/i)
+            next if !observation.obs_group_id.blank?
+
+              child_obs = Observation.find(:all, :conditions => ["obs_group_id = ?", observation.obs_id])
+
+              if !child_obs.empty?
+                text = observation.answer_string.to_s + " - "
+                count = 0
+                child_obs.each { | child_observation |
+                  text = text + ", " if count > 0
+                  text = text + child_observation.answer_string.to_s
+                  count = count + 1
+                }
+                obs << text
+              else
+                obs << observation.answer_string.to_s
+              end
+            }
+              #"#{observe.answer_string}".squish rescue nil if observe.concept.fullname.upcase.include?('DIAGNOSIS')
+            #.compact.join("; ")
+            label.draw_multi_text("Diagnoses at #{encounter_datetime}",title_header_font )
+            obs.each { | observation |
+                label.draw_multi_text("#{observation}", concepts_font)
+            }
           elsif encounter.name.upcase.include?('TRANSFER OUT')
             obs = ["Referred to facility - "]
             obs << encounter.observations.collect{|observe|
-              Location.find("#{observe.answer_string}".squish).name rescue nil if observe.concept.fullname.upcase.include?('TRANSFER')}.compact.join("; ")
+              Location.find("#{observe.answer_string}".squish).name if observe.concept.fullname.upcase.include?('TRANSFER')}.compact.join("; ")
             obs
-            label.draw_multi_text("#{obs}", :font_reverse => false)
-                       
-					elsif encounter.name.upcase.include?("VITALS")
-						string = []
-						encounter.observations.each do |observation|
-							concept_name = observation.concept.concept_names.last.name rescue ''
+            label.draw_multi_text("Transfer Out", :font_reverse => true)
+            label.draw_multi_text("#{obs}", concepts_font)
+          
+          elsif encounter.name.upcase.include?("NOTES")
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
+            obs = []
+            encounter.observations.each { | observation |
+
+              concept_name = observation.concept.concept_names.last.name
 							next if concept_name.match(/Workstation location/i)
-							string << observation.to_s(["short", "order"]).squish + units[concept_name.upcase].to_s
-						end
-						label.draw_multi_text("Vitals - " + string.join(', '), :font_reverse => false)
-          end
+              next if concept_name.match(/Life threatening condition/i)
+              next if concept_name.match(/Triage category/i)
+              next if concept_name.match(/specific presenting complaint/i)
+              next if !observation.obs_group_id.blank?
+
+              child_obs = Observation.find(:all, :conditions => ["obs_group_id = ?", observation.obs_id])
+
+              if !child_obs.empty?
+                text = observation.answer_string.to_s + " - "
+                count = 0
+                child_obs.each { | child_observation |
+                  text = text + ", " if count > 0
+                  text = text + child_observation.answer_string.to_s
+                  count = count + 1
+                }
+                obs << text
+              else
+                obs << observation.answer_string.to_s
+              end
+              notes << obs
+            }
+            notes
+            if (check_vitals == false)
+              label.draw_multi_text("Notes at #{encounter_datetime}",title_header_font)
+              label.draw_multi_text("#{obs.join(',')}",concepts_font)
+            end
+
+          elsif encounter.name.upcase.include?("ADMIT PATIENT")
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
+            obs = []
+            encounter.observations.each do |observation|
+              concept_name = observation.concept.concept_names.last.name
+              next if concept_name.match(/Workstation location/i)
+                obs << observation.answer_string
+            end
+            label.draw_multi_text("Patient admission at #{encounter_datetime}", title_header_font)
+            label.draw_multi_text("#{obs}", concepts_font)
+          elsif encounter.name.upcase.include?("PATIENT SENT HOME")
+              outcomes << "Sent home"
+          elsif encounter.name.upcase.include?("REFERRAL")
+            outcomes << "Referred"
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
+            obs = []
+            encounter.observations.each do |observation|
+              concept_name = observation.concept.fullname
+              next if concept_name.match(/Workstation location/i)
+              obs << observation.answer_string 
+            end
+            string = []
+            string << 'Referred to : ' + obs.first
+            string << 'Specialist clinic : ' + obs.last
+            label.draw_multi_text("Referral at #{encounter_datetime}", title_header_font)
+            string.each { | observation |
+               label.draw_multi_text("#{observation}", concepts_font)
+            }
+
+					elsif encounter.name.upcase.include?("VITALS")
+            vital_signs = ["HT","Weight","Heart rate","Temperature","RR","SAO2", "MUAC"]
+              #blood_pressure = ["TA", "Diastolic"]
+              #SAO2 for oxygen saturation;
+              #TA for Systolic blood pressure
+              #MUAC for middle upper arm circumference
+            encounter_datetime = encounter.encounter_datetime.strftime('%H:%M')
+						string = []
+            obs = []
+            complaints = [] #to hold life threatening condition and triage category
+                            #so that they should be printed in different lines
+            bp = []
+            encounter.observations.each { | observation |
+
+             # if (observation.concept_id == 8578)
+              concept_name = observation.concept.concept_names.last.name
+              #next if concept_name.match(/Detailed presenting complaint/i)
+							next if concept_name.match(/Workstation location/i)
+              next if !observation.obs_group_id.blank?
+
+              child_obs = Observation.find(:all, :conditions => ["obs_group_id = ?", observation.obs_id])
+
+              if !child_obs.empty?
+                text = observation.answer_string.to_s + " : "
+                count = 0
+                child_obs.each { | child_observation |
+                  text = text + ", " if count > 0
+                  text = text + child_observation.answer_string.to_s
+                  count = count + 1
+                }
+                obs << text
+              else
+                string << observation.concept.fullname + ':' + observation.answer_string if vital_signs.include?(concept_name)
+                bp << observation.answer_string if concept_name.match(/TA/i)
+                bp << observation.answer_string if concept_name.match(/DIASTOLIC/i)
+                if !vital_signs.include?(concept_name)
+                  if !concept_name.match(/TA/i)
+                    if !concept_name.match(/DIASTOLIC/i)
+                      if !concept_name.match(/LIFE THREATENING CONDITION/i)
+                        if !concept_name.match(/TRIAGE CATEGORY/i)
+                          obs << observation.answer_string.to_s 
+                        end
+                      end
+                      complaints << concept_name + ':' + observation.answer_string if concept_name.match(/LIFE THREATENING CONDITION/i)
+                      complaints << concept_name + ':' + observation.answer_string if concept_name.match(/TRIAGE CATEGORY/i)
+                    end
+                  end
+                end
+              end
+              vitals << obs << string
+            }
+
+            unless bp.blank?
+              sbp = bp[0]
+              dbp = bp[1]
+              string << ('BP: ' + sbp.to_s.squish + '/' + dbp.to_s.squish )
+            end
+            
+            vitals
+            if (check_notes == false)
+              label.draw_multi_text("Vitals at #{encounter_datetime}", title_header_font)
+              label.draw_multi_text("#{string.join(',')}", concepts_font)
+              #label.draw_multi_text("Presenting complaints", title_header_font)
+              label.draw_multi_text("Presenting complaints\n #{obs.join(',')}", concepts_font) if !obs.blank?
+
+              unless complaints.blank?
+                complaints.each { | complaint |
+                  label.draw_multi_text("#{complaint}", concepts_font)
+                }
+              end
+              
+            end
+        end
 
       }
-			
+      if ((check_notes == true) && (check_vitals == true))
+          combined = (vitals + notes).flatten.sort.uniq #Trying to remove the duplicate entries
+          label.draw_multi_text("NOTES AND VITALS", title_header_font)
+          label.draw_multi_text("#{combined.join(',')}", concepts_font)
+          #combined.each { | value |
+            #label.draw_multi_text("#{value}", concepts_font)
+          #}
+      end
 			['OPD PROGRAM','IPD PROGRAM'].each do |program_name|		
 					program_id = Program.find_by_name(program_name).id
-					state = patient.patient_programs.local.select{|p| p.program_id == program_id}.last.patient_states.last rescue nil
+					state = patient.patient_programs.local.select{|p| 
+            p.program_id == program_id
+          }.last.patient_states.last rescue nil
 
 					next if state.nil?
 					
 					state_start_date = state.start_date.to_date	
 					state_name = state.program_workflow_state.concept.fullname
 					
-					if ((state_start_date == session[:datetime]) || (state_start_date == Date.today)) && (state_name.upcase != 'FOLLOWING')					
-      			label.draw_multi_text("Outcome - #{state_name}", :font_reverse => false)
+					if ((state_start_date == session[:datetime]) || (state_start_date.to_date == Date.today)) && (state_name.upcase != 'FOLLOWING')
+            outcomes << state_name
+      		  #label.draw_multi_text("Outcome : #{state_name}", concepts_font)
       		end
+          unless outcomes.blank?
+            label.draw_multi_text("Outcomes : #{outcomes.uniq.join(',')}", concepts_font)
+          end
 			end
-
-      label.draw_multi_text("Seen by: #{current_user.name rescue ''} at " +
-        " #{Location.current_location.name rescue ''}", :font_reverse => true)
+      initial = current_user.person.names.last.given_name.first + "."
+      last_name = current_user.person.names.last.family_name
+      label.draw_multi_text("___________________________________________________", concepts_font)
+      label.draw_multi_text("Seen by: #{initial + last_name} at " +
+        " #{Location.current_location.name}", title_font_bottom)
       
       label.print(1)
-    end
   end
 
   def past_diagnoses
@@ -299,10 +484,10 @@ class PatientsController < GenericPatientsController
     patient_encounters.each{|e| 
       @past_local_cases[e.encounter_datetime.strftime("%Y-%m-%d")][e.name] = encounter_summary(e)  if e.encounter_datetime.to_date < (session[:datetime].to_date rescue Date.today.to_date)   
       } rescue nil
-    
+   
+    @patient_bean = PatientService.get_patient(Person.find(@patient_ID)) 
     @past_local_cases = @past_local_cases.sort.reverse!
-    render :layout => false
-    
+    render :layout => "menu"
   end
   
 	def diagnosis_summary(encounter)
