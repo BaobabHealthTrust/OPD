@@ -5,11 +5,11 @@ usage(){
   echo
   echo "ENVIRONMENT should be: development|test|production"
   #echo "Available SITES:"
-  ls -1 db/data
+  #ls -1 db/data
 } 
 
 ENV=$1
-SITE=$2
+#SITE=$2
 
 if [ -z "$ENV" ] ; then
   usage
