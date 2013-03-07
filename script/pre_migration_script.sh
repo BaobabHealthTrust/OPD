@@ -29,7 +29,7 @@ DATABASE=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}'][
 echo "DROP TABLE location_tag_map;" | mysql --user=$USERNAME --password=$PASSWORD $DATABASE
 echo "DROP TABLE location_tag;" | mysql --user=$USERNAME --password=$PASSWORD $DATABASE
 
-mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/create_and_alter_tables.sql
+mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/create_and_alter_tables_before_openmrs_migration.sql
 echo "After completing database setup, you are advised to run the following:"
 echo "rake test"
 echo "rake cucumber"
