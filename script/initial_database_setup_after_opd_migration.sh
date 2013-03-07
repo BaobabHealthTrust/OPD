@@ -33,6 +33,8 @@ mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/malawi_regions.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/moh_regimens_only.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/user_schema_modifications.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/missing_tables.sql
+mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/update_concepts.sql
+mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/create_dde_server_connection.sql
 
 echo "After completing database setup, you are advised to run the following:"
 echo "script/runner -e development|production|test script/update_diagnosis_observations.rb"

@@ -8,8 +8,6 @@ GEM
       rack (~> 1.0.0)
     activerecord (2.3.5)
       activesupport (= 2.3.5)
-    activerecord-mysql2-adapter (0.0.3)
-      mysql2
     activeresource (2.3.5)
       activesupport (= 2.3.5)
     activesupport (2.3.5)
@@ -58,7 +56,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activerecord-mysql2-adapter (= 0.0.3)
   devise
   fastercsv
   json (= 1.5.0)
