@@ -15,7 +15,7 @@ outpatient_diagnosis_encounter_type_id = EncounterType.find_by_name('OUTPATIENT 
 
 diagnosis_obs = Observation.find_by_sql("SELECT o.*, e.provider_id, e.form_id, e.encounter_datetime FROM encounter e
                                           LEFT JOIN obs o ON o.encounter_id = e.encounter_id
-                                          WHERE e.encounter_type = #{outpatient_diagnosis_encounter_id}
+                                          WHERE e.encounter_type = #{outpatient_diagnosis_encounter_type_id}
                                           AND e.voided = 0
                                           AND o.voided = 0")
 
