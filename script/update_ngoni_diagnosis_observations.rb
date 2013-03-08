@@ -19,8 +19,6 @@ diagnosis_obs = Observation.find_by_sql("SELECT o.*, e.provider_id, e.form_id, e
 
 diagnosis_obs.each do |aDiagnosis|
   
-     
-    
     #create the primary diagnosis
     if aDiagnosis.value_coded
         value_coded_name_id = ConceptName.find_by_sql("SELECT concept_name_id FROM concept_name WHERE concept_id = #{aDiagnosis.value_coded}").map{|c| c.concept_name_id}

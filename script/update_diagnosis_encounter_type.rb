@@ -4,7 +4,7 @@ outpatient_diagnosis_encounter_type_id = EncounterType.find_by_name('OUTPATIENT 
 diagnosis_encounter_type = EncounterType.find_by_name('DIAGNOSIS').encounter_type_id
 
 #pull out all diagnosis encounters that are not voided
-diagnosis_encounters = Encounter.find_by_sql(" SELECT * FROM encounter
+diagnosis_encounters = Encounter.find_by_sql("SELECT * FROM encounter
                                                WHERE encounter_type = #{diagnosis_encounter_type} 
                                                AND voided = 0 ")
 
