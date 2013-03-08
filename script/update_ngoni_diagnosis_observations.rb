@@ -1,6 +1,7 @@
 # voiding the current diagnosis observations and creating new diagnosis observations
 # and also creating vitals encounters and their observations
 # then change all the diagnosis encounter_type to outpatient diagnosis
+# update weight observations
 
 start_time = Time.now().strftime('%Y-%m-%d %H:%M:%S')
 puts "Start Time: #{start_time}"
@@ -50,8 +51,17 @@ diagnosis_obs.each do |aDiagnosis|
       end
 end
 
+#update weight observations
+normal_weight_concept_id = ConceptName.find_by_name("Normal weight").concept_id
+weight_concept_id = ConceptName.find_by_name("Weight").concept_id
+
+normal_weight_obs = Observation.find(:all, :conditions =>   ["concept_id = ? ", normal_weight_concept_id])
+normal_weight_obs.each do |ob|
+  ob.concept_id = weight_concept_id
+  ob.save
+end
+
 #update the diagnosis encounter_type to outpatient diagnosis encounter_type
-#
 diagnosis_encounter_type = EncounterType.find_by_name('DIAGNOSIS').encounter_type_id
 
 #pull out all diagnosis encounters that are not voided
@@ -67,11 +77,8 @@ diagnosis_encounters.each do |aDiagnosis_encounter|
 end
 
 end_time = Time.now().strftime('%Y-%m-%d %H:%M:%S')
-#end_time = Time.now()
-
 logger.info "End Time : #{end_time}"
 puts "Start Time : #{end_time}\n\n"
 logger.info "Total saved : #{total_saved}"
 logger.info "Total not saved : #{total_not_saved}"
-logger.info "It took : #{end_time - start_time}"
-logger.info "Completed successfully !!\n\n"
+logger.info "Completed successfully !!"
