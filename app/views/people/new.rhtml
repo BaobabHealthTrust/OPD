@@ -127,7 +127,7 @@ function validateDate() {
      if (selectYear != currYear) {
      rule = availableMonths.join("|");
      rule = rule + "|Unknown";
-     return $('touchscreenInput'+tstCurrentPage).setAttribute('validationRule',a);
+     return $('touchscreenInput'+tstCurrentPage).setAttribute('validationRule',rule);
      }
   }
 
