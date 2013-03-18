@@ -50,7 +50,7 @@ pos = 1
       people[<%= pos %>]["Ancestral Traditional Authority(T/A)"] = null;
     }
     try {
-      people[<%= pos %>]["Current Residence"] = "" //"<%#=h person.current_residence -%>";
+      people[<%= pos %>]["Current Residence"] = "<%=h person.current_residence -%>";
     }catch(e){
       people[<%= pos %>]["Current Residence"] = null;
     }
@@ -85,20 +85,12 @@ end -%>
     var tt_cancel_destination = "/clinic"
 <% end %>
 
-  function changeNextButtonText(text, pos , person_id){
+  function changeNextButtonText(text, pos , person_id, selected_person){
     __$('nextButton').innerHTML = "<span>" + text + "</span>";
 
-    if(pos && (person_id == 0)){
-      document.forms[0].action = "select";
-      __$('nextButton').onmousedown = function(){
-        document.forms[0].submit();
-      }
-
-      clearFields();
-
-      pos = parseInt(pos);
-
-      var fields = [
+    if (text.match(/New Patient/)){
+      //clearFields
+        var fields = [
         "identifier",
         "gender",
         "given_name",
@@ -115,26 +107,55 @@ end -%>
         "cell_phone_number",
         "national_id"
       ]
+      for (k = 0; k < fields.length; k ++){
+        try{
+          __$(fields[k]).value = "";
+          __$(fields[k]).removeAttribute("name");
+      }catch(e){
+
+        }
+      }
+       createControlAndAssignValue("given_name", "person[names][given_name]", "<%= params[:given_name] %>");
+       createControlAndAssignValue("family_name", "person[names][family_name]", "<%= params[:family_name] %>");
+       createControlAndAssignValue("gender", "person[gender]", "<%=  params[:gender]%>");
+    }
+
+    if(pos && (person_id == 0) && !text.match(/New Patient/)){
+      document.forms[0].action = "select";
+      __$('nextButton').onmousedown = function(){
+        document.forms[0].submit();
+      }
+
+      clearFields();
+
+      pos = parseInt(pos);
+      var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
       createControlAndAssignValue("remote", "remote", "true");
 
-      <%(@search_results).each do |npid,data| %>
-          createControlAndAssignValue("gender", "person[gender]","<%=data.sex%>");
-          createControlAndAssignValue("given_name", "person[names][given_name]","<%=data.name.split(' ')[0]%>");
-          createControlAndAssignValue("family_name", "person[names][family_name]","<%=data.name.split(' ')[1]%>")
-          createControlAndAssignValue("address2", "person[addresses][address2]","<%=data.current_residence%>")
-          createControlAndAssignValue("person_birth_year", "person[birth_year]","<%=data.birthdate.year%>")
-          createControlAndAssignValue("person_birth_month", "person[birth_month]","<%=data.birthdate.month%>")
-          createControlAndAssignValue("person_birth_day", "person[birth_day]","<%=data.birthdate.day%>")
-          createControlAndAssignValue("birthdate_estimated", "person[birthdate_estimated]", "<%=data.birthdate_estimated%>");
-          createControlAndAssignValue("state_province", "person[addresses][state_province]","<%=data.home_district.squish rescue nil-%>")
-          createControlAndAssignValue("city_village", "person[addresses][city_village]","<%=data.current_residence%>")
-          createControlAndAssignValue("county_district", "person[addresses][county_district]","<%=data.traditional_authority%>")
-          createControlAndAssignValue("occupation", "person[occupation]","<%=data.occupation%>")
-          createControlAndAssignValue("national_id", "person[patient][identifiers][National id]","<%=data.national_id%>")
-      <%end%>
+      if (selected_person){
+        createControlAndAssignValue("gender", "person[gender]",selected_person[pos+1]["Gender"]);
+        createControlAndAssignValue("given_name", "person[names][given_name]",selected_person[pos+1]["Name"].split(' ')[0]);
+        createControlAndAssignValue("family_name", "person[names][family_name]",selected_person[pos+1]["Name"].split(' ')[1])
+        createControlAndAssignValue("address2", "person[addresses][city_village]",selected_person[pos+1]["Current Residence"])
+        createControlAndAssignValue("person_birth_year", "person[birth_year]",selected_person[pos+1]["Year"])
+        try{
+          createControlAndAssignValue("person_birth_month", "person[birth_month]",months.indexOf(selected_person[pos+1]["Month"]) + 1 );
+        }
+        catch(e){
+          createControlAndAssignValue("person_birth_month", "person[birth_month]","");
+        }
+        createControlAndAssignValue("person_birth_day", "person[birth_day]",selected_person[pos+1]["Day"])
+        createControlAndAssignValue("birthdate_estimated", "person[birthdate_estimated]", selected_person[pos+1]["Birthdate Estimated"]);
+        createControlAndAssignValue("home_district", "person[addresses][address2]",selected_person[pos+1]["Home District"])
+        createControlAndAssignValue("county_district", "person[addresses][county_district]",selected_person[pos+1]["Ancestral Traditional Authority(T/A)"])
+        createControlAndAssignValue("occupation", "person[occupation]",selected_person[pos+1]["Occupation"])
+        createControlAndAssignValue("national_id", "person[patient][identifiers][National id]",selected_person[pos+1]["Patient National ID"]);
+       }
+
     } else {
       document.forms[0].action = "select";
+         clearFields();
       __$('nextButton').onmousedown = function(){
         gotoNextPage();
       }
@@ -144,7 +165,11 @@ end -%>
         pos = parseInt(pos) + 1;
         $('identifier').value = people[pos]['Patient National ID'];
       }catch(e){
-        $('identifier').value = null;
+        if(!pos && text.match(/New Patient/)){
+          $('identifier').value = "<%=params[:identifier]%>";
+        }else{
+          $('identifier').value = null;
+        }
       }
     }
   }
@@ -223,6 +248,7 @@ end -%>
     i = -1;
     <%(@patients).each do |data| %>
       i++
+
       people.push({});
 
       people[pos]["Name"] = "<%=data.name.squish rescue nil%>"
@@ -231,7 +257,26 @@ end -%>
 
       people[pos]["Birthdate"] = "<%=data.birth_date.squish rescue nil%>"
 
+      people[pos]["Year"] = "<%=data.birth_date.to_date.year rescue " " %>";
+      if(people[pos]["Year"] == " " ){
+        people[pos]["Year"] =  people[pos]["Birthdate"].split('/')[2].replace("??","");
+      }
+
+      people[pos]["Month"] = "<%=data.birth_date.to_date.strftime("%b") rescue "" %>";
+      if(people[pos]["Month"] == "" ){
+        people[pos]["Month"] =  people[pos]["Birthdate"].split('/')[1].replace("??","");
+      }
+
+      people[pos]["Day"] = "<%=data.birth_date.to_date.day rescue "" %>";
+      if(people[pos]["Day"] == " " ){
+        people[pos]["Day"] =  people[pos]["Birthdate"].split('/')[0].replace("??","");
+      }
+
       people[pos]["Age"] = "<%=data.age.squish rescue nil%>";
+
+      people[pos]["Occupation"] = "<%=data.occupation.squish rescue nil%>";
+
+      people[pos]["Birthdate Estimated"] = "<%=data.birthdate_estimated.squish rescue nil%>";
 
       people[pos]["Home District"] = "<%=data.home_district.squish rescue nil-%>"
 
@@ -253,12 +298,12 @@ end -%>
       }
       li.setAttribute("tag", ((i + 1)/2 > 0 ? "odd" : "even"));
       li.onmousedown = function(){
-        changeNextButtonText('Select Patient', this.getAttribute("pos"), <%=data.person_id%>);
+        changeNextButtonText('Select Patient', this.getAttribute("pos"), <%=data.person_id%>, people);
         updateTouchscreenInputForSelect(this);
         changeSummary(this.id);
       }
       li.onclick = function(){
-        changeNextButtonText('Select Patient', this.getAttribute("pos"), <%=data.person_id%>);
+        changeNextButtonText('Select Patient', this.getAttribute("pos"), <%=data.person_id%>,  people);
         updateTouchscreenInputForSelect(this);
         changeSummary(this.id);
       }
