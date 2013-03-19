@@ -287,7 +287,7 @@ class GenericPeopleController < ApplicationController
         person = Person.find(params[:person][:id])
         patient = DDEService::Patient.new(person.patient)
         patient_id = PatientService.get_patient_identifier(person.patient, "National id")
-        if patient_id.length != 6
+        if patient_id.length != 6 and create_from_dde_server
           patient.check_old_national_id(patient_id)
           print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
         end
