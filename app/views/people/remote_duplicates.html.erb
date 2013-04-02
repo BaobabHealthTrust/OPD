@@ -92,22 +92,7 @@ table{
   function postToSelect(national_id) {
     document.location = "/people/search?identifier=" + national_id;
   }
-
-  function selectByIdentifier(identifier) {
-    new_form = document.createElement("FORM");
-    new_form.setAttribute("type", "hidden");
-    document.body.appendChild(new_form);
-    new_form.method = "POST";
-
-    newElement = document.createElement("input");
-    newElement.setAttribute("name", "identifier");
-    newElement.setAttribute("type", "hidden");
-    newElement.value = identifier;
-    new_form.appendChild(newElement);
-    new_form.action = "/people/search";
-    new_form.submit();
-  }
-
+  
 </script>
 </head>
 
