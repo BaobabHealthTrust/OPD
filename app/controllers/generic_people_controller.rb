@@ -57,6 +57,7 @@ class GenericPeopleController < ApplicationController
   
 	def art_information
 		national_id = params["person"]["patient"]["identifiers"]["National id"] rescue nil
+    national_id = params["person"]["patient"] if national_id.blank? rescue nil
 		art_info = Patient.art_info_for_remote(national_id)
 		art_info = art_info_for_remote(national_id)
 		render :text => art_info.to_json
