@@ -57,6 +57,7 @@ class GenericPeopleController < ApplicationController
   
 	def art_information
 		national_id = params["person"]["patient"]["identifiers"]["National id"] rescue nil
+    national_id = params["person"]["patient"] if national_id.blank? rescue nil
 		art_info = Patient.art_info_for_remote(national_id)
 		art_info = art_info_for_remote(national_id)
 		render :text => art_info.to_json
@@ -125,93 +126,53 @@ class GenericPeopleController < ApplicationController
       national_id = data["person"]["value"] if national_id.blank? rescue nil
       national_id = data["npid"]["value"] if national_id.blank? rescue nil
       national_id = data["person"]["data"]["patient"]["identifiers"]["old_identification_number"] if national_id.blank? rescue nil
-      
+
       next if national_id.blank?
       results = PersonSearch.new(national_id)
       results.national_id = national_id
       results.current_residence =data["person"]["data"]["addresses"]["city_village"]
-      results.person_id = 0                                                     
-      results.home_district = data["person"]["data"]["addresses"]["state_province"]
+      results.person_id = 0
+      results.home_district = data["person"]["data"]["addresses"]["address2"]
       results.traditional_authority =  data["person"]["data"]["addresses"]["county_district"]
       results.name = data["person"]["data"]["names"]["given_name"] + " " + data["person"]["data"]["names"]["family_name"]
-      gender = data["person"]["data"]["gender"]                                 
-      results.occupation = data["person"]["data"]["occupation"]                 
-      results.sex = (gender == 'M' ? 'Male' : 'Female')                         
+      gender = data["person"]["data"]["gender"]
+      results.occupation = data["person"]["data"]["occupation"]
+      results.sex = (gender == 'M' ? 'Male' : 'Female')
       results.birthdate_estimated = (data["person"]["data"]["birthdate_estimated"]).to_i
       results.birth_date = birthdate_formatted((data["person"]["data"]["birthdate"]).to_date , results.birthdate_estimated)
-      results.birthdate = (data["person"]["data"]["birthdate"]).to_date         
+      results.birthdate = (data["person"]["data"]["birthdate"]).to_date
       results.age = cul_age(results.birthdate.to_date , results.birthdate_estimated)
-      @search_results[results.national_id] = results                            
+      @search_results[results.national_id] = results
     end if create_from_dde_server
 
-    (@people || []).each do | person |                                          
-      patient = PatientService.get_patient(person) rescue nil                   
-      next if patient.blank?                                                    
-      results = PersonSearch.new(patient.national_id || patient.patient_id)     
-      results.national_id = patient.national_id                                 
-      results.birth_date = patient.birth_date                                   
-      results.current_residence = patient.current_residence                     
-      results.guardian = patient.guardian                                       
-      results.person_id = patient.person_id                                     
-      results.home_district = patient.home_district                             
-      results.traditional_authority = patient.traditional_authority             
-      results.mothers_surname = patient.mothers_surname                         
-      results.dead = patient.dead                                               
-      results.arv_number = patient.arv_number                                   
-      results.eid_number = patient.eid_number                                   
-      results.pre_art_number = patient.pre_art_number                           
-      results.name = patient.name                                               
-      results.sex = patient.sex                                                 
-      results.age = patient.age                                                 
-      @search_results.delete_if{|x,y| x == results.national_id }                 
-      @patients << results                                                      
-    end                                                                          
+    (@people || []).each do | person |
+      patient = PatientService.get_patient(person) rescue nil
+      next if patient.blank?
+      results = PersonSearch.new(patient.national_id || patient.patient_id)
+      results.national_id = patient.national_id
+      results.birth_date = patient.birth_date
+      results.current_residence = patient.current_residence
+      results.guardian = patient.guardian
+      results.person_id = patient.person_id
+      results.home_district = patient.home_district
+      results.current_district = patient.current_district
+      results.traditional_authority = patient.traditional_authority
+      results.mothers_surname = patient.mothers_surname
+      results.dead = patient.dead
+      results.arv_number = patient.arv_number
+      results.eid_number = patient.eid_number
+      results.pre_art_number = patient.pre_art_number
+      results.name = patient.name
+      results.sex = patient.sex
+      results.age = patient.age
+      @search_results.delete_if{|x,y| x == results.national_id }
+      @patients << results
+    end
 
 		(@search_results || {}).each do | npid , data |
-			@patients << data 
+			@patients << data
 		end
 	end
-=begin  
-  def search
-		found_person = nil
-		if params[:identifier]
-			local_results = PatientService.search_by_identifier(params[:identifier])
-
-			if local_results.length > 1
-				@people = PatientService.person_search(params)
-			elsif local_results.length == 1
-				found_person = local_results.first
-			else
-				# TODO - figure out how to write a test for this
-				# This is sloppy - creating something as the result of a GET
-				if create_from_remote
-					found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
-					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
-				end
-			end
-			if found_person
-
-        patient = DDEService::Patient.new(found_person.patient)
-
-        patient.check_old_national_id(params[:identifier])
-
-				if params[:relation]
-					redirect_to search_complete_url(found_person.id, params[:relation]) and return
-				else
-					redirect_to :action => 'confirm', :found_person_id => found_person.id, :relation => params[:relation] and return
-				end
-			end
-		end
-		@relation = params[:relation]
-		@people = PatientService.person_search(params)
-		@patients = []
-		@people.each do | person |
-			patient = PatientService.get_patient(person) rescue nil
-			@patients << patient
-		end
-
-	end
-=end
 
   def search_from_dde
 		found_person = PatientService.person_search_from_dde(params)
@@ -327,7 +288,7 @@ class GenericPeopleController < ApplicationController
         person = Person.find(params[:person][:id])
         patient = DDEService::Patient.new(person.patient)
         patient_id = PatientService.get_patient_identifier(person.patient, "National id")
-        if patient_id.length != 6
+        if patient_id.length != 6 and create_from_dde_server
           patient.check_old_national_id(patient_id)
           print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
         end

@@ -117,16 +117,16 @@
       //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
         function newID(patient_id,national_id) {
-          document.location = "/people/remote_duplicates?patient_id=" + patient_id + "&identifier=" + national_id;
-        }
+    document.location = "/people/remote_duplicates?patient_id=" + patient_id + "&identifier=" + national_id;
+  }
 
-        function remoteNewID(patient_id,national_id) {
-          document.location = "/people/remote_duplicates?remote_person_id=" + patient_id + "&identifier=" + national_id;
-        }
+  function remoteNewID(patient_id,national_id) {
+    document.location = "/people/remote_duplicates?remote_person_id=" + patient_id + "&identifier=" + national_id;
+  }
 
-       function postToSelect(national_id) {
-          document.location = "/people/search?identifier=" + national_id;
-        }
+ function postToSelect(national_id) {
+    document.location = "/people/search?identifier=" + national_id;
+  }
 
 
     </script>
@@ -231,18 +231,6 @@
   var patient_sets = {}
   var total_id_hash_key = 0
   tt_cancel_destination = "/clinic";
-
-  function newID(patient_id) {
-    document.location = "/people/reassign_identifier?patient_id=" + patient_id;
-  }
-
-  function selectP(patient_id) {
-    document.location = "/patients/pdash?found_person_id=" + patient_id;
-  }
-
-  function assignNewID(person_id,remote){
-   document.location = "/people/reassign_identifier?person_id=" + person_id + "&remote="+ remote;
-  }
 
   function selectByIdentifier(identifier) {
     new_form = document.createElement("FORM");
