@@ -996,7 +996,8 @@ class GenericPatientsController < ApplicationController
     	alerts
    	else
    		alerts.reject! { |item| 
-   			item =~/^HIV/||item =~/^ART/||item =~/^CD4/
+   			#item =~/^HIV/||item =~/^ART/||item =~/^CD4/
+        item.match(/HIV/) || item.match(/ART/) || item.match(/CD4/)
    		}
  	alerts
     end
