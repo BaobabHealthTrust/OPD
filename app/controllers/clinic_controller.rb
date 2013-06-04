@@ -109,7 +109,7 @@ class ClinicController < GenericClinicController
       ["Ask social history questions", "/properties/creation?value=ask_social_history_questions"],
       ["Ask Life threatening questions", "/properties/creation?value=ask_life_threatening_condition_questions"],
       ["Ask triage category questions", "/properties/creation?value=ask_triage_category_questions"],
-      ["Ask vitals before diagnosis (kids)", "/properties/creation?value=ask_vitals_questions_before_diagnosis"],
+      ["Ask vitals before diagnosis (children)", "/properties/creation?value=ask_vitals_questions_before_diagnosis"],
       ["Ask social determinats questions", "/properties/creation?value=ask_social_determinants_questions"],
       ["Ask complaints under vitals", "/properties/creation?value=ask_complaints_under_vitals"],
       ["Ask complaints before diagnosis", "/properties/creation?value=ask_complaints_before_diagnosis"],
@@ -117,7 +117,7 @@ class ClinicController < GenericClinicController
       #["Use User Selected Task(s)", "/properties/creation?value=use_user_selected_activities"],
       #["Use Filing Numbers", "/properties/creation?value=use_filing_numbers"],
       ["Show Lab Results", "/properties/creation?value=show_lab_results"],
-      ["Show Column prescrp. interfeace", "/properties/creation?value=use_column_interface"],
+      ["show column prescription Interface", "/properties/creation?value=use_column_interface"],
       #["Set Appointment Limit", "/properties/set_appointment_limit"]
     ]
     render :layout => false
