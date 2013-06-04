@@ -64,7 +64,8 @@ class GenericProgramsController < ApplicationController
   def locations
     #@locations = Location.most_common_program_locations(params[:q] || '')
     if params[:transfer_type].blank? || params[:transfer_type].nil?
-        @locations = most_common_locations(params[:q] || '')
+        #@locations = most_common_locations(params[:q] || '')
+        @locations = most_common_locations_excluding_wards(params[:q] || '')
     else
         search = params[:q] || ''
         location_tag_id = LocationTag.find_by_name("#{params[:transfer_type]}").id
@@ -270,4 +271,11 @@ class GenericProgramsController < ApplicationController
        "%#{search}%"])).uniq
   end
 
+  def most_common_locations_excluding_wards(search)
+  location_tag_id = LocationTag.find_by_name("ward").id
+  ward_location_ids = LocationTagMap.find(:all,:conditions => ["location_tag_id = (?)",location_tag_id]).map{|e|e.location_id}
+  locations = Location.find(:all, :limit => 10, :conditions=>["location.retired = 0 AND location_id NOT IN (?) AND name LIKE ? AND name != ''", ward_location_ids, "#{search}%"])
+  locations.delete_if{|location|location.name.match(/^WARD/i)}
+  return locations
+  end
 end
