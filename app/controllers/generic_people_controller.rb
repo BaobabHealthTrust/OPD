@@ -427,7 +427,7 @@ class GenericPeopleController < ApplicationController
   def region
     region_conditions = ["name LIKE (?)", "#{params[:value]}%"]
 
-    regions = Region.find(:all,:conditions => region_conditions, :order => 'name')
+    regions = Region.find(:all,:conditions => region_conditions)
     regions = regions.map do |r|
       "<li value='#{r.name}'>#{r.name}</li>"
     end
