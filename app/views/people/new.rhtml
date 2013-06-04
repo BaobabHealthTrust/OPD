@@ -13,7 +13,6 @@
   #tt_page_month_of_birth .NoKeyboard {                                                     
     height: 40em !important;
   } 
-
 </style>
 
 <script>
@@ -160,7 +159,8 @@ function validateDate() {
       :allowFreeText => true,
       :condition => '$("middle_name").value == "" || skipped[tstCurrentPage] == 1',
       :tt_pageStyleClass => "azButton",
-      :tt_onLoad => 'seen(tstCurrentPage);' } if ask_middle_name %>
+      :tt_onLoad => "seen(tstCurrentPage);$('num').style.display='none'",
+      :tt_onUnLoad =>"$('num').style.display=''"} if ask_middle_name %>,
 
   <%= text_field_tag "person[birth_year]", nil, 
     { :helpText => 'Year of Birth',
