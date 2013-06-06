@@ -489,6 +489,8 @@
 			:helptext => 'Respiratory Rate (Breaths per Minute)',
 			:min => 8,
 			:max => 65,
+                        :tt_onLoad => "$('decimal').style.display='none'",
+                        :tt_onUnLoad => "$('decimal').style.display=''",
 			:condition => "getSelected().match(/RESPIRATORY\sRATE/i)",
 			:absoluteMin => 0,
 			:absoluteMax => 250,
