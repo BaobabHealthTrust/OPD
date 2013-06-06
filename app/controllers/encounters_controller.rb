@@ -79,6 +79,16 @@ class EncountersController < GenericEncountersController
     end
 
 
+    if (params[:encounter_type].humanize.upcase rescue '') == 'LAB ORDERS'
+        @blood = CoreService.get_global_property_value('blood').split(',') rescue nil
+        @csf = CoreService.get_global_property_value('csf').split(',') rescue nil
+        @urine = CoreService.get_global_property_value('urine').split(',') rescue nil
+        @aspirate = CoreService.get_global_property_value('aspirate').split(',') rescue nil
+        @sputum = CoreService.get_global_property_value('sputum').split(',') rescue nil
+        @stool = CoreService.get_global_property_value('stool').split(',') rescue nil
+        @swab = CoreService.get_global_property_value('swab').split(',') rescue nil
+    end
+
 		if (params[:encounter_type].upcase rescue '') == "ADMIT_PATIENT"
 			ipd_wards_tag = CoreService.get_global_property_value('ipd.wards.tag')
 			@ipd_wards = []
@@ -598,4 +608,63 @@ class EncountersController < GenericEncountersController
     render :text => result                                                      
   end
 
+  def created_nested_lab_orders
+     encounter = Encounter.new()
+     encounter.encounter_type = EncounterType.find_by_name("LAB ORDERS").id
+     encounter.patient_id = params['encounter']['patient_id']
+     encounter.encounter_datetime = session[:datetime]
+      if params[:filter] and !params[:filter][:provider].blank?
+        user_person_id = User.find_by_username(params[:filter][:provider]).person_id
+      else
+        user_person_id = User.find_by_user_id(params['encounter']['provider_id']).person_id
+      end rescue user_person_id = current_user.person.person_id
+      encounter.provider_id = user_person_id
+      encounter.save
+
+    (params[:lab_orders] || []).each do |order|
+          encounter_id = Encounter.find(:last, :order => 'encounter_id ASC').id
+		  if !order.blank?
+        multiple = order.match(/[:]/)
+        unless multiple.nil?
+          multiple_array = order.split(":")
+          parent_obs = {
+            "encounter_id" => "#{encounter_id}",
+            "patient_id" => params['encounter']['patient_id'],
+            "concept_name" => "Tests ordered".upcase,
+            "value_coded_or_text" => multiple_array[0],
+            "obs_datetime" => params['encounter']['encounter_datetime']
+          }
+
+          parent_obs = Observation.create(parent_obs)
+          obs_group = Observation.find(:first, :order => "obs_id DESC", :conditions => ["encounter_id =? AND concept_id =?", \
+                    encounter_id, parent_obs.concept_id])
+          obs_group_id = obs_group.id if obs_group
+          child_obs = {
+            "encounter_id" => "#{encounter_id}",
+            "patient_id" => params['encounter']['patient_id'],
+            "concept_name" => multiple_array[0],
+            "accession_number" => Observation.new_accession_number,
+            "value_coded_or_text" => multiple_array[1],
+            "obs_group_id" => "#{obs_group_id}",
+            "obs_datetime" => params['encounter']['encounter_datetime']
+          }
+         Observation.create(child_obs)
+        else
+          obs = {
+            "encounter_id" => "#{encounter.id}",
+            "patient_id" => params['encounter']['patient_id'],
+						"concept_name" => "Tests ordered".upcase,
+            "accession_number" => Observation.new_accession_number,
+						"value_coded_or_text" => order,
+						"obs_datetime" => params['encounter']['encounter_datetime']
+          }
+          Observation.create(obs)
+        end
+		  end
+
+    end
+   @patient_id = params[:encounter][:patient_id]
+   #redirect_to("/patients/show/#{@patient_id}")
+    redirect_to"/patients/print_lab_orders/?patient_id=#{@patient_id}"
+  end
 end
