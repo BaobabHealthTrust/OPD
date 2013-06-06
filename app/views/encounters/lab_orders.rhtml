@@ -1,43 +1,15 @@
 <script type="text/javascript" language="javascript">
-  var tt_cancel_destination = "/patients/show?patient_id=<%= @patient.patient_id %>"
-  
-  function getSelected(){
-    var choices = "";
-
-    for(var o = 0; o < __$('tests').options.length; o++){
-      if(__$('tests').options[o].selected == true){
-        choices += __$('tests').options[o].innerHTML + " ";
-        if(__$('tests').options[o].innerHTML.match(/RADIOLOGY/i)) {
-        	__$('tests').options[o]=null;
-        }
-      }
-    }
-
-    return choices;
-  }
+  //var tt_cancel_destination = "/patients/show?patient_id=<%= @patient.patient_id %>"
+  var tt_cancel_destination = "/patients/investigations_dashboard/<%= @patient.patient_id %>"
 </script>
 <style type="text/css" media="screen">
   #space { display:inline; font-size:1.2em; }
-
-  #page0 {
-    height: 625px !important;
-  }
-
-  .inputFrameClass {
-    height: 510px !important;
-  }
-
-  .NoKeyboard .options {
-    height: 473px !important; 
-  }
-
-  .NoKeyboard .inputFrameClass {
-    height: 523px !important;
-  }
+  form{
+    display: block!important;
+}
 </style>
 
-  <form id='lab_tests' action="/encounters/create"
-        method='post'>
+  <form id='lab_tests' action="/encounters/created_nested_lab_orders" method='post'>
     <% default={
       :allowFreeText => 'false',
     } %>
@@ -50,38 +22,60 @@
     <%= hidden_field_tag "patient_identifier[patient_id]", @patient.id %>
     <%= hidden_field_tag "patient_identifier[identifier_type_name]", "LAB IDENTIFIER" %>
     <%= hidden_field_tag "patient_identifier[lab_id]", "LAB" %>
-	
-	<%
-    tests_to_request = Array.new()
-    if @patient_bean.age <15  
-      tests_to_request = concept_set_options("Lab tests for peads")
-    else 
-      tests_to_request = concept_set_options("Lab tests for adults")
-    end
-  %>
-    <%= touch_select_tag "TESTS ORDERED", @patient, tests_to_request, 
-    	{
-		    :multiple => true,
-		    :id => "tests",
-		    :tt_pageStyleclass => "LongListSelect",
-		    :helpText => "Select Tests of interest"
-    	}
-    %>
 
-	<%= touch_select_tag "TESTS ORDERED", @patient, tests_to_request = concept_set_options("List of Radiology tests"),
-		{
-			:id => "test_rad",
-			:multiple => true,
-    	:condition => "getSelected().match(/RADIOLOGY/i)",
-			:helpText => 'Select Radiology Test'
-		} %>
-		
-		<% if @retrospective %>
-			<p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
-			<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
-		<% else %>
-			<%= hidden_field_tag "filter[provider]", nil %>
-		<% end %>
+    <select style="width: 100%" id="multiple" class="multi" name="lab_orders[]" helptext="Select Lab orders" multiple="multiple" nested="true">
+          <option></option>
+
+          <optgroup id="blood_test" label="Blood Tests">
+            <% @blood.each do |test| %>
+              <option id="<%=test.squish%>" value="Blood:<%= test.squish %>"><%= test.squish %></option>
+            <% end %>
+          </optgroup>
+
+          <optgroup id="csf_test" label="CSF">
+            <% @csf.each do |test| %>
+              <option id="<%=test.squish%>" value="CSF:<%= test.squish %>"><%= test.squish %></option>
+            <% end %>
+          </optgroup>
+
+          <optgroup id="urine_test" label="Urine">
+            <% @urine.each do |test| %>
+              <option id="<%=test.squish%>" value="Urine:<%= test.squish %>"><%= test.squish %></option>
+            <% end %>
+          </optgroup>
+
+          <optgroup id="aspirate_test" label="Aspirate">
+            <% @aspirate.each do |test| %>
+              <option id="<%=test.squish%>" value="Full aspirate analysis:<%= test.squish %>"><%= test.squish %></option>
+            <% end %>
+          </optgroup>
+
+          <optgroup id="sputum" label="Sputum">
+            <% @sputum.each do |test| %>
+              <option id="<%=test.squish%>" value="Sputum:<%= test.squish %>"><%= test.squish %></option>
+            <% end %>
+          </optgroup>
+
+          <optgroup id="stool" label="Stool">
+            <% @stool.each do |test| %>
+              <option id="<%=test.squish%>" value="Stool exam:<%= test.squish %>"><%= test.squish %></option>
+            <% end %>
+          </optgroup>
+
+          <optgroup id="fbc" label="Swab">
+            <% @swab.each do |test| %>
+              <option id="<%=test.squish%>" value="Swab sample:<%= test.squish %>"><%= test.squish %></option>
+            <% end %>
+          </optgroup>
+
+        </select>
+    
+    <% if @retrospective %>
+            <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+            <%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+    <% else %>
+            <%= hidden_field_tag "filter[provider]", nil %>
+    <% end %>
 
     <%= submit_tag "Finish" %>
   </form>
