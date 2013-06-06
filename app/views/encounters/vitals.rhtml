@@ -502,6 +502,8 @@
 		{	:id => "systolic_blood_pressure",
 			:helptext => "Systolic Blood Pressure (?/Y)",
 			:field_type => "number",
+                        :absoluteMin => 50,
+			:absoluteMax => 240,
 			:tt_pageStyleClass => "NumbersWithUnknown",
 			:tt_onLoad => "timedEvent = setTimeout('calculateBP(1)', 100);",
 			:tt_onUnLoad => "clearTimeout(timedEvent);",
@@ -517,8 +519,8 @@
 			:tt_onLoad => "timedEvent = setTimeout('calculateBP(2)', 100);",
 			:tt_onUnLoad => "clearTimeout(timedEvent);",
 			:condition => "getSelected().match(/BLOOD\sPRESSURE/i)",
-			:absoluteMin => 0,
-			:max => 180 } %>
+			:absoluteMin => 35,
+			:absoluteMax  => 140 } %>
 
 	<%= touch_text_field_tag "PULSE", @patient, nil,
 		{	:id => "pulse",
