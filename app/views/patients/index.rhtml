@@ -80,8 +80,13 @@
 					</select>
 			
 					<select id="navigation_links">
-						<option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Outcomes</option>
-						<!--<% if show_lab_results %>
+                                          <% if @show_tasks_button == true%>
+                                          
+                                            <option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Tasks</option>
+                                          <% else %>
+                                            <option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Outcomes</option>
+                                          <% end %>
+                                                <!--<% if show_lab_results %>
 						<option link="/lab/results/<%=@patient.id -%>">Lab results</option>
 						<%end%>-->
             <!--<option link='/patients/programs_dashboard/<%= @patient.id %>'>Programs</option>-->
