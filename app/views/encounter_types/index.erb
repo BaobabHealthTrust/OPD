@@ -18,7 +18,7 @@
 </script>
 <form action="/encounter_types/show">
   <%= hidden_field_tag "patient_id", params[:patient_id] %>
-  <label for="encounter_type">Select Outcome</label>
+  <label for="encounter_type">Select Task</label>
   <select name="encounter_type" id="encounter_type">
     <% @available_encounter_types.each do |encounter_type| %>
       <% if encounter_type.upcase.include?('HIV') %>
