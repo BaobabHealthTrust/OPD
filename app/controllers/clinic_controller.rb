@@ -118,6 +118,7 @@ class ClinicController < GenericClinicController
       #["Use Filing Numbers", "/properties/creation?value=use_filing_numbers"],
       ["Show Lab Results", "/properties/creation?value=show_lab_results"],
       ["show column prescription Interface", "/properties/creation?value=use_column_interface"],
+      ["show Tasks button on patient dashboard", "/properties/creation?value=show_tasks_button"]
       #["Set Appointment Limit", "/properties/set_appointment_limit"]
     ]
     render :layout => false
