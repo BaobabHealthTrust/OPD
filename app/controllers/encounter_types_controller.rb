@@ -4,8 +4,15 @@ class EncounterTypesController < GenericEncounterTypesController
   #raise current_user_roles.to_yaml
     role_privileges = RolePrivilege.find(:all,:conditions => ["role IN (?)", current_user_roles])
     privileges = role_privileges.each.map{ |role_privilege_pair| role_privilege_pair["privilege"].humanize }
- 
-    @encounter_privilege_map = CoreService.get_global_property_value("encounter_privilege_map").to_s rescue ''
+
+    @show_tasks_button = CoreService.get_global_property_value('show.tasks.button').to_s == "true" rescue false
+
+    if @show_tasks_button
+      @encounter_privilege_map = CoreService.get_global_property_value("encounter_privilege_map").to_s rescue ''
+    else
+      @encounter_privilege_map = CoreService.get_global_property_value("outcome_privilege_map").to_s rescue ''
+    end
+
     @encounter_privilege_map = @encounter_privilege_map.split(",")
     @encounter_privilege_hash = {}
 
