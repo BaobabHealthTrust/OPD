@@ -1,11 +1,11 @@
 <style>
 
 #tt_page_select_vital_signs .inputFrameClass {                    
-  height: 495px;                                                          
+  height: 560px;                                                          
 }                                                                         
                                                               
 #tt_page_select_vital_signs .options {                            
-  height: 19em;                                                           
+  height: 21.9em;                                                           
 }     
 
 #tt_page_life_threatening_condition .inputFrameClass {
@@ -126,6 +126,9 @@
    function showSelectedConditions() {                                                      
       var conditions = [];
 
+      if ($('avpu').value.length > 0)
+        conditions.push("AVPU: " + $('avpu').value);
+
       if ($('weight').value.length > 0)
         conditions.push("Weight: " + $('weight').value);
 
@@ -216,6 +219,13 @@
 
     function triage() {
 
+      if ($('avpu').value.length > 0) {
+        avpu = $('avpu').value;
+        if (avpu =='Unresponsive') {
+          return 'EMERGENCY'
+        }
+      }
+
       if ($('temperature').value.length > 0) {
         temp = parseFloat($('temperature').value);
         if (temp > 40 || temp < 34) {
@@ -275,6 +285,13 @@
      
       /*  ..................... */
 
+
+      if ($('avpu').value.length > 0) {
+        avpu = $('avpu').value;
+        if (avpu =='Voice' || avpu == 'Generalised body Pains') {
+          return 'PRIORITY'
+        }
+      }
 
 
       if ($('temperature').value.length > 0) {
@@ -461,14 +478,21 @@
 	<%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
   <%
-    vital_signs = ["","Temperature","Respiratory Rate","Blood Pressure", 
+    vital_signs = ["","Temperature","Respiratory Rate","Blood Pressure","AVPU", 
     "Pulse Rate", "Weight", "Height","Oxygen Saturation","Presenting complaints"]
   %>
 
-	<%= select_tag "choice", options_for_select(vital_signs), 
+	<%= select_tag "choice", options_for_select(vital_signs.sort), 
 		{	:helpText => 'Select vital signs', 
 			:id => "choice", 
 			:multiple => true } %>
+
+  <%= touch_select_tag "AVPU", @patient, concept_set_options('AVPU'),
+    {
+    :helpText => 'AVPU',
+    :id => 'avpu',
+    :condition => "getSelected().match(/AVPU/i)"
+  } %>
 
 	<%= touch_text_field_tag "TEMPERATURE (C)", @patient, nil,
 		{	:id => "temperature",
