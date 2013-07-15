@@ -20,7 +20,8 @@ class PeopleController < GenericPeopleController
 	  @patient_bean = PatientService.get_patient(@person)
     render :layout => false
   end
- 
+
+=begin 
   def create
     success = false
     Person.session_datetime = session[:datetime].to_date rescue Date.today
@@ -94,5 +95,7 @@ class PeopleController < GenericPeopleController
       redirect_to :action => "index"
     end
   end
+=end
+
 end
  

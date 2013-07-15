@@ -101,11 +101,8 @@ class ClinicController < GenericClinicController
 
   def properties_tab
     @settings = [
-      #["Set Clinic Days","/properties/clinic_days"],
-      #["View Clinic Holidays","/properties/clinic_holidays"],
-      #["Set Clinic Holidays","/properties/set_clinic_holidays"],
-      #["Set Site Code", "/properties/site_code"],
       ["Manage Roles", "/properties/set_role_privileges"],
+      ["Confirm patient creation", "/properties/creation?value=confirm_before_creating_a_patient"],
       ["Ask social history questions", "/properties/creation?value=ask_social_history_questions"],
       ["Ask Life threatening questions", "/properties/creation?value=ask_life_threatening_condition_questions"],
       ["Ask triage category questions", "/properties/creation?value=ask_triage_category_questions"],
@@ -113,13 +110,9 @@ class ClinicController < GenericClinicController
       ["Ask social determinats questions", "/properties/creation?value=ask_social_determinants_questions"],
       ["Ask complaints under vitals", "/properties/creation?value=ask_complaints_under_vitals"],
       ["Ask complaints before diagnosis", "/properties/creation?value=ask_complaints_before_diagnosis"],
-      #["Use Extended Staging Format", "/properties/creation?value=use_extended_staging_format"],
-      #["Use User Selected Task(s)", "/properties/creation?value=use_user_selected_activities"],
-      #["Use Filing Numbers", "/properties/creation?value=use_filing_numbers"],
       ["Show Lab Results", "/properties/creation?value=show_lab_results"],
       ["show column prescription Interface", "/properties/creation?value=use_column_interface"],
       ["show Tasks button on patient dashboard", "/properties/creation?value=show_tasks_button"]
-      #["Set Appointment Limit", "/properties/set_appointment_limit"]
     ]
     render :layout => false
   end

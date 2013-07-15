@@ -1,0 +1,174 @@
+<style>
+.header {
+  margin: 5px;
+  border-style: solid;
+  border-width: 0px 0px 1px 0px;
+}
+
+.suggestion_results {
+  margin: 5px;
+  border-style: solid;
+  border-width: 0px 0px 1px 0px;
+ }
+
+ .suggestion_results a {
+  -moz-text-blink: none;
+  -moz-text-decoration-color: -moz-use-text-color;
+  -moz-text-decoration-line: none;
+  -moz-text-decoration-style: solid;
+  background-color: grey;
+  border-bottom-color: rgb(238, 238, 238);
+  border-bottom-style: outset;
+  border-bottom-width: 1px;
+  border-left-style-ltr-source: physical;
+  border-left-style-rtl-source: physical;
+  border-left-style-value: outset;
+  border-right-style-ltr-source: physical;
+  border-right-style-rtl-source: physical;
+  border-right-style-value: outset;
+  border-top-color: rgb(238, 238, 238);
+  border-top-style: outset;
+  border-top-width: 1px;
+  color: white;
+  display: block;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 16px;
+  padding-top: 10px;
+  text-align: center;
+}
+
+.suggestion-container {
+  overflow: auto; 
+  height: 61%;
+}
+
+.suggestions {
+  width: 100%;
+}
+
+.suggestions th {
+  padding-left: 5px;
+  text-align: left;
+}
+
+.suggestions td {
+  text-align: left;
+}
+
+.strip_lightgray {
+  /*background-color: lightgray;*/
+}
+
+.table-header {
+  text-align: left;
+}
+
+</style>
+
+<script>
+
+function selectPatient(person_id , national_id) {
+  if (parseInt(person_id) == 0 && national_id) {
+    document.location = "/people/search?identifier=" + national_id;
+  }else{
+    document.location = "/people/select?person[id]=" + person_id;
+  }
+}
+
+</script>
+
+<div class="header">
+  <h1>Existing people</h1>
+  <p>With similar demographics details&nbsp;(click to select)</p>
+</div>
+
+<br />
+
+<div class="suggestion-container">
+<%
+  color = 'white'
+  (@patients || []).each do |person|
+    if color == 'white'
+      color = 'lightgray'
+    else
+      color = 'white'
+    end
+%>
+<div class="suggestion_results">
+  <a href="javascript:selectPatient('<%=person.person_id%>','<%=person.national_id%>');">
+  <table class="suggestions strip_<%=color%>">
+    <tr>
+      <th>Name:</th><td><%=person.name%>&nbsp;(<%=person.sex == 'Female'? 'F' : 'M'%>)</td>
+      <th>Birthdate:</th><td><%=person.birth_date%></td>
+    </tr>
+    <tr>
+      <th>TA:</th><td><%=person.traditional_authority%></td>
+      <th>Home district:</th><td><%=person.home_district%></td>
+    </tr>
+    <tr>
+      <th>Home village:</th><td><%=person.neighborhood_cell%></td>
+      <th>Current residence:</th><td><%=person.current_residence%></td>
+    </tr>
+  </table></a>
+</div>
+<%end%>
+
+</div>
+
+<%
+  paramz = params[:user_entered_params]
+%>
+
+<script>
+
+
+function setAttributes() {
+  var finishButton = document.getElementById("finishButton");
+  finishButton.innerHTML = "<span>Continue</span>";
+  finishButton.setAttribute("onclick","submitUserEnteredParams();")
+}
+
+function submitUserEnteredParams() {
+  submitForm = document.createElement("FORM");                                
+  submitForm.setAttribute("type","hidden");                                   
+  document.body.appendChild(submitForm);                                      
+  submitForm.method = "POST"; 
+  submitForm.action= "/people/create";
+
+  
+  createElements(submitForm , "person[names][given_name]",  "<%= paramz[:person][:names]['given_name'] %>");
+  createElements(submitForm , "person[names][family_name]",  "<%= paramz[:person][:names]['family_name'] %>");
+  createElements(submitForm , "person[gender]",  "<%= paramz[:person][:gender] %>");
+  createElements(submitForm , "person[names][middle_name]", "<%= paramz[:person][:names]['middle_name'] %>");
+  createElements(submitForm , "person[birth_year]", "<%= paramz[:person]['birth_year'] %>");
+  createElements(submitForm , "person[birth_month]", "<%= paramz[:person]['birth_month'] %>");
+  createElements(submitForm , "person[age_estimate]", "<%= paramz[:person]['age_estimate'] %>");
+  createElements(submitForm , "person[birth_day]", "<%= paramz[:person]['birth_day'] %>");
+  createElements(submitForm , "person[addresses][address2]", "<%= paramz[:person][:addresses]['address2'] %>");
+  createElements(submitForm , "person[addresses][county_district]", "<%= paramz[:person][:addresses]['county_district'] %>");
+  createElements(submitForm , "person[addresses][neighborhood_cell]", "<%= paramz[:person][:addresses]['neighborhood_cell'] %>");
+  createElements(submitForm , "person[addresses][state_province]", '');
+  createElements(submitForm , "person[addresses][city_village]", "<%= paramz[:person][:addresses]['city_village'] %>");
+  createElements(submitForm , "person[addresses][address1]", "<%= paramz[:person][:addresses]['address1'] %>");
+  createElements(submitForm , "person[cell_phone_number]", "<%= paramz[:person]['cell_phone_number'] %>");
+  createElements(submitForm , "person[office_phone_number]", "<%= paramz[:person]['office_phone_number'] %>");
+  createElements(submitForm , "person[home_phone_number]", "<%= paramz[:person]['home_phone_number'] %>");
+  createElements(submitForm , "person[occupation]" , "<%= paramz[:person]['occupation'] %>");
+
+  createElements(submitForm , "person[patient]", "");
+  createElements(submitForm , "force_create", "true");
+
+  submitForm.submit();
+}
+
+function createElements(submitForm , name , value) {
+  newElement = document.createElement("input")                                
+  newElement.setAttribute("name", name )                              
+  newElement.setAttribute("type","hidden");                                   
+  newElement.value = value;                                    
+  submitForm.appendChild(newElement);
+}
+
+setTimeout("setAttributes();",200);
+</script>
