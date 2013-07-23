@@ -15,7 +15,7 @@ Enter into the root of your application by typing "cd OPD"
 Type "cp config/application.yml.example config/application.yml"
 Type "cp config/database.yml.example config/database.yml"
 Note: Open config/database.yml and edit the file. Provide any database name to be used in your application. Do not forget to provide mysql password in the same file.
-Type "script/runner script/initial_database_setup.sh development mpc". Please be patient while the script is running. This may take some time.
+Type "script/initial_database_setup.sh development mpc". Please be patient while the script is running. This may take some time.
 Type "script/runner script/load_user_activation_table.rb" This script is for activating users.
 Type "sudo bundle install"
 After completing the above steps, you may now run the application by typing "script/server"
