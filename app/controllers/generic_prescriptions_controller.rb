@@ -322,4 +322,16 @@ class GenericPrescriptionsController < ApplicationController
 		end
 
 	end
+
+  def simple_prescription
+    @generics = MedicationService.generic
+    render:layout => "application"
+  end
+
+  def drug_formulations
+    concept_id = params[:concept_id]
+    drugs = Drug.find(:all, :conditions => ["concept_id =?", concept_id])
+    sub_drugs = drugs.collect{|drug|[drug.name]}
+    render :text => "<li></li><li>" + sub_drugs.join("</li><li>") + "</li>"
+  end
 end
