@@ -1,0 +1,66 @@
+<script>
+  //var tt_cancel_destination = "/patients/show/<%#= @patient.patient_id %>"
+
+function set_ajaxURL_for_suggestions(value) {
+    url = "/prescriptions/sub_drugs?concept_id=" + value
+    $('touchscreenInput'+tstCurrentPage).setAttribute('ajaxURL', url);
+    listSuggestions(tstCurrentPage);
+  }
+</script>
+
+<form  action="" method='post'>
+
+ <%= select_tag "drugs[]", options_for_select(@generics),
+          {
+            :helpText => 'Select Drug Prescribed',
+            :id => "drug"
+          } %>
+ <%= select_tag "sub_drugs[]",options_for_select([]),{
+            :helpText => 'Select Drug Formulation',
+            :tt_onLoad => "set_ajaxURL_for_suggestions(document.getElementById('drug').value);",
+            :id => "sub_drug"
+
+            }%>
+  <%= select_tag "continue", options_for_select(['','yes','no']),
+          {
+            :helpText => 'Continue prescribing drugs?',
+            :id => "continue"
+          } %>
+  <% counter = 0
+     max_counter = 3
+  %>
+  <% max_counter.times do %>
+  <% counter += 1 %>
+  <%= select_tag "drugs[]", options_for_select(@generics),
+          {
+            :helpText => 'Select Drug Prescribed',
+            :id => "drug_#{counter}",
+            :condition => "checkResponse() == 'yes'"
+            
+          } %>
+  <%= select_tag "sub_drugs[]",options_for_select([]),{
+            :helpText => 'Select Drug Formulation',
+            :condition => "checkResponse() == 'yes'",
+            :tt_onLoad => "set_ajaxURL_for_suggestions(document.getElementById('drug_#{counter}').value);",
+
+            }%>
+  <%= select_tag "continue", options_for_select(['','yes','no']),
+          {
+            :helpText => 'Continue prescribing drugs?',
+            :condition => "checkResponse() == 'yes'; #{counter} != #{max_counter} "
+          } %>
+   <% end %>
+</form>
+<script>
+  function checkResponse(){
+    questions = document.getElementsByName('continue')
+    value = ""
+    for(var i = questions.length - 1; i >= 0; i -= 1){
+      value = questions[i].value
+      if (value != '') break
+    }
+    
+   return value;
+  }
+
+</script>
