@@ -128,7 +128,8 @@ class PatientsController < GenericPatientsController
 		@reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
 		@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
     @show_tasks_button = CoreService.get_global_property_value('show.tasks.button').to_s == "true" rescue false
-		render :template => 'patients/index', :layout => false
+		@point_of_care = CoreService.get_global_property_value('point_of_care')
+    render :template => 'patients/index', :layout => false
 	end
 
 	def personal
