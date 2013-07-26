@@ -112,7 +112,8 @@ class ClinicController < GenericClinicController
       ["Ask complaints before diagnosis", "/properties/creation?value=ask_complaints_before_diagnosis"],
       ["Show Lab Results", "/properties/creation?value=show_lab_results"],
       ["show column prescription Interface", "/properties/creation?value=use_column_interface"],
-      ["show Tasks button on patient dashboard", "/properties/creation?value=show_tasks_button"]
+      ["show Tasks button on patient dashboard", "/properties/creation?value=show_tasks_button"],
+      ["Point of care system?", "/properties/creation?value=point_of_care_system"]
     ]
     render :layout => false
   end
