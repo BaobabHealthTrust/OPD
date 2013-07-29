@@ -8,59 +8,47 @@ function set_ajaxURL_for_suggestions(value) {
   }
 </script>
 
-<form  action="" method='post'>
+<form  action="create_simple_prescription" method='post'>
+  <%= text_field_tag "generic[]", "", {
+    :ajaxURL => "/prescriptions/drug_formulations?search_string=",
+    :helpText => "Select Drug"}%>
 
- <%= select_tag "drugs[]", options_for_select(@generics),
-          {
-            :helpText => 'Select Drug Prescribed',
-            :id => "drug"
-          } %>
- <%= select_tag "sub_drugs[]",options_for_select([]),{
-            :helpText => 'Select Drug Formulation',
-            :tt_onLoad => "set_ajaxURL_for_suggestions(document.getElementById('drug').value);",
-            :id => "sub_drug"
-
-            }%>
-  <%= select_tag "continue", options_for_select(['','yes','no']),
-          {
-            :helpText => 'Continue prescribing drugs?',
-            :id => "continue"
-          } %>
-  <% counter = 0
+  <%= text_field_tag "generic[]", "", {
+    :id => "optional_drug",
+    :ajaxURL => "/prescriptions/drug_formulations?search_string=",
+    :optional => "true",
+    :helpText => "Select Drug"}%>
+  <% 
      max_counter = 3
+     counter = 0
   %>
   <% max_counter.times do %>
-  <% counter += 1 %>
-  <%= select_tag "drugs[]", options_for_select(@generics),
-          {
-            :helpText => 'Select Drug Prescribed',
-            :id => "drug_#{counter}",
-            :condition => "checkResponse() == 'yes'"
-            
-          } %>
-  <%= select_tag "sub_drugs[]",options_for_select([]),{
-            :helpText => 'Select Drug Formulation',
-            :condition => "checkResponse() == 'yes'",
-            :tt_onLoad => "set_ajaxURL_for_suggestions(document.getElementById('drug_#{counter}').value);",
+  <% counter +=1 %>
+  <%= text_field_tag "generic[]", nil, {
+    :id =>"#{counter}",
+    :optional => "true",
+    :ajaxURL => "/prescriptions/drug_formulations?search_string=",
+    :condition => "checkOptionalValue(#{counter}) == 'continue'",
+    :helpText => "Select Drug"}%>
 
-            }%>
-  <%= select_tag "continue", options_for_select(['','yes','no']),
-          {
-            :helpText => 'Continue prescribing drugs?',
-            :condition => "checkResponse() == 'yes'; #{counter} != #{max_counter} "
-          } %>
    <% end %>
 </form>
 <script>
-  function checkResponse(){
-    questions = document.getElementsByName('continue')
-    value = ""
-    for(var i = questions.length - 1; i >= 0; i -= 1){
-      value = questions[i].value
-      if (value != '') break
+  
+function checkOptionalValue(counter){
+  return_value = ""
+  if (counter == 1){
+    opt_value = document.getElementById('optional_drug')
+    if (opt_value.value != ''){
+      return_value = "continue"
+      }
     }
-    
-   return value;
+  else{
+    opt_value = document.getElementById(counter - 1)
+    if (opt_value.value != ''){
+      return_value = "continue"
+    }
   }
-
+  return return_value
+}
 </script>
