@@ -343,21 +343,22 @@ class GenericPrescriptionsController < ApplicationController
   end
 
   def create_simple_prescription
-    raise params.inspect
     generics = params[:generics].delete_if{|item|item == ""}
     patient_id = params[:patient_id]
-    concept_id = Concept.find_by_name('').id
+    concept_id = Concept.find_by_name('GIVEN DRUGS').id
     encounter = Encounter.new
-    encounter.encounter_type = EncounterType.find_by_name('').id
+    encounter.encounter_type = EncounterType.find_by_name('DRUGS GIVEN').id
     encounter.patient_id = patient_id
     encounter.encounter_datetime = session[:datetime]
-    #encounter.save
+    encounter.save
     generics.each do |drug|
      obs = Observation.new
      obs.person_id = encounter.patient_id
      obs.concept_id = concept_id
+     obs.obs_datetime = Time.now
      obs.encounter_id = encounter.id
      obs.value_drug = Drug.find_by_name(drug).id
+     obs.value_text = drug
      obs.save
     end
     redirect_to("/patients/show/#{patient_id}")
