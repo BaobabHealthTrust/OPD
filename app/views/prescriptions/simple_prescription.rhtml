@@ -1,5 +1,5 @@
 <script>
-  //var tt_cancel_destination = "/patients/show/<%#= @patient.patient_id %>"
+  var tt_cancel_destination = "/patients/show/<%= params[:patient_id] %>"
 
 function set_ajaxURL_for_suggestions(value) {
     url = "/prescriptions/drug_formulations?concept_id=" + value
@@ -9,11 +9,11 @@ function set_ajaxURL_for_suggestions(value) {
 </script>
 
 <form  action="create_simple_prescription" method='post'>
-  <%= text_field_tag "generic[]", "", {
+  <%= text_field_tag "generics[]", "", {
     :ajaxURL => "/prescriptions/drug_formulations?search_string=",
     :helpText => "Select Drug"}%>
 
-  <%= text_field_tag "generic[]", "", {
+  <%= text_field_tag "generics[]", "", {
     :id => "optional_drug",
     :ajaxURL => "/prescriptions/drug_formulations?search_string=",
     :optional => "true",
@@ -24,7 +24,7 @@ function set_ajaxURL_for_suggestions(value) {
   %>
   <% max_counter.times do %>
   <% counter +=1 %>
-  <%= text_field_tag "generic[]", nil, {
+  <%= text_field_tag "generics[]", nil, {
     :id =>"#{counter}",
     :optional => "true",
     :ajaxURL => "/prescriptions/drug_formulations?search_string=",
@@ -32,6 +32,7 @@ function set_ajaxURL_for_suggestions(value) {
     :helpText => "Select Drug"}%>
 
    <% end %>
+  <%= hidden_field_tag"patient_id", params[:patient_id] %>
 </form>
 <script>
   
