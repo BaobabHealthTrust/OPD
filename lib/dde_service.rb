@@ -625,5 +625,17 @@ module DDEService
     return PatientService.create_from_form(passed["person"])
   end
 
+  def self.create_footprint(national_id, location_name)
+    create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+    return unless create_from_dde_server
+    paramz = {:value => national_id, :workstation_location => location_name}
+    dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+    dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/create_footprint/"
+
+    return RestClient.post(uri,paramz)
+  end
+  
  end
 
