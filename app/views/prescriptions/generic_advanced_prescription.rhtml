@@ -99,4 +99,36 @@ url = url[url.index("/"), url.length - url.index("/")]
   </button-->
 </div>
 <script type="text/javascript" language="javascript">
+  function checkMissingData(){
+   if (Object.keys(selectedGenerics).length != 0)
+    for(var diagnosis in selectedGenerics){
+        for(var generic in selectedGenerics[diagnosis]){
+          drug = generic
+          dosage = selectedGenerics[diagnosis][generic]["dosage"];
+          frequency = selectedGenerics[diagnosis][generic]["frequency"];
+          duration = selectedGenerics[diagnosis][generic]["duration"];
+          if (oneIsEmpty(drug, dosage, frequency, duration)){
+            showMessage("Complete the missing fields to continue");
+          }
+          else
+            {
+              finishButton = document.getElementById('nextButton');
+              finishButton.setAttribute("onmousedown", "gotoNextPage();")
+            }
+        }
+    }
+    else{
+      showMessage("Complete the missing fields to continue");
+    }
+
+  }
+
+  function oneIsEmpty(drug, dosage, frequency, duration){
+    return (drug === null || dosage === null || frequency === null || duration === null);
+  }
+  function validateInput(){
+    finishButton = document.getElementById('nextButton');
+    finishButton.setAttribute("onmousedown", "checkMissingData();")
+  }
+  window.setTimeout("validateInput();", 100);
 </script>
