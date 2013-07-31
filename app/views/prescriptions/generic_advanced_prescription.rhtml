@@ -100,29 +100,32 @@ url = url[url.index("/"), url.length - url.index("/")]
 </div>
 <script type="text/javascript" language="javascript">
   function checkMissingData(){
-   if (Object.keys(selectedGenerics).length != 0)
-    for(var diagnosis in selectedGenerics){
-        for(var generic in selectedGenerics[diagnosis]){
-          drug = generic
-          dosage = selectedGenerics[diagnosis][generic]["dosage"];
-          frequency = selectedGenerics[diagnosis][generic]["frequency"];
-          duration = selectedGenerics[diagnosis][generic]["duration"];
-          if (oneIsEmpty(drug, dosage, frequency, duration)){
-            showMessage("Complete the missing fields to continue");
-          }
-          else
-            {
-              finishButton = document.getElementById('nextButton');
-              finishButton.setAttribute("onmousedown", "gotoNextPage();")
+   data = []
+   if (Object.keys(selectedGenerics).length == 0){
+     showMessage("Complete the missing fields to continue")
+   }
+   else
+   {
+      for(var diagnosis in selectedGenerics){
+          for(var generic in selectedGenerics[diagnosis]){
+            drug = generic
+            dosage = selectedGenerics[diagnosis][generic]["dosage"];
+            frequency = selectedGenerics[diagnosis][generic]["frequency"];
+            duration = selectedGenerics[diagnosis][generic]["duration"];
+            if (oneIsEmpty(drug, dosage, frequency, duration)){
+              data.push(drug)
             }
+          }
         }
-    }
-    else{
-      showMessage("Complete the missing fields to continue");
-    }
-
+      if (data.length > 0){
+        showMessage("Complete the missing fields to continue")
+      }
+      else{
+        removeGenerics();
+        document.forms[0].submit();
+      }
+   }
   }
-
   function oneIsEmpty(drug, dosage, frequency, duration){
     return (drug === null || dosage === null || frequency === null || duration === null);
   }
@@ -130,5 +133,5 @@ url = url[url.index("/"), url.length - url.index("/")]
     finishButton = document.getElementById('nextButton');
     finishButton.setAttribute("onmousedown", "checkMissingData();")
   }
-  window.setTimeout("validateInput();", 100);
+  window.setTimeout("validateInput();", 200);
 </script>
