@@ -127,7 +127,9 @@ url = url[url.index("/"), url.length - url.index("/")]
    }
   }
   function oneIsEmpty(drug, dosage, frequency, duration){
-    return (drug === null || dosage === null || frequency === null || duration === null);
+    return (drug === null || dosage === null || 
+      0===dosage.length || frequency === null || 0===frequency.length ||
+      duration === null || 0===duration.length);
   }
   function validateInput(){
     finishButton = document.getElementById('nextButton');
