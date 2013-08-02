@@ -38,6 +38,9 @@ h2{
   top: -1em;
   left: 14em;
 }
+table, h2{
+  -moz-user-select:none;
+}
 </style>
 <div id="tab" style="margin-top:24px">
   <h2>Current patient statistics</h2>
@@ -49,7 +52,7 @@ h2{
          <th class="header" colspan="2"  style="color: #fff"><%= @user rescue 'Me'%></th>
          <th class="header" colspan="2"  style="color: #fff">Today</th>
       </tr>
-      <tr  " style="color: #fff; background-color: #666;">
+      <tr style="color: #fff; background-color: #666;">
         <th class="header" style="text-align:left;">Task Type</th>
         <!--<th><%= @user rescue 'Me'%></th>-->
          <th class="header">14 and below</th>
