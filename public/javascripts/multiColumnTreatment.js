@@ -46,12 +46,12 @@ function generateGenerics(){
     var parent_container = document.createElement("div");
     parent_container.id = "parent_container";
     parent_container.style.position = "absolute";
-    parent_container.style.marginLeft = "-500px";
+    //parent_container.style.marginLeft = "-500px";
     parent_container.style.marginTop = "-358px";
     parent_container.style.top = "50%";
-    parent_container.style.left = "50%";
+    parent_container.style.left = "0%";
     parent_container.style.height = "630px";
-    parent_container.style.width = "1000px";
+    parent_container.style.width = "99%";
     parent_container.style.overflow = "hidden";
     parent_container.style.zIndex = "20";
     parent_container.style.backgroundColor = "#FFFFFF";
@@ -72,8 +72,8 @@ function generateGenerics(){
     topBannerDiv.style.backgroundColor = "#fff";
     topBannerDiv.style.cssFloat = "left";
     //topBannerDiv.style.border = "1px solid #ccc";
-    topBannerDiv.style.paddingTop = "10px";
-    topBannerDiv.style.paddingLeft = "10px";
+    topBannerDiv.style.paddingTop = "-2px";
+    topBannerDiv.style.paddingLeft = "5px";
     topBannerDiv.innerHTML = "Select Treatment Details";
     topBannerDiv.style.fontSize = "1.8em";
 
@@ -115,19 +115,23 @@ function generateGenerics(){
     var inputTxt = document.createElement("input");
     inputTxt.type = "text";
     inputTxt.id = "inputTxt";
-    inputTxt.style.width = "100%";
+    inputTxt.style.width = "97.5%";
     inputTxt.style.fontSize = "1.8em";
     inputTxt.style.padding = "5px";
     inputTxt.style.backgroundColor = "#eee";
-    inputTxt.style.marginLeft = "5px";
+    //inputTxt.style.marginLeft = "5px";
+    inputTxt.style.left = "1%";
+    inputTxt.style.top = "7%";
+    inputTxt.style.position = "absolute";
 
     mainDiv.appendChild(inputTxt);
 
     var detailsDiv = document.createElement("div");
-    detailsDiv.style.width = "100%";
+    detailsDiv.style.position = "absolute";
+    detailsDiv.style.width = "98%";
     detailsDiv.style.height = "84%";
     detailsDiv.style.marginLeft = "4px";
-    detailsDiv.style.marginTop = "4px";
+    detailsDiv.style.marginTop = "86px";
     detailsDiv.style.backgroundColor = "#fff";
     detailsDiv.style.border = "1px solid #ccc";
     detailsDiv.style.padding = "5px";
