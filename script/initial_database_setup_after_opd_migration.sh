@@ -33,6 +33,7 @@ mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/malawi_regions.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/moh_regimens_only.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/user_schema_modifications.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/missing_tables.sql
+mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/pharmacy.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/update_concepts.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/load_location_tag_and_location_tag_map.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/create_dde_server_connection.sql
