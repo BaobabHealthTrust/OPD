@@ -4,18 +4,18 @@ INSERT INTO role VALUES ('System Developer','System Developers');
 INSERT INTO user_role VALUES (1, 'System Developer');
 
 #create person
-INSERT INTO person (person_id,gender, dead,creator,date_created)
-VALUES (1,'M',0,1,NOW());
+#INSERT INTO person (person_id,gender, dead,creator,date_created)
+#VALUES (1,'M',0,1,NOW());
 
 #Create Person Name
-INSERT INTO person_name(person_name_id,person_id,given_name,family_name,creator)
-VALUES (1,1,'Super','User',1);
+#INSERT INTO person_name(person_name_id,person_id,given_name,family_name,creator)
+#VALUES (1,1,'Super','User',1);
 
-#create user
-INSERT INTO users(user_id,username,password,salt,creator,date_created) VALUES (220,'admin',
-                  '4a1750c8607d0fa237de36c6305715c223415189','c788c6ad82a157b712392ca695dfcf2eed193d7f',
-                  1,NOW());
-
+/*create user
+#INSERT INTO users(user_id,username,password,salt,creator,date_created) VALUES (220,'admin',
+#                  '4a1750c8607d0fa237de36c6305715c223415189','c788c6ad82a157b712392ca695dfcf2eed193d7f',
+#                  1,NOW());
+*/
 #Add concept name tag map
 SET FOREIGN_KEY_CHECKS = 0;
 CREATE TABLE `concept_name_tag_map` (
