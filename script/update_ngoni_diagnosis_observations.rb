@@ -3,10 +3,10 @@
 # then change all the diagnosis encounter_type to outpatient diagnosis
 # update weight observations
 
-start_time = Time.now().strftime('%Y-%m-%d %H:%M:%S')
-puts "Start Time: #{start_time}"
+start_time = Time.now()
+puts "Start Time: #{start_time.strftime('%Y-%m-%d %H:%M:%S')}"
 logger = Logger.new(Rails.root.join("log",'update_diagnosis_observations.log'))
-logger.info "Start Time: #{start_time}"
+logger.info "Start Time: #{start_time.strftime('%Y-%m-%d %H:%M:%S')}"
 total_saved = 0
 total_not_saved = 0
 
@@ -64,9 +64,12 @@ normal_weight_obs.each do |ob|
   ob.save!
 end
 
-end_time = Time.now().strftime('%Y-%m-%d %H:%M:%S')
-logger.info "End Time : #{end_time}"
-puts "Start Time : #{end_time}\n\n"
+end_time = Time.now()
+full_time = end_time - start_time
+logger.info "End Time : #{end_time.strftime('%Y-%m-%d %H:%M:%S')}"
+puts "Start Time : #{end_time.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+puts "It took : #{full_time.strftime('%H hours %M minutes %S seconds')}"
+logger.info "It took : #{full_time.strftime('%H hours %M minutes %S seconds')}"
 logger.info "Total saved : #{total_saved}"
 logger.info "Total not saved : #{total_not_saved}"
 logger.info "Completed successfully !!"
