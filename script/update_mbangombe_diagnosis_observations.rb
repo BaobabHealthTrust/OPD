@@ -65,6 +65,22 @@ diagnosis_encounters.each do |aDiagnosis_encounter|
   aDiagnosis_encounter.save
 end
 
+
+
+referral_encounter_id = EncounterType.find_by_name('REFERRED').encounter_type_id
+outpatient_reception_id = EncounterType.find_by_name('OUTPATIENT RECEPTION').encounter_type_id
+
+#pull out all referral encounters that are not voided
+referal_encounters = Encounter.find_by_sql(" SELECT * FROM encounter
+                                               WHERE encounter_type = #{referral_encounter_id}
+                                               AND voided = 0 ")
+
+referal_encounters.each do |referal_encounter|
+  #change the diagnosis encounter_type_id to outpatient_diagnosis encounter_type_id
+  referal_encounter.encounter_type = outpatient_reception_id
+  referal_encounter.save
+end
+
 end_time = Time.now().strftime('%Y-%m-%d %H:%M:%S')
 #end_time = Time.now()
 
