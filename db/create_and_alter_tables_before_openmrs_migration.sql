@@ -2,6 +2,10 @@
 INSERT INTO role VALUES ('System Developer','System Developers');
 #add oligad as sd user.
 INSERT INTO user_role VALUES (1, 'System Developer');
+#add oligad as super_user
+INSERT INTO user_role VALUES (1, 'superuser');
+#add oligad as provider
+INSERT INTO user_role VALUES (1, 'provider');
 
 #create person
 #INSERT INTO person (person_id,gender, dead,creator,date_created)
