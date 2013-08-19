@@ -23,7 +23,6 @@ diagnosis_obs = Observation.find_by_sql("SELECT o.*, e.provider_id, e.form_id, e
                                          AND o.concept_id = #{diagnosis_concept_id}
                                          AND e.voided = 0
                                          AND o.voided = 0")
-
 diagnosis_obs.each do |diagnosis|
   
     #create the primary diagnosis
@@ -54,7 +53,6 @@ diagnosis_obs.each do |diagnosis|
         logger.info "Total unsaved => #{total_not_saved} concept => #{diagnosis.concept_id} obs_id => #{diagnosis.obs_id} encounter => #{diagnosis.encounter_id}"
       end
 end
-
 #updating referral encounters
 
 referred_encounter_type_id = EncounterType.find_by_name('REFERRED').encounter_type_id rescue 16
@@ -65,7 +63,7 @@ referred_to_hospital_concept_id = ConceptName.find_by_name('REFER TO OTHER HOSPI
 
 referral_hospital_concept_id = ConceptName.find_by_name('REFER TO CLINIC').concept_id
 
-referred_encounters = Encounter.find_by_encounter_type(referred_encounter_type_id)
+referred_encounters = Encounter.find_all_by_encounter_type(referred_encounter_type_id)
 
 referred_encounters.each do |encounter|
   encounter.encounter_type = referral_encounter_type_id
@@ -83,7 +81,7 @@ referred_obs = Observation.find_by_sql("SELECT o.*, e.provider_id, e.form_id, e.
 #updating referral observations
 referred_obs.each do |referred|
 
-    if referred.value_text
+    unless referred.value_text.blank?
         obs = {}
         obs[:concept_id] = referral_hospital_concept_id
         obs[:value_text] = referred.value_text
@@ -107,7 +105,6 @@ referred_obs.each do |referred|
       end
 end
 
-
 #update weight observations
 normal_weight_concept_id = ConceptName.find_by_name("Normal weight").concept_id
 weight_concept_id = ConceptName.find_by_name("Weight").concept_id
@@ -119,11 +116,8 @@ normal_weight_obs.each do |ob|
 end
 
 end_time = Time.now()
-full_time = end_time - start_time
 logger.info "End Time : #{end_time.strftime('%Y-%m-%d %H:%M:%S')}"
-puts "Start Time : #{end_time.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-puts "It took : #{full_time.strftime('%H hours %M minutes %S seconds')}"
-logger.info "It took : #{full_time.strftime('%H hours %M minutes %S seconds')}"
+puts "End Time : #{end_time.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
 logger.info "Total saved : #{total_saved}"
 logger.info "Total not saved : #{total_not_saved}"
 logger.info "Completed successfully !!"
