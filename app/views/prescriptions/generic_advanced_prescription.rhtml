@@ -135,5 +135,7 @@ url = url[url.index("/"), url.length - url.index("/")]
     finishButton = document.getElementById('nextButton');
     finishButton.setAttribute("onmousedown", "checkMissingData();")
   }
-  window.setTimeout("validateInput();", 200);
+  <% if @use_col_interface == "true" %>
+    window.setTimeout("validateInput();", 200);
+  <% end %>
 </script>
