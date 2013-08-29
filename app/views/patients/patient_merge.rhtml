@@ -1,227 +1,225 @@
 <head>
-   <%= javascript_include_tag "prototype" %>
-   <%= javascript_include_tag 'jquery' %>
-   <%= stylesheet_link_tag 'extra_buttons' %>
-	
-	<script>
-		function load (){
-			document.getElementById("finishButton").setAttribute("onclick", "window.location = '/clinic'")
-		}
+  <%= javascript_include_tag "prototype" %>
+  <%= javascript_include_tag 'jquery' %>
+  <%= stylesheet_link_tag 'extra_buttons' %>
+  <script src="/touchscreentoolkit/lib/javascripts/standard.js"></script>
+  <script>
+    function load (){
+      document.getElementById("finishButton").setAttribute("onclick", "window.location = '/clinic'")
+    }
 
-		setTimeout("load()",30);
-	</script>
+    setTimeout("load()",30);
+  </script>
 
   <script type="text/javascript">
 
-		function search_patient(type){
+    function search_patient(type){
 
-					var sec_id = document.getElementById("sec_pat_id").innerHTML;
-					var pri_id = document.getElementById("pri_pat_id").innerHTML;
-					window.location = "/patients/get_similar_patients?type=" + type+ "&pri_id=" + pri_id + "&sec_id="+sec_id ;
+      var sec_id = document.getElementById("sec_pat_id").innerHTML;
+      var pri_id = document.getElementById("pri_pat_id").innerHTML;
+      window.location = "/patients/get_similar_patients?type=" + type+ "&pri_id=" + pri_id + "&sec_id="+sec_id ;
 
-		}
+    }
 		
-		function merge()
-		{
-				var sec_id = document.getElementById("sec_pat_id").innerHTML;
-				var pri_id = document.getElementById("pri_pat_id").innerHTML;
+    function merge()
+    {
+      var sec_id = document.getElementById("sec_pat_id").innerHTML;
+      var pri_id = document.getElementById("pri_pat_id").innerHTML;
 
-				if ((pri_id == "") || (sec_id == ""))
-				{
-						showMessage("Please select primary and secondary patient");
-				}
-				else if (sec_id == pri_id)
-				{
-						showMessage("Unable to merge. Primary and Secondary patients must be different");
-						window.location = "/patients/patient_merge"
-				}
-				else
-				{
+      if ((pri_id == "") || (sec_id == ""))
+      {
+        showMessage("Please select primary and secondary patient");
+      }
+      else if (sec_id == pri_id)
+      {
+        showMessage("Unable to merge. Primary and Secondary patients must be different");
+        window.location = "/patients/patient_merge"
+      }
+      else
+      {
 					
-					var datastring = 'patient_ids='+ pri_id +"," +sec_id;
-					jQuery.ajax({
-							url:  "/patients/merge_patients",
-							type:"POST",
-							data: datastring,
-							success: function(){
-								showMessage("Patients successfully merged");
-								window.location = "/patients/patient_merge"
-							},
-							error: function(){
-								showMessage("Unable to merge patients");
-							}
+        var datastring = 'patient_ids='+ pri_id +"," +sec_id;
+        jQuery.ajax({
+          url:  "/patients/merge_patients",
+          type:"POST",
+          data: datastring,
+          success: function(){
+            showMessage("Patients successfully merged");
+            window.location = "/patients/patient_merge"
+          },
+          error: function(){
+            showMessage("Unable to merge patients");
+          }
 					
-					});
+        });
 					
-				}
+      }
 				
-		}
-	</script>
+    }
+  </script>
 
-   <style>
-     #content{
+  <style>
+    #content{
 
-     }
+    }
 
-      #backspace{
-        position:absolute;
-        left:100px;
-        bottom:2px;
-      }
+    #backspace{
+      position:absolute;
+      left:100px;
+      bottom:2px;
+    }
 
-      #Space{
-        position:absolute;
-        left:220px;
-        bottom:2px;
-        width:200px;
-      }
+    #Space{
+      position:absolute;
+      left:220px;
+      bottom:2px;
+      width:200px;
+    }
 
-      #clear{
-        position:absolute;
-        left:470px;
-        bottom:2px;
-      }
-       #num{
-        position:absolute;
-        left:470px;
-        bottom:2px;
-        width:200px;
-      }
-      #keypad{
-        background-color: #FFFFFF;
-        border: 2px solid #9999FF;
-        border-radius: 15px 15px 15px 15px;
-        display: none;
-        height: 304px;
-        padding: 5px;
-        position: absolute;
-        right: 13px;
-        top: 194px;
-        width: 672px;
-      }
+    #clear{
+      position:absolute;
+      left:470px;
+      bottom:2px;
+    }
+    #num{
+      position:absolute;
+      left:470px;
+      bottom:2px;
+      width:200px;
+    }
+    #keypad{
+      background-color: #FFFFFF;
+      border: 2px solid #9999FF;
+      border-radius: 15px 15px 15px 15px;
+      display: none;
+      height: 304px;
+      padding: 5px;
+      position: absolute;
+      right: 13px;
+      top: 194px;
+      width: 672px;
+    }
   </style>
 
-	<style>
-	
-		div{
-				-moz-user-select :none;
-		}
+  <style>
 
-		div.container{
-			border: 0.2em solid black;
-			border-radius:15px;
-			height :630px;
-		}
-	
-		a.button{
-			width: 200px;
-			height: 30px;
-			background-color: blue;
-		}
-	
-		caption.main{
-			font-size: 1.8em;
-			line-height:50px;
-		}
+    div{
+      -moz-user-select :none;
+    }
 
-		
-		caption.sub{
-			background-color:steelblue;
-			font-size: 1.5em;
-		}
-		tr.odd{
-			background: lightcyan;
-		  font-size: 1.2em;
-			border-width:0px;
-			cell-spacing:0px;
-			cell-padding:0px;
-			line-height: 35px;
-		}
-		tr.even{
-			background: lavender;
-		  font-size: 1.2em;
-	 		border-width:0px;
-	 		line-height: 35px;
-		}
-		
+    div.container{
+      border: 0.2em solid black;
+      border-radius:15px;
+      height :630px;
+    }
 
-	</style>
+    a.button{
+      width: 200px;
+      height: 30px;
+      background-color: blue;
+    }
+
+    caption.main{
+      font-size: 1.8em;
+      line-height:50px;
+    }
+
+
+    caption.sub{
+      background-color:steelblue;
+      font-size: 1.5em;
+    }
+    tr.odd{
+      background: lightcyan;
+      font-size: 1.2em;
+      border-width:0px;
+      cell-spacing:0px;
+      cell-padding:0px;
+      line-height: 35px;
+    }
+    tr.even{
+      background: lavender;
+      font-size: 1.2em;
+      border-width:0px;
+      line-height: 35px;
+    }
+
+
+  </style>
 
 </head>
 
 <body >
-	<br>
-	<table style = "width: 100%; height: 85%; ">
-	
-		<td width = 50%>
-				<div class= "container">
-					<table width = 100% >
-						<caption class= "main">Primary Patient <hr></caption>
-						<tr style = " line-height: 250px;">
-							<td><button class = "red" onclick = "search_patient('primary');"><span>&nbspFind Patient&nbsp</span> </button></td>
-						</tr>
-						<tr>
-							
-							<td colspan = 3>
+  <br>
+  <table style = "width: 100%; height: 85%; ">
 
-								<div style = " margin-top: 15px;border: 1px solid black; border-radius: 5px;">	
-									<table class = "demographics" width = 100%>
-										<caption class="sub"> Primary Patient Demographics</caption>
-										<tr class = "odd"><td>Name</td><td id= "pri_name" width = 300px><%=@values["pri_name"]%></td></tr>
-										<tr class = "even"><td>Gender</td><td id= "pri_sex"><%=@values["pri_gender"]%></td></tr>
-										<tr class = "odd"><td>Birthdate</td><td id= "pri_dob"><%=@values["pri_birthdate"]%></td></tr>
-										<tr class = "even"><td>Age</td><td id= "pri_age"><%= @values["pri_age"]%></td></tr>
-										<tr class = "odd"><td>Home District</td><td id= "pri_district"><%= @values["pri_district"]%></td></tr>
-										<tr class = "even"><td>Traditional Authority(TA)</td><td id= "pri_ta"><%= @values["pri_ta"]%></td></tr>
-										<tr class = "odd"><td>Current Residence</td><td id= "pri_residence"><%= @values["pri_residence"]%></td></tr>
-										<tr class = "even"><td>Patient National ID</td><td id= "pri_nat_id"><%= @values["pri_nat_id"]%></td></tr>
-										<tr style = "visibility :hidden;"><td>Patient ID</td><td id= "pri_pat_id"><%= @values["pri_pat_id"]%></td></tr>
-									</table>
-								</div>	
-							</td>
-						</tr>
-					</table>
-			</div>
-	
-		</td>
+    <td width = 50%>
+      <div class= "container">
+        <table width = 100% >
+          <caption class= "main">Primary Patient <hr></caption>
+          <tr style = " line-height: 250px;">
+            <td><button class = "blue" onclick = "search_patient('primary');"><span>&nbspFind Patient&nbsp</span> </button></td>
+          </tr>
+          <tr>
 
-		<td>
-				<div class= "container">
-					<table width = 100% >
-						<caption class= "main">Secondary Patient <hr></caption>
+            <td colspan = 3>
 
-						<tr style = " line-height: 100px;">
-								<td> <button class = "red" onclick = "search_patient('secondary');"><span>&nbspFind Patient&nbsp</span> </button></td><td></td>
-								<td align = "right"><button class = "red" onclick= "merge();"><span>&nbspMerge&nbsp</span></button></td>
-						</tr>
-						<tr>
-							
-							<td colspan = 3>
+              <div style = " margin-top: 15px;border: 1px solid black; border-radius: 5px;">
+                <table class = "demographics" width = 100%>
+                  <caption class="sub"> Primary Patient Demographics</caption>
+                  <tr class = "odd"><td>Name</td><td id= "pri_name" width = 300px><%=@values["pri_name"]%></td></tr>
+                  <tr class = "even"><td>Gender</td><td id= "pri_sex"><%=@values["pri_gender"]%></td></tr>
+                  <tr class = "odd"><td>Birthdate</td><td id= "pri_dob"><%=@values["pri_birthdate"]%></td></tr>
+                  <tr class = "even"><td>Age</td><td id= "pri_age"><%= @values["pri_age"]%></td></tr>
+                  <tr class = "odd"><td>Home District</td><td id= "pri_district"><%= @values["pri_district"]%></td></tr>
+                  <tr class = "even"><td>Traditional Authority(TA)</td><td id= "pri_ta"><%= @values["pri_ta"]%></td></tr>
+                  <tr class = "odd"><td>Current Residence</td><td id= "pri_residence"><%= @values["pri_residence"]%></td></tr>
+                  <tr class = "even"><td>Patient National ID</td><td id= "pri_nat_id"><%= @values["pri_nat_id"]%></td></tr>
+                  <tr style = "visibility :hidden;"><td>Patient ID</td><td id= "pri_pat_id"><%= @values["pri_pat_id"]%></td></tr>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
 
-								<div style = " margin-top: 15px;border: 1px solid black; border-radius: 5px;">	
-									<table class = "demographics" width = 100%>
-										<caption class="sub"> Secondary Patient Demographics</caption>
-										<tr class = "odd"><td>Name</td><td id= "sec_name" width = 300px><%=@values["sec_name"]%></td></tr>
-										<tr class = "even"><td>Gender</td><td id= "sec_sex"><%=@values["sec_gender"]%></td></tr>
-										<tr class = "odd"><td>Birthdate</td><td id= "sec_dob"><%=@values["sec_birthdate"]%></td></tr>
-										<tr class = "even"><td>Age</td><td id= "sec_age"><%= @values["sec_age"]%></td></tr>
-										<tr class = "odd"><td>Home District</td><td id= "sec_district"><%= @values["sec_district"]%></td></tr>
-										<tr class = "even"><td>Traditional Authority(TA)</td><td id= "sec_ta"><%= @values["sec_ta"]%></td></tr>
-										<tr class = "odd"><td>Current Residence</td><td id= "sec_residence"><%= @values["sec_residence"]%></td></tr>
-										<tr class = "even"><td>Patient National ID</td><td id= "sec_nat_id"><%= @values["sec_nat_id"]%></td></tr>
-										<tr style = "visibility :hidden;"><td>Patien ID</td><td id= "sec_pat_id"><%= @values["sec_pat_id"]%></td></tr>
-									</table>
-								</div>	
-							</td>
-						</tr>
-					</table>
-			</div>
-	
-		</td>
-	
-	</table>
+    </td>
 
-	
+    <td>
+      <div class= "container">
+        <table width = 100% >
+          <caption class= "main">Secondary Patient <hr></caption>
+
+          <tr style = " line-height: 100px;">
+            <td> <button class = "blue" onclick = "search_patient('secondary');"><span>&nbspFind Patient&nbsp</span> </button></td><td></td>
+            <td align = "right"><button class = "red" onclick= "merge();"><span>&nbspMerge&nbsp</span></button></td>
+          </tr>
+          <tr>
+
+            <td colspan = 3>
+
+              <div style = " margin-top: 15px;border: 1px solid black; border-radius: 5px;">
+                <table class = "demographics" width = 100%>
+                  <caption class="sub"> Secondary Patient Demographics</caption>
+                  <tr class = "odd"><td>Name</td><td id= "sec_name" width = 300px><%=@values["sec_name"]%></td></tr>
+                  <tr class = "even"><td>Gender</td><td id= "sec_sex"><%=@values["sec_gender"]%></td></tr>
+                  <tr class = "odd"><td>Birthdate</td><td id= "sec_dob"><%=@values["sec_birthdate"]%></td></tr>
+                  <tr class = "even"><td>Age</td><td id= "sec_age"><%= @values["sec_age"]%></td></tr>
+                  <tr class = "odd"><td>Home District</td><td id= "sec_district"><%= @values["sec_district"]%></td></tr>
+                  <tr class = "even"><td>Traditional Authority(TA)</td><td id= "sec_ta"><%= @values["sec_ta"]%></td></tr>
+                  <tr class = "odd"><td>Current Residence</td><td id= "sec_residence"><%= @values["sec_residence"]%></td></tr>
+                  <tr class = "even"><td>Patient National ID</td><td id= "sec_nat_id"><%= @values["sec_nat_id"]%></td></tr>
+                  <tr style = "visibility :hidden;"><td>Patien ID</td><td id= "sec_pat_id"><%= @values["sec_pat_id"]%></td></tr>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+    </td>
+
+  </table>
+
+
 </body>
-
-
