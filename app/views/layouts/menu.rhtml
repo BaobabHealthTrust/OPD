@@ -42,7 +42,7 @@
   </head>
   <body id="mateme">  
     <div id="container">
-      <div id="content">
+      <div id="content" style = "position : relative; width : 96%; margin-left : -48%">
         <div id="description" style="color:#777;position:absolute;margin-top:-70px;">
           <% if show_intro_text %>
             This demonstration site contains the work of <a href="http://pih.org" style="color:white">Partners In Health</a>
@@ -63,7 +63,7 @@
         </div>  
         <%= yield %>  
         <div id="footer">
-          <div id="buttons" class="buttonsDiv" style="top:0px">
+          <div id="buttons" style="top:0px">
             <button id="finishButton" class="button navButton green" onclick="if (tt_cancel_destination) window.location = tt_cancel_destination;"><span>Finish</span></button>
                   <% if 'mastercard' == params[:action].to_s %>
                     <% if session[:mastercard_ids].length.to_i != 0 %>
