@@ -2270,6 +2270,7 @@ def diagnosis_report_graph
 
       observation.each do | obs|
         next if obs.person.blank?
+        next if obs.person.addresses.blank?
         next if obs.answer_concept.nil?
           if (@age_groups.include?("< 6 MONTHS"))
             if (PatientService.age_in_months(obs.person).to_i < 6 )
