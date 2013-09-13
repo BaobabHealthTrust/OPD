@@ -2015,9 +2015,9 @@ class CohortToolController < ApplicationController
         <= TIMESTAMP(?) AND obs.concept_id IN (?)",
         @start_date.strftime('%Y-%m-%d 00:00:00'),
         @end_date.strftime('%Y-%m-%d 23:59:59'),concept_ids])
-
         observation.each do |obs|
           next if obs.answer_concept.blank?
+          next if obs.person.blank?
           diagnosis_name = obs.answer_concept.fullname rescue ''
            if (PatientService.age_in_months(obs.person).to_i < 6 )
               @diagnosis_report[diagnosis_name]+=1
@@ -2069,7 +2069,6 @@ class CohortToolController < ApplicationController
             @diagnosis_report[diagnosis_name]+=1
           end
         end
-
       @diagnosis_report_paginated = []
       @diagnosis_report.each { | diag, value |
         @diagnosis_report_paginated << [diag, value]
@@ -2270,6 +2269,7 @@ def diagnosis_report_graph
                     concept_ids])
 
       observation.each do | obs|
+        next if obs.person.blank?
         next if obs.answer_concept.nil?
           if (@age_groups.include?("< 6 MONTHS"))
             if (PatientService.age_in_months(obs.person).to_i < 6 )
@@ -2427,6 +2427,7 @@ def diagnosis_report_graph
                @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
                 concept_ids])
               observation.each do | obs|
+                      next if obs.person.blank?
                       next if obs.answer_concept.blank?
                       previous_date = obs.obs_datetime.strftime('%Y-%m-%d').to_date
                       sex = obs.person.gender
