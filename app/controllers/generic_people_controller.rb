@@ -168,10 +168,12 @@ class GenericPeopleController < ApplicationController
         if params[:relation]
           redirect_to search_complete_url(found_person.id, params[:relation]) and return
         elsif national_id_replaced.to_s == "true"
+          DDEService.create_footprint(PatientService.get_patient(found_person).national_id, "OPD")
           print_and_redirect("/patients/national_id_label?patient_id=#{found_person.id}", next_task(found_person.patient)) and return
           redirect_to :controller =>'patients',:action => 'patient_dashboard',
             :found_person_id => found_person.id, :relation => params[:relation] and return
         else
+          DDEService.create_footprint(PatientService.get_patient(found_person).national_id, "OPD")
           redirect_to :controller =>'patients',:action => 'patient_dashboard',
             :found_person_id => found_person.id, :relation => params[:relation] and return
         end
@@ -352,8 +354,10 @@ class GenericPeopleController < ApplicationController
         patient_id = PatientService.get_patient_identifier(person.patient, "National id")
         if patient_id.length != 6 and create_from_dde_server
           patient.check_old_national_id(patient_id)
+          DDEService.create_footprint(PatientService.get_patient(person).national_id, "OPD")
           print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
         end
+        DDEService.create_footprint(PatientService.get_patient(person).national_id, "OPD")
       end
       redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
 
@@ -478,7 +482,7 @@ class GenericPeopleController < ApplicationController
        person = PatientService.create_patient_from_dde(params)
        success = true
      end
-
+     DDEService.create_footprint(PatientService.get_patient(person).national_id, "OPD")
     #for now BART2 will use BART1 for patient/person creation until we upgrade BART1 to 2
     #if GlobalProperty.find_by_property('create.from.remote') and property_value == 'yes'
     #then we create person from remote machine
