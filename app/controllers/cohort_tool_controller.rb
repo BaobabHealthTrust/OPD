@@ -1853,11 +1853,18 @@ class CohortToolController < ApplicationController
       @registered = []
       peoples.each do | person_id |
         person = Person.find(person_id)
+        patient_bean = PatientService.get_patient(person)
+=begin        
         name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
         @registered << [name, person.birthdate, person.gender,
         person.date_created.to_date,
         person.addresses.first.city_village,
         person.addresses.first.county_district]
+=end
+        @registered << [patient_bean.name, patient_bean.birth_date, patient_bean.sex,
+        person.date_created.to_date,
+        patient_bean.current_residence,
+        patient_bean.traditional_authority]
       end
 
     render :layout => "report"

@@ -1070,24 +1070,24 @@ EOF
     patient.person_id = person.id
     patient.patient_id = person.patient.id
     patient.arv_number = get_patient_identifier(person.patient, 'ARV Number')
-    patient.address = person.addresses.first.city_village
+    patient.address = person.addresses.first.city_village rescue nil
     patient.national_id = get_patient_identifier(person.patient, 'National id')
 	  patient.national_id_with_dashes = get_national_id_with_dashes(person.patient)
     patient.name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
 		patient.first_name = person.names.first.given_name rescue nil
 		patient.last_name = person.names.first.family_name rescue nil
     patient.sex = sex(person)
-    patient.age = age(person, current_date)
+    patient.age = 0 if age(person, current_date).blank?
     patient.age_in_months = age_in_months(person, current_date)
     patient.dead = person.dead
-    patient.birth_date = birthdate_formatted(person)
+    patient.birth_date = birthdate_formatted(person) rescue '00/00/0000'
     patient.birthdate_estimated = person.birthdate_estimated
-    patient.current_district = person.addresses.first.state_province
-    patient.home_district = person.addresses.first.address2
-    patient.traditional_authority = person.addresses.first.county_district
-    patient.current_residence = person.addresses.first.city_village
-    patient.landmark = person.addresses.first.address1
-    patient.home_village = person.addresses.first.neighborhood_cell
+    patient.current_district = person.addresses.first.state_province rescue nil
+    patient.home_district = person.addresses.first.address2 rescue nil
+    patient.traditional_authority = person.addresses.first.county_district rescue nil
+    patient.current_residence = person.addresses.first.city_village rescue nil
+    patient.landmark = person.addresses.first.address1 rescue nil
+    patient.home_village = person.addresses.first.neighborhood_cell rescue nil
     patient.mothers_surname = person.names.first.family_name2
     patient.eid_number = get_patient_identifier(person.patient, 'EID Number') rescue nil
     patient.pre_art_number = get_patient_identifier(person.patient, 'Pre ART Number (Old format)') rescue nil
@@ -1492,14 +1492,22 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
         person.birthdate.strftime("??/???/%Y")
       end
     else
-      person.birthdate.strftime("%d/%b/%Y")
+      if !person.birthdate.blank?
+        person.birthdate.strftime("%d/%b/%Y")
+      else
+        return '00/00/0000'
+      end
     end
   end
   
   def self.age_in_months(person, today = Date.today)
-    years = (today.year - person.birthdate.year)
-    months = (today.month - person.birthdate.month)
-    (years * 12) + months
+    if !person.birthdate.blank?
+      years = (today.year - person.birthdate.year)
+      months = (today.month - person.birthdate.month)
+      (years * 12) + months
+    else
+      return 0
+    end
   end
   
   def self.get_attribute(person, attribute)
