@@ -34,8 +34,8 @@ module MedicationService
   # into select options. 
 	def self.regimen_options(weight, program)
 		regimens = Regimen.find(	:all,
-									:order => 'regimen_index',
-									:conditions => ['? >= min_weight AND ? < max_weight AND program_id = ?', weight, weight, program.program_id])
+      :order => 'regimen_index',
+      :conditions => ['? >= min_weight AND ? < max_weight AND program_id = ?', weight, weight, program.program_id])
 
 		options = regimens.map { |r|
 			concept_name = (r.concept.concept_names.typed("SHORT").first ||	r.concept.concept_names.typed("FULLY_SPECIFIED").first).name
@@ -62,26 +62,22 @@ module MedicationService
   end
 
   def self.generic
-    #tag_id = ConceptNameTag.find_by_tag("preferred_qech_aetc_opd").concept_name_tag_id
- 
+  
  		medication_tag = CoreService.get_global_property_value("application_generic_medication")
- 			   
-    all_drugs = Drug.all.collect {|drug|
-      # [Concept.find(drug.concept_id).name.name, drug.concept_id] rescue nil
-
-      [(drug.concept.fullname rescue drug.concept.shortname rescue ' '), drug.concept_id]
-      #[ConceptName.find(:last, :conditions => ["concept_id = ? AND voided = 0 AND concept_name_id IN (?)", 
-      #      drug.concept_id, ConceptNameTagMap.find(:all, :conditions => ["concept_name_tag_id = ?", tag_id]).collect{|c| 
-      #        c.concept_name_id}]).name, drug.concept_id] rescue nil
-    
-    }.compact.uniq  rescue []
-    
+   
     if !medication_tag.blank?
-    	application_drugs = concept_set(medication_tag)
+     
+      application_drugs = concept_set(medication_tag)
+      
     else
-    	application_drugs = all_drugs
+
+      application_drugs = ActiveRecord::Base.connection.select_all(
+        "SELECT concept_name.name name, drug.concept_id concept_id FROM drug
+        INNER JOIN concept_name ON drug.concept_id = concept_name.concept_id AND concept_name.voided = 0 AND drug.retired = 0"
+      ).map{|drg| [drg["name"], drg["concept_id"]]}.compact.uniq
+      
     end
-    return_drugs = all_drugs - (all_drugs - application_drugs) 
+    application_drugs
   end
 
   def self.frequencies
@@ -92,26 +88,26 @@ module MedicationService
                         IN (SELECT concept_name_id FROM concept_name_tag_map \
                         WHERE concept_name_tag_id = (SELECT concept_name_tag_id \
                         FROM concept_name_tag WHERE tag = 'preferred_dmht'))").collect {|freq|
-                            freq.name rescue nil
-                        }.compact rescue []
+      freq.name rescue nil
+    }.compact rescue []
   end
   
-	def self.fully_specified_frequencies
-		concept_id = ConceptName.find_by_name('DRUG FREQUENCY CODED').concept_id
-		set = ConceptSet.find_all_by_concept_set(concept_id, :order => 'sort_weight')
-		frequencies = []
-		options = set.each{ | item | 
-			next if item.concept.blank?
-			frequencies << [item.concept.shortname, item.concept.fullname + "(" + item.concept.shortname + ")"]
-		}
-		frequencies
-	end
+  def self.fully_specified_frequencies
+    concept_id = ConceptName.find_by_name('DRUG FREQUENCY CODED').concept_id
+    set = ConceptSet.find_all_by_concept_set(concept_id, :order => 'sort_weight')
+    frequencies = []
+    options = set.each{ | item |
+      next if item.concept.blank?
+      frequencies << [item.concept.shortname, item.concept.fullname + "(" + item.concept.shortname + ")"]
+    }
+    frequencies
+  end
   
-	def self.dosages(generic_drug_concept_id)    
-		Drug.find(:all, :conditions => ["concept_id = ?", generic_drug_concept_id]).collect {|d|
-			["#{d.name.upcase rescue ""}", "#{d.dose_strength.to_f rescue 1}", "#{d.units.upcase rescue ""}"]
-		}.uniq.compact rescue []
-	end
+  def self.dosages(generic_drug_concept_id)
+    Drug.find(:all, :conditions => ["concept_id = ?", generic_drug_concept_id]).collect {|d|
+      ["#{d.name.upcase rescue ""}", "#{d.dose_strength.to_f rescue 1}", "#{d.units.upcase rescue ""}"]
+    }.uniq.compact rescue []
+  end
 	
   def self.concept_set(concept_name)
     concept_id = ConceptName.find(:first, :conditions =>["name = ?", concept_name]).concept_id

@@ -20,7 +20,7 @@ class GenericPrescriptionsController < ApplicationController
     @order.void
     flash.now[:notice] = "Order was successfully voided"
     if !params[:source].blank? && params[:source].to_s == 'advanced'
-		redirect_to "/prescriptions/advanced_prescription?patient_id=#{params[:patient_id]}" and return
+      redirect_to "/prescriptions/advanced_prescription?patient_id=#{params[:patient_id]}" and return
     else
     	index and return
    	end
@@ -195,7 +195,35 @@ class GenericPrescriptionsController < ApplicationController
 		@generics = MedicationService.generic
 		@frequencies = MedicationService.fully_specified_frequencies
 		@formulations = {}
-		@generics.each { | generic |
+    generic_concept_ids = @generics.collect{|generic| generic[1]}
+    drug_formulations = {}
+    
+    Drug.all(:select => ["name, concept_id, dose_strength, units"],
+      :conditions => ["concept_id IN (?)", generic_concept_ids]
+    ).each do |record|
+      
+      if drug_formulations[record.concept_id].blank?
+        drug_formulations[record.concept_id] = []
+      end
+    
+      drug_formulations[record.concept_id] << [record.name, record.dose_strength, record.units]
+      
+    end
+   
+    @generics.each do | name, concept_id |
+
+      #skip non-drug concepts      
+      next if drug_formulations[concept_id].blank? 
+      formulation = {}    
+      drug_formulations[concept_id].each do |drg_name, dose_strength, drg_units|
+        formulation[drg_name] = [dose_strength, drg_units]
+      end
+      
+      @formulations[concept_id] = formulation
+      
+    end
+   
+    @generics.each { | generic |
 			drugs = Drug.find(:all,	:conditions => ["concept_id = ?", generic[1]])
 			drug_formulations = {}			
 			drugs.each { | drug |
@@ -212,9 +240,9 @@ class GenericPrescriptionsController < ApplicationController
     concept_id = params[:concept_id]
     drugs = Drug.find(:all,	:conditions => ["concept_id = ?", concept_id])
     drug_formulations = []
-			drugs.each { | drug |
-				drug_formulations << drug.name + ':' + drug.dose_strength.to_s + ':' + drug.units.to_s + ';'
-			}
+    drugs.each { | drug |
+      drug_formulations << drug.name + ':' + drug.dose_strength.to_s + ':' + drug.units.to_s + ';'
+    }
     render :text => drug_formulations
 	end
 
@@ -243,23 +271,23 @@ class GenericPrescriptionsController < ApplicationController
         prn = "no"
 				auto_expire_date = start_date + prescription[:duration].to_i.days
 
-					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:strength],
-						prescription[:frequency], prn)
+        DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:strength],
+          prescription[:frequency], prn)
 
 			}
 
-    if(@patient)
-			redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
-		else
-			redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
-		end
+      if(@patient)
+        redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
+      else
+        redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
+      end
 
     end
 
     
 		if params[:prescription].blank?
 			#next if params[:formulation].blank?
-          	formulation = (params[:formulation] || '').upcase
+      formulation = (params[:formulation] || '').upcase
 			drug = Drug.find_by_name(formulation) rescue nil
 			unless drug
 				flash[:notice] = "No matching drugs found for formulation #{params[:formulation]}"
@@ -272,7 +300,7 @@ class GenericPrescriptionsController < ApplicationController
 
 			if prescription[:type_of_prescription] == "variable"
 				DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
-					prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]], 
+            prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]],
 					prescription[:type_of_prescription], prn)
 			else
 				DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
@@ -305,7 +333,7 @@ class GenericPrescriptionsController < ApplicationController
 
 				if prescription[:type_of_prescription] == "variable"
 					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, [prescription[:morning_dose], 
-						prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]], 
+              prescription[:afternoon_dose], prescription[:evening_dose], prescription[:night_dose]],
 						prescription[:type_of_prescription], prn)
 				else
 					DrugOrder.write_order(encounter, @patient, nil, drug, start_date, auto_expire_date, prescription[:dose_strength], 
@@ -352,14 +380,14 @@ class GenericPrescriptionsController < ApplicationController
     encounter.encounter_datetime = session[:datetime]
     encounter.save
     generics.each do |drug|
-     obs = Observation.new
-     obs.person_id = encounter.patient_id
-     obs.concept_id = concept_id
-     obs.obs_datetime = Time.now
-     obs.encounter_id = encounter.id
-     obs.value_drug = Drug.find_by_name(drug).id
-     obs.value_text = drug
-     obs.save
+      obs = Observation.new
+      obs.person_id = encounter.patient_id
+      obs.concept_id = concept_id
+      obs.obs_datetime = Time.now
+      obs.encounter_id = encounter.id
+      obs.value_drug = Drug.find_by_name(drug).id
+      obs.value_text = drug
+      obs.save
     end
     redirect_to("/patients/show/#{patient_id}")
   end
