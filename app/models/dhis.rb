@@ -104,5 +104,28 @@ class Dhis
 			GROUP BY o.encounter_id
 					")
 	end
+
+	def get_all_report_values()
+		#get all the primary diagnosis
+		primary_diagnosis = get_opd_primary_diagnosis()
+		#get all the secondary diagnosis
+		secondary_diagnosis = get_opd_secondary_diagnosis()
+		#add all the diagnosis into one array
+		all_diagnosis = primary_diagnosis + secondary_diagnosis
+		
+		#create a hash of the reporting values to be returned
+		report_values = {:malaria_severe => 0
+
+				}
+
+		#loop through all_diagnoses, group by diagnoses to identify different elements
+		all_diagnosis.group_by(&:diagnosis).each do |diagnosis, diagnosis_list|
+			if diagnosis.downcase == 'malaria'
+				#write code for malaria here
+				#update the values
+				report_values[:malaria_severe] += 1		 
+			end
+		end
+	end
 end
 
