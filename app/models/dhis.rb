@@ -13,6 +13,7 @@ class Dhis
 			SELECT 
 				x.*,
 				o.encounter_id,
+				'NO' AS pregnant,
 				o.concept_id,
 				GROUP_CONCAT(cn.name) as diagnosis,
 				GROUP_CONCAT(dcn.name) as detailed_diagnosis,
@@ -59,6 +60,7 @@ class Dhis
 			SELECT 
 				x.*,
 				o.encounter_id,
+				'NO' AS pregnant,
 				o.concept_id,
 				GROUP_CONCAT(cn.name) as diagnosis,
 				GROUP_CONCAT(dcn.name) as detailed_diagnosis,
@@ -106,22 +108,43 @@ class Dhis
 		all_diagnosis = primary_diagnosis + secondary_diagnosis
 	
 		#create a hash of the reporting values to be returned
-		report_values = {:malaria_severe => 0,
-						 :malaria_uncomplicated => 0
-
+		report_values = {:malaria_uncomplicated => 0,
+						 :malaria_more_than_5_uncomplicated => 0,
+						 :malaria_less_than_5_uncomplicated => 0,
+						 :malaria_severe => 0,
+						 :malaria_more_than_5_severe => 0,
+						 :malaria_less_than_5_severe => 0,
+						 :malaria_in_pregnant_women => 0,
+						 :malaria_uncomplicated_in_pregnant_women => 0,
+						 :malaria_severe_in_pregnant_women => 0,
+						 :pneumonia => 0,
+						 :pneumonia_more_than_5_uncomplicated=> 0,
+						 :malaria_severe_in_pregnant_women => 0
 				}
 
 		#loop through all_diagnoses, group by diagnoses to identify different elements
 		all_diagnosis.group_by(&:diagnosis).each do |diagnosis, diagnosis_list|
-			if diagnosis.downcase == 'malaria'
+			if diagnosis.to_s.downcase == 'malaria'
 				#write code for malaria here
 				#update the values
 				
+				report_values[:malaria_in_pregnant_women] = diagnosis_list.reject{|p| p.pregnant.downcase=='no'}.count
+				
 				diagnosis_list.group_by(&:detailed_diagnosis).each do |malaria_dx, malaria_detail|
-					if malaria_dx.downcase == 'uncomplicated'
+
+					#Malaria Uncomplicated
+					if malaria_dx.to_s.downcase == 'uncomplicated'
 						report_values[:malaria_uncomplicated]=malaria_detail.count
-					elsif malaria_dx.downcase == 'severe'
+						report_values[:malaria_more_than_5_uncomplicated]=malaria_detail.reject{|d| d.age.to_i<5}.count
+						report_values[:malaria_less_than_5_uncomplicated]=malaria_detail.reject{|d| d.age.to_i>=5}.count
+						report_values[:malaria_uncomplicated_in_pregnant_women] = diagnosis_list.reject{|p| p.pregnant.downcase=='no'}.count
+											
+					#Malaria Severve
+					elsif malaria_dx.to_s.downcase == 'severe'
 						report_values[:malaria_severe] = malaria_detail.count
+						report_values[:malaria_more_than_5_severe]=malaria_detail.reject{|d| d.age.to_i<5}.count
+						report_values[:malaria_less_than_5_severe]=malaria_detail.reject{|d| d.age.to_i>=5}.count
+						report_values[:malaria_severe_in_pregnant_women] = diagnosis_list.reject{|p| p.pregnant.downcase=='no'}.count
 					end
 				end		 
 			end
