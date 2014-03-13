@@ -119,7 +119,9 @@ class Dhis
 						 :malaria_severe_in_pregnant_women => 0,
 						 :pneumonia => 0,
 						 :pneumonia_severe_less_5 => 0,
-						 :pneumonia_very_severe_less_than_5 => 0
+						 :pneumonia_very_severe_less_than_5 => 0,
+						 :diarrhoea => 0,
+						 :diarrhoea_with_dehydration => 0
 				}
 
 		#loop through all_diagnoses, group by diagnoses to identify different elements
@@ -165,10 +167,32 @@ class Dhis
 					end
 				end
 			end
-
-						
-						
 			
+			if diagnosis.to_s.downcase == 'diarrhoea'
+
+				report_values[:diarrhoea] = diagnosis_list.count
+
+				diagnosis_list.group_by(&:detailed_diagnosis).each do |diarrhoea_dx, diarrhoea_detail|
+
+					#diarrhoea with_dehydration
+					if diarrhoea_dx.to_s.downcase == 'dehydration'
+						report_values[:diarrhoea_with_dehydration]=diarrhoea_detail.count
+					end
+				end
+			end
+			
+			if diagnosis.to_s.downcase == 'new aids cases'
+
+				report_values[:new_aids_cases] = diagnosis_list.count
+
+				diagnosis_list.group_by(&:detailed_diagnosis).each do |diarrhoea_dx, diarrhoea_detail|
+
+					#diarrhoea with_dehydration
+					if diarrhoea_dx.to_s.downcase == 'dehydration'
+						report_values[:diarrhoea_with_dehydration]=diarrhoea_detail.count
+					end
+				end
+			end			
 		end
 		return report_values
 	end
