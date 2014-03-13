@@ -24,7 +24,9 @@ class Dhis
 						encounter_datetime,
 						p.gender,
 						p.birthdate,
-						p.death_date
+						p.death_date,
+						age(LEFT(p.birthdate,10),LEFT(encounter_datetime,10),
+                                LEFT(p.date_created,10),p.birthdate_estimated) AS age
 				FROM
 					encounter e
 				LEFT JOIN person p ON e.patient_id = p.person_id
@@ -68,7 +70,9 @@ class Dhis
 						encounter_datetime,
 						p.gender,
 						p.birthdate,
-						p.death_date
+						p.death_date,
+						age(LEFT(p.birthdate,10),LEFT(encounter_datetime,10),
+                                LEFT(p.date_created,10),p.birthdate_estimated) AS age
 				FROM
 					encounter e
 				LEFT JOIN person p ON e.patient_id = p.person_id
