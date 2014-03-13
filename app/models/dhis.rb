@@ -126,12 +126,12 @@ class Dhis
              :male_urethral_discharge => 0,
              :urinary_schistosomiasis => 0,
              :intestinal_schistosomiasis => 0,
-             :genital_ulcer => 0,
+             :genital_ulcers => 0,
              :male_genital_ulcer => 0,
              :female_genital_ulcer => 0,
              :cholera => 0,
              :measles => 0,
-			 :diarrhoea_with_blood => 0,
+      			 :diarrhoea_with_blood => 0,
              :meningitis => 0,
              :plague => 0
 				}
@@ -229,11 +229,10 @@ class Dhis
       if diagnosis.to_s.downcase == 'intestinal schistosomiasis'
         report_values[:intestinal_schistosomiasis] = diagnosis_list.count
       end   
-		end
 
-		if diagnosis.to_s.downcase == 'genital_ulcer'
+		if diagnosis.to_s.downcase == 'genital ulcers'
 
-		  report_values[:genital_ulcer] =diagnosis_list.count
+		  report_values[:genital_ulcers] =diagnosis_list.count
 
 			diagnosis_list.group_by(&:gender).each do |u_genital_ulcer_dx, u_genital_ulcer_detail|
 
@@ -261,10 +260,11 @@ class Dhis
       report_values[:plague] = diagnosis_list.count
     end
     
-    if diagnosis.to_s.downcase == 'neonatal_tetanus'
+    if diagnosis.to_s.downcase == 'neonatal tetanus'
       report_values[:neonatal_tetanus] = diagnosis_list.count
     end
-   
+   end
+    
 		return report_values
 	end
 end
