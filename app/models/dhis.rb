@@ -124,7 +124,8 @@ class Dhis
 						 :diarrhoea_with_dehydration => 0,
              :urethral_discharge => 0,
              :male_urethral_discharge => 0,
-             :urinary_schistosomiasis => 0
+             :urinary_schistosomiasis => 0,
+             :intestinal_schistosomiasis => 0
 				}
 
 		#loop through all_diagnoses, group by diagnoses to identify different elements
@@ -209,8 +210,10 @@ class Dhis
         end
       end  
       if diagnosis.to_s.downcase == 'urinary schistosomiasis'
-
         report_values[:urinary_schistosomiasis] = diagnosis_list.count
+      end
+      if diagnosis.to_s.downcase == 'intestinal schistosomiasis'
+        report_values[:intestinal_schistosomiasis] = diagnosis_list.count
       end   
 		end
 		return report_values
