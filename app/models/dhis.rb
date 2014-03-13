@@ -118,8 +118,8 @@ class Dhis
 						 :malaria_uncomplicated_in_pregnant_women => 0,
 						 :malaria_severe_in_pregnant_women => 0,
 						 :pneumonia => 0,
-						 :pneumonia_more_than_5_uncomplicated=> 0,
-						 :malaria_severe_in_pregnant_women => 0
+						 :pneumonia_severe_less_5 => 0,
+						 :pneumonia_very_severe_less_than_5 => 0
 				}
 
 		#loop through all_diagnoses, group by diagnoses to identify different elements
@@ -148,6 +148,29 @@ class Dhis
 					end
 				end		 
 			end
+			
+			if diagnosis.to_s.downcase == 'pneumonia'
+				#write code for malaria here
+				#update the values
+
+				report_values[:pneumonia] = diagnosis_list.count
+
+				diagnosis_list.group_by(&:detailed_diagnosis).each do |pneumonia_dx, pneumonia_detail|
+
+					#Pneumonia severe
+					if pneumonia_dx.to_s.downcase == 'severe'
+						report_values[:pneumonia_severe_less_5]=pneumonia_detail.reject{|d| d.age.to_i<5}.count
+						
+					#Pneumonia Very severe
+					elsif pneumonia_dx.to_s.downcase == 'very severe'
+						report_values[:neumonia_very_severe_less_than_5]=pneumonia_detail.reject{|d| d.age.to_i<5}.count
+					end
+				end
+			end
+
+						
+						
+			
 		end
 		return report_values
 	end
