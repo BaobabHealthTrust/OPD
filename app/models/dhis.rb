@@ -150,8 +150,6 @@ class Dhis
 			end
 			
 			if diagnosis.to_s.downcase == 'pneumonia'
-				#write code for malaria here
-				#update the values
 
 				report_values[:pneumonia] = diagnosis_list.count
 
