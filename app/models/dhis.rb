@@ -131,7 +131,9 @@ class Dhis
              :female_genital_ulcer => 0,
              :cholera => 0,
              :measles => 0,
-			 :diarrhoea_with_blood => 0
+			 :diarrhoea_with_blood => 0,
+             :meningitis => 0,
+             :plague => 0
 				}
 
 		#loop through all_diagnoses, group by diagnoses to identify different elements
@@ -250,6 +252,19 @@ class Dhis
     if diagnosis.to_s.downcase == 'measles'
       report_values[:measles] = diagnosis_list.count
     end
+
+    if diagnosis.to_s.downcase == 'meningitis'
+      report_values[:meningitis] = diagnosis_list.count
+    end    
+
+    if diagnosis.to_s.downcase == 'plague'
+      report_values[:plague] = diagnosis_list.count
+    end
+    
+    if diagnosis.to_s.downcase == 'neonatal_tetanus'
+      report_values[:neonatal_tetanus] = diagnosis_list.count
+    end
+   
 		return report_values
 	end
 end
