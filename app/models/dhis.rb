@@ -132,6 +132,7 @@ class Dhis
              :cholera => 0,
              :measles => 0,
       			 :diarrhoea_with_blood => 0,
+      			 :neonatal_tetanus => 0,
              :meningitis => 0,
              :plague => 0
 				}
