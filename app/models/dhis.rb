@@ -125,7 +125,10 @@ class Dhis
              :urethral_discharge => 0,
              :male_urethral_discharge => 0,
              :urinary_schistosomiasis => 0,
-             :intestinal_schistosomiasis => 0
+             :intestinal_schistosomiasis => 0,
+             :genital_ulcer => 0,
+             :male_genital_ulcer => 0,
+             :female_genital_ulcer => 0
 				}
 
 		#loop through all_diagnoses, group by diagnoses to identify different elements
@@ -208,7 +211,8 @@ class Dhis
             report_values[:male_urethral_discharge]= u_discharge_detail.count
           end
         end
-      end  
+      end
+      
       if diagnosis.to_s.downcase == 'urinary schistosomiasis'
         report_values[:urinary_schistosomiasis] = diagnosis_list.count
       end
@@ -216,6 +220,21 @@ class Dhis
         report_values[:intestinal_schistosomiasis] = diagnosis_list.count
       end   
 		end
+
+		if diagnosis.to_s.downcase == 'genital_ulcer'
+
+		  report_values[:genital_ulcer] =diagnosis_list.count
+				
+			diagnosis_list.group_by(&:gender).each do |u_genital_ulcer_dx, u_genital_ulcer_detail|
+
+        if u_genital_ulcer_dx.to_s.downcase == 'm'
+          report_values[:male_genital_discharge]= u_genital_ulcer_detail.count
+        elsif u_genital_ulcer_dx.to_s.downcase == 'f'
+          report_values[:female_genital_ulcer] = u_genital_ulcer_detail.count
+        end
+     end
+	  end	
+
 		return report_values
 	end
 end
