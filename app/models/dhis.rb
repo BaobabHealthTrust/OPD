@@ -100,9 +100,10 @@ class Dhis
 		secondary_diagnosis = get_opd_secondary_diagnosis()
 		#add all the diagnosis into one array
 		all_diagnosis = primary_diagnosis + secondary_diagnosis
-		
+	
 		#create a hash of the reporting values to be returned
-		report_values = {:malaria_severe => 0
+		report_values = {:malaria_severe => 0,
+						 :malaria_uncomplicated => 0
 
 				}
 
@@ -111,9 +112,17 @@ class Dhis
 			if diagnosis.downcase == 'malaria'
 				#write code for malaria here
 				#update the values
-				report_values[:malaria_severe] += 1		 
+				
+				diagnosis_list.group_by(&:detailed_diagnosis).each do |malaria_dx, malaria_detail|
+					if malaria_dx.downcase == 'uncomplicated'
+						report_values[:malaria_uncomplicated]=malaria_detail.count
+					elsif malaria_dx.downcase == 'severe'
+						report_values[:malaria_severe] = malaria_detail.count
+					end
+				end		 
 			end
 		end
+		return report_values
 	end
 end
 
