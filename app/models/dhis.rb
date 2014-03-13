@@ -130,7 +130,8 @@ class Dhis
              :male_genital_ulcer => 0,
              :female_genital_ulcer => 0,
              :cholera => 0,
-             :measles => 0
+             :measles => 0,
+			 :diarrhoea_with_blood => 0
 				}
 
 		#loop through all_diagnoses, group by diagnoses to identify different elements
@@ -186,6 +187,11 @@ class Dhis
 					#diarrhoea with_dehydration
 					if diarrhoea_dx.to_s.downcase == 'dehydration'
 						report_values[:diarrhoea_with_dehydration]=diarrhoea_detail.count
+					end
+					
+					#diarrhoea with blood
+					if diarrhoea_dx.to_s.downcase == 'blood'
+						report_values[:diarrhoea_with_blood]=diarrhoea_detail.count
 					end
 				end
 			end
