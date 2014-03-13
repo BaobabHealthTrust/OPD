@@ -254,6 +254,11 @@ class Dhis
     if diagnosis.to_s.downcase == 'plague'
       report_values[:plague] = diagnosis_list.count
     end
+    
+    if diagnosis.to_s.downcase == 'neonatal_tetanus'
+      report_values[:neonatal_tetanus] = diagnosis_list.count
+    end
+   
 		return report_values
 	end
 end
