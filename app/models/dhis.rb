@@ -230,14 +230,14 @@ class Dhis
         report_values[:intestinal_schistosomiasis] = diagnosis_list.count
       end   
 
-		if diagnosis.to_s.downcase == 'genital ulcers'
+		if diagnosis.to_s.downcase == 'genital ulcers, lgv'
 
 		  report_values[:genital_ulcers] =diagnosis_list.count
 
 			diagnosis_list.group_by(&:gender).each do |u_genital_ulcer_dx, u_genital_ulcer_detail|
 
         if u_genital_ulcer_dx.to_s.downcase == 'm'
-          report_values[:male_genital_discharge]= u_genital_ulcer_detail.count
+          report_values[:male_genital_ulcer]= u_genital_ulcer_detail.count
         elsif u_genital_ulcer_dx.to_s.downcase == 'f'
           report_values[:female_genital_ulcer] = u_genital_ulcer_detail.count
         end
