@@ -10,6 +10,10 @@ Rails::Initializer.run do |config|
 	config.log_level = :debug
 	config.action_controller.session_store = :active_record_store
 	config.active_record.schema_format = :sql
+
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+
 	# config.time_zone = 'UTC'
 	config.gem 'warden'
 	config.gem 'devise'
@@ -30,6 +34,7 @@ require 'bantu_soundex'
 require 'json'
 require 'colorfy_strings'
 require 'will_paginate'
+require 'action_mailer'
 
 ActiveSupport::Inflector.inflections do |inflect|
   inflect.irregular 'person_address', 'person_address'
@@ -49,3 +54,18 @@ end
 
 # Foreign key checks use a lot of resources but are useful during development
 ActiveRecord::Base.connection.execute("SET FOREIGN_KEY_CHECKS=0") if ENV['RAILS_ENV'] != 'development'
+
+ActionMailer::Base.delivery_method = :smtp
+
+ActionMailer::Base.default_content_type = "text/html"
+
+ActionMailer::Base.smtp_settings = {
+  :address        => "smtp.gmail.com",
+  :enable_starttls_auto => true,
+  :port           => 587,
+  :domain         => "baobabhealth.org",
+  :user_name      => "bartbaobab@gmail.com",
+  :password       => "bartemr@2",
+  :authentication => :plain
+}
+
