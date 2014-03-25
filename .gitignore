@@ -19,3 +19,5 @@ tmp
 =======
 *.lock
 >>>>>>> prescription
+.ruby-version
+
