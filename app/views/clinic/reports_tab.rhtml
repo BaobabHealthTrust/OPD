@@ -1,3 +1,4 @@
+<script src="/touchscreentoolkit/lib/javascripts/standard.js"> </script>
 <style type="text/css">
   body {
     -moz-user-select:none;
@@ -38,10 +39,45 @@
     border: 1px #eee solid;
     border-width: 1px;
   }
+  
+	.messageBar {
+		/*  height: 1em;*/
+		height: 70px;
+		width: 515px;
+		position: absolute;
+		top: 0px;
+		left: 260px;
+		font-size: 2.35em;
+		float: right;
+		text-align: left;
+		z-index: 842;
+		border: thin solid black;
+		background: #40f999;
+		display: none;
+		padding: 20px;   
+		border: 5px outset #40f999;
+		border-radius: 15px;
+		z-index:11000;
+	}
 </style>
 
 <script>
 
+	function showDhisStatus(){
+		    var div = document.createElement("div");
+		    div.id = "progress_bar";
+		    div.className = "messageBar";
+		    div.innerHTML = "Updating DHIS2. Please wait...";
+		    
+		    document.getElementById("tab").appendChild(div);
+		
+		document.getElementById("progress_bar").style.display = "block";
+	}
+
+  function dhis_update_msg() {
+		showDhisStatus()
+  }
+  
   function setInnerHtmlData(id,result,path, target) {
     td = document.getElementById(id);
     if(result == "Graphical Reports")

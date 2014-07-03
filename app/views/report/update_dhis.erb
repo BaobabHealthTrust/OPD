@@ -1,0 +1,42 @@
+<%= javascript_include_tag "prototype" %>
+<%= javascript_include_tag 'jquery' %>
+<%= stylesheet_link_tag 'extra_buttons' %>
+
+<style>
+
+  .tt_controls_month #keyboard{
+    display: none !important;
+  }
+
+  #tt_page_month .options{
+    height: 22em;
+  }
+  #tt_page_month .inputFrameClass{
+    height: 36em;
+  }
+  
+</style>
+
+<form name='update_dhis' method='post' action="generate_dhis_report" >
+	<% month_names = month_name_options.gsub('<option value="Unknown">Unknown</option>', '') %>
+
+  	<%= select_tag 'report', options_for_select( @dhis_reports ),
+		{:helpText => "Select DHIS2 Report",
+		:tt_onLoad => "__$('keyboard').style.display = 'none'"
+		} %>
+  
+	<%= text_field_tag "year", nil,
+		  {:helpText => 'Year',
+		  :field_type => 'number',
+		  :absoluteMin => "1890",
+		  :min => "1940",
+		  :absoluteMax => Date.today.year,
+		  :tt_pageStyleClass => "Numeric NumbersOnly"
+		 }  %>
+
+	<%= select_tag "month", month_names,
+		  {:helpText => 'Month',
+		  :validationMessage => 'Please enter a valid Month'
+		}%>
+
+</form>
