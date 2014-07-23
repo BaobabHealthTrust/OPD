@@ -498,5 +498,536 @@ class GenericReportController < ApplicationController
     @patients = Report.set_appointments(@select_date)
     render :layout => 'menu'
   end
+  
+  
+  def update_dhis
+  	@dhis_reports = ["ANC Monthly Facility Report", "HMIS-15", "IDSR Monthly"]
+	render :layout => "application"
+  end
+  
+  def generate_dhis_report
+  	@logo = CoreService.get_global_property_value('logo') rescue nil
+  	@report = params[:report]
+  	@report_name = ""
+  	@idsr_mothly = {}
+  	if @report == "IDSR Monthly"
+  		@report_name = @report
+  		
+		coc_death = "urZWwWW5FU9"
+		coc_out_patient_cases = "qqg5qsADtHX"
+		coc_inpatient_deaths = "dAObMfCg8zn"
+		coc_inpatient_cases = "q4r3uBRqJaf"
+		coc_in_patient_cases = "RxoQpVgSQq6"
+		coc_in_patient_deaths = "OFdC9ug92YH"
+		coc_default = "fiC1VMp5zq6"
+		
+		
+  		@idsr_mothly = {
+			"IDSR Male Urethral Discharge".upcase=>
+			{ 
+					"Out-patient cases"=>
+					{
+						:dataElement=>"DTZU9thFC85",
+						:value=>0,
+						:categoryOptionCombo=>coc_out_patient_cases
+					 }
+			},
+			
+			"IDSR Viral Hemorrhagic Fever".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"Pj67s6ApYb2",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"Pj67s6ApYb2",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"Pj67s6ApYb2",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Meningitis".upcase=> 
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"CRArwtJppcy",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"CRArwtJppcy",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"CRArwtJppcy",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Pneumonia <5 Years".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"jPH2HL1zlTU",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				}
+			},
+			
+			"IDSR Schistosomiasis Intestinal".upcase=> 
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"p494BDUSEUz",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"p494BDUSEUz",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"p494BDUSEUz",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Uncomplicated Malaria <5y, Lab-Confirmed".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"WDQ9DoNW1gI",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+		  	},
+			
+			"IDSR Male Non-Vesicular Genital Ulcer".upcase => 
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"gMQn2Hgv3ud",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+			},
+			
+			"IDSR Malaria < 5 Years Severe".upcase=>
+			{									
+				"In-patient cases"=>
+				{
+					:dataElement=>"wsOnpRZtp3t",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"wsOnpRZtp3t",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR New AIDS Cases".upcase=> 
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"fYpGGzLiVbe",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"fYpGGzLiVbe",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"fYpGGzLiVbe",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Measles".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"BnbLe0vUHIM",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"BnbLe0vUHIM",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"BnbLe0vUHIM",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Neonatal Tetanus".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"YXnx3FepHlE",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"YXnx3FepHlE",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"YXnx3FepHlE",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Diarrhoea With Dehydration".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"GERSeo2EiaP",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"GERSeo2EiaP",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"GERSeo2EiaP",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Malaria >= 5 Years Uncomplicated".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"sUmQaUBzNy3",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				}
+			},
+			
+			"IDSR Malaria With Severe Anemia <5years".upcase=>
+			{
+				"In-patient cases"=>
+				{
+					:dataElement=>"spfnMEG1wl0",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"spfnMEG1wl0",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Female Non-Vesicular Genital Ulcer".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"TxPvgF64DZB",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				}
+		    },
+			
+			"IDSR AFP".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"aZmJTJpj4Xa",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"aZmJTJpj4Xa",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"aZmJTJpj4Xa",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Malaria In Pregnant Women Uncomplicated".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"cLEvPveMGfq",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+			},
+			
+			"IDSR Schistosomiasis Urinary".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"wA7sDe6Jshb",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"wA7sDe6Jshb",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"wA7sDe6Jshb",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Cholera".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"xRmq6560gDJ",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"xRmq6560gDJ",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"xRmq6560gDJ",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Uncomplicated Malaria 5+Y, Lab-Confirmed".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"tvp6Blay8Yc",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				}
+		  	},
+			
+			"IDSR Malaria >= 5 Years Severe".upcase=>
+			{
+				"In-patient cases"=>
+				{
+					:dataElement=>"hHXHbQQVm4O",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"hHXHbQQVm4O",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+		   	},
+			
+			"IDSR Malaria < 5 Years Uncomplicated".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"DpRXVfxBy1m",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				}
+			},
+			
+			"IDSR Plague".upcase=>
+			{					
+				"Out-patient cases"=>
+				{
+					:dataElement=>"Zs6Bjgfyrct",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"Zs6Bjgfyrct",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"Zs6Bjgfyrct",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Malaria In Pregnant Women Severe".upcase=>
+			{
+				"In-patient cases"=>
+				{
+					:dataElement=>"HiFlLTvDG0l",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"HiFlLTvDG0l",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+		  	},
+			
+			"IDSR Diarrhoea With Blood".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"XVNCLVde2Eu",
+					:value=>0,
+					:categoryOptionCombo=>coc_out_patient_cases
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"XVNCLVde2Eu",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"XVNCLVde2Eu",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+		  	},
+			
+			"IDSR Severe Pneumonia <5 Years".upcase=>
+			{
+				"In-patient cases"=>
+				{
+					:dataElement=>"tLk5ymzkutq",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"tLk5ymzkutq",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+			
+			"IDSR Diarrhoea With Bloody".upcase=>
+			{
+				"Out-patient cases"=>
+				{
+					:dataElement=>"wDCBO0oRE18",
+					:value=>0,
+					:categoryOptionCombo=>coc_default
+				},
+				"In-patient cases"=>
+				{
+					:dataElement=>"XVNCLVde2Eu",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"XVNCLVde2Eu",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			},
+
+			
+			"IDSR Very Severe Pneumonia <5 Years".upcase=>
+			{
+
+				"In-patient cases"=>
+				{
+					:dataElement=>"kLWOyuVuvoW",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_cases
+				},
+				"In-patient deaths"=>
+				{
+					:dataElement=>"kLWOyuVuvoW",
+					:value=>0,
+					:categoryOptionCombo=>coc_in_patient_deaths
+				}
+			 }																		
+  		}
+
+		header="<dataValueSet dataSet=\"wmO5qvufx5b\" completeDate=\"2014-03-25\" period=\"201403\" orgUnit=\"rERxz2TtA3i\">\n"
+		c = header
+  		@idsr_mothly.each do |key, data|
+  			data.each do |k,d|
+  				c += "	<dataValue dataElement=\""+d[:dataElement].to_s + "\" categoryOptionCombo=\""+d[:categoryOptionCombo].to_s + "\" value=\""+d[:value].to_s + "\" />\n"
+  			end
+  		end
+  		
+  		c+="</dataValueSet>"
+  		`touch dhis2/datavalueset.xml`
+  		f = File.open("dhis2/datavalueset.xml", 'w')
+  		f.print c
+  		f.close()
+  		
+  		@report = @report + " (#{Date::MONTHNAMES[params[:month].to_i]} - #{params[:year]}) Report Preview"
+  		render :template => 'report/dhis_idsr', :layout => 'dhis2'
+  	else
+  		redirect_to "/report/update_dhis" and return
+  	end
+  end
+  
+  def update_dhis2_report
+		result = `curl -d @dhis2/datavalueset.xml "http://localhost:8080/api/dataValueSets" -H "Content-Type:application/xml" -u admin:district -v`
+		puts result
+		result = result.scan(/<status>(.*)<\/status>/).to_s
+		
+		if result.empty?
+			result = "failed"
+		end
+		redirect_to "/clinic?dhis_status=#{result}" and return
+  end
 
 end

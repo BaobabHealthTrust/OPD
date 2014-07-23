@@ -334,7 +334,7 @@ div { -moz-user-select: none; }
  <%end%>
   <% 
     ( @duplicates || {} ).each do | patient |
-      @remote_duplicates.delete_if do |x|
+    ( @remote_duplicates || {} ) .delete_if do |x|
         x.national_id == patient.national_id and
         x.name.soundex == patient.name.soundex and
         x.sex == patient.sex and
