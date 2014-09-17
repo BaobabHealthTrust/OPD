@@ -154,6 +154,11 @@
           __$("person_addresses_city_village").value : null
       );
     
+    json.addresses.current_village = (
+        __$("person_addresses_city_village") ? 
+          __$("person_addresses_city_village").value : null
+      );
+    
     json.addresses.current_ta = (
         __$("filter_t_a") ? 
           __$("filter_t_a").value : null
@@ -307,7 +312,7 @@
   <%= text_field_tag "region_region_name" , nil,
 			{	:id => 'region_region_name',
 				:tt_requireNextClick => false,
-				:ajaxURL => '/people/region_of_origin/Region?field=role&value=',
+				:ajaxURL => '/people/region/Region?field=role&value=',
 				:tt_onLoad => "$('nextButton').style.display = 'none';",
 				:helpText => 'Region of origin' } if ask_home_village %>
 
