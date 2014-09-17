@@ -282,6 +282,6 @@
     <%= select_tag "person[attributes][occupation]", options_for_select([" ", "Housewife", "Farmer", "Police", "Soldier", "Business", "Teacher", "Student", "Healthcare Worker"].sort.concat(["Other"]), params[:occupation]), {:helpText => 'Occupation'}%>
   <%end%>
 
-  <%= hidden_field_tag("person_id", params[:id])%>
+  <%= hidden_field_tag("person_id", (params[:id] || params[:patient_id]))%>
   
 <% end %>
