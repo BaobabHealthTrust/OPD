@@ -15,4 +15,6 @@ rerun.txt
 nbproject
 Gemfile.lock
 tmp
-*.lock	
+*.lock
+.ruby-version
+	

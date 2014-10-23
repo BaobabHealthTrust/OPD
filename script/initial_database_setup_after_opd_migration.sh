@@ -40,5 +40,4 @@ mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/create_dde_server_con
 
 echo "After completing database setup, you are advised to run the following:"
 echo "script/runner -e development|production|test script/update_diagnosis_observations.rb"
-echo "rake test"
-echo "rake cucumber"
+echo "done"
