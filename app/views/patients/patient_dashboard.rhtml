@@ -175,10 +175,10 @@ div {
     <div class="demographics data">
       <b>Name:&nbsp;</b><%=@patient_bean.name%>&nbsp;
       <%= image_tag("#{@patient_bean.sex.downcase}.gif", :class => 'gender') %><br />
-      <b>Birthdate:</b>&nbsp;<%=@patient_bean.birth_date%>&nbsp;
+      <b>Birth Date:</b>&nbsp;<%=@patient_bean.birth_date%>&nbsp;
       <b>Age:</b>&nbsp;<%=@patient_bean.age%><br />
       <b>National ID:</b>&nbsp;<%=@patient_bean.national_id_with_dashes%><br />
-      <b>Address</b>&nbsp;Area 47<br /><hr />
+      <b>Address</b>&nbsp;<%=  @patient_bean.current_residence %><br /><hr />
       <b>Next task:</b>&nbsp;<%=@task.encounter_type%>
     </div><p />
 
