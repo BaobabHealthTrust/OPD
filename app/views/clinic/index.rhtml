@@ -2,10 +2,49 @@
   <head>
     <title>Clinic</title>
     <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer ></script>
-<script src="/touchscreentoolkit/lib/javascripts/standard.js"> </script>
+    <script src="/touchscreentoolkit/lib/javascripts/standard.js"> </script>
+    <%= javascript_include_tag("jquery") %>
     <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
     
     <style>
+      table td img{
+        height: 34px;
+        width: 32px;
+      }
+      .emergencyPopup {
+          position: relative;
+          background-color: #fff;
+          border: 1px solid #aaa;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+          padding: 15px;
+          z-index: 1000;
+          min-height: 39%;
+          max-height: 39%;
+          width: 400px;
+          left: 31%;
+          margin-top: 5%;
+          border-radius: 15px;
+    }
+
+    .confirmatory_buttons{
+      position: relative;
+      margin-top: 20%;
+      margin-left: -15px;
+      margin-right: -14px;
+    }
+    #shield{
+      position:fixed;
+      top:0%;
+      width:100%;
+      height:100%;
+      background-color:#000000;
+      filter:alpha(opacity=60);
+      opacity:0.6;
+      -moz-opacity:0.6;
+      z-index:100;
+      text-align:center;
+      vertical-align:middle;
+    }
     
     </style>
     
@@ -35,6 +74,12 @@
 			document.getElementById("popupBox").style.display = "block";
 			document.getElementById("popupBox").style.width = "400px";
 		}
+
+        function setEmergencyButton(){
+          $("button[link='Emergency']")[0].onclick = function(){alert('ddd')}
+        }
+        window.setInterval("setEmergencyButton();", 300);
+        
     </script>
   </head>
   <body><div id='content'>
@@ -88,7 +133,7 @@ on the rest of the stations %>
               <%# else %>
                 <!--<option value='/people/search' link='/people/search' ttSize="200px">Find By Name</option>-->
               <%# end %>
-
+              <option>Emergency</option>
 <%# Hide Find by ARV Number button on non-HIV workstations %>
               <% if @location =~ /HIV/ %>
                 <option value="/people/find_by_arv_number" ttSize="265px">Find By ARV Number</option>
@@ -119,5 +164,33 @@ on the rest of the stations %>
         </form>
       </center>
     </div>
+<!-----------------EMERGENCY POPUP -->
+<div id="shield">
+  
+</div>
+<div style="display: block;" class="emergencyPopup">
+    <center><span><b style="font-size:14pt;">Select Gender</b>
+    </span></center>
+
+    <table width="30%;" align="center" cellspacing="0" style="margin-top:10%;">
+      <tr>
+        <td style="border-bottom: 1px solid black"><img src='/touchscreentoolkit/lib/images/unchecked.png' height='45' /></td>
+        <td style="border-bottom: 1px solid black">Male</td>
+      </tr>
+      <tr>
+        <td><img src='/touchscreentoolkit/lib/images/unchecked.png' height='45' /></td>
+        <td>Female</td>
+      </tr>
+    </table>
+    <div style="border-top:1px solid black" class="confirmatory_buttons">
+      <button onmousedown="" class="button red" onclick="cancelPopup()">
+          <span>Cancel</span>
+      </button>
+      <button onmousedown="" class="button green" id="okayButton" style="float:right;">
+          <span>Okay</span>
+      </button>
+    </div>
+  </div>
+<!-- EMERGENCY POPUP --->
   </body>
 </html>
