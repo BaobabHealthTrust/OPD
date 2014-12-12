@@ -76,10 +76,14 @@
 		}
 
         function setEmergencyButton(){
-          $("button[link='Emergency']")[0].onclick = function(){alert('ddd')}
+          $("button[link='Emergency']")[0].onclick = function(){
+            showEmergencyPopup();
+          }
+          $("button[link='Emergency']")[0].className = 'red';
         }
         window.setInterval("setEmergencyButton();", 300);
-
+        
+        var currentGender = "";
         function selectGender(gender){
             unchecked='/touchscreentoolkit/lib/images/unchecked.png';
             checked = '/touchscreentoolkit/lib/images/checked.png';
@@ -95,7 +99,21 @@
             activeGender.className = "active";
             imgTag = activeGender.getElementsByTagName("img")[0];
             imgTag.src =  checked;
-        }
+            currentGender = gender;
+      }
+
+      function cancelEmergencyPopup(){
+        currentGender = "";
+        unchecked='/touchscreentoolkit/lib/images/unchecked.png';
+        document.getElementById("male").getElementsByTagName("img")[0].src =  unchecked;
+        document.getElementById("female").getElementsByTagName("img")[0].src =  unchecked;
+        document.getElementById("shield").style.display='none';
+        document.getElementsByClassName("emergencyPopup")[0].style.display = 'none';        
+      }
+      function showEmergencyPopup(){
+        document.getElementById("shield").style.display='block';
+        document.getElementsByClassName("emergencyPopup")[0].style.display = 'block';
+      }
     </script>
   </head>
   <body><div id='content'>
@@ -181,10 +199,10 @@ on the rest of the stations %>
       </center>
     </div>
 <!-----------------EMERGENCY POPUP -->
-<div id="shield">
+<div id="shield" style="display:none">
   
 </div>
-<div style="display: block;" class="emergencyPopup">
+<div style="display: none;" class="emergencyPopup">
     <center><span><b style="font-size:14pt;">Select Gender</b>
     </span></center>
 
@@ -199,7 +217,7 @@ on the rest of the stations %>
       </tr>
     </table>
     <div style="border-top:1px solid black" class="confirmatory_buttons">
-      <button onmousedown="" class="button red" onclick="cancelPopup()">
+      <button onmousedown="" class="button red" onclick="cancelEmergencyPopup()">
           <span>Cancel</span>
       </button>
       <button onmousedown="" class="button green" id="okayButton" style="float:right;">
