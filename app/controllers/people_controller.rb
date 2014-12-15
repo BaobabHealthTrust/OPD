@@ -96,6 +96,5 @@ class PeopleController < GenericPeopleController
     end
   end
 =end
-
 end
  
