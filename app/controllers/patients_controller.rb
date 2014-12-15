@@ -871,4 +871,33 @@ class PatientsController < GenericPatientsController
   
     render :layout => false
   end
+
+  def process_emergency_data
+    patient_id = ""
+    ActiveRecord::Base.transaction do
+      person = Person.create({
+        :gender => params[:gender].first.upcase
+      })
+      person.names.create({})
+      person.addresses.create({})
+      patient = person.create_patient
+      patient_id = patient.id
+      identifier_type = PatientIdentifierType.find_by_name("DUMMY ID").id
+      current_dummy_id = 1 #Starting point for the dummy IDs
+      last_dummy_record = PatientIdentifier.find(:last, :conditions => ["identifier_type =?", identifier_type])
+      
+      unless last_dummy_record.blank?
+        current_dummy_id = (last_dummy_record.identifier.to_i + 1)
+      end
+
+      current_dummy_id = current_dummy_id.to_s.rjust(5,'0')
+
+      patient.patient_identifiers.create({
+        :identifier => current_dummy_id,
+        :identifier_type => identifier_type
+      })
+    end
+    render :text => patient_id and return
+  end
+
 end

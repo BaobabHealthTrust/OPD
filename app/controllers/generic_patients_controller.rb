@@ -258,7 +258,13 @@ class GenericPatientsController < ApplicationController
     end
     print_and_redirect("/patients/national_id_label?patient_id=#{params[:id]}", redirect)  
   end
-  
+
+  def dashboard_print_temporary_id
+    patient_id = params[:patient_id]
+    url = "/patients/show/#{patient_id}"
+    print_and_redirect("/patients/temporary_id_label?patient_id=#{patient_id}", url)
+  end
+
   def dashboard_print_visit
     print_and_redirect("/patients/visit_label/?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")
   end
@@ -291,6 +297,31 @@ class GenericPatientsController < ApplicationController
   def national_id_label
     print_string = PatientService.patient_national_id_label(@patient) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a national id label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
+  end
+
+  def temporary_id_label
+    patient = Patient.find(params[:patient_id])
+    print_string = dummy_id_standard_label(patient)
+    send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
+  end
+
+  def dummy_id_standard_label(patient)
+    identifier_type = PatientIdentifierType.find_by_name("DUMMY ID").id
+    dummy_identifier = patient.patient_identifiers.find(:last,
+                    :conditions => ["identifier_type =?", identifier_type]
+                  ).identifier
+    sex =  '(' + patient.person.gender.to_s + ')'
+    today = Date.today.strftime("%d/%b/%Y")
+    label = ZebraPrinter::StandardLabel.new
+    label.font_size = 2
+    label.font_horizontal_multiplier = 2
+    label.font_vertical_multiplier = 2
+    label.left_margin = 50
+    label.draw_barcode(200,140,0,1,4,15,120,false,"#{dummy_identifier}")
+    label.draw_multi_text("Visit Date:#{today} #{sex}")
+    label.font_size = 1
+    label.draw_text("(Emergency)",280,300,0,3,1,1,false)
+    label.print(1)
   end
 
   def print_lab_orders

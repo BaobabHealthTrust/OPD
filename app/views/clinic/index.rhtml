@@ -74,7 +74,23 @@
 			document.getElementById("popupBox").style.display = "block";
 			document.getElementById("popupBox").style.width = "400px";
 		}
+        function processEmergencyData(){
+          if (currentGender == ""){
+            return false;
+          }
+          else{
 
+              jQuery.ajax({
+                type: "POST",
+                url: "/patients/process_emergency_data/",
+                data: "gender=" + currentGender,
+                success: function(patientID){
+                  window.location = "/patients/dashboard_print_temporary_id?patient_id=" + patientID;
+                }
+              });
+          }
+        }
+        
         function setEmergencyButton(){
           $("button[link='Emergency']")[0].onclick = function(){
             showEmergencyPopup();
@@ -220,7 +236,7 @@ on the rest of the stations %>
       <button onmousedown="" class="button red" onclick="cancelEmergencyPopup()">
           <span>Cancel</span>
       </button>
-      <button onmousedown="" class="button green" id="okayButton" style="float:right;">
+      <button onmousedown="processEmergencyData();" class="button green" id="okayButton" style="float:right;">
           <span>Okay</span>
       </button>
     </div>
