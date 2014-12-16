@@ -881,10 +881,12 @@ class GenericPeopleController < ApplicationController
       patient = Patient.find(params[:patient_id])
       ActiveRecord::Base.transaction do
         #******************************************
-          address_params = params["addresses"]
-          names_params = params["names"]
-          params_to_process = params.reject{|key,value| key.match(/addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) }
+
+          address_params = params["person"]["addresses"]
+          names_params = params["person"]["names"]
+          params_to_process = params["person"].reject{|key,value| key.match(/addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) }
           birthday_params = params_to_process.reject{|key,value| key.match(/gender/) }
+
           person_params = params_to_process.reject{|key,value| key.match(/birth_|age_estimate|occupation|identifiers/) }
 
           if person_params["gender"].to_s == "Female"
@@ -915,19 +917,19 @@ class GenericPeopleController < ApplicationController
 
           person.person_attributes.create(
             :person_attribute_type_id => PersonAttributeType.find_by_name("Occupation").person_attribute_type_id,
-            :value => params["occupation"]) unless params["occupation"].blank? rescue nil
+            :value => params["person"]["occupation"]) unless params["person"]["occupation"].blank? rescue nil
 
           person.person_attributes.create(
             :person_attribute_type_id => PersonAttributeType.find_by_name("Cell Phone Number").person_attribute_type_id,
-            :value => params["cell_phone_number"]) unless params["cell_phone_number"].blank? rescue nil
+            :value => params["person"]["cell_phone_number"]) unless params["person"]["cell_phone_number"].blank? rescue nil
 
           person.person_attributes.create(
             :person_attribute_type_id => PersonAttributeType.find_by_name("Office Phone Number").person_attribute_type_id,
-            :value => params["office_phone_number"]) unless params["office_phone_number"].blank? rescue nil
+            :value => params["person"]["office_phone_number"]) unless params["person"]["office_phone_number"].blank? rescue nil
 
           person.person_attributes.create(
             :person_attribute_type_id => PersonAttributeType.find_by_name("Home Phone Number").person_attribute_type_id,
-            :value => params["home_phone_number"]) unless params["home_phone_number"].blank? rescue nil
+            :value => params["person"]["home_phone_number"]) unless params["person"]["home_phone_number"].blank? rescue nil
 
       end
       redirect_to(next_task(patient)) and return
