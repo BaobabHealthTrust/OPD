@@ -133,6 +133,7 @@ class GenericPeopleController < ApplicationController
         :conditions => ["identifier_type =?", dummy_identifier_type])
       
       unless dummy_record.blank?
+        redirect_to :controller => "patients", :action => "show", :id => "#{dummy_record.patient.id}" and return unless dummy_record.patient.person.names.blank?
         redirect_to :controller => "people", :action => "emergency", :patient_id => dummy_record.patient_id and return
       end
 
