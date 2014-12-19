@@ -320,16 +320,20 @@ class Reports::CohortOpd
   end
 
   def attendance
+    hiv_encounters = ["HIV RECEPTION", "HIV CLINIC REGISTRATION", "HIV STAGING", "HIV CLINIC CONSULTATION"]
+    hiv_encounter_type_ids = EncounterType.find(:all, :conditions => ["name IN (?)",
+                hiv_encounters]).map(&:encounter_type_id).join(', ')
 		@cases = Encounter.find_by_sql(
 												"SELECT patient_id, COUNT(patient_id), DATE_FORMAT(encounter_datetime,'%Y-%m-%d') enc_date 
 												FROM encounter e
 												LEFT OUTER JOIN person p ON p.person_id = e.patient_id 
 												WHERE e.voided = 0 AND encounter_datetime >= '" + @start_date +"'
 													AND encounter_datetime <= '" + @end_date + "'
+                          AND e.encounter_type NOT IN (#{hiv_encounter_type_ids})
 													AND DATEDIFF(NOW(), p.birthdate)/365 >= " + @start_age + "
 													AND DATEDIFF(NOW(), p.birthdate)/365 <= " + @end_age + "
 												GROUP BY patient_id, enc_date
 												ORDER BY patient_id ASC, COUNT(patient_id) DESC"
-		).map{|e| e. patient_id}.uniq.size
+		).map{|e| e. patient_id}.size#.uniq.size
   end
 end
