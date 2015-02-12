@@ -13,8 +13,8 @@ class LocationController < GenericLocationController
     
     (diagnosis_concepts || []).each do |diagnosis_concept|
       concept_id = diagnosis_concept.concept_id
-      concept_short_name = diagnosis_concept.short_name
-      concept_full_name = diagnosis_concept.full_name
+      concept_short_name = diagnosis_concept.shortname
+      concept_full_name = diagnosis_concept.fullname
       hash["diagnosis_concepts"][concept_id] = {}
       hash["diagnosis_concepts"][concept_id]["short_name"] = concept_short_name
       hash["diagnosis_concepts"][concept_id]["full_name"] = concept_full_name
@@ -27,8 +27,8 @@ class LocationController < GenericLocationController
     
     (presenting_complaints_concepts || []).each do |presenting_complaint_concept|
       concept_id = presenting_complaint_concept.concept_id
-      concept_short_name = presenting_complaint_concept.short_name
-      concept_full_name = presenting_complaint_concept.full_name
+      concept_short_name = presenting_complaint_concept.shortname
+      concept_full_name = presenting_complaint_concept.fullname
       hash["presenting_complaints_concepts"][concept_id] = {}
       hash["presenting_complaints_concepts"][concept_id]["short_name"] = concept_short_name
       hash["presenting_complaints_concepts"][concept_id]["full_name"] = concept_full_name
