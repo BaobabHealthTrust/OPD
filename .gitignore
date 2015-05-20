@@ -17,4 +17,4 @@ Gemfile.lock
 tmp
 *.lock
 .ruby-version
-
+.idea/*
