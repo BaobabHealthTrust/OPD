@@ -1,37 +1,49 @@
 class LocationController < GenericLocationController
 
   def disease_surveillance_api
-
-    diagnosis_set = CoreService.get_global_property_value("application_diagnosis_concept")
-    diagnosis_set = "Qech outpatient diagnosis list" if diagnosis_set.blank?
-    diagnosis_concept_set = ConceptName.find_by_name(diagnosis_set).concept
-    diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set.id])
-
     hash = {}
-    hash["diagnosis_concepts"] = {}
-    hash["presenting_complaints_concepts"] = {}
+    facility = Location.current_health_center.name rescue 'Location Not Set'
+    start_date = params[:start_date].to_date rescue Date.today
+    end_date = params[:end_date].to_date rescue Date.today
+
+    concept_names = [
+      'PRIMARY DIAGNOSIS', 'DETAILED PRIMARY DIAGNOSIS', 'SECONDARY DIAGNOSIS',
+      'DETAILED SECONDARY DIAGNOSIS', 'SPECIFIC SECONDARY DIAGNOSIS', 'ADDITIONAL DIAGNOSIS']
     
-    (diagnosis_concepts || []).each do |diagnosis_concept|
-      concept_id = diagnosis_concept.concept_id
-      concept_short_name = diagnosis_concept.shortname
-      concept_full_name = diagnosis_concept.fullname
-      hash["diagnosis_concepts"][concept_id] = {}
-      hash["diagnosis_concepts"][concept_id]["short_name"] = concept_short_name
-      hash["diagnosis_concepts"][concept_id]["full_name"] = concept_full_name
+    diagnosis_concept_ids = []
+    concept_names.each do |concept_name|
+        diagnosis_concept_id = ConceptName.find_by_name(concept_name).concept_id
+        diagnosis_concept_ids << diagnosis_concept_id
     end
 
-    presenting_complaints_set = "PRESENTING COMPLAINT"
-		presenting_complaints_concept_set = ConceptName.find_by_name(presenting_complaints_set).concept
-		presenting_complaints_concepts = Concept.find(:all, :joins => :concept_sets,
-      :conditions => ['concept_set = ?', presenting_complaints_concept_set.id])
-    
-    (presenting_complaints_concepts || []).each do |presenting_complaint_concept|
-      concept_id = presenting_complaint_concept.concept_id
-      concept_short_name = presenting_complaint_concept.shortname
-      concept_full_name = presenting_complaint_concept.fullname
-      hash["presenting_complaints_concepts"][concept_id] = {}
-      hash["presenting_complaints_concepts"][concept_id]["short_name"] = concept_short_name
-      hash["presenting_complaints_concepts"][concept_id]["full_name"] = concept_full_name
+    diagnosis_obs = Observation.find(:all, :conditions => ["concept_id IN (?) AND DATE(obs_datetime) >= ? AND
+        DATE(obs_datetime) <= ?", diagnosis_concept_ids, start_date, end_date])
+    count = 1
+    diagnosis_obs.each do |obs|
+        next if obs.value_coded.blank? #Interested only in coded answers
+        parent_obs = Observation.find(:all, :conditions => ["obs_group_id =?", obs.id])
+        next unless parent_obs.blank? #Not interested in parent obs that has child obs
+        obs_id = obs.id
+        person = obs.person
+        birthdate = person.birthdate.to_date rescue 1900
+        birthdate_estimated = person.birthdate_estimated
+        gender = person.gender
+        age = PatientService.cul_age(birthdate, birthdate_estimated, obs.date_created.to_date, obs.date_created.to_date)
+        national_id = PatientService.get_national_id(person.patient) rescue nil
+        next if national_id.blank?
+        diagnosis_short_name = Concept.find(obs.value_coded).shortname
+        diagnosis_full_name = Concept.find(obs.value_coded).fullname
+        hash[count] = {
+                      "national_id" => national_id, 
+                      "gender" => gender, 
+                      "age" => age,
+                      "diagnosis_short_name" => diagnosis_short_name,
+                      "diagnosis_full_name" => diagnosis_full_name,
+                      "obs_date" => obs.obs_datetime.to_date,
+                      "facility" => facility,
+                      "obs_id" => obs_id
+        }
+        count = count + 1
     end
     
     render :text => hash.to_json and return
