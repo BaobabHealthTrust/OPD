@@ -5,7 +5,7 @@ class LocationController < GenericLocationController
     facility = Location.current_health_center.name rescue 'Location Not Set'
     start_date = params[:start_date].to_date rescue Date.today
     end_date = params[:end_date].to_date rescue Date.today
-
+    zone = CoreService.get_global_property_value("zone")
     concept_names = [
       'PRIMARY DIAGNOSIS', 'DETAILED PRIMARY DIAGNOSIS', 'SECONDARY DIAGNOSIS',
       'DETAILED SECONDARY DIAGNOSIS', 'SPECIFIC SECONDARY DIAGNOSIS', 'ADDITIONAL DIAGNOSIS']
@@ -41,7 +41,8 @@ class LocationController < GenericLocationController
                       "diagnosis_full_name" => diagnosis_full_name,
                       "obs_date" => obs.obs_datetime.to_date,
                       "facility" => facility,
-                      "obs_id" => obs_id
+                      "obs_id" => obs_id,
+                      "zone" => zone
         }
         count = count + 1
     end
