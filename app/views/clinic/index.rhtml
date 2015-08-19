@@ -45,7 +45,7 @@
               <th colspan=2>Home Page</th>
             </tr>
             <h1 id='project_name'>
-              <div style="font-size: 0.8em; margin-top: 28px;">
+              <div style="font-size: 0.8em; margin-top: 5px;">
                 <%location_name = (@location.downcase == "outpatient" ? "OPD" : "OPD") 
                   if current_user.activities.include?('Manage Lab Orders') or current_user.activities.include?('Manage Lab Results') or
                   current_user.activities.include?('Manage Sputum Submissions') or current_user.activities.include?('Manage TB Clinic Visits') or
@@ -55,6 +55,8 @@
                 <%else%>
                   <%= location_name %>
                <%end%>
+                <br />
+                <span style="font-size: 12px; font-style: italic; color: #333;"><%= BART_VERSION %></span>
               </div>
             </h1>
 
