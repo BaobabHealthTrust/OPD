@@ -18,3 +18,4 @@ tmp
 *.lock
 .ruby-version
 .idea/*
+config/*.yml
