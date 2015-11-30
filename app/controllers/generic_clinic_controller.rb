@@ -298,4 +298,9 @@ class GenericClinicController < ApplicationController
     render :template => 'clinic/lab_tab.rhtml' , :layout => false
   end
 
+  def preferred_diagnosis
+    
+    render :layout => false
+  end
+  
 end

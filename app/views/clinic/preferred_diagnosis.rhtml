@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <title>Preferred Diagnoses</title>
+
+    <script type="text/javascript">
+      function getButtonString(id,string){
+        return "<button onMouseDown='press(this.id);' class='keyboardButton' id='"+ id +"'>" + string + "</button>";
+      }
+
+      function getCharButtonSetID(character,id){
+        return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' + "<span style='width:32px'>"+ character +"</span>"+ "</button>";
+      }
+
+      function getButtons(chars){
+        var buttonLine = "";
+        for(var i=0; i<chars.length; i++){
+          character = chars.substring(i,i+1)
+          buttonLine += getCharButtonSetID(character,character)
+        }
+        return buttonLine;
+      }
+
+      function showAlphaKeypad(){
+        document.getElementById("keypad").style.height = "280";
+        keyboard = document.getElementsByClassName("keypad")[0];
+        keyboard.innerHTML= getButtons("0123456789") + "</br>"
+        keyboard.innerHTML+= getButtons("QWERTYUIOP") + "</br>"
+        keyboard.innerHTML+= getButtons("ASDFGHJKL:") + "</br>"
+        keyboard.innerHTML+= getButtons("ZXCVBNM,.?")
+        keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
+        keyboard.innerHTML+= getButtonString('Space','<span>Space</span>')
+        keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
+      }
+
+      function showKeyboard(){
+        showAlphaKeypad();
+        key = document.getElementById("keypad")
+        if(key.style.display == 'none' || key.style.display == ""){
+          key.style.display = "inline";
+          return
+        }
+
+        key.style.display = "none";
+      }
+
+      function press(pressedChar){
+        search = document.getElementById("search");
+        switch (pressedChar) {
+          case 'backspace':
+            search.value = search.value.substring(0,search.value.length-1);
+            searchDiagnosis(search.value)
+            return;
+          case 'Space':
+            search.value+= " "
+            searchDiagnosis(search.value)
+            return
+          case 'clear':
+            search.value = ""
+            searchDiagnosis(search.value)
+            return
+          case 'num':
+            showNumericKeypad();
+            return
+          case 'slash':
+            search.value+= "/"
+            searchDiagnosis(search.value)
+            return
+          case 'dash':
+            search.value+= "-"
+            searchDiagnosis(search.value)
+            return
+          case 'abc':
+            showAlphaKeypad();
+            return
+        }
+        search.value+= pressedChar
+        searchDiagnosis(search.value)
+      }
+
+
+      function searchDiagnosis(value){
+
+      }
+
+    </script>
+
+    <%= stylesheet_link_tag fancy_or_high_contrast_touch %>
+    <%= stylesheet_link_tag "dashboard" %>
+    <script src="/javascripts/jquery-1.3.2.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      jQuery(document).ready(function($) {
+        $('#finish').click(function() {
+          window.location = '/clinic';
+        })
+      })
+
+    </script>
+    <style type="text/css">
+      #backspace{
+        position:absolute;
+        left:100px;
+        bottom:2px;
+      }
+
+      #Space{
+        position:absolute;
+        left:220px;
+        bottom:2px;
+        width:200px;
+      }
+
+      #clear{
+        position:absolute;
+        left:470px;
+        bottom:2px;
+      }
+
+      #keypad{
+        background-color: #FFFFFF;
+        border: 2px solid #9999FF;
+        border-radius: 15px 15px 15px 15px;
+        display: none;
+        height: 304px;
+        padding: 5px;
+        position: absolute;
+        left: 39%;
+        top: 11px;
+        width: 672px;
+      }
+
+      #press{
+        font-size:75px;
+        height:80px;
+        position:absolute;
+        right:13px;
+        top:35px;
+        width:300px;
+      }
+
+
+      td {
+        border-width:1px;
+      }
+
+      .messageBar {
+        left: 250px;
+        width: 450px;
+        position: absolute;
+        top: 100px;
+        font-size: 2em;
+        text-align: center;
+        background-color: tomato;
+        padding: 10px;
+        z-index: 999;
+        border: 5px outset tomato;
+        display: none;
+        border-radius: 15px;
+      }
+
+      #second_patient_div {
+        width:49%;
+        margin-left:55%;
+      }
+
+      #primary_patient_div {
+        float:left;
+        width:45%;
+        margin-left:1%;
+      }
+
+      .find_buttons {
+        height:30px;
+        width: 100px;
+        font-size:10px;
+      }
+
+      table{
+        font-size:20px;
+        /*padding-left:10px;*/
+      }
+
+      #left_div {
+        float: left;
+        width: 43%;
+        border-style:solid;
+        border-width:1px;
+        height: 75%;
+        overflow: auto;
+        margin-top: 2%;
+        margin-left: 0.5%;
+      }
+
+      #right_div {
+        width: 44%;
+        border-style:solid;
+        border-width:1px;
+        height: 75%;
+        overflow: auto;
+        margin-top: 2%;
+        margin-left: 54%;
+      }
+
+      #center_div {
+        float: left;
+        width: 8%;
+        height: 77%;
+        overflow: auto;
+      }
+
+      #popUpBox{
+        position: absolute;
+        top: 84px;
+        left: 420px;
+        border: solid 1px #000000;
+        background-color:MediumTurquoise;
+        visibility: hidden;
+        font-size: 25;
+        z-index: 600;
+        width:413px;
+        -moz-user-select:none
+      }
+
+      input{
+        border: 1px solid #ccc;
+        border-radius: 0;
+        box-shadow: none;
+        color: black;
+        padding: 12px;
+        width: 20%;
+      }
+
+      div{
+        -moz-user-select: none;
+      }
+
+      #input_div{
+        padding-top: 20px;
+        padding-left: 200px;
+      }
+
+      #main {
+        margin: auto;
+        width: 90%;
+        padding-top: 20px;
+      }
+
+      #div-a {
+        width: 50%;
+        min-height: 550px;
+        background: #EEE5DE;
+        float: left;
+      }
+
+      #div-b  {
+        width: 50%;
+        background: #71C671;
+        min-height: 550px;
+        float: left;
+      }
+
+      .clear:after {
+        clear: both;
+        display: table;
+        content: "";
+      }
+
+      ul li {
+        display: block;
+        color: #388E8E;
+        border-bottom: 1px solid black;
+        width: 600px;
+      }
+      ul a {
+        display: block;
+        color: #388E8E;
+        text-decoration: none;
+        padding-top: 10px;
+        padding-bottom: 16px;
+        padding-left: 15px;
+      }
+
+      ul li:hover{
+        background-color: #FFFFFF;
+}
+      .btn {
+        -moz-user-select: none;
+        background-image: none;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.42857;
+        margin-bottom: 0;
+        padding: 6px 56px;
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+        background-color: #337ab7;
+        border-color: #2e6da4;
+        color: #fff;
+        float: right;
+        margin-top: -5px;
+      }
+
+      .div-b-header{
+        background-color: #FFFAFA;
+        vertical-align: middle;
+        white-space: nowrap;
+        display: inline-block;
+        padding: 6px 12px;
+        margin-top: 5px;
+        display:inline-block;
+        float: left;
+        margin-left: 25%;
+
+      }
+
+      .div-a-header{
+        background-color: #FFE7BA;
+        display:inline-block;
+        vertical-align: middle;
+        margin-top: 5px;
+        padding: 6px 12px;
+        margin-left: 30%;
+      }
+    </style>
+
+  </head>
+  <body id="mateme">
+    <div id="container">
+      <div id="content" style = "position : relative; width : 99%; margin-left : -49.5%">
+
+        <div id="keypad">
+          <span class="keypad">
+          </span>
+        </div>
+
+        <div id='input_div'>
+          <span style="font-family: 'PT Serif',serif; font-weight: bold;">Filter Diagnoses </span> <%=  "&nbsp;" * 2 %> <input onmousedown="showKeyboard();" name="primary_patient" id="search" type="text" />
+        </div>
+
+        <div id="main">
+          <div id="div-a">
+            <span class="div-a-header">SELECT DIAGNOSIS BELOW</span>
+            <div id="nav">
+              <div style="overflow:auto; height: 515px;">
+                <ul>
+                  <% 10.times do %>
+                    <li><a href="#">Diagnosis One <span class="btn">Select</span></a></li>
+                    <li><a href="#">Diagnosis Two <span class="btn">Select</span></a></li>
+                    <li><a href="#">Diagnosis Three <span class="btn">Select</span></a></li>
+                    <li><a href="#">Diagnosis Four <span class="btn">Select</span></a></li>
+                    <li><a href="#">Diagnosis Five <span class="btn">Select</span></a></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div id="div-b">
+            <span class="div-b-header">TOP 10 DIAGNOSES FOR THIS FACILITY</span>
+          </div>
+        </div>
+
+        <div id="footer" class="dark">
+          <div id="buttons" class="buttons" style="top:0px">
+            <button id="cancel" class="red right" style="position :relative; float:left;"><span>Cancel</span></button>
+            <button id="finish" class="blue left" style="position :relative; float:right;"><span>Save</span></button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </body>
+
+
+</html>
