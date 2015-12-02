@@ -136,7 +136,12 @@
 
       function rebuildSelectedDiagnosis(conceptId){
         delete selectedHashData[conceptId];
-        showSelectedDiagnoses(selectedHashData);
+        yesButton = document.getElementById('yes');
+        showPopup();
+        yesButton.onclick = function(){
+          showSelectedDiagnoses(selectedHashData);
+          hidePopup();//Hide the popup
+        }
       }
 
       jQuery(document).ready(function($) {
@@ -158,6 +163,16 @@
           document.getElementById("diagnosis-form").submit();
         });
       })
+
+      function showPopup(){
+        document.getElementById("popup-div").style.display = 'inline';
+        document.getElementById("cover").style.display = 'inline';
+      }
+
+      function hidePopup(){
+        document.getElementById("popup-div").style.display = 'none';
+        document.getElementById("cover").style.display = 'none';
+      }
       
     </script>
 
@@ -395,6 +410,42 @@
       .danger{
         background-color: #CD2626;
       }
+
+      #popup-div {
+        display: none;
+        background-color: #F4F4F4;
+        border: 2px solid #E0E0E0;
+        border-radius: 15px;
+        height: 140px;
+        padding: 5px;
+        position: absolute;
+        margin-top: 100px;
+        width: 560px;
+        margin-left: 430px;
+        z-index: 991;
+      }
+
+      #popup-header{
+        border-bottom: 2px solid #7D9EC0;
+        margin-left: -5px;
+        width: 101.5%;
+        background-color: #FFFFFF;
+        margin-top: -5px;
+        padding-top: 5px;
+        border-radius: 15px 15px 0 0;
+      }
+
+      #cover{
+        display: none;
+        position: absolute;
+        background-color: black;
+        width: 100%;
+        height: 102%;
+        left: 0%;
+        top: 0%;
+        z-index: 990;
+        opacity: 0.65;
+      }
     </style>
 
   </head>
@@ -449,12 +500,23 @@
       </div>
     </div>
 
+    <div id="popup-div">
+      <div id="popup-header">
+        <center>Confirm</center>
+      </div><br />
+      <span>Are you sure you want to continue?</span>
+      <span id="yes" class="btn" style="margin-top: 63px !Important; position: relative;">Yes</span>
+      <span onclick="hidePopup();" class="btn" style="margin-top: 63px !Important; position: relative; right: 20px;">Cancel</span>
+    </div>
+    <div id="cover"></div>
+
+
     <script type="text/javascript">
-        <% @preferred_diagnoses.each do |concept_id, values| %>
-            selectedHashData['<%= concept_id %>'] = {name: '<%= values[:name] %>'};
-        <% end %>
+<% @preferred_diagnoses.each do |concept_id, values| %>
+    selectedHashData['<%= concept_id %>'] = {name: '<%= values[:name] %>'};
+<% end %>
     </script>
-    
+
   </body>
 
 
