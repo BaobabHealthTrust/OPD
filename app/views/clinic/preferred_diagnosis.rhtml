@@ -145,6 +145,10 @@
       }
 
       jQuery(document).ready(function($) {
+        $('#cancel').click(function() {
+          window.location = '/clinic';
+        })
+
         $('#finish').click(function() {
           form = document.createElement("form");
           form.method = 'POST';
