@@ -7,7 +7,7 @@
     <%= stylesheet_link_tag fancy_or_high_contrast_touch %>
     <%= stylesheet_link_tag "dashboard" %>
     <script src="/javascripts/jquery-1.3.2.min.js" type="text/javascript"></script>
-    
+
     <script type="text/javascript">
       function getButtonString(id,string){
         return "<button onMouseDown='press(this.id);' class='keyboardButton' id='"+ id +"'>" + string + "</button>";
@@ -429,7 +429,11 @@
             <span class="div-b-header">TOP 10 DIAGNOSES FOR THIS FACILITY</span>
             <div id="nav" style="background-color: #EEE5DE; margin-top: 50px; margin-left: 10px; width: 97%; padding-bottom: 3px;">
               <ul id="preference-diagnoses">
-
+                <% count = 0 %>
+                <% @preferred_diagnoses.each do |concept_id, values| %>
+                  <% count = count + 1 %>
+                  <li><a href='#' onmousedown='rebuildSelectedDiagnosis(<%= concept_id %>)'><b><%= count %>. </b><%= values[:name] %> <span class='btn danger'>Remove</span></a></li>
+                <% end %>
               </ul>
             </div>
           </div>
@@ -444,6 +448,13 @@
 
       </div>
     </div>
+
+    <script type="text/javascript">
+        <% @preferred_diagnoses.each do |concept_id, values| %>
+            selectedHashData['<%= concept_id %>'] = {name: '<%= values[:name] %>'};
+        <% end %>
+    </script>
+    
   </body>
 
 

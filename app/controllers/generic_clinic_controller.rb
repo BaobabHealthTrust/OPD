@@ -315,6 +315,14 @@ class GenericClinicController < ApplicationController
     end
 
     @diagnosis_hash = @diagnosis_hash.sort_by{|k, v|v[:name]}
+
+    @preferred_diagnoses = {}
+    preferred_diagnosis_concept_ids = GlobalProperty.find(:last, :conditions => ["property =?", 'preferred.diagnosis.concept_id']).property_value.split(", ") rescue []
+    preferred_diagnosis_concept_ids.each do |concept_id|
+      diagnosis_name = Concept.find(concept_id).fullname
+      @preferred_diagnoses[concept_id] = {:name => diagnosis_name}
+    end
+
     render :layout => false
   end
 
@@ -340,20 +348,15 @@ class GenericClinicController < ApplicationController
 	end
 
   def save_diagnoses
-
     ActiveRecord::Base.transaction do
-      property_name = 'preferred.diagnosis.concept_id'
-      params[:concept_ids].each do |concept_id|
-        old_property = GlobalProperty.find(:last, :conditions => ["property =? AND property_value =?",
-            property_name, concept_id])
+        property_name = 'preferred.diagnosis.concept_id'
+        old_property = GlobalProperty.find(:last, :conditions => ["property =?", property_name])
         old_property.delete unless old_property.blank?
 
         new_property = GlobalProperty.new()
         new_property.property = property_name
-        new_property.property_value = concept_id
+        new_property.property_value = params[:concept_ids].join(', ')
         new_property.save
-        
-      end
     end
 
     redirect_to("/clinic/preferred_diagnosis") and return
