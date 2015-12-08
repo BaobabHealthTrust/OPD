@@ -58,6 +58,8 @@
                                         <% else %>
                                           <option value='/patients/treatment_dashboard/<%= @patient.id %>'>Treatment</option>
                                         <% end %>
+                                        <option value='/encounters/new/malaria_lab_results?patient_id=<%= @patient.id %>'>Lab Results</option>
+                                        
 					<%  if @spine_clinician  %>
 						<option value="/encounters/new/influenza_data?patient_id=<%=@patient.patient_id%>"> Influenza </option>
 						<option value="/encounters/new/chronic_conditions?patient_id=<%=@patient.patient_id%>"> Chronic Conditions</option>
@@ -94,7 +96,8 @@
 						<option link="/lab/results/<%=@patient.id -%>">Lab results</option>
 						<%end%>-->
             <!--<option link='/patients/programs_dashboard/<%= @patient.id %>'>Programs</option>-->
-            <option link="/encounters/new/lab_orders?patient_id=<%= @patient.id -%>" ttSize = "160px">Investigation</option>
+
+            <!--<option link="/encounters/new/lab_orders?patient_id=<%= @patient.id -%>" ttSize = "160px">Investigation</option>-->
 
             <option link='<%= ((session[:datetime].to_date rescue '') != '' ?
 						"/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">

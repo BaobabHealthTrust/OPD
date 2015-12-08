@@ -157,4 +157,19 @@ class Observation < ActiveRecord::Base
     text += ": #{self.answer_string}" if(self.answer_string.downcase != "yes" && self.answer_string.downcase != "unknown")
     text
   end
+
+  def self.preferred_diagnoses
+    property_name = 'preferred.diagnosis.concept_id'
+    preferred_diagnosis_concept_ids = GlobalProperty.find(:last,
+      :conditions => ["property =?", property_name]).property_value.split(', ') rescue []
+
+    diagnoses = []
+    preferred_diagnosis_concept_ids.each do |concept_id|
+      diagnosis_name = Concept.find(concept_id).fullname
+      diagnoses << diagnosis_name
+    end
+    
+    return diagnoses.sort
+  end
+
 end

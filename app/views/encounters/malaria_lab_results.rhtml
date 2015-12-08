@@ -1,0 +1,48 @@
+<%= javascript_include_tag "jquery" %>
+<%= javascript_include_tag 'utils' %>
+
+<script>
+  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
+
+</script>
+
+
+<form action="/encounters/create" method='post'>
+
+  <%= hidden_field_tag "encounter[encounter_type_name]", "LAB RESULTS" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+
+  <%= touch_select_tag "MALARIA TEST", @patient, options_for_select(@malaria_tests),
+    {
+      :id => 'malaria_test',
+      :helpText => "Select Test Done"
+  }
+%>
+
+  <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@microscopy_options),
+    {
+      :id => "microscopy",
+      :condition => '$("malaria_test").value.toUpperCase().match(/SMEAR MICROSCOPY/i)',
+      :helpText => "Select Microscopy Results Below"
+  }
+%>
+
+  <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@malaria_rdt_options),
+    {
+      :id => "mRDT",
+      :condition => '$("malaria_test").value.toUpperCase().match(/MALARIA RDT/i)',
+      :helpText => "Select mRDT Results Below"
+  }
+%>
+  
+  <%  if @retrospective %>
+    <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+      <%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+  <% else %>
+    <%= hidden_field_tag "filter[provider]", nil %>
+  <% end %>
+
+</form
+

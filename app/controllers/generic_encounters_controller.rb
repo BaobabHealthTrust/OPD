@@ -609,12 +609,26 @@ class GenericEncountersController < ApplicationController
 			name.upcase.include?(search_string) ? name : nil rescue nil
 		}.compact
 
+    preferred_diagnoses = Observation.preferred_diagnoses
+    preferred_diagnoses = preferred_diagnoses.map{|diagnosis_name|
+      diagnosis_name.upcase.include?(search_string) ? diagnosis_name : nil rescue nil
+    }.compact
+
 		previous_answers = []
 		# TODO Need to check global property to find out if we want previous answers or not (right now we)
 		previous_answers = Observation.find_most_common(outpatient_diagnosis, search_string)
 		@suggested_answers = (previous_answers + valid_answers.sort!).reject{ | answer | filter_list.include?(answer) }.uniq[0..10]
 		@suggested_answers = @suggested_answers - params[:search_filter].split(',') rescue @suggested_answers
-		render :text => "<li></li>" + "<li>" + @suggested_answers.join("</li><li>") + "</li>"
+    
+    unless preferred_diagnoses.blank?
+      html = "<li></li>"
+      html += preferred_diagnoses.collect{|preferred_diagnosis|"<li preferred='true' value='#{preferred_diagnosis}'>#{preferred_diagnosis}</li>"}.to_s
+      html += (@suggested_answers - preferred_diagnoses).uniq.collect{|suggested_answer|"<li value='#{suggested_answer}'>#{suggested_answer}</li>"}.to_s
+      render :text => html and return
+    else
+      render :text => "<li></li>" + "<li>" + @suggested_answers.join("</li><li>") + "</li>" and return
+    end
+		
 	end
 
 

@@ -356,7 +356,7 @@ class GenericClinicController < ApplicationController
 
         new_property = GlobalProperty.new()
         new_property.property = property_name
-        new_property.property_value = params[:concept_ids].join(', ')
+        new_property.property_value = (params[:concept_ids].join(', ') rescue '')
         new_property.save
     end
 

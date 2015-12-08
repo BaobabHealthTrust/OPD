@@ -34,7 +34,7 @@ helper_method :allowed_hiv_viewer
 				task.encounter_type = 'ADMISSION DIAGNOSIS'
 				task.url = "/encounters/new/admission_diagnosis?patient_id=#{patient.id}"
 			end
-		end
+		end #OUTPATIENT DIAGNOSIS
 
 		patient_bean = PatientService.get_patient((Patient.find(patient.patient_id)).person)
     ask_complaints_questions_before_diagnosis = CoreService.get_global_property_value('ask.complaints.before_diagnosis').to_s == "true" rescue false
@@ -63,11 +63,33 @@ helper_method :allowed_hiv_viewer
 			task.url = "/encounters/new/social_determinants?patient_id=#{patient.id}"
 		end if ask_social_determinants_questions
 
-		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true') 
+		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true')
 			task.encounter_type = 'OUTPATIENT RECEPTION'
 			task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
 		end
 
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    if is_encounter_available(patient, 'OUTPATIENT DIAGNOSIS', session_date)
+      #raise "Lab Order"
+      diagnosis_concept_names = ["PRIMARY DIAGNOSIS", "SECONDARY DIAGNOSIS", "ADDITIONAL DIAGNOSIS"]
+      diagnosis_concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",
+          diagnosis_concept_names]).map(&:concept_id)
+
+      malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
+      malaria_diagnosis_obs = Observation.find(:last, :conditions => ["person_id =? AND concept_id IN (?) AND
+          value_coded =? AND DATE(obs_datetime) =?", patient.id, diagnosis_concept_ids,
+          malaria_concept_id, session_date
+        ])
+
+      unless malaria_diagnosis_obs.blank?
+        if !is_encounter_available(patient, 'LAB ORDERS', session_date)
+          task.encounter_type = 'LAB ORDERS'
+          task.url = "/encounters/new/malaria_lab_order?patient_id=#{patient.id}"
+        end
+      end
+
+		end
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		if task.encounter_type == session[:original_encounter]
 			session[:original_encounter] = nil
 		end

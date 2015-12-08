@@ -17,6 +17,12 @@
     document.forms["inpatient_diagnosis"].submit();
   }
 
+function updatePreferredDiagnosisTextColor(){
+  jQuery("li[preferred='true']").css("color", 'green');
+}
+
+window.setInterval("updatePreferredDiagnosisTextColor();", 50);
+
 </script>
 
 

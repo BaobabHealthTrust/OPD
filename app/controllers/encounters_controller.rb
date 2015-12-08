@@ -30,7 +30,22 @@ class EncountersController < GenericEncountersController
 		@min_height = PatientService.get_patient_attribute_value(@patient, "min_height")
 		@max_height = PatientService.get_patient_attribute_value(@patient, "max_height")
 		@select_options = select_options
-    
+
+    @malaria_tests = [
+        ["Malaria Rapid Diagnostic Test (mRDT)", "Malaria RDT"],
+        ["Microscopy", "Smear microscopy"]
+      ]
+
+    @microscopy_options = [
+      ["Thick Smear Positive", "Smear Positive"],
+      ["Thick Smear Negative", "Smear Negative"]
+    ]
+
+    @malaria_rdt_options = [
+      ["Malaria RDT Positive", "Malaria RDT Positive"],
+      ["Malaria RDT Negative", "Malaria RDT Negative"],
+    ]
+
     if  ['INPATIENT_DIAGNOSIS', 'OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id
 			diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set_id])	
