@@ -92,11 +92,10 @@
           data: "search_string=" + value,
           success: function(drugs){
             results = eval("(" + drugs  + ")");
+            console.log(results);
             html = ""
-            for (var concept_id in results){
-              conceptID = results[concept_id][0]
-              drugName = results[concept_id][1]["name"]
-
+            for (var conceptID in results){
+              drugName = results[conceptID];
               html += "<li><a href='#' onmousedown=\"updateSelectedDrugs(" + conceptID + ",'" + drugName +"' )\">" + drugName + " <span class='btn'>Select</span></a></li>";
             }
             

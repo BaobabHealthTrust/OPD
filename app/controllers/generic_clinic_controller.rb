@@ -350,14 +350,14 @@ class GenericClinicController < ApplicationController
 
   def save_diagnoses
     ActiveRecord::Base.transaction do
-        property_name = 'preferred.diagnosis.concept_id'
-        old_property = GlobalProperty.find(:last, :conditions => ["property =?", property_name])
-        old_property.delete unless old_property.blank?
+      property_name = 'preferred.diagnosis.concept_id'
+      old_property = GlobalProperty.find(:last, :conditions => ["property =?", property_name])
+      old_property.delete unless old_property.blank?
 
-        new_property = GlobalProperty.new()
-        new_property.property = property_name
-        new_property.property_value = (params[:concept_ids].join(', ') rescue '')
-        new_property.save
+      new_property = GlobalProperty.new()
+      new_property.property = property_name
+      new_property.property_value = (params[:concept_ids].join(', ') rescue '')
+      new_property.save
     end
 
     redirect_to("/clinic/preferred_diagnosis") and return
@@ -378,11 +378,38 @@ class GenericClinicController < ApplicationController
   end
 
   def preferred_drugs_search
+    search_string = params[:search_string].upcase
+    generic_drugs = MedicationService.generic
+    
+    generic_drugs = generic_drugs.map{|generic_drug|
+			drug_name = generic_drug[0]
+			drug_name.upcase.include?(search_string) ? generic_drug : nil rescue nil
+		}.compact
 
+    hash = {}
+    
+    generic_drugs.each do |drug|
+      name = drug[0]
+      concept_id  = drug[1]
+      hash[concept_id] = name
+    end
+
+    render :json => hash
   end
 
   def save_preferred_drugs
+    ActiveRecord::Base.transaction do
+      property_name = 'preferred.drugs.concept_id'
+      old_property = GlobalProperty.find(:last, :conditions => ["property =?", property_name])
+      old_property.delete unless old_property.blank?
 
+      new_property = GlobalProperty.new()
+      new_property.property = property_name
+      new_property.property_value = (params[:concept_ids].join(', ') rescue '')
+      new_property.save
+    end
+
+    redirect_to("/clinic/preferred_drugs") and return
   end
   
 end
