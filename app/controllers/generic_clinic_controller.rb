@@ -366,11 +366,15 @@ class GenericClinicController < ApplicationController
   def preferred_drugs
     @generic_drugs = MedicationService.generic
     @preferred_drugs = []
-    preferred_diagnosis_concept_ids = GlobalProperty.find(:last, :conditions => ["property =?", 'preferred.drugs.concept_id']).property_value.split(", ") rescue []
+    preferred_diagnosis_concept_ids = GlobalProperty.find(:last, 
+      :conditions => ["property =?", 'preferred.drugs.concept_id']).property_value.split(", ") rescue []
+    
     preferred_diagnosis_concept_ids.each do |concept_id|
       drug_name = Concept.find(concept_id).fullname
       @preferred_drugs << [concept_id, drug_name]
     end
+
+    render :layout => false
   end
 
   def preferred_drugs_search

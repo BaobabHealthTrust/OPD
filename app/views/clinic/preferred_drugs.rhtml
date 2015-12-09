@@ -96,7 +96,6 @@
             for (var concept_id in results){
               conceptID = results[concept_id][0]
               drugName = results[concept_id][1]["name"]
-              //<li><a href="#">Diagnosis One <span class="btn">Select</span></a></li>
 
               html += "<li><a href='#' onmousedown=\"updateSelectedDrugs(" + conceptID + ",'" + drugName +"' )\">" + drugName + " <span class='btn'>Select</span></a></li>";
             }
@@ -114,7 +113,7 @@
         console.log(hashSize)
         if (hashSize <= 9){
           selectedHashData[conceptId] = {name: drugName};
-          showSelectedDiagnoses(selectedHashData);
+          showSelectedDrugs(selectedHashData);
         }
         else{
           console.log("Maximum Reached")
