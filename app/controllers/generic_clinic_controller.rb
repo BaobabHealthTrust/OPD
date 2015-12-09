@@ -362,5 +362,23 @@ class GenericClinicController < ApplicationController
 
     redirect_to("/clinic/preferred_diagnosis") and return
   end
+
+  def preferred_drugs
+    @generic_drugs = MedicationService.generic
+    @preferred_drugs = []
+    preferred_diagnosis_concept_ids = GlobalProperty.find(:last, :conditions => ["property =?", 'preferred.drugs.concept_id']).property_value.split(", ") rescue []
+    preferred_diagnosis_concept_ids.each do |concept_id|
+      drug_name = Concept.find(concept_id).fullname
+      @preferred_drugs << [concept_id, drug_name]
+    end
+  end
+
+  def preferred_drugs_search
+
+  end
+
+  def save_preferred_drugs
+
+  end
   
 end
