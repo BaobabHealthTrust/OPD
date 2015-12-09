@@ -14,11 +14,13 @@
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
-  <%= touch_select_tag "MALARIA TEST", @patient, options_for_select(@malaria_tests),
+  <%= touch_select_tag "TESTS ORDERED", @patient, options_for_select(@malaria_tests),
     {
     :helpText => "Confirm Malaria with a test"
   }
 %>
+
+  <%= hidden_field_tag("observations[][accession_number]", @new_accession_number) %>
 
   <%  if @retrospective %>
     <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>

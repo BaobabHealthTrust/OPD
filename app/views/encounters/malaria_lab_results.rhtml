@@ -2,9 +2,95 @@
 <%= javascript_include_tag 'utils' %>
 
 <script>
-  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
+  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>";
+  var checkForBarcodeTimeout = 1500;
+  
+  function formatBarcodeSpace(){
 
+    __$('inputFrame' + tstCurrentPage).style.background = "white";
+    __$('inputFrame' + tstCurrentPage).style.marginTop = "6%";
+    __$('page' + tstCurrentPage).style.marginTop = "2.5%";
+    __$('inputFrame' + tstCurrentPage).style.border = "hidden";
+
+    var barcode = document.getElementById("touchscreenInput0");
+    var helptext = __$("helpText" + tstCurrentPage);
+
+    barcode.style.width = "400px"
+    barcode.style.fontSize = "50px"
+    barcode.style.marginLeft = "33%";
+    barcode.style.height = "80px";
+
+    helptext.style.marginLeft = "32.5%";
+    helptext.style.paddingTop = "50px";
+  }
+
+  function focusForBarcodeInput() {
+    var barcode = document.getElementById("touchscreenInput0");
+    if (barcode) {
+      barcode.focus();
+      //window.setTimeout("focusForBarcodeInput()", setFocusTimeout);
+    }
+    //window.setTimeout("focusForBarcodeInput()", setFocusTimeout);
+  }
+
+  jQuery(document).ready(function ($) {
+
+    $("#barcode").keydown(function (event) {
+      alert("here")
+      if ($.inArray(event.keyCode, [46, 8, 9, 27, 13, 190]) !== -1 ||
+        (event.keyCode == 65 && event.ctrlKey === true) ||
+        (event.keyCode >= 35 && event.keyCode <= 39)) {
+        return;
+      }
+      else {
+        if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
+          event.preventDefault();
+        }
+      }
+    });
+  });
+
+  function loadBarcodePage() {
+    focusForBarcodeInput();
+    moveNext();
+  }
+    
+  function moveNext() {
+    usertext = document.getElementById("touchscreenInput0");
+    if (usertext && usertext.value.match(/.+\$$/i) != null) {
+      usertext.value = usertext.value.substring(0, usertext.value.length - 1);
+      gotoNextPage();
+    }
+    window.setTimeout("moveNext()", checkForBarcodeTimeout);
+  }
+  
+  window.addEventListener("load", loadBarcodePage, false);
+
+  function updateAccessionNumber(id){
+    accesionNumber = $("barcode").value;
+    $(id).value = accesionNumber;
+  }
+  
 </script>
+<style>
+  .barcode{
+    position: absolute;
+    left: 26%;
+    width: 5%;
+    top: 24%;
+    width: 100px;
+  }
+
+  #tt_page_scan_accession_number .touchscreenTextInput {
+    position: absolute;
+    top: 80px;
+  }
+
+  #tt_page_scan_accession_number .helpTextClass{
+    margin-left: 34.5% !Important;
+  }
+
+</style>
 
 
 <form action="/encounters/create" method='post'>
@@ -14,29 +100,40 @@
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
+  <%= text_field_tag :accession_number, '', {
+    :tt_onLoad => "$('keyboard').style.display = 'none'; formatBarcodeSpace()",
+    :id => 'barcode',
+    :class => 'touchscreenTextInput',
+    :helpText => 'Scan Accession Number',
+    :style => 'position:absolute'} %>
+
   <%= touch_select_tag "MALARIA TEST", @patient, options_for_select(@malaria_tests),
     {
-      :id => 'malaria_test',
-      :helpText => "Select Test Done"
+    :id => 'malaria_test',
+    :helpText => "Select Test Done"
   }
 %>
 
   <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@microscopy_options),
     {
-      :id => "microscopy",
-      :condition => '$("malaria_test").value.toUpperCase().match(/SMEAR MICROSCOPY/i)',
-      :helpText => "Select Microscopy Results Below"
+    :id => "microscopy",
+    :tt_onLoad => "updateAccessionNumber('microscopy_');",
+    :accession_number => '',
+    :condition => '$("malaria_test").value.toUpperCase().match(/SMEAR MICROSCOPY/i)',
+    :helpText => "Select Microscopy Results Below"
   }
 %>
 
   <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@malaria_rdt_options),
     {
-      :id => "mRDT",
-      :condition => '$("malaria_test").value.toUpperCase().match(/MALARIA RDT/i)',
-      :helpText => "Select mRDT Results Below"
+    :id => "mRDT",
+    :tt_onLoad => "updateAccessionNumber('mRDT_');",
+    :accession_number => '',
+    :condition => '$("malaria_test").value.toUpperCase().match(/MALARIA RDT/i)',
+    :helpText => "Select mRDT Results Below"
   }
 %>
-  
+
   <%  if @retrospective %>
     <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
       <%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
