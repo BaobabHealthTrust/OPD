@@ -56,7 +56,7 @@
                                         <% if @point_of_care.to_s == "false" %>
                                           <option value='/prescriptions/simple_prescription?patient_id=<%= @patient.id %>'>Treatment</option>
                                         <% else %>
-                                          <option value='/patients/treatment_dashboard/<%= @patient.id %>'>Treatment</option>
+                                          <option value='/prescriptions/generic_advanced_prescription?patient_id=<%= @patient.id %>'>Treatment</option>
                                         <% end %>
                                         <option value='/encounters/new/malaria_lab_results?patient_id=<%= @patient.id %>'>Lab Results</option>
                                         

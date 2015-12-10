@@ -48,7 +48,8 @@ class PatientsController < GenericPatientsController
 		@prescriptions = @patient.orders.unfinished.prescriptions.all
 		@programs = @patient.patient_programs.all
 		@alerts = alerts(@patient, session_date) rescue nil
-
+    @use_col_interface = CoreService.get_global_property_value("use.column.interface").to_s
+    
 		if !session[:location].blank?
 			session["category"] = (session[:location] == "Paeds A and E" ? "paeds" : "adults")
 		end
