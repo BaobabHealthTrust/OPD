@@ -193,13 +193,18 @@ class GenericPrescriptionsController < ApplicationController
 		@use_col_interface = CoreService.get_global_property_value("use.column.interface").to_s
 		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
 		@generics = MedicationService.generic
+    @preferred_drugs = Drug.preferred_drugs
+    
 		@frequencies = MedicationService.fully_specified_frequencies
 		@formulations = {}
     generic_concept_ids = @generics.collect{|generic| generic[1]}
+    preferred_drugs_concept_ids = @preferred_drugs.collect{|preferred_drug| preferred_drug[1]}
+    @preferred_drugs_concept_ids = preferred_drugs_concept_ids
+    
     drug_formulations = {}
     
     Drug.all(:select => ["name, concept_id, dose_strength, units"],
-      :conditions => ["concept_id IN (?)", generic_concept_ids]
+      :conditions => ["concept_id IN (?)", (preferred_drugs_concept_ids + generic_concept_ids).uniq]
     ).each do |record|
       
       if drug_formulations[record.concept_id].blank?
@@ -210,7 +215,7 @@ class GenericPrescriptionsController < ApplicationController
       
     end
    
-    @generics.each do | name, concept_id |
+    (@preferred_drugs + @generics).uniq.each do | name, concept_id |
 
       #skip non-drug concepts      
       next if drug_formulations[concept_id].blank? 
@@ -223,7 +228,7 @@ class GenericPrescriptionsController < ApplicationController
       
     end
    
-    @generics.each { | generic |
+    (@preferred_drugs + @generics).uniq.each { | generic |
 			drugs = Drug.find(:all,	:conditions => ["concept_id = ?", generic[1]])
 			drug_formulations = {}			
 			drugs.each { | drug |
@@ -231,6 +236,7 @@ class GenericPrescriptionsController < ApplicationController
 			}
 			@formulations[generic[1]] = drug_formulations			
 		}
+    
     session[:formulations] = @formulations
 		@diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []
 		render :layout => 'application'

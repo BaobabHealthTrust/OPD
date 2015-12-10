@@ -231,8 +231,8 @@ class GenericClinicController < ApplicationController
       ['/clinic/users_tab','User Accounts/Settings'],
       ['/clinic/location_management_tab','Location Management'],
       ['/patients/patient_merge','Merge Patients'],
-      ['/clinic/preferred_diagnosis','Set Top 10 Diagnoses']
-      #['/people/tranfer_patient_in','Transfer Patient in']
+      ['/clinic/preferred_diagnosis','Set Top 10 Diagnoses'],
+      ['/clinic/preferred_drugs','Set Top 10 Drugs']
     ]
     if current_user.admin?
       @reports << ['/clinic/management_tab','Drug Management']

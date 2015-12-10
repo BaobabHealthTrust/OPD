@@ -1,5 +1,6 @@
 <link href="/touchscreentoolkit/lib/stylesheets/drug-style.css" type="text/css" rel="stylesheet" />
 <link href="/touchscreentoolkit/lib/stylesheets/dispense.css" type="text/css" rel="stylesheet" />
+<%= javascript_include_tag "jquery" %>
 <% 
 url = request.referrer.gsub(/http\:\/\//,"") 
 
@@ -10,22 +11,30 @@ url = url[url.index("/"), url.length - url.index("/")]
   // tt_cancel_show = "<%= '/patients/treatment_dashboard/#{@patient.id}' %>";
   tt_cancel_destination = '<%= "/patients/treatment_dashboard/#{@patient.id}" %>';
 
-  var generic_drugs = <%= @generics.sort.to_json %>;
-  var generics = <%= @generics.sort.to_json %>;
+  var generic_drugs = <%= (@preferred_drugs + @generics.sort).uniq.to_json %>;
+  var generics = <%= (@preferred_drugs + @generics.sort).uniq.to_json %>;
   var frequencies = <%= @frequencies.to_json %>;
   var drugslist = <%= @formulations.to_json %>;
   var diagnosisList = <%= @diagnosis.to_json %>;
   var patient_id = <%= params[:patient_id] rescue "" %>;
   var search_path = "/prescriptions/load_frequencies_and_dosages";
 
+  function updatePreferredDrugsTextColor(){
+    <% @preferred_drugs_concept_ids.each do |concept_id| %>
+        jQuery("li[concept_id='<%=  concept_id %>']").css("color", 'green');
+    <% end %>
+  }
+
+  window.setInterval("updatePreferredDrugsTextColor();", 50);
+
 </script>
 
 <% if @use_col_interface == "true" %>
-<script language="javascript" type="text/javascript" src="/javascripts/multiColumnTreatment.js" defer></script>
+  <script language="javascript" type="text/javascript" src="/javascripts/multiColumnTreatment.js" defer></script>
 
 <%else%>
 
-<script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/prescriber.js" defer></script>
+  <script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/prescriber.js" defer></script>
 
 <%end%>
 
@@ -52,10 +61,10 @@ url = url[url.index("/"), url.length - url.index("/")]
   }
   .keyboard{
     display: none !important;	
-}
-	      div {
-        -moz-user-select: none;
-      }
+  }
+  div {
+    -moz-user-select: none;
+  }
 
 </style>
 
@@ -100,23 +109,23 @@ url = url[url.index("/"), url.length - url.index("/")]
 </div>
 <script type="text/javascript" language="javascript">
   function checkMissingData(){
-   data = []
-   if (Object.keys(selectedGenerics).length == 0){
-     showMessage("Complete the missing fields to continue")
-   }
-   else
-   {
+    data = []
+    if (Object.keys(selectedGenerics).length == 0){
+      showMessage("Complete the missing fields to continue")
+    }
+    else
+    {
       for(var diagnosis in selectedGenerics){
-          for(var generic in selectedGenerics[diagnosis]){
-            drug = generic
-            dosage = selectedGenerics[diagnosis][generic]["dosage"];
-            frequency = selectedGenerics[diagnosis][generic]["frequency"];
-            duration = selectedGenerics[diagnosis][generic]["duration"];
-            if (oneIsEmpty(drug, dosage, frequency, duration)){
-              data.push(drug)
-            }
+        for(var generic in selectedGenerics[diagnosis]){
+          drug = generic
+          dosage = selectedGenerics[diagnosis][generic]["dosage"];
+          frequency = selectedGenerics[diagnosis][generic]["frequency"];
+          duration = selectedGenerics[diagnosis][generic]["duration"];
+          if (oneIsEmpty(drug, dosage, frequency, duration)){
+            data.push(drug)
           }
         }
+      }
       if (data.length > 0){
         showMessage("Complete the missing fields to continue")
       }
@@ -124,7 +133,7 @@ url = url[url.index("/"), url.length - url.index("/")]
         removeGenerics();
         document.forms[0].submit();
       }
-   }
+    }
   }
   function oneIsEmpty(drug, dosage, frequency, duration){
     return (drug === null || dosage === null || 
@@ -135,7 +144,7 @@ url = url[url.index("/"), url.length - url.index("/")]
     finishButton = document.getElementById('nextButton');
     finishButton.setAttribute("onmousedown", "checkMissingData();")
   }
-  <% if @use_col_interface == "true" %>
+<% if @use_col_interface == "true" %>
     window.setTimeout("validateInput();", 200);
-  <% end %>
+<% end %>
 </script>

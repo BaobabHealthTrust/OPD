@@ -55,9 +55,9 @@ class Drug < ActiveRecord::Base
     drugs = []
     preferred_drugs_concept_ids.each do |concept_id|
       drug_name = Concept.find(concept_id).fullname
-      drugs << drug_name
+      drugs << [drug_name, concept_id.to_i]
     end
 
-    return drugs.sort
+    return drugs.sort_by{|name, concept|name}
   end
 end
