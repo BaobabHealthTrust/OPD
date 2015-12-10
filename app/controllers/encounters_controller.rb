@@ -55,7 +55,10 @@ class EncountersController < GenericEncountersController
 
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring details").concept.id
 			diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set_id])	
-      @diagnoses_requiring_details = diagnosis_concepts.map{|concept| concept.fullname.upcase if concept.is_set == 1}.compact.join(';')
+      @diagnoses_requiring_details = diagnosis_concepts.map{|concept|
+        next if concept.fullname.match(/MALARIA/i) #The details can only be known after Lab tests
+        concept.fullname.upcase if concept.is_set == 1
+      }.compact.join(';')
     end
         
     if (params[:encounter_type].upcase rescue '') == 'PRESENTING_COMPLAINTS'
