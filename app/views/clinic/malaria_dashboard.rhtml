@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--
+        ===
+        This comment should NOT be removed.
+
+        Charisma v2.0.0
+
+        Copyright 2012-2014 Muhammad Usman
+        Licensed under the Apache License v2.0
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        http://usman.it
+        http://twitter.com/halalit_usman
+        ===
+    -->
+    <meta charset="utf-8">
+    <title>Malaria Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Charisma, a fully featured, responsive, HTML5, Bootstrap admin template.">
+    <meta name="author" content="Muhammad Usman">
+
+    <!-- The styles -->
+    <%= stylesheet_link_tag("bootstrap-cerulean.min") %>
+    <%= stylesheet_link_tag("charisma-app") %>
+    <%= stylesheet_link_tag("fullcalendar") %>
+    <%= stylesheet_link_tag("chosen.min") %>
+    <%= stylesheet_link_tag("colorbox") %>
+    <%= stylesheet_link_tag("responsive-tables") %>
+    <%= stylesheet_link_tag("bootstrap-tour.min") %>
+    <%= stylesheet_link_tag("jquery.noty") %>
+    <%= stylesheet_link_tag("noty_theme_default") %>
+    <%= stylesheet_link_tag("elfinder.min") %>
+    <%= stylesheet_link_tag("elfinder.theme") %>
+    <%= stylesheet_link_tag("jquery.iphone.toggle") %>
+    <%= stylesheet_link_tag("uploadify") %>
+    <%= stylesheet_link_tag("animate.min") %>
+
+    <!-- jQuery -->
+    <%= javascript_include_tag("jquery.min") %>
+    <style>
+      .navbar-brand {
+        font-size: 26px;
+        letter-spacing: 2px;
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+      }
+
+      .navbar-inner {
+        height: 52px;
+        padding-bottom: 0;
+        padding-top: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- topbar starts -->
+    <div class="navbar navbar-default" role="navigation">
+
+      <div class="navbar-inner">
+        <a href="#" class="navbar-brand">
+          <span style="width:500px;">Malaria Dashboard</span>
+        </a>
+
+      </div>
+    </div>
+    <!-- topbar ends -->
+    <div class="ch-container">
+      <div class="row">
+        <div id="content">
+
+          <!--***********************-->
+
+          <div class="row">
+            <div class="box col-md-12">
+              <div class="box-inner">
+                <div class="box-header well" data-original-title="">
+                  <h2><i class=" glyphicon glyphicon-ok"></i>&nbsp;Microscopy AND mRDT</h2>
+                </div>
+                <div class="box-content">
+                  <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-6">
+                      <a class="well top-block" href="#">
+                        <i class="glyphicon glyphicon-info-sign blue"></i>
+                        <div>Total Tests</div>
+                        <div class="badge">1014</div>
+                      </a>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-6">
+                      <a class="well top-block" href="#">
+                        <i class="glyphicon glyphicon-plus-sign blue"></i>
+                        <div>Positives</div>
+                        <div class="badge">400</div>
+                      </a>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-6">
+                      <a class="well top-block" href="#">
+                        <i class="glyphicon glyphicon-minus-sign blue"></i>
+                        <div>Negatives</div>
+                        <div class="badge">600</div>
+                      </a>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-6">
+                      <a class="well top-block" href="#">
+                        <i class="glyphicon glyphicon-question-sign blue"></i>
+                        <div>Unknown Results</div>
+                        <div class="badge">14</div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!--*********************-->
+
+          <div class="row">
+            <div class="box col-md-12">
+              <div class="box-inner">
+                <div class="box-header well" data-original-title="">
+                  <h2><i class=" glyphicon glyphicon-ok"></i>&nbsp;Microscopy</h2>
+                </div>
+                <div class="box-content">
+                  <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-6">
+                      <a class="well top-block" href="#">
+                        <i class="glyphicon glyphicon-info-sign blue"></i>
+                        <div>Total Tests</div>
+                        <div class="badge">507</div>
+                      </a>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-6">
+                      <a class="well top-block" href="#">
+                        <i class="glyphicon glyphicon-plus-sign blue"></i>
+                        <div>Positives</div>
+                        <div class="badge">200</div>
+                      </a>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-6">
+                      <a class="well top-block" href="#">
+                        <i class="glyphicon glyphicon-minus-sign blue"></i>
+                        <div>Negatives</div>
+                        <div class="badge">300</div>
+                      </a>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-6">
+                      <a class="well top-block" href="#">
+                        <i class="glyphicon glyphicon-question-sign blue"></i>
+                        <div>Unknown Results</div>
+                        <div class="badge">07</div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="box col-md-12">
+              <div class="box-inner">
+                <div class="box-header well" data-original-title="">
+                  <h2><i class=" glyphicon glyphicon-ok"></i>&nbsp; mRDT</h2>
+                </div>
+                <div class="box-content">
+                  <div class="row">
+                    <div class="row">
+                      <div class="col-md-3 col-sm-3 col-xs-6">
+                        <a class="well top-block" href="#">
+                          <i class="glyphicon glyphicon-info-sign blue"></i>
+                          <div>Total Tests</div>
+                          <div class="badge">507</div>
+                        </a>
+                      </div>
+                      <div class="col-md-3 col-sm-3 col-xs-6">
+                        <a class="well top-block" href="#">
+                          <i class="glyphicon glyphicon-plus-sign blue"></i>
+                          <div>Positives</div>
+                          <div class="badge">200</div>
+                        </a>
+                      </div>
+                      <div class="col-md-3 col-sm-3 col-xs-6">
+                        <a class="well top-block" href="#">
+                          <i class="glyphicon glyphicon-minus-sign blue"></i>
+                          <div>Negatives</div>
+                          <div class="badge">300</div>
+                        </a>
+                      </div>
+                      <div class="col-md-3 col-sm-3 col-xs-6">
+                        <a class="well top-block" href="#">
+                          <i class="glyphicon glyphicon-question-sign blue"></i>
+                          <div>Unknown Results</div>
+                          <div class="badge">07</div>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <footer class="row">
+          <p class="col-md-3 col-sm-3 col-xs-12 powered-by">Powered by: <a
+              href="http://www.baobabhealth.org/">Baobab Health Trust</a></p>
+        </footer>
+
+      </div><!--/.fluid-container-->
+    </div>
+    <!-- external javascript -->
+
+    <%= javascript_include_tag("bootstrap.min") %>
+    <!-- data table plugin -->
+    <%= javascript_include_tag("jquery.dataTables.min") %>
+    <!-- select or dropdown enhancer -->
+    <%= javascript_include_tag("chosen.jquery.min") %>
+    <!-- library for making tables responsive -->
+    <%= javascript_include_tag("responsive-tables") %>
+
+  </body>
+</html>

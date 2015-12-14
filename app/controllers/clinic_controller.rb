@@ -119,4 +119,8 @@ class ClinicController < GenericClinicController
     render :layout => false
   end
 
+  def malaria_dashboard
+    render :layout => false
+  end
+  
 end
