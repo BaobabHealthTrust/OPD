@@ -4,7 +4,8 @@
 <script>
   var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>";
   var checkForBarcodeTimeout = 1500;
-  
+  var requiredAccessionNumber = '<%= @required_accession_number %>'
+
   function formatBarcodeSpace(){
 
     __$('inputFrame' + tstCurrentPage).style.background = "white";
@@ -59,7 +60,14 @@
     usertext = document.getElementById("touchscreenInput0");
     if (usertext && usertext.value.match(/.+\$$/i) != null) {
       usertext.value = usertext.value.substring(0, usertext.value.length - 1);
-      gotoNextPage();
+      scannedAccessionNumber = usertext.value
+
+      if (parseInt(requiredAccessionNumber) == parseInt(scannedAccessionNumber)){
+        gotoNextPage();
+      } else{
+        showMessage("Invalid Accession Number. Accession Number:  <b>" + requiredAccessionNumber + " </b> is expected")
+      }
+
     }
     window.setTimeout("moveNext()", checkForBarcodeTimeout);
   }
@@ -69,6 +77,17 @@
   function updateAccessionNumber(id){
     accesionNumber = $("barcode").value;
     $(id).value = accesionNumber;
+  }
+
+  function changeDefultSettings(){
+    $('nextButton').onmousedown = function(){
+      scannedAccessionNumber = document.getElementById("touchscreenInput0").value;
+      if (parseInt(requiredAccessionNumber) == parseInt(scannedAccessionNumber)){
+        gotoNextPage();
+      } else{
+        showMessage("Invalid Accession Number. Accession Number:  <b>" + requiredAccessionNumber + " </b> is expected")
+      }
+    }
   }
   
 </script>
@@ -90,6 +109,10 @@
     margin-left: 26.5% !Important;
   }
 
+  .messageBar {
+    width: 500px !Important;
+    left: 500px !Important;
+  }
 </style>
 
 
@@ -101,9 +124,11 @@
   <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
   <%= text_field_tag :accession_number, '', {
-    :tt_onLoad => "$('keyboard').style.display = 'none'; formatBarcodeSpace()",
+    :tt_onLoad => "formatBarcodeSpace(); changeDefultSettings();",
     :id => 'barcode',
     :class => 'touchscreenTextInput',
+    :field_type => 'number',
+    :tt_pageStyleClass => "Numeric NumbersOnly",
     :helpText => "Scan Accession Number (#{@required_accession_number}) for #{@malaria_test_name}",
     :style => 'position:absolute'
   } %>
