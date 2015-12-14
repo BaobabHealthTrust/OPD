@@ -86,8 +86,8 @@
     top: 80px;
   }
 
-  #tt_page_scan_accession_number .helpTextClass{
-    margin-left: 34.5% !Important;
+  #page0 .helpTextClass{
+    margin-left: 26.5% !Important;
   }
 
 </style>
@@ -104,35 +104,27 @@
     :tt_onLoad => "$('keyboard').style.display = 'none'; formatBarcodeSpace()",
     :id => 'barcode',
     :class => 'touchscreenTextInput',
-    :helpText => "Scan Accession Number (#{@required_accession_number})",
-    :style => 'position:absolute'} %>
-
-  <%= touch_select_tag "MALARIA TEST", @patient, options_for_select(@malaria_tests),
-    {
-    :id => 'malaria_test',
-    :helpText => "Select Test Done"
-  }
-%>
+    :helpText => "Scan Accession Number (#{@required_accession_number}) for #{@malaria_test_name}",
+    :style => 'position:absolute'
+  } %>
 
   <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@microscopy_options),
     {
     :id => "microscopy",
     :tt_onLoad => "updateAccessionNumber('microscopy_');",
     :accession_number => '',
-    :condition => '$("malaria_test").value.toUpperCase().match(/SMEAR MICROSCOPY/i)',
+    :condition => "'#{@malaria_test_name}'.match(/MICROSCOPY/i) && parseInt($('barcode').value) == parseInt(#{@required_accession_number})",
     :helpText => "Select Microscopy Results Below"
-  }
-%>
+  } %>
 
   <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@malaria_rdt_options),
     {
     :id => "mRDT",
     :tt_onLoad => "updateAccessionNumber('mRDT_');",
     :accession_number => '',
-    :condition => '$("malaria_test").value.toUpperCase().match(/MALARIA RDT/i)',
+    :condition => "'#{@malaria_test_name}'.toUpperCase().match(/MRDT/i) && parseInt($('barcode').value) == parseInt(#{@required_accession_number})",
     :helpText => "Select mRDT Results Below"
-  }
-%>
+  } %>
 
   <%  if @retrospective %>
     <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
