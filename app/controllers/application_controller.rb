@@ -18,10 +18,43 @@ helper_method :allowed_hiv_viewer
 		encounter_available = nil
 		task = Task.first rescue nil
     task = Task.new() if task.blank?
-		
+
 		task.encounter_type = 'NONE'
 		task.url = "/patients/show/#{patient.id}"
 
+    unless session[:datetime].blank? #Back Data Entry
+
+      test_ordered_concept_id = Concept.find_by_name("TESTS ORDERED").concept_id
+      malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+
+      lab_order_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
+      lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+
+      test_orders_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_order_encounter_type_id} AND e.patient_id=#{patient.id}
+        AND o.concept_id = #{test_ordered_concept_id} AND e.voided=0 AND
+        DATE(e.encounter_datetime) <= '#{session[:datetime].to_date}'
+        ORDER BY o.obs_id DESC")
+
+      test_orders_observations.each do |obs|
+        accession_number = obs.accession_number
+        next if accession_number.blank?
+        malaria_test_result_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id} AND e.patient_id=#{patient.id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0 AND o.accession_number = #{accession_number}
+        AND DATE(e.encounter_datetime) <= '#{session[:datetime].to_date}'
+        ORDER BY e.encounter_datetime DESC LIMIT 1").last
+
+        if malaria_test_result_obs.blank?
+          task.encounter_type = 'LAB RESULTS'
+          task.url = "/encounters/new/malaria_lab_results?patient_id=#{patient.id}"
+          break
+        end
+
+      end
+
+    end
+    
 		if is_encounter_available(patient, 'DISCHARGE PATIENT', session_date)
 			if !is_encounter_available(patient, 'DISCHARGE DIAGNOSIS', session_date)
 				task.encounter_type = 'DISCHARGE DIAGNOSIS'

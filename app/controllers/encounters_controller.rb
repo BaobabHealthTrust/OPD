@@ -47,7 +47,31 @@ class EncountersController < GenericEncountersController
     ]
 
     @new_accession_number = Observation.new_accession_number
-    
+
+    lab_order_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
+    test_ordered_concept_id = Concept.find_by_name("TESTS ORDERED").concept_id
+    malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+    lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+
+    @required_accession_number = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_order_encounter_type_id} AND e.patient_id=#{@patient.id}
+        AND o.concept_id = #{test_ordered_concept_id} AND e.voided=0 AND
+        DATE(e.encounter_datetime) <= '#{session_date.to_date}'
+        ORDER BY o.obs_id DESC").last.accession_number rescue ''
+
+    unless @required_accession_number.blank?
+      malaria_test_result_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+          ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id} AND e.patient_id=#{@patient.id}
+          AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0 AND o.accession_number = '#{@required_accession_number}'
+          AND DATE(e.encounter_datetime) <= '#{session_date.to_date}'
+          ORDER BY e.encounter_datetime DESC LIMIT 1").last
+
+      unless malaria_test_result_obs.blank?
+        @required_accession_number = "Results Detected"
+      end
+    end
+    @required_accession_number = "No Order Detected" if @required_accession_number.blank?
+
     if  ['INPATIENT_DIAGNOSIS', 'OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id
 			diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set_id])	

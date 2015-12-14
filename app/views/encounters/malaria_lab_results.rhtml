@@ -104,7 +104,7 @@
     :tt_onLoad => "$('keyboard').style.display = 'none'; formatBarcodeSpace()",
     :id => 'barcode',
     :class => 'touchscreenTextInput',
-    :helpText => 'Scan Accession Number',
+    :helpText => "Scan Accession Number (#{@required_accession_number})",
     :style => 'position:absolute'} %>
 
   <%= touch_select_tag "MALARIA TEST", @patient, options_for_select(@malaria_tests),
