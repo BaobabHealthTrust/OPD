@@ -35,38 +35,38 @@ class ClinicController < GenericClinicController
 
   def administration
     @reports =  [
-                  ['/clinic/users','User accounts/settings'],
-                  ['/clinic/management','Drug Management'], 
-                  ['/clinic/location_management','Location Management']
-                ]
+      ['/clinic/users','User accounts/settings'],
+      ['/clinic/management','Drug Management'],
+      ['/clinic/location_management','Location Management']
+    ]
     @landing_dashboard = 'clinic_administration'
-#    render :template => 'clinic/administration', :layout => 'clinic' 
+    #    render :template => 'clinic/administration', :layout => 'clinic'
   end
 
   def reports_tab
     session[:observation] = nil
     session[:people] = nil
     @reports = [
-						      ["OPD General", "/cohort_tool/opd_report_index"],
-						      ["Disaggregated Diagnosis", "/cohort_tool/opd_menu?report_name=disaggregated_diagnosis"],
-      						["Diagnosis (By address)", "/cohort_tool/opd_menu?report_name=diagnosis_by_address"],
-      						#["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"],
-      						["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report"],
-      						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered"],
-      						["Referrals", "/cohort_tool/opd_menu?report_name=referral"],
-      						["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"],
-      						["Shift Report", "/cohort_tool/opd_menu?report_name=shift_report"],
-      						["Graphical Reports", "/clinic/reports_tab_graphs"],
-      						["Update DHIS2", "/report/update_dhis"]
-               ] 
-        #if allowed_hiv_viewer
-        	#@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
-        #end
+      ["OPD General", "/cohort_tool/opd_report_index"],
+      ["Disaggregated Diagnosis", "/cohort_tool/opd_menu?report_name=disaggregated_diagnosis"],
+      ["Diagnosis (By address)", "/cohort_tool/opd_menu?report_name=diagnosis_by_address"],
+      #["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"],
+      ["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report"],
+      ["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered"],
+      ["Referrals", "/cohort_tool/opd_menu?report_name=referral"],
+      ["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"],
+      ["Shift Report", "/cohort_tool/opd_menu?report_name=shift_report"],
+      ["Graphical Reports", "/clinic/reports_tab_graphs"],
+      ["Update DHIS2", "/report/update_dhis"]
+    ]
+    #if allowed_hiv_viewer
+    #@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
+    #end
     render :layout => false
   end
   
   def reports_tab_graphs
-	   session[:observation] = nil
+    session[:observation] = nil
     session[:people] = nil
     @facility = Location.current_health_center.name rescue ''
 
@@ -79,23 +79,23 @@ class ClinicController < GenericClinicController
     @roles = current_user.user_roles.collect{|r| r.role} rescue []
 
     @reports = [
-						      ["OPD General", "/cohort_tool/opd_report_index_graph"],
-	     						["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report_graph"],
-	     						["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered_graph"],
-      						["Transfer Out", "/cohort_tool/opd_menu?report_name=referals_graph"]
+      ["OPD General", "/cohort_tool/opd_report_index_graph"],
+      ["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report_graph"],
+      ["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered_graph"],
+      ["Transfer Out", "/cohort_tool/opd_menu?report_name=referals_graph"]
       						
-               ] 
- 	    render :layout => false
+    ]
+    render :layout => false
   end
 
   def data_cleaning_tab
     @reports = [
-                 ['Missing Prescriptions' , '/cohort_tool/select?report_type=dispensations_without_prescriptions'],
-                 ['Missing Dispensations' , '/cohort_tool/select?report_type=prescriptions_without_dispensations'],
-                 ['Multiple Start Reasons' , '/cohort_tool/select?report_type=patients_with_multiple_start_reasons'],
-                 ['Out of range ARV number' , '/cohort_tool/select?report_type=out_of_range_arv_number'],
-                 ['Data Consistency Check' , '/cohort_tool/select?report_type=data_consistency_check']
-               ] 
+      ['Missing Prescriptions' , '/cohort_tool/select?report_type=dispensations_without_prescriptions'],
+      ['Missing Dispensations' , '/cohort_tool/select?report_type=prescriptions_without_dispensations'],
+      ['Multiple Start Reasons' , '/cohort_tool/select?report_type=patients_with_multiple_start_reasons'],
+      ['Out of range ARV number' , '/cohort_tool/select?report_type=out_of_range_arv_number'],
+      ['Data Consistency Check' , '/cohort_tool/select?report_type=data_consistency_check']
+    ]
     render :layout => false
   end
 
@@ -120,6 +120,22 @@ class ClinicController < GenericClinicController
   end
 
   def malaria_dashboard
+    outpatient_encounter_type_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+    malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
+    diagnosis_concept_ids = ["PRIMARY DIAGNOSIS", "SECONDARY DIAGNOSIS", "ADDITIONAL DIAGNOSIS"].collect do |concept_name|
+      Concept.find_by_name(concept_name).concept_id
+    end
+
+
+    malaria_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{outpatient_encounter_type_id}
+        AND o.concept_id IN (#{diagnosis_concept_ids.join(', ')}) AND o.value_coded = #{malaria_concept_id}
+        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @malaria_cases_count = malaria_observations.count
+
+
     render :layout => false
   end
   

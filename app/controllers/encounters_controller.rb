@@ -38,12 +38,14 @@ class EncountersController < GenericEncountersController
 
     @microscopy_options = [
       ["Thick Smear Positive", "Thick Smear Positive"],
-      ["Thick Smear Negative", "Thick Smear Negative"]
+      ["Thick Smear Negative", "Thick Smear Negative"],
+      ["Unknown", "Unknown"]
     ]
 
     @malaria_rdt_options = [
       ["Malaria RDT Positive", "Malaria RDT Positive"],
       ["Malaria RDT Negative", "Malaria RDT Negative"],
+      ["Unknown", "Unknown"]
     ]
 
     @new_accession_number = Observation.new_accession_number
