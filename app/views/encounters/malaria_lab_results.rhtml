@@ -89,6 +89,12 @@
       }
     }
   }
+
+  function resetDefaultSettings(){
+    $('nextButton').onmousedown = function(){
+      gotoNextPage();
+    }
+  }
   
 </script>
 <style>
@@ -136,7 +142,7 @@
   <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@microscopy_options),
     {
     :id => "microscopy",
-    :tt_onLoad => "updateAccessionNumber('microscopy_');",
+    :tt_onLoad => "updateAccessionNumber('microscopy_'); resetDefaultSettings();",
     :accession_number => '',
     :condition => "'#{@malaria_test_name}'.match(/MICROSCOPY/i) && parseInt($('barcode').value) == parseInt(#{@required_accession_number})",
     :helpText => "Select Microscopy Results Below"
@@ -145,7 +151,7 @@
   <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@malaria_rdt_options),
     {
     :id => "mRDT",
-    :tt_onLoad => "updateAccessionNumber('mRDT_');",
+    :tt_onLoad => "updateAccessionNumber('mRDT_'); resetDefaultSettings();",
     :accession_number => '',
     :condition => "'#{@malaria_test_name}'.toUpperCase().match(/MRDT/i) && parseInt($('barcode').value) == parseInt(#{@required_accession_number})",
     :helpText => "Select mRDT Results Below"
