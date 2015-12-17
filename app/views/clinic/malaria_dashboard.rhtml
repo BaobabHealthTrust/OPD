@@ -35,7 +35,7 @@
 
     <!-- jQuery -->
     <%= javascript_include_tag("jquery.min") %>
-    <style>
+    <style type="text/css">
       .navbar-brand {
         font-size: 26px;
         letter-spacing: 2px;
@@ -82,7 +82,11 @@
       }
 
       .count{
-        font-size: 16pt;
+        font-size: 30pt;
+        font-weight: bold;
+      }
+      .box-content {
+        padding: 0;
       }
     </style>
   </head>
@@ -104,37 +108,25 @@
 
       <div class="row">
         <div class="box col-md-12">
-          <div class="box-inner">
-            <div class="box-header well">
-              <h2><i></i> <span>Cases</span></h2>
-            </div>
-            <div class="box-content">
+         
               <table class="table table-striped table-bordered responsive">
-                <thead>
-                  <tr>
-                    <th style="width: 300px;">&nbsp;</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
+             
                 <tbody>
 
                   <tr>
                     <td class="test-label">Malaria Cases</td>
                     <td class="center">
-                      <a class="btn btn-info" href="#"><span class="count"><%= @malaria_cases_count %></span></a>
+                      <a class="btn btn-primary" href="#"><span class="count"><%= @malaria_cases_count %></span></a>
                     </td>
                   </tr>
 
                 </tbody>
               </table>
-            </div>
-          </div>
+          
         </div>
         <!--/span-->
 
       </div>
-
-
 
 
       <div class="row">
@@ -142,9 +134,7 @@
           <div class="row">
             <div class="box col-md-12">
               <div class="box-inner">
-                <div class="box-header well">
-                  <h2><i></i> <span>Tests Ordered</span></h2>
-                </div>
+                
                 <div class="box-content">
                   <table class="table table-striped table-bordered responsive">
                     <thead>
@@ -161,28 +151,28 @@
                       <tr>
                         <td class="test-label">mRDT</td>
                         <td class="center">
-                          <a class="btn btn-info" href="#"><span class="count"><%= @mrdt_total_orders %></span></a>
+                          <a class="btn btn-primary" href="#"><span class="count"><%= @mrdt_total_orders %></span></a>
                         </td>
                         <td class="center">
                           <a class="btn btn-danger" href="#"><span class="count"><%= @mrdt_positive_results_count %></span></a>
                         </td>
                         <td class="center">
-                          <a class="btn btn-danger" href="#"><span class="count"><%= @mrdt_negative_results_count %></span></a>
+                          <a class="btn btn-success" href="#"><span class="count"><%= @mrdt_negative_results_count %></span></a>
                         </td>
                         <td class="center">
-                          <a class="btn btn-danger" href="#"><span class="count"><%= @mrdt_unknown_results_count %></span></a>
+                          <a class="btn btn-warning" href="#"><span class="count"><%= @mrdt_unknown_results_count %></span></a>
                         </td>
                       </tr>
                       <tr>
                         <td class="test-label">Microscopy</td>
                         <td class="center">
-                          <a class="btn btn-info" href="#"><span class="count"><%= @microscopy_total_orders %></span></a>
+                          <a class="btn btn-primary" href="#"><span class="count"><%= @microscopy_total_orders %></span></a>
                         </td>
                         <td class="center">
                           <a class="btn btn-danger" href="#"><span class="count"><%= @microscopy_positive_results_count %></span></a>
                         </td>
                         <td class="center">
-                          <a class="btn btn-danger" href="#"><span class="count"><%= @microscopy_negative_results_count %></span></a>
+                          <a class="btn btn-success" href="#"><span class="count"><%= @microscopy_negative_results_count %></span></a>
                         </td>
                         <td class="center">
                           <a class="btn btn-danger" href="#"><span class="count"><%= @microscopy_uknown_results_count %></span></a>
@@ -197,15 +187,9 @@
           </div>
 
 
-
-
-
           <div class="row">
             <div class="box col-md-12">
               <div class="box-inner">
-                <div class="box-header well">
-                  <h2><i></i> <span>Anti Malaria Drugs</span></h2>
-                </div>
                 <div class="box-content">
                   <table class="table table-striped table-bordered responsive">
                     <thead>
@@ -219,25 +203,25 @@
                       <tr>
                         <td class="test-label">AL 1</td>
                         <td class="center">
-                          <a class="btn btn-info" href="#"><span class="count">234</span></a>
+                          <a class="btn btn-primary" href="#"><span class="count">234</span></a>
                         </td>
                       </tr>
                       <tr>
                         <td class="test-label">AL 2</td>
                         <td class="center">
-                          <a class="btn btn-info" href="#"><span class="count">234</span></a>
+                          <a class="btn btn-primary" href="#"><span class="count">234</span></a>
                         </td>
                       </tr>
                       <tr>
                         <td class="test-label">AL 3</td>
                         <td class="center">
-                          <a class="btn btn-info" href="#"><span class="count">234</span></a>
+                          <a class="btn btn-primary" href="#"><span class="count">234</span></a>
                         </td>
                       </tr>
                       <tr>
                         <td class="test-label">AL 4</td>
                         <td class="center">
-                          <a class="btn btn-info" href="#"><span class="count">234</span></a>
+                          <a class="btn btn-primary" href="#"><span class="count">234</span></a>
                         </td>
                       </tr>
                     </tbody>
