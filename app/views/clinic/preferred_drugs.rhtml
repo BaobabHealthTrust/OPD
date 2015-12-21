@@ -133,10 +133,10 @@
       }
 
       function rebuildSelectedDrug(conceptId){
-        delete selectedHashData[conceptId];
         yesButton = document.getElementById('yes');
         showPopup();
         yesButton.onclick = function(){
+          delete selectedHashData[conceptId];
           showSelectedDrugs(selectedHashData);
           hidePopup();//Hide the popup
         }
@@ -517,9 +517,26 @@
 <% @preferred_drugs.each do |concept_id, drug_name| %>
     selectedHashData['<%= concept_id %>'] = {name: '<%= drug_name %>'};
 <% end %>
+
+  $('html').click(function() {
+    $("#keypad").hide();
+    $("#popup-div").hide();
+    $("#cover").hide();
+  });
+
+  $('#keypad').click(function(event){
+    event.stopPropagation();
+  });
+
+  $('#popup-div').click(function(event){
+    event.stopPropagation();
+  });
+
+  $('#search').click(function(event){
+    event.stopPropagation();
+  });
     </script>
 
   </body>
-
 
 </html>

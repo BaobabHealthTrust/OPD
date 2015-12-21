@@ -135,10 +135,10 @@
       }
 
       function rebuildSelectedDiagnosis(conceptId){
-        delete selectedHashData[conceptId];
         yesButton = document.getElementById('yes');
         showPopup();
         yesButton.onclick = function(){
+          delete selectedHashData[conceptId];
           showSelectedDiagnoses(selectedHashData);
           hidePopup();//Hide the popup
         }
@@ -177,7 +177,8 @@
         document.getElementById("popup-div").style.display = 'none';
         document.getElementById("cover").style.display = 'none';
       }
-      
+
+
     </script>
 
     <style type="text/css">
@@ -519,9 +520,26 @@
 <% @preferred_diagnoses.each do |concept_id, values| %>
     selectedHashData['<%= concept_id %>'] = {name: '<%= values[:name] %>'};
 <% end %>
+
+  $('html').click(function() {
+    $("#keypad").hide();
+    $("#popup-div").hide();
+    $("#cover").hide();
+  });
+
+  $('#keypad').click(function(event){
+    event.stopPropagation();
+  });
+
+  $('#popup-div').click(function(event){
+    event.stopPropagation();
+  });
+
+  $('#search').click(function(event){
+    event.stopPropagation();
+  });
     </script>
 
   </body>
-
 
 </html>
