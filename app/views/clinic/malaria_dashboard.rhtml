@@ -88,6 +88,14 @@
       .box-content {
         padding: 0;
       }
+
+      .theader{
+        font-weight: 900;
+        font-size: 18pt;
+        font-family: Baskerville, "Baskerville Old Face", "Goudy Old Style", Garamond, "Times New Roman", serif;
+        color: #EE82EE;
+
+      }
     </style>
   </head>
 
@@ -97,7 +105,7 @@
 
       <div class="navbar-inner">
         <a href="#" class="navbar-brand">
-          <span style="width:500px;">Kamuzu Central Hospital</span>
+          <span style="width:500px;" id="facility-name">Kamuzu Central Hospital</span>
         </a>
 
       </div>
@@ -140,10 +148,10 @@
                     <thead>
                       <tr>
                         <th style="width: 300px;">&nbsp;</th>
-                        <th>Total Orders</th>
-                        <th>Positives</th>
-                        <th>Negatives</th>
-                        <th>Unknown</th>
+                        <th class="theader">Total Orders</th>
+                        <th class="theader">Positives</th>
+                        <th class="theader">Negatives</th>
+                        <th class="theader">Unknown</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -151,31 +159,31 @@
                       <tr>
                         <td class="test-label">mRDT</td>
                         <td class="center">
-                          <a class="btn btn-primary" href="#"><span class="count"><%= @mrdt_total_orders %></span></a>
+                          <a class="btn btn-primary" href="#"><span class="count" id="mrdt_total_orders"><%= @mrdt_total_orders %></span></a>
                         </td>
                         <td class="center">
-                          <a class="btn btn-danger" href="#"><span class="count"><%= @mrdt_positive_results_count %></span></a>
+                          <a class="btn btn-danger" href="#"><span class="count" id="mrdt_positive_results_count"><%= @mrdt_positive_results_count %></span></a>
                         </td>
                         <td class="center">
-                          <a class="btn btn-success" href="#"><span class="count"><%= @mrdt_negative_results_count %></span></a>
+                          <a class="btn btn-success" href="#"><span class="count" id="mrdt_negative_results_count"><%= @mrdt_negative_results_count %></span></a>
                         </td>
                         <td class="center">
-                          <a class="btn btn-warning" href="#"><span class="count"><%= @mrdt_unknown_results_count %></span></a>
+                          <a class="btn btn-warning" href="#"><span class="count" id="mrdt_unknown_results_count"><%= @mrdt_unknown_results_count %></span></a>
                         </td>
                       </tr>
                       <tr>
                         <td class="test-label">Microscopy</td>
                         <td class="center">
-                          <a class="btn btn-primary" href="#"><span class="count"><%= @microscopy_total_orders %></span></a>
+                          <a class="btn btn-primary" href="#"><span class="count" id="microscopy_total_orders"><%= @microscopy_total_orders %></span></a>
                         </td>
                         <td class="center">
-                          <a class="btn btn-danger" href="#"><span class="count"><%= @microscopy_positive_results_count %></span></a>
+                          <a class="btn btn-danger" href="#"><span class="count" id="microscopy_positive_results_count"><%= @microscopy_positive_results_count %></span></a>
                         </td>
                         <td class="center">
-                          <a class="btn btn-success" href="#"><span class="count"><%= @microscopy_negative_results_count %></span></a>
+                          <a class="btn btn-success" href="#"><span class="count" id="microscopy_negative_results_count"><%= @microscopy_negative_results_count %></span></a>
                         </td>
                         <td class="center">
-                          <a class="btn btn-danger" href="#"><span class="count"><%= @microscopy_uknown_results_count %></span></a>
+                          <a class="btn btn-warning" href="#"><span class="count" id="microscopy_uknown_results_count"><%= @microscopy_uknown_results_count %></span></a>
                         </td>
                       </tr>
 
@@ -193,21 +201,21 @@
               <table class="table table-striped table-bordered responsive">
                 <thead>
                   <tr>
-                    <th>Drug Name</th>
-                    <th>Amount Prescribed</th>
+                    <th class="theader">Drug Name</th>
+                    <th class="theader">Amount Prescribed</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td class="test-label">AL 1</td>
                     <td >
-                      <a class="btn btn-primary" href="#"><span class="count"><%= @total_la_one_prescribed_drugs %></span></a>
+                      <a class="btn btn-primary" href="#"><span class="count" id="total_la_one_prescribed_drugs"><%= @total_la_one_prescribed_drugs %></span></a>
                     </td>
                   </tr>
                   <tr>
                     <td class="test-label">AL 2</td>
                     <td class="center">
-                      <a class="btn btn-primary" href="#"><span class="count"><%= @total_la_two_prescribed_drugs %></span></a>
+                      <a class="btn btn-primary" href="#"><span class="count" id="total_la_two_prescribed_drugs"><%= @total_la_two_prescribed_drugs %></span></a>
                     </td>
                   </tr>
                 </tbody>
@@ -222,20 +230,20 @@
               <table class="table table-striped table-bordered responsive">
                 <thead>
                   <tr>
-                    <th>Drug Name</th>
-                    <th>Amount Prescribed</th>
+                    <th class="theader">Drug Name</th>
+                    <th class="theader">Amount Prescribed</th>
                   </tr>
                 </thead>
                 <tr>
                   <td class="test-label">AL 3</td>
                   <td >
-                    <a class="btn btn-primary" href="#"><span class="count"><%= @total_la_three_prescribed_drugs %></span></a>
+                    <a class="btn btn-primary" href="#"><span class="count" id="total_la_three_prescribed_drugs"><%= @total_la_three_prescribed_drugs %></span></a>
                   </td>
                 </tr>
                 <tr>
                   <td class="test-label">AL 4</td>
                   <td class="center">
-                    <a class="btn btn-primary" href="#"><span class="count"><%= @total_la_four_prescribed_drugs %></span></a>
+                    <a class="btn btn-primary" href="#"><span class="count" id="total_la_four_prescribed_drugs"><%= @total_la_four_prescribed_drugs %></span></a>
                   </td>
                 </tr>
               </table>
