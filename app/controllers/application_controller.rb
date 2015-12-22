@@ -1,6 +1,6 @@
 class ApplicationController < GenericApplicationController
-COMMON_YEAR_DAYS_IN_MONTH = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-helper_method :allowed_hiv_viewer
+  COMMON_YEAR_DAYS_IN_MONTH = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  helper_method :allowed_hiv_viewer
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
 
@@ -21,38 +21,38 @@ helper_method :allowed_hiv_viewer
 
 		task.encounter_type = 'NONE'
 		task.url = "/patients/show/#{patient.id}"
+    
+    if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")
+      unless session[:datetime].blank? #Back Data Entry
 
-    unless session[:datetime].blank? #Back Data Entry
+        test_ordered_concept_id = Concept.find_by_name("TESTS ORDERED").concept_id
+        malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
 
-      test_ordered_concept_id = Concept.find_by_name("TESTS ORDERED").concept_id
-      malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+        lab_order_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
+        lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
 
-      lab_order_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
-      lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
-
-      test_orders_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        latest_malaria_test_ordered = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_order_encounter_type_id} AND e.patient_id=#{patient.id}
         AND o.concept_id = #{test_ordered_concept_id} AND e.voided=0 AND
         DATE(e.encounter_datetime) <= '#{session[:datetime].to_date}'
-        ORDER BY o.obs_id DESC")
+        ORDER BY o.obs_id DESC").first
 
-      test_orders_observations.each do |obs|
-        accession_number = obs.accession_number
-        next if accession_number.blank?
-        malaria_test_result_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
-        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id} AND e.patient_id=#{patient.id}
-        AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0 AND o.accession_number = #{accession_number}
-        AND DATE(e.encounter_datetime) <= '#{session[:datetime].to_date}'
-        ORDER BY e.encounter_datetime DESC LIMIT 1").last
+        unless latest_malaria_test_ordered.blank?
+          accession_number = latest_malaria_test_ordered.accession_number
 
-        if malaria_test_result_obs.blank?
-          task.encounter_type = 'LAB RESULTS'
-          task.url = "/encounters/new/malaria_lab_results?patient_id=#{patient.id}"
-          break
+          malaria_test_result_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+            ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id} AND e.patient_id=#{patient.id}
+            AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0 AND o.accession_number = '#{accession_number}'
+            AND DATE(e.encounter_datetime) <= '#{session[:datetime].to_date}'
+            ORDER BY e.encounter_datetime DESC LIMIT 1").last
+
+          if malaria_test_result_obs.blank?
+            task.encounter_type = 'LAB RESULTS'
+            task.url = "/encounters/new/malaria_lab_results?patient_id=#{patient.id}"
+          end
         end
-
+        
       end
-
     end
     
 		if is_encounter_available(patient, 'DISCHARGE PATIENT', session_date)
@@ -134,8 +134,8 @@ helper_method :allowed_hiv_viewer
 		is_available = false
 
 		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
-						                           patient.id, EncounterType.find_by_name(encounter_type).id, session_date],
-						                           :order =>'encounter_datetime DESC', :limit => 1)
+        patient.id, EncounterType.find_by_name(encounter_type).id, session_date],
+      :order =>'encounter_datetime DESC', :limit => 1)
 		if encounter_available.blank?
 			is_available = false
 		else
@@ -149,8 +149,8 @@ helper_method :allowed_hiv_viewer
 	def encounter_available_ever(patient, encounter_type)
 		is_available = false
 		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ?",
-						                           patient.id, EncounterType.find_by_name(encounter_type).id],
-						                           :order =>'encounter_datetime DESC', :limit => 1)
+        patient.id, EncounterType.find_by_name(encounter_type).id],
+      :order =>'encounter_datetime DESC', :limit => 1)
  
 		if encounter_available.blank?
 			is_available = false
@@ -162,31 +162,31 @@ helper_method :allowed_hiv_viewer
 	end
 
 	def allowed_hiv_viewer
-				allowed = false
-				user_roles = current_user_roles.collect{|role| role.to_s.upcase}
-				if user_roles.include?("DOCTOR") || user_roles.include?("NURSE") || user_roles.include?("SUPERUSER")
-						allowed = true
-				end
+    allowed = false
+    user_roles = current_user_roles.collect{|role| role.to_s.upcase}
+    if user_roles.include?("DOCTOR") || user_roles.include?("NURSE") || user_roles.include?("SUPERUSER")
+      allowed = true
+    end
   end 	
   
   def hiv_program
   	program = PatientProgram.first(:conditions => {:patient_id => @patient.id,
-      :program_id => Program.find_by_name('HIV PROGRAM').id}) rescue nil
+        :program_id => Program.find_by_name('HIV PROGRAM').id}) rescue nil
     unless program.nil?
-  	   return program.program_id
+      return program.program_id
     else
-       return false
+      return false
     end
   end
   
   def remove_art_encounters(all_encounters, type)
     non_art_encounters = []
     hiv_encounters_list = [ "HIV STAGING", "HIV CLINIC REGISTRATION", 
-                            "HIV RECEPTION","HIV CLINIC CONSULTATION",
-                            "EXIT FROM HIV CARE","ART ADHERENCE",
-                            "ART_FOLLOWUP","ART ENROLLMENT",
-                            "UPDATE HIV STATUS","APPOINTMENT"
-                          ]
+      "HIV RECEPTION","HIV CLINIC CONSULTATION",
+      "EXIT FROM HIV CARE","ART ADHERENCE",
+      "ART_FOLLOWUP","ART ENROLLMENT",
+      "UPDATE HIV STATUS","APPOINTMENT"
+    ]
     if type.to_s.downcase == 'encounter'
       all_encounters.each{|encounter|
         if ! hiv_encounters_list.include? EncounterType.find(encounter.encounter_type).name.to_s.upcase

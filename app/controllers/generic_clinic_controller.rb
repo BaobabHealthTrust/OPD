@@ -230,10 +230,14 @@ class GenericClinicController < ApplicationController
     @reports =  [
       ['/clinic/users_tab','User Accounts/Settings'],
       ['/clinic/location_management_tab','Location Management'],
-      ['/patients/patient_merge','Merge Patients'],
-      ['/clinic/preferred_diagnosis','Set Top 10 Diagnoses'],
-      ['/clinic/preferred_drugs','Set Top 10 Drugs']
+      ['/patients/patient_merge','Merge Patients']
     ]
+    
+    if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")
+      @reports << ['/clinic/preferred_diagnosis','Set Top 10 Diagnoses']
+      @reports << ['/clinic/preferred_drugs','Set Top 10 Drugs']
+    end
+    
     if current_user.admin?
       @reports << ['/clinic/management_tab','Drug Management']
     end

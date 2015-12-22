@@ -114,7 +114,8 @@ class ClinicController < GenericClinicController
       ["Show Lab Results", "/properties/creation?value=show_lab_results"],
       ["show column prescription Interface", "/properties/creation?value=use_column_interface"],
       ["show Tasks button on patient dashboard", "/properties/creation?value=show_tasks_button"],
-      ["Point of care system?", "/properties/creation?value=point_of_care_system"]
+      ["Point of care system?", "/properties/creation?value=point_of_care_system"],
+      ["Activate Malaria Feature", "/properties/creation?value=is_this_malaria_enabled_facility?"]
     ]
     render :layout => false
   end
