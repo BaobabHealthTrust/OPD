@@ -65,7 +65,13 @@
       if (parseInt(requiredAccessionNumber) == parseInt(scannedAccessionNumber)){
         gotoNextPage();
       } else{
-        showMessage("Invalid Accession Number. Accession Number:  <b>" + requiredAccessionNumber + " </b> is expected")
+        if (requiredAccessionNumber.match(/RESULTS DETECTED/i))
+        {
+          showMessage("Results already captured")
+        }
+        else{
+          showMessage("Invalid Accession Number. Accession Number:  <b>" + requiredAccessionNumber + " </b> is expected")
+        }
       }
 
     }
