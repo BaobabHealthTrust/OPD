@@ -93,9 +93,9 @@
         font-weight: 900;
         font-size: 18pt;
         font-family: Baskerville, "Baskerville Old Face", "Goudy Old Style", Garamond, "Times New Roman", serif;
-        color: #EE82EE;
-
+        color: #473C8B;
       }
+
     </style>
   </head>
 
@@ -203,6 +203,7 @@
                   <tr>
                     <th class="theader">Drug Name</th>
                     <th class="theader">Amount Prescribed</th>
+                    <th class="theader">Amount Dispensed</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -211,11 +212,17 @@
                     <td >
                       <a class="btn btn-primary" href="#"><span class="count" id="total_la_one_prescribed_drugs"><%= @total_la_one_prescribed_drugs %></span></a>
                     </td>
+                    <td >
+                      <a class="btn btn-primary" href="#"><span class="count" id="total_la_one_dispensed_drugs"><%= @total_la_one_dispensed_drugs %></span></a>
+                    </td>
                   </tr>
                   <tr>
                     <td class="test-label">AL 2</td>
                     <td class="center">
                       <a class="btn btn-primary" href="#"><span class="count" id="total_la_two_prescribed_drugs"><%= @total_la_two_prescribed_drugs %></span></a>
+                    </td>
+                    <td >
+                      <a class="btn btn-primary" href="#"><span class="count" id="total_la_two_dispensed_drugs"><%= @total_la_two_dispensed_drugs %></span></a>
                     </td>
                   </tr>
                 </tbody>
@@ -232,6 +239,7 @@
                   <tr>
                     <th class="theader">Drug Name</th>
                     <th class="theader">Amount Prescribed</th>
+                    <th class="theader">Amount Dispensed</th>
                   </tr>
                 </thead>
                 <tr>
@@ -239,11 +247,17 @@
                   <td >
                     <a class="btn btn-primary" href="#"><span class="count" id="total_la_three_prescribed_drugs"><%= @total_la_three_prescribed_drugs %></span></a>
                   </td>
+                  <td >
+                    <a class="btn btn-primary" href="#"><span class="count" id="total_la_three_dispensed_drugs"><%= @total_la_three_dispensed_drugs %></span></a>
+                  </td>
                 </tr>
                 <tr>
                   <td class="test-label">AL 4</td>
                   <td class="center">
                     <a class="btn btn-primary" href="#"><span class="count" id="total_la_four_prescribed_drugs"><%= @total_la_four_prescribed_drugs %></span></a>
+                  </td>
+                  <td >
+                    <a class="btn btn-primary" href="#"><span class="count" id="total_la_four_dispensed_drugs"><%= @total_la_four_dispensed_drugs %></span></a>
                   </td>
                 </tr>
               </table>
