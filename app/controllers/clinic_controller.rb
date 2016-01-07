@@ -279,5 +279,16 @@ class ClinicController < GenericClinicController
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     render :layout => false
   end
+
+  def load_malaria_dashboard_data
+=begin
+    malaria_ip_addresses = CoreService.get_global_property_value("malaria_ip_addresses").split(", ") rescue []
+    malaria_data = {}
+    malaria_ip_addresses.each do |ip_address|
+
+      JSON.parse(RestClient.get(ip_address))
+    end
+=end
+  end
   
 end

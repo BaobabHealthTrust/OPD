@@ -9,7 +9,8 @@ url = url[url.index("/"), url.length - url.index("/")]
 <script type="text/javascript" language="javascript">
   
   // tt_cancel_show = "<%= '/patients/treatment_dashboard/#{@patient.id}' %>";
-  tt_cancel_destination = '<%= "/patients/treatment_dashboard/#{@patient.id}" %>';
+  // tt_cancel_destination = '<%= "/patients/treatment_dashboard/#{@patient.id}" %>';
+  tt_cancel_destination = '<%= "/patients/show/#{@patient.id}" %>';
 
   var generic_drugs = <%= (@preferred_drugs + @generics.sort).uniq.to_json %>;
   var generics = <%= (@preferred_drugs + @generics.sort).uniq.to_json %>;
@@ -20,9 +21,9 @@ url = url[url.index("/"), url.length - url.index("/")]
   var search_path = "/prescriptions/load_frequencies_and_dosages";
 
   function updatePreferredDrugsTextColor(){
-    <% @preferred_drugs_concept_ids.each do |concept_id| %>
-        jQuery("li[concept_id='<%=  concept_id %>']").css("color", 'green');
-    <% end %>
+<% @preferred_drugs_concept_ids.each do |concept_id| %>
+      jQuery("li[concept_id='<%=  concept_id %>']").css("color", 'green');
+<% end %>
   }
 
   window.setInterval("updatePreferredDrugsTextColor();", 50);

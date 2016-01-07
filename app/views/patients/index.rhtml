@@ -58,6 +58,7 @@
           <% else %>
             <option value='/prescriptions/generic_advanced_prescription?patient_id=<%= @patient.id %>'>Prescription</option>
           <% end %>
+          <option value='/patients/treatment_dashboard/<%= @patient.id %>'>Dispensation</option>
           <option value='/encounters/new/malaria_lab_results?patient_id=<%= @patient.id %>'>Lab Results</option>
 
           <%  if @spine_clinician  %>
@@ -93,11 +94,11 @@
               <option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Outcomes</option>
             <% end %>
             <!--<% if show_lab_results %>
-                                                    <option link="/lab/results/<%=@patient.id -%>">Lab results</option>
+                                                      <option link="/lab/results/<%=@patient.id -%>">Lab results</option>
             <%end%>-->
   <!--<option link='/patients/programs_dashboard/<%= @patient.id %>'>Programs</option>-->
 
-              <!--<option link="/encounters/new/lab_orders?patient_id=<%= @patient.id -%>" ttSize = "160px">Investigation</option>-->
+                <!--<option link="/encounters/new/lab_orders?patient_id=<%= @patient.id -%>" ttSize = "160px">Investigation</option>-->
 
             <option link='<%= ((session[:datetime].to_date rescue '') != '' ?
                         "/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
