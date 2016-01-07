@@ -35,6 +35,14 @@
 
     <!-- jQuery -->
     <%= javascript_include_tag("jquery.min") %>
+
+    <script type="text/javascript">
+      function refreshDashboard(){
+        window.location.reload();
+      }
+      window.setInterval("refreshDashboard();", 60000);//1 minute
+    </script>
+
     <style type="text/css">
       .navbar-brand {
         font-size: 26px;
