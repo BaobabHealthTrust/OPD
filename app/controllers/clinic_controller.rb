@@ -151,7 +151,8 @@ class ClinicController < GenericClinicController
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MICROSCOPY QUERIES START>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @microscopy_total_orders = microscopy_order_observations.count
     microscopy_order_accession_numbers = microscopy_order_observations.map(&:accession_number).compact
-
+    microscopy_order_accession_numbers = [0] if microscopy_order_accession_numbers.blank?
+    
     microscopy_positive_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
         AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
@@ -189,7 +190,7 @@ class ClinicController < GenericClinicController
 
     @mrdt_total_orders = mrdt_observations.count
     mrdt_order_accession_numbers = mrdt_observations.map(&:accession_number).compact
-
+    mrdt_order_accession_numbers = [0] if mrdt_order_accession_numbers.blank?
 
     mrdt_positive_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
@@ -224,7 +225,7 @@ class ClinicController < GenericClinicController
     amount_dispensed_concept = Concept.find_by_name('Amount dispensed').id
     drug_order_type_id = OrderType.find_by_name("Drug Order").order_type_id
 
-    la_one_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 1 x 6").drug_id 
+    la_one_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 1 x 6").drug_id rescue 0 #Add this drug to meta-data
     la_two_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 2 x 6").drug_id
     la_three_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 3 x 6").drug_id
     la_four_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 4 x 6").drug_id
