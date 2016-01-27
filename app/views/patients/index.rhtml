@@ -52,6 +52,7 @@
             <option value='/encounters/new/vitals?patient_id=<%= @patient.id %>'>Triage</option>
           <% end %>
           <option value='/encounters/new/presenting_complaints?patient_id=<%= @patient.id %>'>Clinical Notes</option>
+          <option value='/encounters/new/lab_orders?patient_id=<%= @patient.id -%>'>Lab Orders</option>
           <option value='/encounters/new/outpatient_diagnosis?patient_id=<%= @patient.id %>'>Diagnosis</option>
           <% if @point_of_care.to_s == "false" %>
             <option value='/prescriptions/simple_prescription?patient_id=<%= @patient.id %>'>Prescription</option>
