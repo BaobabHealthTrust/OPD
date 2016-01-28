@@ -80,7 +80,7 @@
     background-color: #F4F4F4;
     border: 2px solid #E0E0E0;
     border-radius: 15px;
-    height: 172px;
+    height: 239px;
     padding: 5px;
     position: absolute;
     margin-top: 100px;
@@ -97,6 +97,8 @@
     margin-top: -5px;
     padding-top: 5px;
     border-radius: 15px 15px 0 0;
+    font-size: 14pt;
+    font-weight: bolder;
   }
 
   #cover{
@@ -222,9 +224,15 @@
     <center>Confirm</center>
   </div><br />
   <div>
-    <span style="font-size: 16pt;">Are you sure you want to continue?</span>
+
+    <span style="font-size: 16pt;">
+      <center>
+        <i><b><%= @patient_malaria_notification %></b></i><br />
+        Are you sure you want to select malaria as your final diagnosis?
+      </center>
+    </span>
     <div style="padding-top: 65px;">
-      <span id="yes" onclick="" class="my_button" style="position: relative;">Yes</span>
+      <span id="yes" onclick="continueProcess();" class="my_button" style="position: relative;">Yes</span>
       <span id="no" onclick="hidePopup();" class="my_button" style=" position: relative; right: 20px;">Cancel</span>
     </div>
   </div>
@@ -234,6 +242,7 @@
 <script type="text/javascript">
   jQuery('html').click(function() {
     jQuery("#popup-div").hide();
+    clearInput();
     jQuery("#cover").hide();
   });
 
@@ -241,5 +250,10 @@
     event.stopPropagation();
   });
 
+  function continueProcess(){
+    jQuery("#popup-div").hide();
+    jQuery("#cover").hide();
+    gotoNextPage()
+  }
 </script>
 

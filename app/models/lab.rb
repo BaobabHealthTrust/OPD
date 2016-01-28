@@ -49,4 +49,29 @@ ORDER BY DATE(TESTDATE) DESC",patient_ids,type
     results_hash
   end
 
+
+  def self.malaria_test_result(patient)
+    lab_orders_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
+    tests_ordered_concept_id = Concept.find_by_name("TESTS ORDERED").concept_id
+
+    malaria_order_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.patient_id = #{patient.id} AND e.encounter_type = #{lab_orders_encounter_type_id}
+        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) IN ('MICROSCOPY', 'MRDT')
+        AND e.voided=0 AND DATE(e.encounter_datetime) = '#{Date.today}'")
+
+    return "no_orders" if malaria_order_observations.blank?
+
+    lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+    malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+
+    malaria_positive_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.patient_id = #{patient.id} AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IS NOT NULL
+        AND UPPER(o.value_text) IN ('THICK SMEAR POSITIVE', 'MALARIA RDT POSITIVE')
+        AND e.voided=0 AND DATE(e.encounter_datetime) = '#{Date.today}'")
+
+    return "positive" unless malaria_positive_results_observations.blank?
+    
+  end
+
 end
