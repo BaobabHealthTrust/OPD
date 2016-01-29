@@ -23,14 +23,17 @@
 
   window.setInterval("updatePreferredDiagnosisTextColor();", 50);
 
+  var malariaTestStatus = '<%= @malaria_test_status %>';
   function setAttributes(){
-    liElements = jQuery("li");
-    for (var i = 0; i <= liElements.length - 1; i++){
-      if (liElements[i].hasAttribute("value")){
-        value = liElements[i].getAttribute("value");
-        if (value.match(/MALARIA/i)){
-          liElements[i].setAttribute("onmousedown", "null; updateTouchscreenInputForSelect(this); showMalariaConfirmationPopup();");
-          break;
+    if (malariaTestStatus == 'no_orders' || malariaTestStatus == 'negative'){
+      liElements = jQuery("li");
+      for (var i = 0; i <= liElements.length - 1; i++){
+        if (liElements[i].hasAttribute("value")){
+          value = liElements[i].getAttribute("value");
+          if (value.match(/MALARIA/i)){
+            liElements[i].setAttribute("onmousedown", "null; updateTouchscreenInputForSelect(this); showMalariaConfirmationPopup();");
+            break;
+          }
         }
       }
     }
@@ -242,7 +245,9 @@
 <script type="text/javascript">
   jQuery('html').click(function() {
     jQuery("#popup-div").hide();
-    clearInput();
+    if ($('touchscreenInput'+tstCurrentPage).value.match(/MALARIA/i)){
+      clearInput();
+    }
     jQuery("#cover").hide();
   });
 
@@ -255,5 +260,6 @@
     jQuery("#cover").hide();
     gotoNextPage()
   }
+  
 </script>
 

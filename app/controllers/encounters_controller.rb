@@ -32,9 +32,9 @@ class EncountersController < GenericEncountersController
 		@select_options = select_options
 
     @malaria_tests = [
-        ["Malaria Rapid Diagnostic Test (mRDT)", "mRDT"],
-        ["Microscopy", "Microscopy"]
-      ]
+      ["Malaria Rapid Diagnostic Test (mRDT)", "mRDT"],
+      ["Microscopy", "Microscopy"]
+    ]
 
     @microscopy_options = [
       ["Thick Smear Positive", "Thick Smear Positive"],
@@ -79,12 +79,14 @@ class EncountersController < GenericEncountersController
     
     @required_accession_number = "No Order Detected" if @required_accession_number.blank?
 
-    @patient_malaria_notification = "This patient was tested negative"
+    @patient_malaria_notification = ""
 
-    #Lab.malaria_test_result(@patient)
+    @malaria_test_status = Lab.malaria_test_result(@patient)
 
-    @patient_malaria_notification = "No any malaria test was ordered for this patient"
-    
+    @patient_malaria_notification = "No any malaria test was ordered for this patient" if @malaria_test_status == 'no_orders'
+    @patient_malaria_notification = "Results are not yet captured in the system" if @malaria_test_status == 'waiting_results'
+    @patient_malaria_notification = "This patient was tested negative" if @malaria_test_status == 'negative'
+
     if  ['INPATIENT_DIAGNOSIS', 'OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id
 			diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set_id])	
@@ -137,13 +139,13 @@ class EncountersController < GenericEncountersController
 
 
     if (params[:encounter_type].humanize.upcase rescue '') == 'LAB ORDERS'
-        @blood = CoreService.get_global_property_value('blood').split(',') rescue nil
-        @csf = CoreService.get_global_property_value('csf').split(',') rescue nil
-        @urine = CoreService.get_global_property_value('urine').split(',') rescue nil
-        @aspirate = CoreService.get_global_property_value('aspirate').split(',') rescue nil
-        @sputum = CoreService.get_global_property_value('sputum').split(',') rescue nil
-        @stool = CoreService.get_global_property_value('stool').split(',') rescue nil
-        @swab = CoreService.get_global_property_value('swab').split(',') rescue nil
+      @blood = CoreService.get_global_property_value('blood').split(',') rescue nil
+      @csf = CoreService.get_global_property_value('csf').split(',') rescue nil
+      @urine = CoreService.get_global_property_value('urine').split(',') rescue nil
+      @aspirate = CoreService.get_global_property_value('aspirate').split(',') rescue nil
+      @sputum = CoreService.get_global_property_value('sputum').split(',') rescue nil
+      @stool = CoreService.get_global_property_value('stool').split(',') rescue nil
+      @swab = CoreService.get_global_property_value('swab').split(',') rescue nil
     end
 
 		if (params[:encounter_type].upcase rescue '') == "ADMIT_PATIENT"
@@ -163,12 +165,12 @@ class EncountersController < GenericEncountersController
 
 		if params[:encounter_type].upcase == 'ADMISSION DIAGNOSIS' || params[:encounter_type].upcase == 'DISCHARGE DIAGNOSIS' || params[:encounter_type].upcase == 'OUTPATIENT_DIAGNOSIS'
       if (ask_vitals_questions_before_diagnosis)
-       if( @patient_bean.age <= 14)
-        if !is_encounter_available(@patient, 'VITALS', session_date)
+        if( @patient_bean.age <= 14)
+          if !is_encounter_available(@patient, 'VITALS', session_date)
             session[:original_encounter] = params[:encounter_type]
             params[:encounter_type] = 'vitals'
+          end
         end
-       end
       end
 		end
 		
@@ -591,23 +593,23 @@ class EncountersController < GenericEncountersController
 
   def create_complaints
     #raise params[:complaints].to_yaml
-      encounter = Encounter.new()
-      if params['encounter']['encounter_type_name'].upcase == 'NOTES'
-        encounter.encounter_type = EncounterType.find_by_name("NOTES").id
-      else
-        encounter.encounter_type = EncounterType.find_by_name("VITALS").id
-      end
-      encounter.patient_id = params['encounter']['patient_id']
-      encounter.encounter_datetime = session[:datetime]
-      if params[:filter] and !params[:filter][:provider].blank?
-        user_person_id = User.find_by_username(params[:filter][:provider]).person_id
-      else
-        user_person_id = User.find_by_user_id(params['encounter']['provider_id']).person_id
-      end rescue user_person_id = current_user.person.person_id
-      encounter.provider_id = user_person_id
-      encounter.save
+    encounter = Encounter.new()
+    if params['encounter']['encounter_type_name'].upcase == 'NOTES'
+      encounter.encounter_type = EncounterType.find_by_name("NOTES").id
+    else
+      encounter.encounter_type = EncounterType.find_by_name("VITALS").id
+    end
+    encounter.patient_id = params['encounter']['patient_id']
+    encounter.encounter_datetime = session[:datetime]
+    if params[:filter] and !params[:filter][:provider].blank?
+      user_person_id = User.find_by_username(params[:filter][:provider]).person_id
+    else
+      user_person_id = User.find_by_user_id(params['encounter']['provider_id']).person_id
+    end rescue user_person_id = current_user.person.person_id
+    encounter.provider_id = user_person_id
+    encounter.save
 
-      (params[:complaints] || []).each do |complaint|
+    (params[:complaints] || []).each do |complaint|
       encounter_id = Encounter.find(:last, :order => 'encounter_id ASC').id
 		  if !complaint.blank?
         multiple = complaint.match(/[:]/)
@@ -626,7 +628,7 @@ class EncountersController < GenericEncountersController
           encounter_id = b.encounter_id
           parent_concept_id = b.concept_id
           obs_group = Observation.find(:first, :order => "obs_id DESC", :conditions => ["encounter_id =? AND concept_id =?", \
-                    encounter_id, parent_concept_id])
+                encounter_id, parent_concept_id])
           obs_group_id = obs_group.id if obs_group
           child_obs = {
             "encounter_id" => "#{encounter_id}",
@@ -636,7 +638,7 @@ class EncountersController < GenericEncountersController
             "obs_group_id" => "#{obs_group_id}",
             "obs_datetime" => params['encounter']['encounter_datetime']
           }
-         Observation.create(child_obs)
+          Observation.create(child_obs)
         else
           obs = {
             "encounter_id" => "#{encounter.id}",
@@ -649,37 +651,37 @@ class EncountersController < GenericEncountersController
         end
 		  end
     end
-   create_obs(encounter, params)
-   @patient_id = params[:encounter][:patient_id]
-   redirect_to("/patients/show/#{@patient_id}")
+    create_obs(encounter, params)
+    @patient_id = params[:encounter][:patient_id]
+    redirect_to("/patients/show/#{@patient_id}")
   end
 
   def recorded_religions                                                        
     religions = Observation.find(:all, :joins => [:concept, :encounter],         
       :conditions => ["obs.concept_id = ? 
       AND value_text LIKE '%#{params[:search_string]}%' AND encounter_type = ?",                                                
-      ConceptName.find_by_name("Other").concept_id,                           
-      EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|o| o.value_text}
+        ConceptName.find_by_name("Other").concept_id,
+        EncounterType.find_by_name("SOCIAL HISTORY").id]).collect{|o| o.value_text}
                                                                                 
     result = "<li>" + religions.map{|n| n } .join("</li><li>") + "</li>"        
     render :text => result                                                      
   end
 
   def created_nested_lab_orders
-     encounter = Encounter.new()
-     encounter.encounter_type = EncounterType.find_by_name("LAB ORDERS").id
-     encounter.patient_id = params['encounter']['patient_id']
-     encounter.encounter_datetime = session[:datetime]
-      if params[:filter] and !params[:filter][:provider].blank?
-        user_person_id = User.find_by_username(params[:filter][:provider]).person_id
-      else
-        user_person_id = User.find_by_user_id(params['encounter']['provider_id']).person_id
-      end rescue user_person_id = current_user.person.person_id
-      encounter.provider_id = user_person_id
-      encounter.save
+    encounter = Encounter.new()
+    encounter.encounter_type = EncounterType.find_by_name("LAB ORDERS").id
+    encounter.patient_id = params['encounter']['patient_id']
+    encounter.encounter_datetime = session[:datetime]
+    if params[:filter] and !params[:filter][:provider].blank?
+      user_person_id = User.find_by_username(params[:filter][:provider]).person_id
+    else
+      user_person_id = User.find_by_user_id(params['encounter']['provider_id']).person_id
+    end rescue user_person_id = current_user.person.person_id
+    encounter.provider_id = user_person_id
+    encounter.save
 
     (params[:lab_orders] || []).each do |order|
-          encounter_id = Encounter.find(:last, :order => 'encounter_id ASC').id
+      encounter_id = Encounter.find(:last, :order => 'encounter_id ASC').id
 		  if !order.blank?
         multiple = order.match(/[:]/)
         unless multiple.nil?
@@ -694,7 +696,7 @@ class EncountersController < GenericEncountersController
 
           parent_obs = Observation.create(parent_obs)
           obs_group = Observation.find(:first, :order => "obs_id DESC", :conditions => ["encounter_id =? AND concept_id =?", \
-                    encounter_id, parent_obs.concept_id])
+                encounter_id, parent_obs.concept_id])
           obs_group_id = obs_group.id if obs_group
           child_obs = {
             "encounter_id" => "#{encounter_id}",
@@ -705,7 +707,7 @@ class EncountersController < GenericEncountersController
             "obs_group_id" => "#{obs_group_id}",
             "obs_datetime" => params['encounter']['encounter_datetime']
           }
-         Observation.create(child_obs)
+          Observation.create(child_obs)
         else
           obs = {
             "encounter_id" => "#{encounter.id}",
@@ -720,8 +722,8 @@ class EncountersController < GenericEncountersController
 		  end
 
     end
-   @patient_id = params[:encounter][:patient_id]
-   #redirect_to("/patients/show/#{@patient_id}")
+    @patient_id = params[:encounter][:patient_id]
+    #redirect_to("/patients/show/#{@patient_id}")
     redirect_to"/patients/print_lab_orders/?patient_id=#{@patient_id}"
   end
 end
