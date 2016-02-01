@@ -67,9 +67,9 @@
               <% if not @prescriptions.blank? %>
               <table id = 'dispensation' style = "width:100%;">
                 <tr style="text-align:left;">
-                  <th>&nbsp;</th>
-                  <th>Amount needed</th>
+                  <!--<th>&nbsp;</th>-->
                   <th>Drug</th>
+                  <th>Amount needed</th>
                   <th style="text-align:right;">Amount dispensed</th>
                 </tr>
                 <% @prescriptions.each do |order| %>
@@ -83,15 +83,15 @@
                         total_dispensed += parseFloat("<%=total_dispensed%>");
                       </script>
                       <tr class = 'dispensation_data' id = "<%=order.id%>">
-                        <td style="text-align:center;vertical-align: middle;" onmousedown = "voiding('<%=order.id%>');">
+                        <!--<td style="text-align:center;vertical-align: middle;" onmousedown = "voiding('<%=order.id%>');">
                           <img src="/images/cancel_flat_small.png"/>
-                        </td>
+                        </td>-->
                         <% total_required = order.drug_order.total_required
                           drug_unit  =  order.drug_order.units
                           if total_required > total_dispensed then color = 'red' else color = '' end
                         %>
-                        <td style="color:<%=color%>;"><%="#{total_required} #{drug_unit}"%></td>
                         <td><%=order.drug_order.drug.name%></td>
+                        <td style="color:<%=color%>;"><%="#{total_required} #{drug_unit}"%></td>
                         <td style="text-align:right;"><%= total_dispensed %></td>
                       </tr>
                 <% end %>

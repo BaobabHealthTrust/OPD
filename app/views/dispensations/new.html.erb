@@ -3,13 +3,24 @@
     display: none;
   }
 </style>
-<script>
+<script type="text/javascript">
   var tt_cancel_destination = "/patients/treatment_dashboard/<%= @patient.patient_id %>"
 
   function set_drug_for_quantity() {
     var drug_id = encodeURIComponent($('drug_id').value); 
     $('touchscreenInput'+tstCurrentPage).setAttribute('ajaxURL', "/dispensations/quantities?formulation=" + drug_id + "&search_string=");
     listSuggestions(tstCurrentPage); 
+  }
+
+  function createStockedOutButton(){
+    stockedOutButton = document.getElementById("equals");
+    stockedOutButton.innerHTML = "<span>Stocked Out</span>";
+    stockedOutButton.style.display = 'inline';
+    stockedOutButton.style.float = 'Right';
+    stockedOutButton.className = "keyboardButton red"
+    stockedOutButton.onmousedown = function(){
+      press('Stocked Out');
+    }
   }
 </script>
 <form id='dispensation' action="/dispensations/create" method='post'>
@@ -21,7 +32,7 @@
 
   <% # Set ajaxURL in the script, but need to start it blank %>
   <%= text_field_tag :quantity, nil, { 
-    :tt_onLoad => "set_drug_for_quantity();",
+    :tt_onLoad => "set_drug_for_quantity(); createStockedOutButton();",
     :ajaxURL => "", 
     :field_type => 'number',
     :units => '',
