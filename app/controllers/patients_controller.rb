@@ -130,6 +130,12 @@ class PatientsController < GenericPatientsController
 		@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
     @show_tasks_button = CoreService.get_global_property_value('show.tasks.button').to_s == "true" rescue false
 		@point_of_care = CoreService.get_global_property_value('point_of_care')
+
+    @current_prescriptions = Order.find(:all,
+      :joins => "INNER JOIN encounter e USING (encounter_id)",
+      :conditions => ["encounter_type = ? AND e.patient_id = ? AND DATE(encounter_datetime) = ?",
+        EncounterType.find_by_name('TREATMENT').id,@patient.id,session_date])
+    
     render :template => 'patients/index', :layout => false
 	end
 
