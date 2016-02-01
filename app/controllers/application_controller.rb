@@ -21,7 +21,7 @@ class ApplicationController < GenericApplicationController
 
 		task.encounter_type = 'NONE'
 		task.url = "/patients/show/#{patient.id}"
-    
+=begin
     if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")
       unless session[:datetime].blank? #Back Data Entry
 
@@ -54,7 +54,7 @@ class ApplicationController < GenericApplicationController
         
       end
     end
-    
+=end
 		if is_encounter_available(patient, 'DISCHARGE PATIENT', session_date)
 			if !is_encounter_available(patient, 'DISCHARGE DIAGNOSIS', session_date)
 				task.encounter_type = 'DISCHARGE DIAGNOSIS'
