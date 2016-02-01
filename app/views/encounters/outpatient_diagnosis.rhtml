@@ -25,7 +25,7 @@
 
   var malariaTestStatus = '<%= @malaria_test_status %>';
   function setAttributes(){
-    if (malariaTestStatus == 'no_orders' || malariaTestStatus == 'negative'){
+    if (malariaTestStatus == 'no_orders' || malariaTestStatus == 'waiting_results' || malariaTestStatus == 'negative'){
       liElements = jQuery("li");
       for (var i = 0; i <= liElements.length - 1; i++){
         if (liElements[i].hasAttribute("value")){
@@ -246,7 +246,9 @@
   jQuery('html').click(function() {
     jQuery("#popup-div").hide();
     if ($('touchscreenInput'+tstCurrentPage).value.match(/MALARIA/i)){
-      clearInput();
+      if (malariaTestStatus == 'no_orders' || malariaTestStatus == 'waiting_results' || malariaTestStatus == 'negative'){
+        clearInput();
+      }
     }
     jQuery("#cover").hide();
   });

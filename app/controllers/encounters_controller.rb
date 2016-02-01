@@ -51,15 +51,14 @@ class EncountersController < GenericEncountersController
     @new_accession_number = Observation.new_accession_number
 
     lab_order_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
-    test_ordered_concept_id = Concept.find_by_name("TESTS ORDERED").concept_id
+    test_ordered_concept_id = Concept.find_by_name("BLOOD").concept_id
     malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
     lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
 
     malaria_test_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_order_encounter_type_id} AND e.patient_id=#{@patient.id}
-        AND o.concept_id = #{test_ordered_concept_id} AND e.voided=0 AND
-        DATE(e.encounter_datetime) <= '#{session_date.to_date}'
-        ORDER BY o.obs_id DESC").first
+        AND o.concept_id = #{test_ordered_concept_id} AND e.voided=0 AND UPPER(o.value_text) IN ('MALARIA (MRDT)', 'MALARIA (MICROSCOPY)') 
+        AND DATE(e.encounter_datetime) <= '#{session_date.to_date}' ORDER BY o.obs_id DESC").first
 
     @required_accession_number = malaria_test_obs.accession_number rescue ''
     @malaria_test_name = malaria_test_obs.answer_string.squish rescue ''

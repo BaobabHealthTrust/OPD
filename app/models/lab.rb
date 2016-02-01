@@ -52,11 +52,11 @@ ORDER BY DATE(TESTDATE) DESC",patient_ids,type
 
   def self.malaria_test_result(patient)
     lab_orders_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
-    tests_ordered_concept_id = Concept.find_by_name("TESTS ORDERED").concept_id
+    tests_ordered_concept_id = Concept.find_by_name("BLOOD").concept_id
 
     malaria_order_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.patient_id = #{patient.id} AND e.encounter_type = #{lab_orders_encounter_type_id}
-        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) IN ('MICROSCOPY', 'MRDT')
+        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) IN ('MALARIA (MRDT)', 'MALARIA (MICROSCOPY)')
         AND e.voided=0 AND DATE(e.encounter_datetime) = '#{Date.today}'")
 
     return "no_orders" if malaria_order_observations.blank?
