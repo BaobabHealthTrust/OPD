@@ -777,6 +777,42 @@ class GenericPatientsController < ApplicationController
     render :template => 'dashboards/treatment_dashboard', :layout => false
   end
 
+  def prescription_dashboard
+	  @patient_bean = PatientService.get_patient(@patient.person)
+    @amount_needed = 0
+    @amounts_required = 0
+
+    type = EncounterType.find_by_name('TREATMENT')
+    session_date = session[:datetime].to_date rescue Date.today
+    Order.find(:all,
+      :joins => "INNER JOIN encounter e USING (encounter_id)",
+      :conditions => ["encounter_type = ? AND e.patient_id = ? AND DATE(encounter_datetime) = ?",
+        type.id,@patient.id,session_date]).each{|order|
+
+      @amount_needed = @amount_needed + (order.drug_order.amount_needed.to_i rescue 0)
+
+      @amounts_required = @amounts_required + (order.drug_order.total_required rescue 0)
+
+    }
+
+    @dispensed_order_id = params[:dispensed_order_id]
+
+    render :template => 'dashboards/prescription_dashboard', :layout => false
+  end
+
+  def precription_data
+    type = EncounterType.find_by_name('TREATMENT')
+    session_date = session[:datetime].to_date rescue Date.today
+    @prescriptions = Order.find(:all,
+      :joins => "INNER JOIN encounter e USING (encounter_id)",
+      :conditions => ["encounter_type = ? AND e.patient_id = ? AND DATE(encounter_datetime) = ?",
+        type.id,@patient.id,session_date])
+
+    @encounters = @patient.encounters.find_by_date(session_date)
+
+    render :template => 'dashboards/prescription_tab', :layout => false
+  end
+
   def guardians_dashboard
 	  @patient_bean = PatientService.get_patient(@patient.person)
     @reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
