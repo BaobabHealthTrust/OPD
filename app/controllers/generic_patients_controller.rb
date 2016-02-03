@@ -88,6 +88,7 @@ class GenericPatientsController < ApplicationController
     #@prescriptions = @patient.orders.current.prescriptions.all
     type = EncounterType.find_by_name('TREATMENT')
     session_date = session[:datetime].to_date rescue Date.today
+    @session_date = session_date
     @prescriptions = Order.find(:all,
       :joins => "INNER JOIN encounter e USING (encounter_id)",
       :conditions => ["encounter_type = ? AND e.patient_id = ? AND DATE(encounter_datetime) = ?",
