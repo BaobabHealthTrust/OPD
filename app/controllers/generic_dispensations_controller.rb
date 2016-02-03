@@ -204,6 +204,24 @@ class GenericDispensationsController < ApplicationController
     encounter ||= patient.encounters.create(:encounter_type => type.id,:encounter_datetime => date, :provider_id => provider)
   end
 
+  def create_drug_stock_out_obs
+    raise params.inspect
+    patient_id = params[:patient_id]
+    drug_name = params[:drug_name]
+    drug_id = params[:drug_id]
+
+    patient = Patient.find(patient_id)
+    dispensation_encounter = current_dispensation_encounter(patient)
+    concept_id = Concept.find_by_name("DRUG OUT OF STOCK").concept_id
+    dispensation_encounter.observations.create({
+        :person_id => patient_id,
+        :concept_id => concept_id,
+        :value_drug => drug_id,
+        :value_text => drug_name
+    })
+  
+  end
+
 	def set_received_regimen(patient, encounter,prescription)
 		dispense_finish = true ; dispensed_drugs_inventory_ids = []
 

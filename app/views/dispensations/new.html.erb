@@ -1,10 +1,83 @@
 <style type="text/css">
-   .tt_controls_quantity #char {
+  .tt_controls_quantity #char {
     display: none;
+  }
+
+  .my_button {
+    -moz-user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bolder;
+    line-height: 1.82857;
+    margin-bottom: 0;
+    padding: 6px 56px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+    color: #fff;
+    float: right;
+    margin-top: -5px;
+  }
+
+
+  #popup-div {
+    display: none;
+    background-color: #F4F4F4;
+    border: 2px solid #E0E0E0;
+    border-radius: 15px;
+    height: 212px;
+    padding: 5px;
+    position: absolute;
+    margin-top: 100px;
+    width: 560px;
+    margin-left: 430px;
+    z-index: 991;
+  }
+
+  #popup-header{
+    border-bottom: 2px solid #7D9EC0;
+    margin-left: -5px;
+    width: 101.5%;
+    background-color: #FFFFFF;
+    margin-top: -5px;
+    padding-top: 5px;
+    border-radius: 15px 15px 0 0;
+    font-size: 14pt;
+    font-weight: bolder;
+  }
+
+  #cover{
+    display: none;
+    position: absolute;
+    background-color: black;
+    width: 100%;
+    height: 102%;
+    left: 0%;
+    top: 0%;
+    z-index: 990;
+    opacity: 0.65;
+  }
+
+  #yes, #no {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  #drugName{
+    font-style: italic;
+    font-weight: bolder;
   }
 </style>
 <script type="text/javascript">
   var tt_cancel_destination = "/patients/treatment_dashboard/<%= @patient.patient_id %>"
+  var patientID = "<%= @patient.patient_id %>";
 
   function set_drug_for_quantity() {
     var drug_id = encodeURIComponent($('drug_id').value); 
@@ -20,20 +93,30 @@
     stockedOutButton.className = "keyboardButton red"
     stockedOutButton.onmousedown = function(){
       press('Stocked Out');
+      showStockOutConfirmationPopup();
     }
   }
+
+  function updateDrugName(){
+    drugName = $('touchscreenInput'+tstCurrentPage).value;
+    $('drugName').innerHTML = drugName;
+  }
+  
 </script>
 <form id='dispensation' action="/dispensations/create" method='post'>
- 
+
   <%= hidden_field_tag :patient_id, @patient.id %>
 
-  <%= select_tag :drug_id, options_for_select(@options), 
-    {:helpText => "Dispense which prescribed drug?"} %> 
+  <%= select_tag :drug_id, options_for_select(@options),
+    {
+    :tt_onUnLoad => "updateDrugName();",
+    :helpText => "Dispense which prescribed drug?"
+  } %>
 
   <% # Set ajaxURL in the script, but need to start it blank %>
-  <%= text_field_tag :quantity, nil, { 
+  <%= text_field_tag :quantity, nil, {
     :tt_onLoad => "set_drug_for_quantity(); createStockedOutButton();",
-    :ajaxURL => "", 
+    :ajaxURL => "",
     :field_type => 'number',
     :units => '',
     :helpText => "Quantity",
@@ -42,12 +125,77 @@
     :allowFreeText => "true",
     :tt_pageStyleClass => "NumbersOnlyWithDecimal"}%>
 
-  <% session_date = session[:datetime].to_date rescue nil                       
-    if session_date %>
+  <% session_date = session[:datetime].to_date rescue nil
+  if session_date %>
 
     <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
-<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
-    <% else %>
-      <%= hidden_field_tag "filter[provider]", nil %>
-    <%end%>
+      <%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+  <% else %>
+    <%= hidden_field_tag "filter[provider]", nil %>
+  <%end%>
 </form>
+
+<div id="popup-div">
+  <div id="popup-header">
+    <center>Confirm</center>
+  </div><br />
+  <div>
+
+    <span style="font-size: 16pt;">
+      <center>
+        Are you sure <span id="drugName">drug_name</span> is stocked out?
+      </center>
+    </span>
+    <div style="padding-top: 65px;">
+      <span id="yes" onclick="continueProcess();" class="my_button" style="position: relative;">Yes</span>
+      <span id="no" onclick="hidePopup();" class="my_button" style=" position: relative; right: 20px;">Cancel</span>
+    </div>
+  </div>
+</div>
+<div id="cover"></div>
+
+<script type="text/javascript">
+  jQuery('html').click(function() {
+    //jQuery("#popup-div").hide();
+    //jQuery("#cover").hide();
+  });
+
+  jQuery('#popup-div').click(function(event){
+    event.stopPropagation();
+  });
+
+  function continueProcess(){
+    form = document.createElement('form');
+    document.getElementsByTagName('body')[0].appendChild(form);
+    form.action ='/dispensations/create_drug_stock_out_obs';
+    form.method='POST';
+    drugID = $('drug_id').value;
+    drugName = $('drugName').innerHTML;
+
+
+    createInput(form, 'hidden', 'drug_name', drugName);
+    createInput(form, 'hidden', 'drug_id', drugID);
+    createInput(form, 'hidden', 'patient_id', patientID);
+    form.submit();
+  }
+
+  function createInput(form, type, name, value){
+    input = document.createElement('input');
+    input.type = type;
+    input.value = value;
+    input.name = name;
+    form.appendChild(input);
+  }
+
+  function showStockOutConfirmationPopup(){
+    document.getElementById("popup-div").style.display = 'inline';
+    document.getElementById("cover").style.display = 'inline';
+  }
+
+  function hidePopup(){
+    clearInput();
+    document.getElementById("popup-div").style.display = 'none';
+    document.getElementById("cover").style.display = 'none';
+  }
+  
+</script>
