@@ -213,7 +213,7 @@ class GenericDispensationsController < ApplicationController
 
   def create_drug_stock_out_obs
     patient_id = params[:patient_id]
-    drug_name = params[:drug_name]
+    #drug_name = params[:drug_name]
     drug_id = params[:drug_id]
     order_id = params[:order_id]
     session_date = session[:datetime].to_date rescue Time.now
@@ -230,7 +230,7 @@ class GenericDispensationsController < ApplicationController
         :obs_datetime => Time.now
       })
     
-    redirect_to("/patients/treatment_dashboard/#{patient_id}")
+    redirect_to("/patients/treatment_dashboard/#{patient_id}") and return
   end
 
 	def set_received_regimen(patient, encounter,prescription)
