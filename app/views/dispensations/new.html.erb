@@ -78,7 +78,8 @@
 <script type="text/javascript">
   var tt_cancel_destination = "/patients/treatment_dashboard/<%= @patient.patient_id %>"
   var patientID = "<%= @patient.patient_id %>";
-
+  var drugOrderHash = JSON.parse('<%= @drug_order_hash.to_json %>');
+  
   function set_drug_for_quantity() {
     var drug_id = encodeURIComponent($('drug_id').value); 
     $('touchscreenInput'+tstCurrentPage).setAttribute('ajaxURL', "/dispensations/quantities?formulation=" + drug_id + "&search_string=");
@@ -171,10 +172,11 @@
     form.method='POST';
     drugID = $('drug_id').value;
     drugName = $('drugName').innerHTML;
-
+    orderID = drugOrderHash[drugID];
 
     createInput(form, 'hidden', 'drug_name', drugName);
     createInput(form, 'hidden', 'drug_id', drugID);
+    createInput(form, 'hidden', 'order_id', orderID);
     createInput(form, 'hidden', 'patient_id', patientID);
     form.submit();
   }

@@ -6,10 +6,17 @@ class GenericDispensationsController < ApplicationController
 		type = EncounterType.find_by_name('TREATMENT')
 		session_date = session[:datetime].to_date rescue Date.today
 		@prescriptions = Order.find(:all,
-					     :joins => "INNER JOIN encounter e USING (encounter_id)", 
-					     :conditions => ["encounter_type = ? AND e.patient_id = ? AND DATE(encounter_datetime) = ?",
-					     type.id,@patient.id,session_date]) 
+      :joins => "INNER JOIN encounter e USING (encounter_id)",
+      :conditions => ["encounter_type = ? AND e.patient_id = ? AND DATE(encounter_datetime) = ?",
+        type.id,@patient.id,session_date])
 		@options = @prescriptions.map{|presc| [presc.drug_order.drug.name, presc.drug_order.drug_inventory_id]}
+
+    @drug_order_hash = {}
+    @prescriptions.each do |presc|
+      drug_id =  presc.drug_order.drug_inventory_id
+      @drug_order_hash[drug_id] = presc.order_id
+    end
+
 	end
 
   def create
@@ -45,7 +52,7 @@ class GenericDispensationsController < ApplicationController
     @encounter = current_dispensation_encounter(@patient, session_date, user_person_id)
 
     @order = PatientService.current_treatment_encounter( @patient, session_date, user_person_id).drug_orders.find(:first,:conditions => ['drug_order.drug_inventory_id = ?', 
-             params[:drug_id]]).order rescue []
+        params[:drug_id]]).order rescue []
 
     # Do we have an order for the specified drug?
 		if @order.blank?
@@ -71,8 +78,8 @@ class GenericDispensationsController < ApplicationController
 				duration = 0
 
 				if !estimate
-						regimen = Regimen.find(:first, :select => "regimen.*, regimen_drug_order.*", :joins => 'LEFT JOIN regimen_drug_order ON regimen.regimen_id = regimen_drug_order.regimen_id' ,
-												:conditions => ['min_weight <= ? AND max_weight > ?
+          regimen = Regimen.find(:first, :select => "regimen.*, regimen_drug_order.*", :joins => 'LEFT JOIN regimen_drug_order ON regimen.regimen_id = regimen_drug_order.regimen_id' ,
+            :conditions => ['min_weight <= ? AND max_weight > ?
 													AND program_id = 1 AND drug_inventory_id = ?', current_weight, current_weight, params[:drug_id]])
           if !regimen.blank?
             dose = regimen.dose
@@ -102,7 +109,7 @@ class GenericDispensationsController < ApplicationController
 					equivalent_daily_dose)   
 
 				@order = PatientService.current_treatment_encounter( @patient, session_date, user_person_id).drug_orders.find(:first,:conditions => ['drug_order.drug_inventory_id = ?', 
-					params[:drug_id]]).order rescue []
+            params[:drug_id]]).order rescue []
 				
 				@order_id = @order.order_id
 				@drug_value = params[:drug_id]
@@ -140,16 +147,16 @@ class GenericDispensationsController < ApplicationController
     end
 
     @patient.patient_programs.find_last_by_program_id(Program.find_by_name("HIV PROGRAM")).transition(
-             :state => "On antiretrovirals",:start_date => session_date || Time.now()) if MedicationService.arv(@drug) rescue nil
+      :state => "On antiretrovirals",:start_date => session_date || Time.now()) if MedicationService.arv(@drug) rescue nil
 
     @patient.patient_programs.find_last_by_program_id(Program.find_by_name("DIABETES PROGRAM")).transition(
-             :state => "On treatment",:start_date => session_date || Time.now()) if MedicationService.diabetes_medication(@drug) rescue nil
+      :state => "On treatment",:start_date => session_date || Time.now()) if MedicationService.diabetes_medication(@drug) rescue nil
 
     @tb_programs = @patient.patient_programs.in_uncompleted_programs(['TB PROGRAM', 'MDR-TB PROGRAM'])
 
     if !@tb_programs.blank?
       @patient.patient_programs.find_last_by_program_id(Program.find_by_name("TB PROGRAM")).transition(
-             :state => "Currently in treatment",:start_date => session_date || Time.now()) if   MedicationService.tb_medication(@drug)
+        :state => "Currently in treatment",:start_date => session_date || Time.now()) if   MedicationService.tb_medication(@drug)
     end
 
     @order.drug_order.total_drug_supply(@patient, @encounter, session_date.to_date)
@@ -205,21 +212,25 @@ class GenericDispensationsController < ApplicationController
   end
 
   def create_drug_stock_out_obs
-    raise params.inspect
     patient_id = params[:patient_id]
     drug_name = params[:drug_name]
     drug_id = params[:drug_id]
-
+    order_id = params[:order_id]
+    session_date = session[:datetime].to_date rescue Time.now
+    
     patient = Patient.find(patient_id)
-    dispensation_encounter = current_dispensation_encounter(patient)
+    dispensation_encounter = current_dispensation_encounter(patient, session_date, current_user.person_id)
     concept_id = Concept.find_by_name("DRUG OUT OF STOCK").concept_id
     dispensation_encounter.observations.create({
         :person_id => patient_id,
         :concept_id => concept_id,
+        :order_id => order_id,
         :value_drug => drug_id,
-        :value_text => drug_name
-    })
-  
+        :value_text => 'Stocked Out',
+        :obs_datetime => Time.now
+      })
+    
+    redirect_to("/patients/treatment_dashboard/#{patient_id}")
   end
 
 	def set_received_regimen(patient, encounter,prescription)
@@ -263,8 +274,8 @@ EOF
 			regimen_prescribed = regimen_drug_order.first['concept_id'].to_i rescue ConceptName.find_by_name('UNKNOWN ANTIRETROVIRAL DRUG').concept_id
 
 
-#			if (Observation.find(:first,:conditions => ["person_id = ? AND encounter_id = ? AND concept_id = ?",
-#					patient.id,encounter.id,ConceptName.find_by_name('ARV REGIMENS RECEIVED ABSTRACTED CONSTRUCT').concept_id])).blank?
+      #			if (Observation.find(:first,:conditions => ["person_id = ? AND encounter_id = ? AND concept_id = ?",
+      #					patient.id,encounter.id,ConceptName.find_by_name('ARV REGIMENS RECEIVED ABSTRACTED CONSTRUCT').concept_id])).blank?
 
 			regimen_value_text = Concept.find(regimen_prescribed).shortname rescue nil
 			if regimen_value_text.blank?
@@ -304,34 +315,34 @@ EOF
 
 	private
 
-		def dispensation_complete(patient,encounter,prescription)
-			complete = all_orders_complete(patient, encounter.encounter_datetime.to_date)
-			if complete
-				dispensation_completed = set_received_regimen(patient, encounter,prescription)
-			end
-			return complete
-		end
+  def dispensation_complete(patient,encounter,prescription)
+    complete = all_orders_complete(patient, encounter.encounter_datetime.to_date)
+    if complete
+      dispensation_completed = set_received_regimen(patient, encounter,prescription)
+    end
+    return complete
+  end
 
-		def all_orders_complete(patient, encounter_date)                               
-			type = EncounterType.find_by_name('TREATMENT').id                           
+  def all_orders_complete(patient, encounter_date)
+    type = EncounterType.find_by_name('TREATMENT').id
 
-			current_treatment_encounters = Encounter.find(:all,                                                  
-				:conditions =>["patient_id = ? AND encounter_datetime BETWEEN ? AND ?           
+    current_treatment_encounters = Encounter.find(:all,
+      :conditions =>["patient_id = ? AND encounter_datetime BETWEEN ? AND ?
 				AND encounter_type = ?",patient.id , 
 				encounter_date.to_date.strftime('%Y-%m-%d 00:00:00'),
 				encounter_date.to_date.strftime('%Y-%m-%d 23:59:59'), 
 				type])              
 							                                                            
-			complete = true                                                             
-			(current_treatment_encounters || []).each do | encounter |                                             
-				encounter.drug_orders.each do | drug_order |  
-					if drug_order.amount_needed > 0
-						complete = false
-					end
-					break if complete == false
-				end
-				break if complete == false                                                                       
-			end                                                                         
-			return complete                                                             
-		end  
+    complete = true
+    (current_treatment_encounters || []).each do | encounter |
+      encounter.drug_orders.each do | drug_order |
+        if drug_order.amount_needed > 0
+          complete = false
+        end
+        break if complete == false
+      end
+      break if complete == false
+    end
+    return complete
+  end
 end
