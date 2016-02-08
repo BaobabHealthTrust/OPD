@@ -26,7 +26,7 @@
   }
 
 
-  #popup-div {
+  #popup-div, #popup-div-2 {
     display: none;
     background-color: #F4F4F4;
     border: 2px solid #E0E0E0;
@@ -38,6 +38,10 @@
     width: 560px;
     margin-left: 430px;
     z-index: 991;
+  }
+
+  #popup-div-2{
+    height: 185px;
   }
 
   #popup-header{
@@ -153,19 +157,38 @@
     </div>
   </div>
 </div>
+
+<!--POP-UP2 BEGIN-->
+<div id="popup-div-2">
+  <div id="popup-header">
+    <center>Confirm</center>
+  </div><br />
+  <div>
+    <span style="font-size: 16pt;">
+      <center>
+        Do you want to dispense another drug?
+      </center>
+    </span>
+    <div style="padding-top: 65px;">
+      <span id="yes" onclick="processData('yes')" class="my_button" style="position: relative;">Yes</span>
+      <span id="no" onclick="processData('no')" class="my_button" style=" position: relative; right: 20px;">No</span>
+    </div>
+  </div>
+</div>
+<!--POP-UP2 END-->
+
 <div id="cover"></div>
 
 <script type="text/javascript">
-  jQuery('html').click(function() {
-    //jQuery("#popup-div").hide();
-    //jQuery("#cover").hide();
-  });
-
-  jQuery('#popup-div').click(function(event){
-    event.stopPropagation();
-  });
 
   function continueProcess(){
+    if (__$("popup-div")){
+      __$("popup-div").style.display = "none";
+    }
+    showDispenseNewDrugPopup();
+  }
+
+  function processData(v){
     form = document.createElement('form');
     document.getElementsByTagName('body')[0].appendChild(form);
     form.action ='/dispensations/create_drug_stock_out_obs';
@@ -178,6 +201,11 @@
     createInput(form, 'hidden', 'drug_id', drugID);
     createInput(form, 'hidden', 'order_id', orderID);
     createInput(form, 'hidden', 'patient_id', patientID);
+    
+    if (v.trim().toUpperCase() == 'YES'){
+      createInput(form, 'hidden', 'dispense_new_drug', 'true');
+    }
+    
     form.submit();
   }
 
@@ -196,8 +224,20 @@
 
   function hidePopup(){
     clearInput();
-    document.getElementById("popup-div").style.display = 'none';
+    if (__$("popup-div")){
+      __$("popup-div").style.display = "none";
+    }
+    
+    if (__$("popup-div-2")){
+      __$("popup-div-2").style.display = "none";
+    }
+    
     document.getElementById("cover").style.display = 'none';
+  }
+
+  function showDispenseNewDrugPopup(){
+    document.getElementById("popup-div-2").style.display = 'inline';
+    document.getElementById("cover").style.display = 'inline';
   }
   
 </script>

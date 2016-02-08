@@ -229,10 +229,31 @@ class GenericDispensationsController < ApplicationController
         :value_text => 'Stocked Out',
         :obs_datetime => Time.now
       })
-    
+
+    redirect_to("/dispensations/dispense_non_prescribed_drugs?patient_id=#{patient_id}") and return if params[:dispense_new_drug]
     redirect_to("/patients/treatment_dashboard/#{patient_id}") and return
   end
 
+  def dispense_non_prescribed_drugs
+    @patient = Patient.find(params[:patient_id])
+    concept_id = Concept.find_by_name("LA(Lumefantrine + arthemether)").concept_id
+		type = EncounterType.find_by_name('TREATMENT')
+		session_date = session[:datetime].to_date rescue Date.today
+		prescriptions = Order.find(:all,
+      :joins => "INNER JOIN encounter e USING (encounter_id)",
+      :conditions => ["encounter_type = ? AND e.patient_id = ? AND DATE(encounter_datetime) = ?",
+        type.id,@patient.id,session_date])
+
+    prescribed_drug_ids = prescriptions.map{|presc| presc.drug_order.drug_inventory_id}
+    prescribed_drug_ids = [0] if prescribed_drug_ids.blank?
+
+    non_prescribed_drugs = Drug.find(:all, :conditions => ["concept_id =? AND drug_id NOT IN (?)",
+        concept_id, prescribed_drug_ids])
+    
+		@options = non_prescribed_drugs.map{|drug| [drug.name, drug.drug_id]}
+
+  end
+  
 	def set_received_regimen(patient, encounter,prescription)
 		dispense_finish = true ; dispensed_drugs_inventory_ids = []
 
