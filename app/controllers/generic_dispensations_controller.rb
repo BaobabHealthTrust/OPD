@@ -230,7 +230,7 @@ class GenericDispensationsController < ApplicationController
         :obs_datetime => Time.now
       })
 
-    redirect_to("/dispensations/dispense_non_prescribed_drugs?patient_id=#{patient_id}") and return if params[:dispense_new_drug]
+    redirect_to("/dispensations/dispense_non_prescribed_drugs?patient_id=#{patient_id}&order_id=#{order_id}") and return if params[:dispense_new_drug]
     redirect_to("/patients/treatment_dashboard/#{patient_id}") and return
   end
 
@@ -253,29 +253,69 @@ class GenericDispensationsController < ApplicationController
 		@options = non_prescribed_drugs.map{|drug| [drug.name, drug.drug_id]}
 
   end
-  
-	def set_received_regimen(patient, encounter,prescription)
-		dispense_finish = true ; dispensed_drugs_inventory_ids = []
 
-		prescription.orders.each do | order |
-		  next if not MedicationService.arv(order.drug_order.drug)
+  def create_non_prescribed_drug_dispensation
+    session_date = session[:datetime].to_date rescue Time.now()
+    order = Order.find(params[:order_id])
+    new_order = order.clone
+    new_drug_order = order.drug_order.clone
+
+    if params[:filter] and !params[:filter][:provider].blank?
+      user_person_id = User.find_by_username(params[:filter][:provider]).person_id
+    elsif params[:location]
+      user_person_id = params[:provider_id]
+    else
+      user_person_id = current_user.person_id
+    end
+
+    patient = Patient.find(params[:patient_id])
+    encounter = current_dispensation_encounter(patient, session_date, user_person_id)
+
+    ActiveRecord::Base.transaction do
+      new_order.save
+      new_drug_order.order_id = new_order.order_id
+      new_drug_order.drug_inventory_id = params[:drug_id]
+      new_drug_order.save
+
+      obs = Observation.new(
+        :concept_name => "AMOUNT DISPENSED",
+        :order_id => new_order.order_id,
+        :person_id => params[:patient_id],
+        :encounter_id => encounter.encounter_id,
+        :value_drug => params[:drug_id],
+        :value_numeric => params[:quantity],
+        :obs_datetime => session_date
+      )
+      obs.save
+      
+      new_order.drug_order.total_drug_supply(patient, encounter, session_date.to_date)
+    end
+
+    redirect_to("/patients/treatment_dashboard/#{params[:patient_id]}")
+  end
+
+  def set_received_regimen(patient, encounter,prescription)
+    dispense_finish = true ; dispensed_drugs_inventory_ids = []
+
+    prescription.orders.each do | order |
+      next if not MedicationService.arv(order.drug_order.drug)
 		  
-		  if order.drug_order.quantity and order.drug_order.quantity > 0
-		    dispensed_drugs_inventory_ids << order.drug_order.drug.id
-		  end
+      if order.drug_order.quantity and order.drug_order.quantity > 0
+        dispensed_drugs_inventory_ids << order.drug_order.drug.id
+      end
 =begin		
 		  if (order.drug_order.amount_needed > 0)
 			dispense_finish = false
 		  end
 =end
-		end
+    end
 
-		#return unless dispense_finish
-		#return if dispensed_drugs_inventory_ids.blank?
+    #return unless dispense_finish
+    #return if dispensed_drugs_inventory_ids.blank?
 
-		return_text = ''
-		if !dispensed_drugs_inventory_ids.blank?
-			regimen_drug_order = ActiveRecord::Base.connection.select_all <<EOF
+    return_text = ''
+    if !dispensed_drugs_inventory_ids.blank?
+      regimen_drug_order = ActiveRecord::Base.connection.select_all <<EOF
 SELECT r.regimen_id , r.concept_id ,
 (SELECT COUNT(t3.regimen_id) FROM regimen_drug_order t3
 WHERE t3.regimen_id = t.regimen_id GROUP BY t3.regimen_id) as c
@@ -292,49 +332,49 @@ HAVING count(x.drug_inventory_id) = c
 LIMIT 1)
 EOF
 
-			regimen_prescribed = regimen_drug_order.first['concept_id'].to_i rescue ConceptName.find_by_name('UNKNOWN ANTIRETROVIRAL DRUG').concept_id
+      regimen_prescribed = regimen_drug_order.first['concept_id'].to_i rescue ConceptName.find_by_name('UNKNOWN ANTIRETROVIRAL DRUG').concept_id
 
 
       #			if (Observation.find(:first,:conditions => ["person_id = ? AND encounter_id = ? AND concept_id = ?",
       #					patient.id,encounter.id,ConceptName.find_by_name('ARV REGIMENS RECEIVED ABSTRACTED CONSTRUCT').concept_id])).blank?
 
-			regimen_value_text = Concept.find(regimen_prescribed).shortname rescue nil
-			if regimen_value_text.blank?
-				regimen_value_text = ConceptName.find_by_concept_id(regimen_prescribed).name rescue nil
-			end
+      regimen_value_text = Concept.find(regimen_prescribed).shortname rescue nil
+      if regimen_value_text.blank?
+        regimen_value_text = ConceptName.find_by_concept_id(regimen_prescribed).name rescue nil
+      end
 	
-			return if regimen_value_text.blank?
-			return_text = regimen_value_text
+      return if regimen_value_text.blank?
+      return_text = regimen_value_text
 
-			selected_regimen = Regimen.find(regimen_drug_order.first['regimen_id'].to_i) rescue nil
+      selected_regimen = Regimen.find(regimen_drug_order.first['regimen_id'].to_i) rescue nil
 
       regimen_category_id = ConceptName.find_by_name('REGIMEN CATEGORY').concept_id
       if encounter.observations.find_by_concept_id(regimen_category_id).blank?
-				obs = Observation.create(
-					:concept_name => "REGIMEN CATEGORY",
-					:person_id => patient.id,
-					:encounter_id => encounter.id,
-					:value_text => selected_regimen.regimen_index,
-					:obs_datetime => encounter.encounter_datetime) if !selected_regimen.blank?
-			end
+        obs = Observation.create(
+          :concept_name => "REGIMEN CATEGORY",
+          :person_id => patient.id,
+          :encounter_id => encounter.id,
+          :value_text => selected_regimen.regimen_index,
+          :obs_datetime => encounter.encounter_datetime) if !selected_regimen.blank?
+      end
 			
       regimens_received_id = ConceptName.find_by_name('ARV REGIMENS RECEIVED ABSTRACTED CONSTRUCT').concept_id
       if encounter.observations.find_by_concept_id(regimens_received_id).blank?
-				obs = Observation.new(
-					:concept_name => "ARV REGIMENS RECEIVED ABSTRACTED CONSTRUCT",
-					:person_id => patient.id,
-					:encounter_id => encounter.id,
-					:value_coded => regimen_prescribed,
-					:obs_datetime => encounter.encounter_datetime)
+        obs = Observation.new(
+          :concept_name => "ARV REGIMENS RECEIVED ABSTRACTED CONSTRUCT",
+          :person_id => patient.id,
+          :encounter_id => encounter.id,
+          :value_coded => regimen_prescribed,
+          :obs_datetime => encounter.encounter_datetime)
 
         obs.save
-			end
+      end
 			
-		end
-		return return_text
-	end
+    end
+    return return_text
+  end
 
-	private
+  private
 
   def dispensation_complete(patient,encounter,prescription)
     complete = all_orders_complete(patient, encounter.encounter_datetime.to_date)
@@ -350,9 +390,9 @@ EOF
     current_treatment_encounters = Encounter.find(:all,
       :conditions =>["patient_id = ? AND encounter_datetime BETWEEN ? AND ?
 				AND encounter_type = ?",patient.id , 
-				encounter_date.to_date.strftime('%Y-%m-%d 00:00:00'),
-				encounter_date.to_date.strftime('%Y-%m-%d 23:59:59'), 
-				type])              
+        encounter_date.to_date.strftime('%Y-%m-%d 00:00:00'),
+        encounter_date.to_date.strftime('%Y-%m-%d 23:59:59'),
+        type])
 							                                                            
     complete = true
     (current_treatment_encounters || []).each do | encounter |

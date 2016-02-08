@@ -10,12 +10,12 @@
   var tt_cancel_destination = "/patients/treatment_dashboard/<%= @patient.patient_id %>"
 
 </script>
-<form id='dispensation' action="/dispensations/create" method='post'>
+<form id='dispensation' action="/dispensations/create_non_prescribed_drug_dispensation" method='post'>
 
   <%= hidden_field_tag :patient_id, @patient.id %>
+  <%= hidden_field_tag :order_id, params[:order_id] %>
 
-  <%= select_tag :drug_id, options_for_select(@options),
-    {
+  <%= select_tag :drug_id, options_for_select(@options),{
     :helpText => "Dispense which non prescribed drug?"
   } %>
 
