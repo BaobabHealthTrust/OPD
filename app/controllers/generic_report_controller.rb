@@ -499,6 +499,28 @@ class GenericReportController < ApplicationController
     render :layout => 'menu'
   end
   
+  def malaria_report_menu
+    render :layout => "application"
+  end
+
+  def process_malaria_report
+    @report_name = "Malaria Report"
+    @logo = CoreService.get_global_property_value('logo').to_s
+    @current_location_name =Location.current_health_center.name
+
+    @start_date = (params[:start_year] + "-" + params[:start_month] + "-" + params[:start_day]).to_date
+    @end_date = (params[:end_year] + "-" + params[:end_month] + "-" + params[:end_day]).to_date
+
+    @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+    @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
+
+    if @start_date > @end_date
+      flash[:notice] = 'Start date is greater that end date'
+      redirect_to :action => 'malaria_report_menu' and return
+    end
+
+    render :layout => "report"
+  end
   
   def update_dhis
   	@dhis_reports = ["ANC Monthly Facility Report", "HMIS-15", "IDSR Monthly"]

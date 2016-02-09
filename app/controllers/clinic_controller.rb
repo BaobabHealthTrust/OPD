@@ -57,7 +57,8 @@ class ClinicController < GenericClinicController
       ["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"],
       ["Shift Report", "/cohort_tool/opd_menu?report_name=shift_report"],
       ["Graphical Reports", "/clinic/reports_tab_graphs"],
-      ["Update DHIS2", "/report/update_dhis"]
+      ["Update DHIS2", "/report/update_dhis"],
+      ["Malaria Report", "/report/malaria_report_menu"]
     ]
     #if allowed_hiv_viewer
     #@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
