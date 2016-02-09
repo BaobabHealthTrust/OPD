@@ -519,6 +519,103 @@ class GenericReportController < ApplicationController
       redirect_to :action => 'malaria_report_menu' and return
     end
 
+    outpatient_encounter_type_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+    lab_orders_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
+    lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+
+    tests_ordered_concept_id = Concept.find_by_name("TESTS ORDERED").concept_id
+    malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
+    malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+    unknown_concept_id = Concept.find_by_name("UNKNOWN").concept_id
+    diagnosis_concept_ids = ["PRIMARY DIAGNOSIS", "SECONDARY DIAGNOSIS", "ADDITIONAL DIAGNOSIS"].collect do |concept_name|
+      Concept.find_by_name(concept_name).concept_id
+    end
+
+    malaria_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{outpatient_encounter_type_id}
+        AND o.concept_id IN (#{diagnosis_concept_ids.join(', ')}) AND o.value_coded = #{malaria_concept_id}
+        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @malaria_cases_count = malaria_observations.count
+
+    microscopy_order_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_orders_encounter_type_id}
+        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MICROSCOPY'
+        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MICROSCOPY QUERIES START>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    @microscopy_total_orders = microscopy_order_observations.count
+    microscopy_order_accession_numbers = microscopy_order_observations.map(&:accession_number).compact
+    microscopy_order_accession_numbers = [0] if microscopy_order_accession_numbers.blank?
+
+    microscopy_positive_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
+        AND UPPER(o.value_text) = 'THICK SMEAR POSITIVE'
+        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @microscopy_positive_results_count = microscopy_positive_results_observations.count
+
+    microscopy_negative_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
+        AND UPPER(o.value_text) = 'THICK SMEAR NEGATIVE'
+        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @microscopy_negative_results_count = microscopy_negative_results_observations.count
+
+    microscopy_uknown_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
+        AND o.value_coded = #{unknown_concept_id}
+        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @microscopy_uknown_results_count = microscopy_uknown_results_observations.count
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>mRDT QUERIES>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+    mrdt_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_orders_encounter_type_id}
+        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MRDT'
+        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @mrdt_total_orders = mrdt_observations.count
+    mrdt_order_accession_numbers = mrdt_observations.map(&:accession_number).compact
+    mrdt_order_accession_numbers = [0] if mrdt_order_accession_numbers.blank?
+
+    mrdt_positive_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{mrdt_order_accession_numbers.join(', ')})
+        AND UPPER(o.value_text) = 'MALARIA RDT POSITIVE'
+        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @mrdt_positive_results_count = mrdt_positive_results_observations.count
+
+    mrdt_negative_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{mrdt_order_accession_numbers.join(', ')})
+        AND UPPER(o.value_text) = 'MALARIA RDT NEGATIVE'
+        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @mrdt_negative_results_count = mrdt_negative_results_observations.count
+
+    mrdt_unknown_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{mrdt_order_accession_numbers.join(', ')})
+        AND o.value_coded = #{unknown_concept_id}
+        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @mrdt_unknown_results_count = mrdt_unknown_results_observations.count
+    
     render :layout => "report"
   end
   
