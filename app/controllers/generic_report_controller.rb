@@ -534,7 +534,7 @@ class GenericReportController < ApplicationController
     malaria_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{outpatient_encounter_type_id}
         AND o.concept_id IN (#{diagnosis_concept_ids.join(', ')}) AND o.value_coded = #{malaria_concept_id}
-        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
     @malaria_cases_count = malaria_observations.count
@@ -542,7 +542,7 @@ class GenericReportController < ApplicationController
     microscopy_order_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_orders_encounter_type_id}
         AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MICROSCOPY'
-        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MICROSCOPY QUERIES START>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -554,7 +554,7 @@ class GenericReportController < ApplicationController
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
         AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
         AND UPPER(o.value_text) = 'THICK SMEAR POSITIVE'
-        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
     @microscopy_positive_results_count = microscopy_positive_results_observations.count
@@ -563,7 +563,7 @@ class GenericReportController < ApplicationController
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
         AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
         AND UPPER(o.value_text) = 'THICK SMEAR NEGATIVE'
-        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
     @microscopy_negative_results_count = microscopy_negative_results_observations.count
@@ -572,7 +572,7 @@ class GenericReportController < ApplicationController
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
         AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
         AND o.value_coded = #{unknown_concept_id}
-        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
     @microscopy_uknown_results_count = microscopy_uknown_results_observations.count
@@ -582,7 +582,7 @@ class GenericReportController < ApplicationController
     mrdt_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_orders_encounter_type_id}
         AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MRDT'
-        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
     @mrdt_total_orders = mrdt_observations.count
@@ -593,7 +593,7 @@ class GenericReportController < ApplicationController
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
         AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{mrdt_order_accession_numbers.join(', ')})
         AND UPPER(o.value_text) = 'MALARIA RDT POSITIVE'
-        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
     @mrdt_positive_results_count = mrdt_positive_results_observations.count
@@ -602,7 +602,7 @@ class GenericReportController < ApplicationController
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
         AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{mrdt_order_accession_numbers.join(', ')})
         AND UPPER(o.value_text) = 'MALARIA RDT NEGATIVE'
-        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
     @mrdt_negative_results_count = mrdt_negative_results_observations.count
@@ -611,7 +611,7 @@ class GenericReportController < ApplicationController
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
         AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{mrdt_order_accession_numbers.join(', ')})
         AND o.value_coded = #{unknown_concept_id}
-        AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
     @mrdt_unknown_results_count = mrdt_unknown_results_observations.count
