@@ -12,9 +12,10 @@
         $('#table_id').dataTable({
           "bAutoWidth": true,
           "bProcessing": true,
+          "bPaginate": false,
           "sScrollY": "400px",
           "bInfo": true,
-          "bPaginate": false
+          "bSort" : false
         });
         search_box = $('#table_id').dataTable()
         search = document.getElementsByTagName("input")[0];
@@ -165,6 +166,10 @@
         top: 194px;
         width: 672px;
       }
+
+      table.dataTable thead th {
+        padding: 3px 4px 3px 10px;
+      }
     </style>
     <style>
       div {
@@ -207,7 +212,7 @@
       #table_id_info{
         left: 10px;
         position: absolute;
-        top: 476px;
+        top: 488px;
         font-weight:bold;
       }
       #table_id_length{
@@ -244,6 +249,18 @@
             <td><%= @malaria_cases_count %></td>
           </tr>
           <tr>
+            <td>Total Positive Cases</td>
+            <td><%= @microscopy_positive_results_count + @mrdt_positive_results_count %></td>
+          </tr>
+          <tr>
+            <td>Total Negative Cases</td>
+            <td><%= @microscopy_negative_results_count + @mrdt_negative_results_count %></td>
+          </tr>
+          <tr>
+            <td>Total Unknown Cases</td>
+            <td><%= @microscopy_uknown_results_count + @mrdt_unknown_results_count %></td>
+          </tr>
+          <tr>
             <td>Total Microscopy Orders</td>
             <td><%= @microscopy_total_orders %></td>
           </tr>
@@ -257,7 +274,7 @@
           </tr>
           <tr>
             <td>Total Microscopy Unknown Results</td>
-            <td><%= @microscopy_negative_results_count %></td>
+            <td><%= @microscopy_uknown_results_count %></td>
           </tr>
           <tr>
             <td>Total mRDT Orders</td>
