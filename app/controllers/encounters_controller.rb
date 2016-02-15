@@ -82,8 +82,9 @@ class EncountersController < GenericEncountersController
 
     @malaria_test_status = Lab.malaria_test_result(@patient)
 
-    malaria_accession_number = @malaria_test_status.split(/[^\d]/).last rescue nil
+    malaria_accession_number = @malaria_test_status.split(/[^\d]/).last rescue nil #Get last digits
     malaria_test_name = Lab.malaria_test_name(malaria_accession_number)
+    malaria_test_name = malaria_test_name.scan(/\(([^\)]+)\)/).last rescue nil #Get text in brackets () only e.g malaria(mRDT) returns mRDT"
 
     @patient_malaria_notification = "No any malaria test was ordered for this patient" if @malaria_test_status.match(/no_orders/i)
     @patient_malaria_notification = "#{malaria_test_name} Results are not yet captured in the system" if @malaria_test_status.match(/waiting_results/i)
