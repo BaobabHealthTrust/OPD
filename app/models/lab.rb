@@ -70,7 +70,8 @@ ORDER BY DATE(TESTDATE) DESC",patient_ids,type
         AND e.voided=0 AND DATE(e.encounter_datetime) = '#{Date.today}'")
 
     unless malaria_order_observations.blank?
-      return "waiting_results" if malaria_results_observations.blank?
+      accession_number = malaria_order_observations.last.accession_number rescue ''
+      return "waiting_results&accession_number=#{accession_number}" if malaria_results_observations.blank?
     end
     
     malaria_negative_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
@@ -79,9 +80,22 @@ ORDER BY DATE(TESTDATE) DESC",patient_ids,type
         AND UPPER(o.value_text) IN ('THICK SMEAR NEGATIVE', 'MALARIA RDT NEGATIVE')
         AND e.voided=0 AND DATE(e.encounter_datetime) = '#{Date.today}'")
 
-
-    return "negative" unless malaria_negative_results_observations.blank?
+    unless malaria_negative_results_observations.blank?
+      accession_number = malaria_negative_results_observations.last.accession_number rescue ''
+      return "negative&accession_number=#{accession_number}"
+    end
     
   end
 
+  def self.malaria_test_name(accession_number)
+    lab_orders_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
+    tests_ordered_concept_id = Concept.find_by_name("BLOOD").concept_id
+
+    test_ordered_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_orders_encounter_type_id}
+        AND o.concept_id = #{tests_ordered_concept_id} AND o.accession_number = '#{accession_number}'
+        AND e.voided=0").last
+    return test_ordered_obs.answer_string.squish rescue ""
+  end
+  
 end

@@ -82,9 +82,12 @@ class EncountersController < GenericEncountersController
 
     @malaria_test_status = Lab.malaria_test_result(@patient)
 
-    @patient_malaria_notification = "No any malaria test was ordered for this patient" if @malaria_test_status == 'no_orders'
-    @patient_malaria_notification = "Results are not yet captured in the system" if @malaria_test_status == 'waiting_results'
-    @patient_malaria_notification = "This patient was tested negative" if @malaria_test_status == 'negative'
+    malaria_accession_number = @malaria_test_status.split(/[^\d]/).last rescue nil
+    malaria_test_name = Lab.malaria_test_name(malaria_accession_number)
+
+    @patient_malaria_notification = "No any malaria test was ordered for this patient" if @malaria_test_status.match(/no_orders/i)
+    @patient_malaria_notification = "#{malaria_test_name} Results are not yet captured in the system" if @malaria_test_status.match(/waiting_results/i)
+    @patient_malaria_notification = "This patient was tested negative using #{malaria_test_name}" if @malaria_test_status.match(/negative/i)
 
     if  ['INPATIENT_DIAGNOSIS', 'OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id

@@ -25,7 +25,7 @@
 
   var malariaTestStatus = '<%= @malaria_test_status %>';
   function setAttributes(){
-    if (malariaTestStatus == 'no_orders' || malariaTestStatus == 'waiting_results' || malariaTestStatus == 'negative'){
+    if (malariaTestStatus.match(/no_orders/i) || malariaTestStatus.match(/waiting_results/i) || malariaTestStatus.match(/negative/i)){
       liElements = jQuery("li");
       for (var i = 0; i <= liElements.length - 1; i++){
         if (liElements[i].hasAttribute("value")){
@@ -83,7 +83,7 @@
     background-color: #F4F4F4;
     border: 2px solid #E0E0E0;
     border-radius: 15px;
-    height: 239px;
+    height: 270px;
     padding: 5px;
     position: absolute;
     margin-top: 100px;
@@ -243,25 +243,26 @@
 <div id="cover"></div>
 
 <script type="text/javascript">
-  jQuery('html').click(function() {
-    jQuery("#popup-div").hide();
-    if ($('touchscreenInput'+tstCurrentPage).value.match(/MALARIA/i)){
-      if (malariaTestStatus == 'no_orders' || malariaTestStatus == 'waiting_results' || malariaTestStatus == 'negative'){
-        clearInput();
+<% if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true") %>
+    jQuery('html').click(function() {
+      jQuery("#popup-div").hide();
+      if ($('touchscreenInput'+tstCurrentPage).value.match(/MALARIA/i)){
+        if (malariaTestStatus.match(/no_orders/i) || malariaTestStatus.match(/waiting_results/i) || malariaTestStatus.match(/negative/i)){
+          clearInput();
+        }
       }
+      jQuery("#cover").hide();
+    });
+
+    jQuery('#popup-div').click(function(event){
+      event.stopPropagation();
+    });
+
+    function continueProcess(){
+      jQuery("#popup-div").hide();
+      jQuery("#cover").hide();
+      gotoNextPage()
     }
-    jQuery("#cover").hide();
-  });
-
-  jQuery('#popup-div').click(function(event){
-    event.stopPropagation();
-  });
-
-  function continueProcess(){
-    jQuery("#popup-div").hide();
-    jQuery("#cover").hide();
-    gotoNextPage()
-  }
-  
+<% end %>
 </script>
 
