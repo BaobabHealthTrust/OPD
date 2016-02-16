@@ -84,7 +84,8 @@ ORDER BY DATE(TESTDATE) DESC",patient_ids,type
       accession_number = malaria_negative_results_observations.last.accession_number rescue ''
       return "negative&accession_number=#{accession_number}"
     end
-    
+
+    return "positive"
   end
 
   def self.malaria_test_name(accession_number)

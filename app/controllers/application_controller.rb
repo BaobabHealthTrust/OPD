@@ -102,6 +102,7 @@ class ApplicationController < GenericApplicationController
 		end
 
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+=begin
     if is_encounter_available(patient, 'OUTPATIENT DIAGNOSIS', session_date)
       #raise "Lab Order"
       diagnosis_concept_names = ["PRIMARY DIAGNOSIS", "SECONDARY DIAGNOSIS", "ADDITIONAL DIAGNOSIS"]
@@ -122,6 +123,7 @@ class ApplicationController < GenericApplicationController
       end
 
 		end
+=end
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		if task.encounter_type == session[:original_encounter]
 			session[:original_encounter] = nil
