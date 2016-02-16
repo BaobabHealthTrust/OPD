@@ -253,6 +253,7 @@ class PatientsController < GenericPatientsController
           elsif encounter.name.upcase.include?('LAB ORDERS')
             lab_orders = []
             encounter.observations.each do |observation|
+            next if observation.obs_group_id.blank?
             concept_name = observation.concept.fullname
             next if concept_name.match(/Workstation location/i)
                lab_orders << observation.answer_string.to_s

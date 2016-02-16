@@ -4,6 +4,10 @@
     display: none;
   }
 
+  #decimal{
+    display: none;
+  }
+  
 </style>
 
 <script type="text/javascript">
@@ -23,7 +27,7 @@
   <%= text_field_tag :quantity, nil, {
     :field_type => 'number',
     :units => '',
-    :helpText => "Quantity",
+    :helpText => "Quantity(Tabs)",
     :validationRule => "([0-9]+\\.?[0-9]*)|Unknown$",
     :validationMessage => "You must enter a number (for example: 5<b>.0</b>)",
     :allowFreeText => "true",

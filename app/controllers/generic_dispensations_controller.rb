@@ -262,6 +262,9 @@ class GenericDispensationsController < ApplicationController
     order = Order.find(params[:order_id])
     new_order = order.clone
     new_drug_order = order.drug_order.clone
+    instructions = new_order.instructions.split(":")[1]
+    drug_name = Drug.find(params[:drug_id]).name
+    new_order_instructions = "#{drug_name} : #{instructions.squish}"
 
     if params[:filter] and !params[:filter][:provider].blank?
       user_person_id = User.find_by_username(params[:filter][:provider]).person_id
@@ -275,7 +278,9 @@ class GenericDispensationsController < ApplicationController
     encounter = current_dispensation_encounter(patient, session_date, user_person_id)
 
     ActiveRecord::Base.transaction do
+      new_order.instructions = new_order_instructions
       new_order.save
+
       new_drug_order.order_id = new_order.order_id
       new_drug_order.drug_inventory_id = params[:drug_id]
       new_drug_order.save
