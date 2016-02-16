@@ -86,9 +86,9 @@ class EncountersController < GenericEncountersController
     malaria_test_name = Lab.malaria_test_name(malaria_accession_number)
     malaria_test_name = malaria_test_name.scan(/\(([^\)]+)\)/).last rescue nil #Get text in brackets () only e.g malaria(mRDT) returns mRDT"
 
-    @patient_malaria_notification = "No any malaria test was ordered for this patient" if @malaria_test_status.match(/no_orders/i)
+    @patient_malaria_notification = "No any malaria test is ordered for this patient" if @malaria_test_status.match(/no_orders/i)
     @patient_malaria_notification = "#{malaria_test_name} Results are not yet captured in the system" if @malaria_test_status.match(/waiting_results/i)
-    @patient_malaria_notification = "This patient was tested negative using #{malaria_test_name}" if @malaria_test_status.match(/negative/i)
+    @patient_malaria_notification = "This patient is tested negative using #{malaria_test_name}" if @malaria_test_status.match(/negative/i)
 
     if  ['INPATIENT_DIAGNOSIS', 'OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id
