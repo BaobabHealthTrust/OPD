@@ -17,6 +17,9 @@ class GenericDispensationsController < ApplicationController
       @drug_order_hash[drug_id] = presc.order_id
     end
 
+    la_concept_id = Concept.find_by_name("LA(Lumefantrine + arthemether)").concept_id
+    @quinine_drug_names = Drug.find(:all, :conditions => ["concept_id =?", la_concept_id]).collect{|d|d.name.squish}
+
 	end
 
   def create

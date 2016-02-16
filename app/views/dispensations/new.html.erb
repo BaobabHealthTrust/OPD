@@ -83,6 +83,8 @@
   var tt_cancel_destination = "/patients/treatment_dashboard/<%= @patient.patient_id %>"
   var patientID = "<%= @patient.patient_id %>";
   var drugOrderHash = JSON.parse('<%= @drug_order_hash.to_json %>');
+
+  var quinineDrugNames = JSON.parse('<%= @quinine_drug_names.to_json %>');
   
   function set_drug_for_quantity() {
     var drug_id = encodeURIComponent($('drug_id').value); 
@@ -105,6 +107,7 @@
   function updateDrugName(){
     drugName = $('touchscreenInput'+tstCurrentPage).value;
     $('drugName').innerHTML = drugName;
+
   }
   
 </script>
@@ -182,10 +185,16 @@
 <script type="text/javascript">
 
   function continueProcess(){
-    if (__$("popup-div")){
-      __$("popup-div").style.display = "none";
+    drugName = $('drugName').innerHTML;
+    if (contains(quinineDrugNames, drugName)){
+      if (__$("popup-div")){
+        __$("popup-div").style.display = "none";
+      }
+      showDispenseNewDrugPopup();
     }
-    showDispenseNewDrugPopup();
+    else{
+      processData('no'); //Do not dispense new drug
+    }
   }
 
   function processData(v){
@@ -220,6 +229,7 @@
   function showStockOutConfirmationPopup(){
     document.getElementById("popup-div").style.display = 'inline';
     document.getElementById("cover").style.display = 'inline';
+
   }
 
   function hidePopup(){
@@ -238,6 +248,15 @@
   function showDispenseNewDrugPopup(){
     document.getElementById("popup-div-2").style.display = 'inline';
     document.getElementById("cover").style.display = 'inline';
+  }
+
+  function contains(a, obj) {
+    for (var i = 0; i < a.length; i++) {
+      if (a[i].trim() === obj.trim()) {
+        return true;
+      }
+    }
+    return false;
   }
   
 </script>
