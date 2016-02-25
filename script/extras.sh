@@ -25,8 +25,8 @@ PASSWORD=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}'][
 DATABASE=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}']['database']"`
 HOST=`ruby -ryaml -e "puts YAML::load_file('config/database.yml')['${ENV}']['host']"`
 
-mysql --host=$HOST --user=$USERNAME --password=$PASSWORD $DATABASE < db/extras/countries.sql
-
 mysql --host=$HOST --user=$USERNAME --password=$PASSWORD $DATABASE < db/extras/drop_villages.sql
+
+mysql --host=$HOST --user=$USERNAME --password=$PASSWORD $DATABASE < db/extras/countries.sql
 
 mysql --host=$HOST --user=$USERNAME --password=$PASSWORD $DATABASE < db/extras/villages.sql
