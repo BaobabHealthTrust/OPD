@@ -1,0 +1,68 @@
+<%= javascript_include_tag "jquery" %>
+<%= javascript_include_tag 'utils' %>
+
+<script type="text/javascript">
+  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>";
+
+</script>
+<style type="text/css">
+
+</style>
+
+<%
+@malaria_tests << ['Unknown', 'Unknown']
+malaria_results_options_with_unknown = ['Positive', 'Negative', 'Unknown']
+malaria_results_options_without_unknown = ['Positive', 'Negative']
+%>
+
+<form action="/encounters/create" method='post'>
+
+  <%= hidden_field_tag "encounter[encounter_type_name]", "LAB RESULTS" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+
+  <%= touch_select_tag "TESTS ORDERED", @patient, options_for_select(@malaria_tests),
+    {
+    :id => "tests_ordered",
+    :helpText => "Which test was ordered to confirm Malaria"
+  } %>
+
+  <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(malaria_results_options_with_unknown),
+    {
+    :id => "microscopy",
+    :condition => "__$('tests_ordered').value.match(/MICROSCOPY/i);",
+    :helpText => "Select Microscopy Results Below"
+  } %>
+
+  <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(malaria_results_options_with_unknown),
+    {
+    :id => "mRDT",
+    :condition => "__$('tests_ordered').value.match(/MRDT/i)",
+    :helpText => "Select mRDT Results Below"
+  } %>
+
+  <%= touch_select_tag "RESULT AVAILABLE", @patient, options_for_select(['', 'Yes', 'No']),
+    {
+    :id => "result_available",
+    :accession_number => '',
+    :condition => "__$('tests_ordered').value.match(/UNKNOWN/i)",
+    :helpText => "Are test results available?"
+  } %>
+
+  <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(malaria_results_options_without_unknown),
+    {
+    :id => "unknown_test",
+    :condition => "__$('result_available').value.match(/YES/i)",
+    :helpText => "Select Test Result Below"
+  } %>
+
+  <%  if @retrospective %>
+    <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+      <%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+  <% else %>
+    <%= hidden_field_tag "filter[provider]", nil %>
+  <% end %>
+
+</form
+

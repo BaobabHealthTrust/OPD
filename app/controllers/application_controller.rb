@@ -21,40 +21,44 @@ class ApplicationController < GenericApplicationController
 
 		task.encounter_type = 'NONE'
 		task.url = "/patients/show/#{patient.id}"
-=begin
+    
     if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")
       unless session[:datetime].blank? #Back Data Entry
 
-        test_ordered_concept_id = Concept.find_by_name("TESTS ORDERED").concept_id
         malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
 
-        lab_order_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
         lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+        outpatient_diagnosis_encounter_type_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+        malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
 
-        latest_malaria_test_ordered = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
-        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_order_encounter_type_id} AND e.patient_id=#{patient.id}
-        AND o.concept_id = #{test_ordered_concept_id} AND e.voided=0 AND
-        DATE(e.encounter_datetime) <= '#{session[:datetime].to_date}'
-        ORDER BY o.obs_id DESC").first
+        diagnosis_concept_ids = ["PRIMARY DIAGNOSIS", "SECONDARY DIAGNOSIS", "ADDITIONAL DIAGNOSIS"].collect do |concept_name|
+          Concept.find_by_name(concept_name).concept_id
+        end
 
-        unless latest_malaria_test_ordered.blank?
-          accession_number = latest_malaria_test_ordered.accession_number
+        todays_malaria_diagnosis_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{outpatient_diagnosis_encounter_type_id}
+        AND e.patient_id=#{patient.id} AND o.concept_id IN (#{diagnosis_concept_ids.join(', ')})
+        AND o.value_coded = #{malaria_concept_id} AND e.voided=0
+        AND DATE(e.encounter_datetime) = '#{session[:datetime].to_date}'").last
+
+        unless todays_malaria_diagnosis_obs.blank?
 
           malaria_test_result_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
             ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id} AND e.patient_id=#{patient.id}
-            AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0 AND o.accession_number = '#{accession_number}'
-            AND DATE(e.encounter_datetime) <= '#{session[:datetime].to_date}'
+            AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0
+            AND DATE(e.encounter_datetime) = '#{session[:datetime].to_date}'
             ORDER BY e.encounter_datetime DESC LIMIT 1").last
 
           if malaria_test_result_obs.blank?
             task.encounter_type = 'LAB RESULTS'
-            task.url = "/encounters/new/malaria_lab_results?patient_id=#{patient.id}"
+            task.url = "/encounters/new/malaria_lab_results_back_data_entry?patient_id=#{patient.id}"
           end
+
         end
         
       end
     end
-=end
+
 		if is_encounter_available(patient, 'DISCHARGE PATIENT', session_date)
 			if !is_encounter_available(patient, 'DISCHARGE DIAGNOSIS', session_date)
 				task.encounter_type = 'DISCHARGE DIAGNOSIS'

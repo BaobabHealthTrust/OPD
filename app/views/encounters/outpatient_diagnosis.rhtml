@@ -3,6 +3,7 @@
 
 <script type="text/javascript">
   var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
+  var sessionDate = '<%= session[:datetime] %>'
 
   function set_ajaxURL_for_suggestions(value) {
     url = "/encounters/concept_options?search_string=" + value
@@ -25,14 +26,16 @@
 
   var malariaTestStatus = '<%= @malaria_test_status %>';
   function setAttributes(){
-    if (malariaTestStatus.match(/no_orders/i) || malariaTestStatus.match(/waiting_results/i) || malariaTestStatus.match(/negative/i)){
-      liElements = jQuery("li");
-      for (var i = 0; i <= liElements.length - 1; i++){
-        if (liElements[i].hasAttribute("value")){
-          value = liElements[i].getAttribute("value");
-          if (value.match(/MALARIA/i)){
-            liElements[i].setAttribute("onmousedown", "null; updateTouchscreenInputForSelect(this); showMalariaConfirmationPopup();");
-            break;
+    if (sessionDate.length == 0){ //We don't want the popup during back data entry
+      if (malariaTestStatus.match(/no_orders/i) || malariaTestStatus.match(/waiting_results/i) || malariaTestStatus.match(/negative/i)){
+        liElements = jQuery("li");
+        for (var i = 0; i <= liElements.length - 1; i++){
+          if (liElements[i].hasAttribute("value")){
+            value = liElements[i].getAttribute("value");
+            if (value.match(/MALARIA/i)){
+              liElements[i].setAttribute("onmousedown", "null; updateTouchscreenInputForSelect(this); showMalariaConfirmationPopup();");
+              break;
+            }
           }
         }
       }
@@ -244,25 +247,28 @@
 
 <script type="text/javascript">
 <% if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true") %>
-    jQuery('html').click(function() {
-      jQuery("#popup-div").hide();
-      if ($('touchscreenInput'+tstCurrentPage).value.match(/MALARIA/i)){
-        if (malariaTestStatus.match(/no_orders/i) || malariaTestStatus.match(/waiting_results/i) || malariaTestStatus.match(/negative/i)){
-          clearInput();
+  <% if  session[:datetime].blank? %>
+      jQuery('html').click(function() {
+        jQuery("#popup-div").hide();
+        if ($('touchscreenInput'+tstCurrentPage).value.match(/MALARIA/i)){
+          if (malariaTestStatus.match(/no_orders/i) || malariaTestStatus.match(/waiting_results/i) || malariaTestStatus.match(/negative/i)){
+            clearInput();
+          }
         }
+        jQuery("#cover").hide();
+      });
+
+      jQuery('#popup-div').click(function(event){
+        event.stopPropagation();
+      });
+
+      function continueProcess(){
+        jQuery("#popup-div").hide();
+        jQuery("#cover").hide();
+        gotoNextPage()
       }
-      jQuery("#cover").hide();
-    });
 
-    jQuery('#popup-div').click(function(event){
-      event.stopPropagation();
-    });
-
-    function continueProcess(){
-      jQuery("#popup-div").hide();
-      jQuery("#cover").hide();
-      gotoNextPage()
-    }
+  <% end %>
 <% end %>
 </script>
 
