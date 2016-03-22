@@ -260,7 +260,7 @@ function hackGenericDrugs(){
     if (!selectedGenerics[current_diagnosis]) selectedGenerics[current_diagnosis] = {};
  
     selectedGenerics[current_diagnosis][current_selected_drug] = {
-        "dosage": [selectMalariaDrug["duration"], selectMalariaDrug["strength"], selectMalariaDrug["units"]],
+        "dosage": [selectMalariaDrug["drug_name"], selectMalariaDrug["strength"], selectMalariaDrug["units"]],
         "frequency": selectMalariaDrug["frequency"],
         "duration": selectMalariaDrug["duration"]
     };
