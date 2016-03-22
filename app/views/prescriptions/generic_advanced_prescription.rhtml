@@ -28,11 +28,19 @@ url = url[url.index("/"), url.length - url.index("/")]
 
   window.setInterval("updatePreferredDrugsTextColor();", 50);
 
+  var antiMalariaDrugsHash = {
+    1:{drug_name: 'AL1', frequency: 'OD', duration: 3, tabs: 12, concept_id: 20, strength: '1.0', units: 'tabs'},
+    2:{drug_name: 'AL2', frequency: 'OD', duration: 4, tabs: 18, concept_id: 30 , strength: '1.0', units: 'tabs'},
+    3:{drug_name: 'AL3', frequency: 'TDS', duration: 6, tabs: 24, concept_id: 40 , strength: '1.0', units: 'tabs'},
+    4:{drug_name: 'AL4', frequency: 'TDS', duration: 9, tabs: 32, concept_id: 50, strength: '1.0', units: 'tabs'},
+    5:{drug_name: 'Quinine', frequency: 'TDS', duration: 9, tabs: 32, concept_id: 60, strength: '1.0', units: 'tabs'}
+  };
+
 </script>
 
 <% if @use_col_interface == "true" %>
   <script language="javascript" type="text/javascript" src="/javascripts/multiColumnTreatment.js" defer></script>
-
+  <script language="javascript" type="text/javascript" src="/javascripts/popup.js"></script>
 <%else%>
 
   <script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/prescriber.js" defer></script>
@@ -145,7 +153,24 @@ url = url[url.index("/"), url.length - url.index("/")]
     finishButton = document.getElementById('nextButton');
     finishButton.setAttribute("onmousedown", "checkMissingData();")
   }
+
+  function addAntiMalarialDrugsButton(){
+    buttonsDiv = document.getElementsByClassName("buttonsDiv")[0];
+    button = document.createElement("button");
+    button.className = "button blue navButton";
+    button.id = "antiMalarialButton";
+    button.innerHTML = '<span>Predefined Antimalarial Drugs</span>';
+    button.onmousedown = function(){
+      antiMalarialPopup();
+    }
+
+    buttonsDiv.appendChild(button);
+  }
 <% if @use_col_interface == "true" %>
-    window.setTimeout("validateInput();", 200);
+    window.setTimeout("validateInput(); addAntiMalarialDrugsButton();", 200);
+    /*
+     *<button onmousedown="clearInput()" class="button blue navButton" id="clearButton"><span>Clear</span></button>
+     **/
+
 <% end %>
 </script>
