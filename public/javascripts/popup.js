@@ -155,8 +155,9 @@ function antiMalarialPopup(){
     cancelButton.style.color = '#fff';
     cancelButton.style.left = '81%';
     cancelButton.onclick = function(){
-        hideLibPopup()
+        hideLibPopup();
         selectMalariaDrug = {}; //Remove the selected drug
+        removeDrugFromGenerics();
     }
 
     popupDiv.appendChild(cancelButton);
