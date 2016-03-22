@@ -22,7 +22,7 @@ url = url[url.index("/"), url.length - url.index("/")]
 
   function updatePreferredDrugsTextColor(){
 <% @preferred_drugs_concept_ids.each do |concept_id| %>
-      jQuery("li[concept_id='<%=  concept_id %>']").css("color", 'green');
+      //jQuery("li[concept_id='<%=  concept_id %>']").css("color", 'green');
 <% end %>
   }
 

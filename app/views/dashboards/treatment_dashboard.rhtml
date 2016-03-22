@@ -32,7 +32,7 @@
     update_outcome = document.getElementById('update_outcome')
     update_outcome.setAttribute('onclick',"window.location = '/encounter_types?patient_id=<%=@patient.id%>'")
   }
-  setTimeout("setEvent();",300)
+  //setTimeout("setEvent();",300)
   function printVisitSummary(){
 				
     confirmOperation("Print visit summary?", "/patients/print_opd_visit_summary/<%= @patient.id %>");
@@ -60,9 +60,21 @@
     }
 
   }
+
+  function showError(){
+    <% unless flash[:error].blank? %>
+      confirmYesNo("<%= flash[:error] %> ")
+    <% end %>
+  }
+  
+  setTimeout("showError();",300);
     </script>
 
-
+    <style>
+      #confirmation #no, #confirmation #yes{
+        display: none
+}
+    </style>
   </head>
 
   <body>
@@ -100,5 +112,6 @@
         <input type='submit' value='Finish' />
       </form>
     </div>
+    
   </body>
 </html>
