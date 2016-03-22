@@ -239,6 +239,21 @@ class GenericPrescriptionsController < ApplicationController
     
     session[:formulations] = @formulations
 		@diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []
+
+    antimalaria_drugs = CoreService.get_global_property_value("anti_malaria_drugs")
+    @antimalarial_drugs_hash = {}
+    antimalaria_drugs.each do |key, values|
+      drug_id = Drug.find_by_name(key).drug_id rescue nil
+      next if drug_id.blank?
+      @antimalarial_drugs_hash[drug_id] = {}
+      @antimalarial_drugs_hash[drug_id]["duration"] = values["duration"]
+      @antimalarial_drugs_hash[drug_id]["frequency"] = values["frequency"]
+      @antimalarial_drugs_hash[drug_id]["strength"] = values["strength"]
+      @antimalarial_drugs_hash[drug_id]["units"] = values["units"]
+      @antimalarial_drugs_hash[drug_id]["drug_name"] = values["drug_name"]
+      @antimalarial_drugs_hash[drug_id]["tabs"] = values["tabs"]
+    end
+
 		render :layout => 'application'
 	end
   

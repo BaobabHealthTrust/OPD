@@ -28,19 +28,13 @@ url = url[url.index("/"), url.length - url.index("/")]
 
   window.setInterval("updatePreferredDrugsTextColor();", 50);
 
-  var antiMalariaDrugsHash = {
-    1:{drug_name: 'AL1', frequency: 'OD', duration: '3', tabs: '12', concept_id: '20', strength: '1.0', units: 'tabs'},
-    2:{drug_name: 'AL2', frequency: 'OD', duration: '4', tabs: '18', concept_id: '30' , strength: '1.0', units: 'tabs'},
-    3:{drug_name: 'AL3', frequency: 'TDS', duration: '6', tabs: '24', concept_id: '40' , strength: '1.0', units: 'tabs'},
-    4:{drug_name: 'AL4', frequency: 'TDS', duration: '9', tabs: "32", concept_id: '50', strength: '1.0', units: 'tabs'},
-    5:{drug_name: 'Quinine', frequency: 'TDS', duration: '9', tabs: '32', concept_id: '60', strength: '1.0', units: 'tabs'}
-  };
-
+  var antiMalariaDrugsHash = <%= @antimalarial_drugs_hash.to_json %>;
+  
 </script>
 
 <% if @use_col_interface == "true" %>
   <script language="javascript" type="text/javascript" src="/javascripts/multiColumnTreatment.js" defer></script>
-  <script language="javascript" type="text/javascript" src="/javascripts/popup.js"></script>
+  <script language="javascript" type="text/javascript" src="/javascripts/popup.js" defer></script>
 <%else%>
 
   <script language="javascript" type="text/javascript" src="/touchscreentoolkit/lib/javascripts/prescriber.js" defer></script>

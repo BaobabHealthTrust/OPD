@@ -26,7 +26,7 @@ for (var drugID in antiMalariaDrugsHash){
     frequency = antiMalariaDrugsHash[drugID]["frequency"];
     duration = antiMalariaDrugsHash[drugID]["duration"];
     tabs = antiMalariaDrugsHash[drugID]["tabs"];
-    drugsData += "<tr id='" + drugID + "' color='" + color + "' onclick = 'highLightSelectedRow(this);' style='cursor: pointer; background-color: " + color + "' row_id='" + drugID + "' >";
+    drugsData += "<tr id='" + drugID + "' drug_name='" + drugName + "' color='" + color + "' onclick = 'highLightSelectedRow(this);' style='cursor: pointer; background-color: " + color + "' row_id='" + drugID + "' >";
     drugsData += "<td style='border-bottom: 1px solid black; padding:8px; font-weight: bold; font-style: italic;'>" + count + ".</td>";
     drugsData += "<td style='border-bottom: 1px solid black; padding:8px; text-align: center;'>" + drugName + "</td>";
     drugsData += "<td style='border-bottom: 1px solid black; text-align: center;'>" + frequency + "</td>";
@@ -216,9 +216,21 @@ function uncheckRows(){
             row.style.backgroundColor = oldColor;
             mycheckedImg = document.getElementById('img_' + rID );
             mycheckedImg.src = uncheckedImg;
+            d_name = row.getAttribute('drug_name');
+
+            if (selectedGenerics[current_diagnosis]){
+                if (selectedGenerics[current_diagnosis][d_name]){
+                    delete selectedGenerics[current_diagnosis][d_name];
+                }
+            }
         }
     }
-
+    
+    if (selectedGenerics[current_diagnosis]){
+        if (Object.keys(selectedGenerics[current_diagnosis]).length == 0){
+            delete selectedGenerics[current_diagnosis] //it has no data
+        }
+    }
 }
 
 function loadPreviousSelectedDrug(){
