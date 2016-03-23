@@ -255,6 +255,18 @@ class GenericPrescriptionsController < ApplicationController
       @antimalarial_drugs_hash[drug_id]["tabs"] = values["tabs"]
     end
 
+    lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+    malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+    today =  session[:datetime].to_date rescue Date.today
+
+    malaria_test_result_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+            ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id} AND e.patient_id=#{@patient.id}
+            AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0
+            AND DATE(e.encounter_datetime) = '#{today}'
+            ORDER BY e.encounter_datetime DESC LIMIT 1").last
+
+    @malaria_test_result = malaria_test_result_obs.answer_string.squish rescue ""
+    
 		render :layout => 'application'
 	end
   
