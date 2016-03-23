@@ -286,4 +286,11 @@ function removeDrugFromGenerics(){
             delete selectedGenerics[current_diagnosis][current_selected_drug];
         }
     }
+
+    if (selectedGenerics[current_diagnosis]){
+        if (Object.keys(selectedGenerics[current_diagnosis]).length == 0){
+            delete selectedGenerics[current_diagnosis] //it has no data
+        }
+    }
+    
 }
