@@ -113,7 +113,15 @@
     $('drugName').innerHTML = drugName;
 
   }
-  
+
+  function setAbsoluteLAValues(){
+    selectedDrug = __$('touchscreenInput' + tstCurrentPage).value;
+    if (quinineDrugNames.includes(selectedDrug)){
+      __$('quantity').setAttribute("absoluteMin", 6)
+      __$('quantity').setAttribute("absoluteMax", 24)
+    }
+  }
+
 </script>
 <form id='dispensation' action="/dispensations/create" method='post'>
 
@@ -121,12 +129,13 @@
 
   <%= select_tag :drug_id, options_for_select(@options),
     {
-    :tt_onUnLoad => "updateDrugName();",
+    :tt_onUnLoad => "updateDrugName(); setAbsoluteLAValues();",
     :helpText => "Dispense which prescribed drug?"
   } %>
 
   <% # Set ajaxURL in the script, but need to start it blank %>
   <%= text_field_tag :quantity, nil, {
+    :id => 'quantity',
     :tt_onLoad => "set_drug_for_quantity(); createStockedOutButton();",
     :ajaxURL => "",
     :field_type => 'number',
