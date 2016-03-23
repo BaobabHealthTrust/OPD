@@ -192,8 +192,9 @@ class GenericPrescriptionsController < ApplicationController
 	def generic_advanced_prescription
 		@use_col_interface = CoreService.get_global_property_value("use.column.interface").to_s
 		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
-		@generics = MedicationService.generic
-    @preferred_drugs = Drug.preferred_drugs
+    la_concept_id = Concept.find_by_name("LA(Lumefantrine + arthemether)").concept_id
+		@generics = MedicationService.generic.delete_if{|g| g if g[1] == la_concept_id} #Remove LA drug from list. Dosage + frequency + duration already known
+    @preferred_drugs = Drug.preferred_drugs.delete_if{|p| p if p[1] == la_concept_id} #Remove LA drug from list. Dosage + frequency + duration already known
     
 		@frequencies = MedicationService.fully_specified_frequencies
 		@formulations = {}
