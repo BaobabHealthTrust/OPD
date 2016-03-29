@@ -298,7 +298,11 @@ class GenericPrescriptionsController < ApplicationController
 
 	def create_advanced_prescription
 		@patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
-		encounter  = MedicationService.current_treatment_encounter(@patient)
+    session_date = session[:datetime].to_date rescue Date.today
+		#encounter  = MedicationService.current_treatment_encounter(@patient)
+    user_person_id = current_user.person_id
+    encounter = PatientService.current_treatment_encounter(@patient, session_date, user_person_id)
+
     if !(params[:prescriptions].blank?)
 
       (params[:prescriptions] || []).each{ | prescription |
