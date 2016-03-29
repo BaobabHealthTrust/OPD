@@ -266,7 +266,23 @@ class GenericPrescriptionsController < ApplicationController
             ORDER BY e.encounter_datetime DESC LIMIT 1").last
 
     @malaria_test_result = malaria_test_result_obs.answer_string.squish rescue ""
-    
+
+    if @malaria_test_result.blank?
+      malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
+      outpatient_encounter_type_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+
+      diagnosis_concept_ids = ["PRIMARY DIAGNOSIS", "SECONDARY DIAGNOSIS", "ADDITIONAL DIAGNOSIS"].collect do |concept_name|
+        Concept.find_by_name(concept_name).concept_id
+      end
+
+      malaria_observation = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{outpatient_encounter_type_id} AND e.patient_id=#{@patient.id}
+        AND o.concept_id IN (#{diagnosis_concept_ids.join(', ')}) AND o.value_coded = #{malaria_concept_id}
+        AND e.voided=0 AND DATE(e.encounter_datetime) = '#{today}'").last
+      
+      @malaria_test_result = 'Positive' unless malaria_observation.blank?
+    end
+
 		render :layout => 'application'
 	end
   
@@ -312,6 +328,7 @@ class GenericPrescriptionsController < ApplicationController
 
       if(@patient)
         #redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
+        flash[:notice] = "Your prescription is successful"
         redirect_to "/patients/show/#{@patient.id}" and return
       else
         #redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
@@ -381,6 +398,7 @@ class GenericPrescriptionsController < ApplicationController
 
 		if(@patient)
 			#redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
+      flash[:notice] = "Your prescription is successful"
       redirect_to "/patients/show/#{@patient.id}" and return
 		else
 			#redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return

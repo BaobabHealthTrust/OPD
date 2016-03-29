@@ -10,7 +10,40 @@
       tstCurrentDate = "<%= @date %>";
       //tt_cancel_destination = '/clinic';
       tt_cancel_show = '/clinic';
+      var flashNoticeMsg = '<%= flash[:notice] %>';
+
+      function showFlashNotice(){
+        if (flashNoticeMsg.length > 0){
+          confirmYesNo(flashNoticeMsg);
+        }
+      }
+
+      setTimeout("showFlashNotice();",300);
+
     </script>
+
+    <style type="text/css">
+      #confirmation #no, #confirmation #yes{
+        display: none
+      }
+
+      .confirmation {
+        background-color: green !important;
+        border: 5px outset green !important;
+        color: white;
+        border-radius: 5px;
+        font-size: 2em;
+        left: 30% !important;
+        margin-left: -160px !important;
+        padding: 10px;
+        position: absolute;
+        text-align: center;
+        top: 25% !important;
+        width: 600px !important;
+        z-index: 999;
+      }
+    </style>
+
   </head>
   <body>
     <div id='content'>
@@ -107,11 +140,11 @@
               <option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Outcomes</option>
             <% end %>
             <!--<% if show_lab_results %>
-                                                                                                    <option link="/lab/results/<%=@patient.id -%>">Lab results</option>
+                                                                                                                                        <option link="/lab/results/<%=@patient.id -%>">Lab results</option>
             <%end%>-->
   <!--<option link='/patients/programs_dashboard/<%= @patient.id %>'>Programs</option>-->
 
-                                                              <!--<option link="/encounters/new/lab_orders?patient_id=<%= @patient.id -%>" ttSize = "160px">Investigation</option>-->
+                                                                                                  <!--<option link="/encounters/new/lab_orders?patient_id=<%= @patient.id -%>" ttSize = "160px">Investigation</option>-->
 
             <option link='<%= ((session[:datetime].to_date rescue '') != '' ?
                         "/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
