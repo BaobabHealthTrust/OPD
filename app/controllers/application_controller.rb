@@ -21,7 +21,7 @@ class ApplicationController < GenericApplicationController
 
 		task.encounter_type = 'NONE'
 		task.url = "/patients/show/#{patient.id}"
-    
+
     if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")
       unless session[:datetime].blank? #Back Data Entry
 
@@ -105,30 +105,10 @@ class ApplicationController < GenericApplicationController
 			task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
 		end
 
-    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-=begin
-    if is_encounter_available(patient, 'OUTPATIENT DIAGNOSIS', session_date)
-      #raise "Lab Order"
-      diagnosis_concept_names = ["PRIMARY DIAGNOSIS", "SECONDARY DIAGNOSIS", "ADDITIONAL DIAGNOSIS"]
-      diagnosis_concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",
-          diagnosis_concept_names]).map(&:concept_id)
-
-      malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
-      malaria_diagnosis_obs = Observation.find(:last, :conditions => ["person_id =? AND concept_id IN (?) AND
-          value_coded =? AND DATE(obs_datetime) =?", patient.id, diagnosis_concept_ids,
-          malaria_concept_id, session_date
-        ])
-
-      unless malaria_diagnosis_obs.blank?
-        if !is_encounter_available(patient, 'LAB ORDERS', session_date)
-          task.encounter_type = 'LAB ORDERS'
-          task.url = "/encounters/new/malaria_lab_order?patient_id=#{patient.id}"
-        end
-      end
-
-		end
-=end
-    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    if (location.name.match(/PHARMACY/i))
+      task.url = "/patients/treatment_dashboard/#{patient.id}"
+    end
+    
 		if task.encounter_type == session[:original_encounter]
 			session[:original_encounter] = nil
 		end
