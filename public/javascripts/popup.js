@@ -100,6 +100,7 @@ function antiMalarialPopup(){
     
     okayButton.onclick = function(){
         hideLibPopup();
+        notifier();
     }
     
     popupDiv.appendChild(okayButton);
@@ -254,6 +255,11 @@ function disableEnableFinishButton(){
             finishButton.style.backgroundColor = 'green';
             finishButton.onclick = function(){
                 hideLibPopup();
+                notifier();
+                if (notifierInterval){
+                    clearInterval(notifierInterval);
+                    notifierInterval = window.setInterval("hideNotifier();", 2000);
+                }
             }
         }
     }
@@ -294,3 +300,67 @@ function removeDrugFromGenerics(){
     }
     
 }
+
+function notifier(){
+    content = document.getElementById('content');
+    popupDiv = document.createElement('div');
+    popupDiv.className = 'popup-div-notifier';
+    popupDiv.style.backgroundColor = 'white';
+    popupDiv.style.border = '2px solid #DDDD';
+    popupDiv.style.borderRadius = '15px';
+    popupDiv.style.height = '100px';
+    popupDiv.style.top = '2%';
+    popupDiv.style.left = '32%';
+    popupDiv.style.marginTop = '-20px';
+    popupDiv.style.position = 'absolute';
+    popupDiv.style.marginTop = '158px';
+    popupDiv.style.width = '600px';
+    popupDiv.style.zIndex = '991';
+    content.appendChild(popupDiv);
+
+    popupHeader = document.createElement('div');
+    popupHeader.className = 'popup-header-notifier';
+    popupHeader.innerHTML = 'Notifications';
+    popupHeader.style.borderBottom = '2px solid #7D9EC0';
+    popupHeader.style.backgroundColor = '#FFFFFF';
+    popupHeader.style.paddingTop = '5px';
+    popupHeader.style.paddingLeft = '5px';
+    popupHeader.style.borderRadius = '15px 15px 0 0';
+    popupHeader.style.fontSize = '14pt';
+    popupHeader.style.fontWeight = 'bolder';
+
+
+    popupDiv.appendChild(popupHeader);
+    popupData = document.createElement('div');
+    popupData.className = 'popup-data-notifier';
+    popupData.innerHTML = selectMalariaDrug.drug_name;
+    popupData.style.fontSize = '18pt';
+    popupData.style.fontWeight = 'bolder';
+    popupData.style.textAlign = 'center';
+    popupDiv.appendChild(popupData);
+    popupFooter = document.createElement('div');
+    popupFooter.className = 'popup-footer-notifier';
+    popupFooter.style.position = 'absolute';
+    popupFooter.style.marginBottom = '60px';
+
+    popupCover = document.createElement('div');
+    popupCover.className = 'popup-cover-notifier';
+    popupCover.style.position = 'absolute';
+    popupCover.style.backgroundColor = 'black';
+    popupCover.style.width = '100%';
+    popupCover.style.height = '102%';
+    popupCover.style.left = '0%';
+    popupCover.style.top = '0%';
+    popupCover.style.zIndex = '990';
+    popupCover.style.opacity = '0.65';
+    content.appendChild(popupCover);
+}
+
+function hideNotifier(){
+    popupCover = document.getElementsByClassName("popup-cover-notifier")[0];
+    popupDiv = document.getElementsByClassName("popup-div-notifier")[0];
+    if (popupCover) popupCover.parentNode.removeChild(popupCover);
+    if (popupDiv) popupDiv.parentNode.removeChild(popupDiv);
+}
+
+var notifierInterval = window.setInterval("hideNotifier();", 2000);
