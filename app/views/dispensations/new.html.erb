@@ -110,16 +110,21 @@
 
   function updateDrugName(){
     drugName = $('touchscreenInput'+tstCurrentPage).value;
-    $('drugName').innerHTML = drugName;
+    __$('drugName').innerHTML = drugName;
 
   }
 
   function setAbsoluteLAValues(){
     selectedDrug = __$('touchscreenInput' + tstCurrentPage).value;
-    if (quinineDrugNames.includes(selectedDrug)){
-      __$('quantity').setAttribute("absoluteMin", 6)
-      __$('quantity').setAttribute("absoluteMax", 24)
+
+    for (var i=0; i<=quinineDrugNames.length - 1; i++){
+      if (quinineDrugNames[i] == selectedDrug){
+        __$('quantity').setAttribute("absoluteMin", 6);
+        __$('quantity').setAttribute("absoluteMax", 24);
+        break;
+      }
     }
+
   }
 
 </script>
