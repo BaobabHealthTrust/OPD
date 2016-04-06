@@ -30,13 +30,12 @@
       if (malariaTestStatus.match(/no_orders/i) || malariaTestStatus.match(/waiting_results/i) || malariaTestStatus.match(/negative/i)){
         liElements = jQuery("li");
         for (var i = 0; i <= liElements.length - 1; i++){
-          if (liElements[i].hasAttribute("value")){
-            value = liElements[i].getAttribute("value");
-            if (value.match(/MALARIA/i)){
-              liElements[i].setAttribute("onmousedown", "null; updateTouchscreenInputForSelect(this); showMalariaConfirmationPopup();");
-              break;
-            }
+
+          if (liElements[i].innerHTML.match(/MALARIA/i)){
+            liElements[i].setAttribute("onmousedown", "null; updateTouchscreenInputForSelect(this); showMalariaConfirmationPopup();");
+            break;
           }
+          
         }
       }
     }
