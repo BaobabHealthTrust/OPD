@@ -48,7 +48,7 @@ function antiMalarialPopup(){
     popupDiv.style.borderRadius = '15px';
     popupDiv.style.height = '522px';
     popupDiv.style.top = '2%';
-    popupDiv.style.left = '15%';
+    popupDiv.style.left = '5%';
     popupDiv.style.marginTop = '-20px';
     popupDiv.style.marginLeft = '-20px';
     popupDiv.style.position = 'absolute';

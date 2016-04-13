@@ -160,7 +160,7 @@ url = url[url.index("/"), url.length - url.index("/")]
   <%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>
 
   <input
-    type='text' name='drugs' tt_onLoad='generateGenerics(<%= @patient.id %>)'
+    type='text' name='drugs' tt_onLoad='generateGenerics(<%= @patient.id %>);addAntiMalarialDrugsButton();'
     tt_onUnLoad='removeGenerics()' tt_pageStyleClass='NoControls'
     optional />
 
@@ -251,26 +251,29 @@ url = url[url.index("/"), url.length - url.index("/")]
   }
 
   function addAntiMalarialDrugsButton(){
-    buttonsDiv = document.getElementsByClassName("buttonsDiv")[0];
-    button = document.createElement("button");
-    button.className = "button blue navButton";
-    button.id = "antiMalarialButton";
-    button.innerHTML = '<span>Predefined Antimalarial Drugs</span>';
-    
-    if (malariaTestResult.match(/POSITIVE/i)){
-      button.onmousedown = function(){
-        antiMalarialPopup();
-      }
-    }else{
-      button.onmousedown = function(){
-        showMalariaDrugsConfirmationPopup();
-      }
-    }
-
-    buttonsDiv.appendChild(button);
-  }
 <% if @use_col_interface == "true" %>
-    window.setTimeout("validateInput(); addAntiMalarialDrugsButton();", 200);
+      buttonsDiv = document.getElementsByClassName("buttonsDiv")[0];
+      button = document.createElement("button");
+      button.className = "button blue navButton";
+      button.id = "antiMalarialButton";
+      button.innerHTML = '<span>Predefined Antimalarial Drugs</span>';
+    
+      if (malariaTestResult.match(/POSITIVE/i)){
+        button.onmousedown = function(){
+          antiMalarialPopup();
+        }
+      }else{
+        button.onmousedown = function(){
+          showMalariaDrugsConfirmationPopup();
+        }
+      }
+
+      buttonsDiv.appendChild(button);
+<% end %>
+  }
+
+<% if @use_col_interface == "true" %>
+    window.setTimeout("validateInput();", 200);
     /*
      *<button onmousedown="clearInput()" class="button blue navButton" id="clearButton"><span>Clear</span></button>
      **/
