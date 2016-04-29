@@ -2114,7 +2114,7 @@ class CohortToolController < ApplicationController
       concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["Additional diagnosis","Diagnosis",
             "primary diagnosis","secondary diagnosis"]]).map(&:concept_id)
 
-      observations = Observation.find(:all, :include => {:person =>{}},
+      observations = Observation.find(:all, :group => "obs.person_id, DATE(obs_datetime)", :include => {:person =>{}},
         :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime <= TIMESTAMP(?) AND
           obs.concept_id IN (?) AND obs.value_coded =? ", @start_date.strftime('%Y-%m-%d 00:00:00'),
           @end_date.strftime('%Y-%m-%d 23:59:59'),concept_ids, diagnosis_concept_id])
