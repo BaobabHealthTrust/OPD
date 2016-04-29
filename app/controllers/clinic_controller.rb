@@ -47,16 +47,17 @@ class ClinicController < GenericClinicController
     session[:observation] = nil
     session[:people] = nil
     @reports = [
-      ["OPD General", "/cohort_tool/opd_report_index"],
+      #["OPD General", "/cohort_tool/opd_report_index"],
       ["Disaggregated Diagnosis", "/cohort_tool/opd_menu?report_name=disaggregated_diagnosis"],
-      ["Diagnosis (By address)", "/cohort_tool/opd_menu?report_name=diagnosis_by_address"],
+      #["Diagnosis (By address)", "/cohort_tool/opd_menu?report_name=diagnosis_by_address"],
       #["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"],
       ["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report"],
+      ["Diagnosis Specific Report", "/cohort_tool/diagnosis_specific_report_menu?report_name=diagnosis_specific_report"],
       ["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered"],
       ["Referrals", "/cohort_tool/opd_menu?report_name=referral"],
-      ["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"],
-      ["Shift Report", "/cohort_tool/opd_menu?report_name=shift_report"],
-      ["Graphical Reports", "/clinic/reports_tab_graphs"],
+      #["Transfer Out", "/cohort_tool/opd_menu?report_name=transfer_out"],
+      #["Shift Report", "/cohort_tool/opd_menu?report_name=shift_report"],
+      #["Graphical Reports", "/clinic/reports_tab_graphs"],
       ["Update DHIS2", "/report/update_dhis"],
       ["Malaria Report", "/report/malaria_report_menu"]
     ]
