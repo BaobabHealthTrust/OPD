@@ -121,33 +121,33 @@ class GenericPropertiesController < ApplicationController
         redirect_to "/clinic" and return
       end
     else
-		@privileges = Privilege.find(:all, :order => "privilege").collect{|r|r.privilege} 
-		@privilege_index = {}
-		@role_privileges = {}
+      @privileges = Privilege.find(:all, :order => "privilege").collect{|r|r.privilege}
+      @privilege_index = {}
+      @role_privileges = {}
 
-		counter = 0
-		@privileges.each do | privilege |
-			counter = counter + 1
-			@privilege_index[privilege] = counter
-		end
+      counter = 0
+      @privileges.each do | privilege |
+        counter = counter + 1
+        @privilege_index[privilege] = counter
+      end
 
-		Role.find(:all).each do | role |
-			@role_privileges[role.role] = RolePrivilege.find(:all, :conditions =>["role = ?", role.role]).collect{ | rp |
-				rp.privilege
-			}.join(',')
-		end
+      Role.find(:all).each do | role |
+        @role_privileges[role.role] = RolePrivilege.find(:all, :conditions =>["role = ?", role.role]).collect{ | rp |
+          rp.privilege
+        }.join(',')
+      end
 
-		#raise @privilege_index.to_yaml
-		#,:conditions => ["privilege IN (?)",privileges])
-		#@privileges = Privilege.find(:all) 
-		@activities = RolePrivilege.find(:all).collect{|r|r.privilege}
+      #raise @privilege_index.to_yaml
+      #,:conditions => ["privilege IN (?)",privileges])
+      #@privileges = Privilege.find(:all)
+      @activities = RolePrivilege.find(:all).collect{|r|r.privilege}
     end
   end
 
   def selected_roles
     render :text => RolePrivilege.find(:all,
-           :conditions =>["role = ?",
-           params[:role]]).collect{|r|r.privilege.privilege}.join(',') and return
+      :conditions =>["role = ?",
+        params[:role]]).collect{|r|r.privilege.privilege}.join(',') and return
   end
 
   def creation
@@ -156,6 +156,15 @@ class GenericPropertiesController < ApplicationController
       global_property.property = params[:property]
       global_property.property_value = (params[:property_value].downcase == "yes").to_s
       global_property.save
+
+      if (params[:property] == 'database.sharing' && params[:property_value].downcase == "yes")
+        check_program_encounter_table_existence = ActiveRecord::Base.connection.table_exists? 'program_encounters'
+
+        if !check_program_encounter_table_existence
+          `bundle exec rake db:migrate:up VERSION=20160503085616`
+        end
+      end
+      
       redirect_to '/clinic'
     end
   end
