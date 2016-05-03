@@ -14,6 +14,8 @@ class Encounter < ActiveRecord::Base
   # TODO, this needs to account for current visit, which needs to account for possible retrospective entry
   named_scope :current, :conditions => 'DATE(encounter.encounter_datetime) = CURRENT_DATE()'
 
+  after_create :create_encounter_program
+  
   def before_save
     self.provider = User.current.person if self.provider.blank?
     # TODO, this needs to account for current visit, which needs to account for possible retrospective entry
@@ -22,7 +24,6 @@ class Encounter < ActiveRecord::Base
 
   def after_save
     self.add_location_obs
-    create_encounter_program
   end
 
   def after_void(reason = nil)
@@ -38,6 +39,8 @@ EOF
     self.orders.each do |order|
       order.void(reason) 
     end
+
+    void_encounter_program
   end
 
   def name
@@ -61,7 +64,7 @@ EOF
       weight = observations.select {|obs| obs.concept.concept_names.map(&:name).include?("WEIGHT (KG)") || obs.concept.concept_names.map(&:name).include?("Weight (kg)") && "#{obs.answer_string}".upcase != '0.0' }
       height = observations.select {|obs| obs.concept.concept_names.map(&:name).include?("HEIGHT (CM)") || obs.concept.concept_names.map(&:name).include?("Height (cm)") && "#{obs.answer_string}".upcase != '0.0' }
       vitals = [weight_str = weight.first.answer_string + 'KG' rescue 'UNKNOWN WEIGHT',
-                height_str = height.first.answer_string + 'CM' rescue 'UNKNOWN HEIGHT']
+        height_str = height.first.answer_string + 'CM' rescue 'UNKNOWN HEIGHT']
       temp_str = temp.first.answer_string + '°C' rescue nil
       vitals << temp_str if temp_str                          
       vitals.join(', ')
@@ -74,20 +77,49 @@ EOF
 
     encounter_types = EncounterType.all(:conditions => ['name IN (?)', encounter_types])
     encounter_types_hash = encounter_types.inject({}) {|result, row| result[row.encounter_type_id] = row.name; result }
-    with_scope(:find => opts) do
-      rows = self.all(
-         :select => 'count(*) as number, encounter_type', 
-         :group => 'encounter.encounter_type',
-         :conditions => ['encounter_type IN (?)', encounter_types.map(&:encounter_type_id)]) 
-      return rows.inject({}) {|result, row| result[encounter_types_hash[row['encounter_type']]] = row['number']; result }
-    end     
+    database_sharing = CoreService.get_global_property_value("database.sharing").to_s == "true"
+    opd_program_id = Program.find_by_name("OPD Program").program_id
+    
+    if (database_sharing)
+      with_scope(:find => opts) do
+        rows = self.all(
+          :select => 'count(*) as number, encounter_type',
+          :joins => [:program_encounter],
+          :group => 'encounter.encounter_type',
+          :conditions => ['encounter_type IN (?) AND program_id =?', encounter_types.map(&:encounter_type_id), opd_program_id])
+        return rows.inject({}) {|result, row| result[encounter_types_hash[row['encounter_type']]] = row['number']; result }
+      end   
+    else
+      with_scope(:find => opts) do
+        rows = self.all(
+          :select => 'count(*) as number, encounter_type',
+          :group => 'encounter.encounter_type',
+          :conditions => ['encounter_type IN (?)', encounter_types.map(&:encounter_type_id)])
+        return rows.inject({}) {|result, row| result[encounter_types_hash[row['encounter_type']]] = row['number']; result }
+      end   
+    end
+
   end
 
   def create_encounter_program
-    program_encounter = ProgramEcounter.new
-    program_encounter.encounter_id = self.encounter_id
-    program_encounter.program_id = Program.find_by_name("OPD Program").program_id
-    program_encounter.save
+    database_sharing = CoreService.get_global_property_value("database.sharing").to_s == "true"
+    if (database_sharing)
+      program_encounter = ProgramEncounter.new
+      program_encounter.encounter_id = self.encounter_id
+      program_encounter.program_id = Program.find_by_name("OPD Program").program_id
+      program_encounter.save
+    end
   end
 
+  def void_encounter_program
+    database_sharing = CoreService.get_global_property_value("database.sharing").to_s == "true"
+    if (database_sharing)
+      program_encounter = ProgramEncounter.find_by_encounter_id(self.encounter_id)
+      unless program_encounter.blank?
+        program_encounter.voided = 1
+        program_encounter.save
+      end
+    end
+  end
+  
 end
