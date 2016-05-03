@@ -9,6 +9,8 @@ class Encounter < ActiveRecord::Base
   belongs_to :provider, :class_name => "Person", :foreign_key => :provider_id, :conditions => {:voided => 0}
   belongs_to :patient, :conditions => {:voided => 0}
 
+  has_one :program_encounter, :foreign_key => :encounter_id
+  
   # TODO, this needs to account for current visit, which needs to account for possible retrospective entry
   named_scope :current, :conditions => 'DATE(encounter.encounter_datetime) = CURRENT_DATE()'
 
@@ -20,6 +22,7 @@ class Encounter < ActiveRecord::Base
 
   def after_save
     self.add_location_obs
+    create_encounter_program
   end
 
   def after_void(reason = nil)
@@ -79,4 +82,12 @@ EOF
       return rows.inject({}) {|result, row| result[encounter_types_hash[row['encounter_type']]] = row['number']; result }
     end     
   end
+
+  def create_encounter_program
+    program_encounter = ProgramEcounter.new
+    program_encounter.encounter_id = self.encounter_id
+    program_encounter.program_id = Program.find_by_name("OPD Program").program_id
+    program_encounter.save
+  end
+
 end
