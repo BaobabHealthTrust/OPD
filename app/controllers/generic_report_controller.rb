@@ -523,7 +523,7 @@ class GenericReportController < ApplicationController
     lab_orders_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
     lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
 
-    tests_ordered_concept_id = Concept.find_by_name("TESTS ORDERED").concept_id
+    tests_ordered_concept_id = Concept.find_by_name("BLOOD").concept_id
     malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
     malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
     unknown_concept_id = Concept.find_by_name("UNKNOWN").concept_id
@@ -541,7 +541,7 @@ class GenericReportController < ApplicationController
 
     microscopy_order_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_orders_encounter_type_id}
-        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MICROSCOPY'
+        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MALARIA (MICROSCOPY)'
         AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
@@ -581,7 +581,7 @@ class GenericReportController < ApplicationController
 
     mrdt_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_orders_encounter_type_id}
-        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MRDT'
+        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MALARIA (MRDT)'
         AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
