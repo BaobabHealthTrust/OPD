@@ -615,7 +615,113 @@ class GenericReportController < ApplicationController
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
     @mrdt_unknown_results_count = mrdt_unknown_results_observations.count
-    
+
+    #>>>>>>>>>>>>>>>>DRUG PRESCRIPTION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    treatment_encounter_type_id = EncounterType.find_by_name("TREATMENT").encounter_type_id
+    dispensing_encounter_type_id = EncounterType.find_by_name("DISPENSING").encounter_type_id
+    amount_dispensed_concept = Concept.find_by_name('Amount dispensed').id
+    drug_order_type_id = OrderType.find_by_name("Drug Order").order_type_id
+
+    la_one_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 1 x 6").drug_id rescue 0 #Add this drug to meta-data
+    la_two_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 2 x 6").drug_id
+    la_three_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 3 x 6").drug_id
+    la_four_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 4 x 6").drug_id
+
+    #as total_prescribed_drugs
+    @total_la_one_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND do.drug_inventory_id = #{la_one_drug_id} AND
+        o.order_type_id = #{drug_order_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_one_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_one_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    @total_la_two_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_two_drug_id} AND
+        o.order_type_id = #{drug_order_type_id} AND e.encounter_datetime <= \"#{Date.today} 23:59:59\"
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_two_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} 
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND o.order_type_id = #{drug_order_type_id}
+        AND do.drug_inventory_id = #{la_two_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    @total_la_three_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_three_drug_id} AND
+        o.order_type_id = #{drug_order_type_id} AND e.encounter_datetime <= \"#{Date.today} 23:59:59\"
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_three_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_three_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    @total_la_four_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_four_drug_id} AND
+        o.order_type_id = #{drug_order_type_id} AND e.encounter_datetime <= \"#{Date.today} 23:59:59\"
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_four_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_four_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     render :layout => "report"
   end
   
