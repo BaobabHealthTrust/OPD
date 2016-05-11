@@ -526,9 +526,9 @@ module PatientService
     # Can't return multiple results because there will be redundant data from sites
 
     if server_port.blank?
-      uri = "http://#{login.first}:#{password.first}@#{server_address}/people/demographics"                          
+      uri = "http://#{login.first}:#{password.first}@#{server_address}/people/demographics_remote"
     else
-      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/demographics"                          
+      uri = "http://#{login.first}:#{password.first}@#{server_address}:#{server_port}/people/demographics_remote"
     end
 
     output = RestClient.post(uri,known_demographics)      
