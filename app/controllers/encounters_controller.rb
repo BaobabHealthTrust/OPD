@@ -75,7 +75,9 @@ class EncountersController < GenericEncountersController
         @required_accession_number = "Results Detected"
       end
     end
-    
+
+    @available_accesion_number_options = Lab.malaria_tests_ordered(@patient)
+
     @required_accession_number = "No Order Detected" if @required_accession_number.blank?
 
     @patient_malaria_notification = ""
@@ -726,7 +728,13 @@ class EncountersController < GenericEncountersController
 
     end
     @patient_id = params[:encounter][:patient_id]
+    @patient = Patient.find(@patient_id)
     #redirect_to("/patients/show/#{@patient_id}")
-    redirect_to"/patients/print_lab_orders/?patient_id=#{@patient_id}"
+    can_print_specimen_label = CoreService.get_global_property_value("specimen.label.print").to_s == 'true'
+    if can_print_specimen_label
+      redirect_to"/patients/print_lab_orders/?patient_id=#{@patient_id}" and return
+    else
+      redirect_to next_task(@patient) and return
+    end
   end
 end

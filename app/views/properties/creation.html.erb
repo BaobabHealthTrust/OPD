@@ -52,6 +52,8 @@
     property = 'malaria.enabled.facility'
   when 'does_this_system_share_database_with_bart?'
     property = 'database.sharing'
+  when 'specimen_label_print?'
+    property = 'specimen.label.print'
   end
 %>
   <%= hidden_field_tag "property", property %>

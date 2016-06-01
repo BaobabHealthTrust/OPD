@@ -118,7 +118,8 @@ class ClinicController < GenericClinicController
       ["show Tasks button on patient dashboard", "/properties/creation?value=show_tasks_button"],
       ["Point of care system?", "/properties/creation?value=point_of_care_system"],
       ["Activate Malaria Feature", "/properties/creation?value=is_this_malaria_enabled_facility?"],
-      ["Shares Database with BART2?", "/properties/creation?value=does_this_system_share_database_with_bart?"]
+      ["Shares Database with BART2?", "/properties/creation?value=does_this_system_share_database_with_bart?"],
+      ["Do you print specimen labels?", "/properties/creation?value=specimen_label_print?"],
     ]
     render :layout => false
   end
