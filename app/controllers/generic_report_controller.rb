@@ -727,7 +727,7 @@ class GenericReportController < ApplicationController
     render :layout => "report"
   end
   def process_la_report
-    @report_name = "LA Report"
+    @report_name = "Lumefantrine + Arthemether Report"
     @logo = CoreService.get_global_property_value('logo').to_s
     @current_location_name =Location.current_health_center.name
 
