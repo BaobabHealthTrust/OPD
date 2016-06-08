@@ -283,6 +283,54 @@
       <span class="keypad">
       </span>
     </div>
-
+    <script type="text/javascript">
+          function printLabel(){
+            var form = document.createElement("form");
+            form.action ="/report/print_la_raport_label";
+            form.method = "POST";
+            var input = document.createElement("input");
+            input.name = "1[prescription]";
+            input.value = "<%= @total_la_one_prescribed_drugs.to_i %>";
+            form.appendChild(input);
+            input = document.createElement("input");
+            input.name = "1[dispensed]";
+            input.value = "<%=@total_la_one_dispensed_drugs.to_i %>";
+            form.appendChild(input);
+            input = document.createElement("input");
+            input.name = "2[prescription]";
+            input.value = "<%= @total_la_two_prescribed_drugs.to_i %>";
+            form.appendChild(input);
+            input = document.createElement("input");
+            input.name = "2[dispensed]";
+            input.value = "<%=@total_la_two_dispensed_drugs.to_i %>";
+            form.appendChild(input);
+            input = document.createElement("input");
+            input.name = "3[prescription]";
+            input.value = "<%= @total_la_three_prescribed_drugs.to_i %>";
+            form.appendChild(input);
+            input = document.createElement("input");
+            input.name = "3[dispensed]";
+            input.value = "<%=@total_la_three_dispensed_drugs.to_i %>";
+            form.appendChild(input);
+            input = document.createElement("input");
+            input.name = "4[prescription]";
+            input.value = "<%= @total_la_four_prescribed_drugs.to_i %>";
+            form.appendChild(input);
+            input = document.createElement("input");
+            input.name = "4[dispensed]";
+            input.value = "<%=@total_la_four_dispensed_drugs.to_i %>";
+            form.appendChild(input);
+            input = document.createElement("input");
+            input.name = "date[start]";
+            input.value = "<%= @start_date %>";
+            form.appendChild(input);
+            input = document.createElement("input");
+            input.name = "date[end]";
+            input.value = "<%=@end_date%>";
+            form.appendChild(input);
+            $("#table_id").append(form);
+            form.submit();
+          }
+    </script>
   </body>
 </html>
