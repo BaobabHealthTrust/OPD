@@ -152,6 +152,7 @@ class GenericPropertiesController < ApplicationController
 
   def creation
     if request.post?
+      raise params.inspect
       global_property = GlobalProperty.find_by_property(params[:property]) || GlobalProperty.new()
       global_property.property = params[:property]
       global_property.property_value = (params[:property_value].downcase == "yes").to_s

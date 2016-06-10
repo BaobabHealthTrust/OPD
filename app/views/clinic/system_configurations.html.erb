@@ -135,7 +135,7 @@
 
       function changeProperty(path){
         console.log(path)
-        if (path == '/properties/export_cohort_data' || path == '/properties/mailing_management' || path == '/properties/set_appointment_limit' || path == '/properties/clinic_days' || path == '/properties/set_clinic_holidays' || path == '/properties/set_htn_bp_thresholds' || path == '/properties/set_htn_age_threshold' || path == '/properties/staging_properties' || path == '/properties/filing_number' || path == '/properties/site_code'){
+        if (path == '/properties/set_role_privileges' || path == '/properties/mailing_management' || path == '/properties/set_appointment_limit' || path == '/properties/clinic_days' || path == '/properties/set_clinic_holidays' || path == '/properties/set_htn_bp_thresholds' || path == '/properties/set_htn_age_threshold' || path == '/properties/staging_properties' || path == '/properties/filing_number' || path == '/properties/site_code'){
           path = path + "?view_configuration=true";
         }else{
           path = path + "&view_configuration=true";
@@ -200,6 +200,7 @@
 
       #table_id {
         width: 100%;
+        
       }
 
       #table_id_filter{
@@ -237,7 +238,9 @@
       }
       #num{ display:none; }
       #char{ display:none; }
-
+      #table_id tr:nth-child(odd){
+        background: #e6ddd6;
+      }
     </style>
 
 
@@ -299,111 +302,80 @@
       </thead>
       <tbody>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Activate Cervical Cancer Screening</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @cervical_cancer_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=activate_cervical_cancer_screening')">Change</td>
+          <td>Activate Malaria Feature</td>
+          <td><%= @malaria_enable_property %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=is_this_malaria_enabled_facility?')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Activate Drug Management</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @drug_management_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=activate_drug_management')">Change</td>
+          <td>Ask Life threatening Questions</td>
+          <td><%= @ask_life_threatening_condition_property %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_life_threatening_condition_questions')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Activate Hypertension Screening</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @hypertension_management_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=activate_hypertension_enhancement')">Change</td>
+          <td >Ask complaints before diagnosis</td>
+          <td><%= @complaints_before_diagnosis_property %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_complaints_before_diagnosis')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Activate VL Routine Check</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @vl_management_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=activate_viral_load_routine_check')">Change</td>
+          <td>Ask complaints under Vitals</td>
+          <td><%= @complaint_under_vitals_property %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_complaints_under_vitals')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Ask Pills Remaining At Home</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @ask_pills_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_pills_remaining_at_home')">Change</td>
+          <td>Ask social history questions</td>
+          <td ><%= @social_history_property %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_social_history_questions')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Confirm Patient Creation</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @confirm_before_creating_property %></td>
+          <td>Ask triage category questions</td>
+          <td><%= @triage_category_property %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_triage_category_questions')">Change</td>
+        </tr>
+        <tr>
+          <td >Ask vitals before diagnosis (children)</td>
+          <td ><%= @ask_vitals_before_property %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_vitals_questions_before_diagnosis')">Change</td>
+        </tr>
+        <tr>
+          <td >Confirm patient creation</td>
+          <td ><%= @confirm_patience_creation_property %></td>
           <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=confirm_before_creating_a_patient')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Enter Lab Results</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @enter_lab_results_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=enter_lab_results')">Change</td>
+          <td>Do you print specimen labels?</td>
+          <td ><%= @print_specimen_label_property %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=specimen_label_print?')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Export Cohort Data</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @export_cohort_data_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/export_cohort_data')">Change</td>
+          <td >Manage Roles</td>
+          <td><%= @manage_roles_property rescue 'Not Set'%></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/set_role_privileges')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Extended Family Planning</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @extended_family_panning_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=extended_family_planning')">Change</td>
+          <td >Point of care system?</td>
+          <td ><%= @point_of_care_property %> </td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=point_of_care_system')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Mailing List</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @mailing_members.join("<br />") || 'Not Se'%></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/mailing_management')">Change</td>
+          <td>Shares Database with BART2?</td>
+          <td><%= @share_database_property rescue "Not Set" %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=does_this_system_share_database_with_bart?')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Set Appointment Limit</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @appointment_limit_property %> </td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/set_appointment_limit')">Change</td>
-        </tr>
-        <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Set Clinic Days</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @clinic_days.join("<br />") rescue "Not Set" %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/clinic_days')">Change</td>
-        </tr>
-        <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Set Clinic Holidays</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @clinic_holidays.join("<br />") || "Not Set" %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/set_clinic_holidays')">Change</td>
-        </tr>
-        <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Set Hypertension Thresholds</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= "#{@systollic_blood_pressure_property}/#{@diastollic_blood_pressure_property}" %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/set_htn_bp_thresholds')">Change</td>
-        </tr>
-        <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Set Hypertension Screen Age</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @htn_screening_age_property || "Not Set"%></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/set_htn_age_threshold')">Change</td>
-        </tr>
-        <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Set Site Code</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= (@site_code_property || "Not Set") %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/site_code')">Change</td>
-        </tr>
-        <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Set Filing Limit</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @filing_number_property || "Not Set"%></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/filing_number')">Change</td>
-        </tr>
-        <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Show Lab Results</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @show_lab_results_property %></td>
+          <td>Show Lab Results</td>
+          <td><%= @show_lab_results_property rescue "Not Set" %></td>
           <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=show_lab_results')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Staging Format</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @extended_staging_property %></td>
-          <td id="number" style="text-align:center"  onclick="changeProperty('/properties/staging_properties')">Change</td>
+          <td>Show Tasks button on patient dashboard</td>
+          <td><%= @show_task_button_property rescue "Not Set" %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=show_tasks_button')">Change</td>
         </tr>
         <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Use Filing Numbers</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @use_filing_number_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=use_filing_numbers')">Change</td>
+          <td>Show column prescription Interface</td>
+          <td><%= @show_column_interface_property rescue "Not Set"%></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=use_column_interface')">Change</td>
         </tr>
-        <tr>
-          <td style="background-color: #FFF68F; font-size: 14pt">Use User Selected Tasks</td>
-          <td style="text-align:center; background-color: #FFF68F; font-size: 14pt"><%= @use_user_selected_activities_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=use_user_selected_activities')">Change</td>
-        </tr>
-
       </tbody>
       <tfoot>
 
