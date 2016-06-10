@@ -528,8 +528,7 @@ class GenericReportController < ApplicationController
       label.draw_text("Time: #{time.strftime("%Y-%m-%d %H:%M:%S")}", 500, 20, 0, 2, 1, 1,false)
       label.print(1)
       #label.draw_barcode(40, 130, 0, 1, 5, 15, 120,true, "#{drug_barcode}")
-      #    send_data(label.print(1),:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{Time.now.to_i}la.lbl", :disposition => "inline")
-    send_data(label.print(1),:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"00001.lbl", :disposition => "inline")
+    send_data(label.print(1),:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{Time.now.to_i}la.lbl", :disposition => "inline")
   end
   def process_malaria_report
     @report_name = "Malaria Report"
