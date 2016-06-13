@@ -295,7 +295,7 @@
     <table id="table_id" width="99%">
       <thead>
         <tr>
-          <th style="width: 50%;">Property</th>
+          <th style="width:50%;">Property</th>
           <th>Value</th>
           <th>Action</th>
         </tr>
@@ -304,47 +304,52 @@
         <tr>
           <td>Activate Malaria Feature</td>
           <td><%= @malaria_enable_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=is_this_malaria_enabled_facility?')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=is_this_malaria_enabled_facility?')">Change</td>
         </tr>
         <tr>
           <td>Ask Life threatening Questions</td>
           <td><%= @ask_life_threatening_condition_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_life_threatening_condition_questions')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=ask_life_threatening_condition_questions')">Change</td>
         </tr>
         <tr>
           <td >Ask complaints before diagnosis</td>
           <td><%= @complaints_before_diagnosis_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_complaints_before_diagnosis')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=ask_complaints_before_diagnosis')">Change</td>
         </tr>
         <tr>
           <td>Ask complaints under Vitals</td>
           <td><%= @complaint_under_vitals_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_complaints_under_vitals')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=ask_complaints_under_vitals')">Change</td>
+        </tr>
+        <tr>
+          <td>Ask social determinats questions</td>
+          <td><%= @social_determinats_property %></td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=ask_social_determinants_questions')">Change</td>
         </tr>
         <tr>
           <td>Ask social history questions</td>
           <td ><%= @social_history_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_social_history_questions')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=ask_social_history_questions')">Change</td>
         </tr>
         <tr>
           <td>Ask triage category questions</td>
           <td><%= @triage_category_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_triage_category_questions')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=ask_triage_category_questions')">Change</td>
         </tr>
         <tr>
           <td >Ask vitals before diagnosis (children)</td>
           <td ><%= @ask_vitals_before_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=ask_vitals_questions_before_diagnosis')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=ask_vitals_questions_before_diagnosis')">Change</td>
         </tr>
         <tr>
           <td >Confirm patient creation</td>
           <td ><%= @confirm_patience_creation_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=confirm_before_creating_a_patient')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=confirm_before_creating_a_patient')">Change</td>
         </tr>
         <tr>
           <td>Do you print specimen labels?</td>
           <td ><%= @print_specimen_label_property %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=specimen_label_print?')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=specimen_label_print?')">Change</td>
         </tr>
         <tr>
           <td >Manage Roles</td>
@@ -354,27 +359,27 @@
         <tr>
           <td >Point of care system?</td>
           <td ><%= @point_of_care_property %> </td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=point_of_care_system')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=point_of_care_system')">Change</td>
         </tr>
         <tr>
           <td>Shares Database with BART2?</td>
           <td><%= @share_database_property rescue "Not Set" %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=does_this_system_share_database_with_bart?')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=does_this_system_share_database_with_bart?')">Change</td>
         </tr>
         <tr>
           <td>Show Lab Results</td>
           <td><%= @show_lab_results_property rescue "Not Set" %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=show_lab_results')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=show_lab_results')">Change</td>
         </tr>
         <tr>
           <td>Show Tasks button on patient dashboard</td>
           <td><%= @show_task_button_property rescue "Not Set" %></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=show_tasks_button')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=show_tasks_button')">Change</td>
         </tr>
         <tr>
           <td>Show column prescription Interface</td>
           <td><%= @show_column_interface_property rescue "Not Set"%></td>
-          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?value=use_column_interface')">Change</td>
+          <td id="number" style="text-align:center" onclick="changeProperty('/properties/creation?redirect=system_configurations&value=use_column_interface')">Change</td>
         </tr>
       </tbody>
       <tfoot>

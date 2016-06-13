@@ -118,7 +118,11 @@ class GenericPropertiesController < ApplicationController
       if params[:id]
         redirect_to "/patients/show/#{params[:id]}" and return
       else
-        redirect_to "/clinic" and return
+        if params[:redirect].present?
+            redirect_to "/clinic/#{params[:redirect]}"
+        else
+            redirect_to "/clinic" and return
+        end
       end
     else
       @privileges = Privilege.find(:all, :order => "privilege").collect{|r|r.privilege}
@@ -152,7 +156,6 @@ class GenericPropertiesController < ApplicationController
 
   def creation
     if request.post?
-      raise params.inspect
       global_property = GlobalProperty.find_by_property(params[:property]) || GlobalProperty.new()
       global_property.property = params[:property]
       global_property.property_value = (params[:property_value].downcase == "yes").to_s
@@ -165,8 +168,11 @@ class GenericPropertiesController < ApplicationController
           `bundle exec rake db:migrate:up VERSION=20160503085616`
         end
       end
-      
-      redirect_to '/clinic'
+      if params[:redirect].present?
+          redirect_to "/clinic/#{params[:redirect]}"
+      else
+          redirect_to '/clinic'
+      end
     end
   end
 

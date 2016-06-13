@@ -315,6 +315,7 @@ class GenericClinicController < ApplicationController
     @ask_life_threatening_condition_property = GlobalProperty.find_by_property("ask.life.threatening.condition.questions").property_value.to_s == "true" rescue "Not Set"
     @complaints_before_diagnosis_property = GlobalProperty.find_by_property("ask.complaints.before_diagnosis").property_value.to_s == "true" rescue "Not Set"
     @complaint_under_vitals_property = GlobalProperty.find_by_property("ask.complaints.under.vitals").property_value.to_s == "true" rescue "Not Set"
+    @social_determinats_property = GlobalProperty.find_by_property("ask.social.determinants.questions").property_value.to_s == "true" rescue "Not Set"
     @social_history_property = GlobalProperty.find_by_property("ask.social.history.questions").property_value.to_s == "true" rescue "Not Set"
     @triage_category_property = GlobalProperty.find_by_property("ask.triage.category.questions").property_value.to_s == "true" rescue "Not Set"
     @ask_vitals_before_property = GlobalProperty.find_by_property("ask.vitals.questions.before.diagnosis").property_value.to_s == "true" rescue "Not Set"

@@ -56,6 +56,9 @@
     property = 'specimen.label.print'
   end
 %>
+  <%if params[:redirect].present? %>
+      <%= hidden_field_tag "redirect", params[:redirect] %>
+  <%end%>
   <%= hidden_field_tag "property", property %>
 
   <%= hidden_field_tag "property_value", nil %>
