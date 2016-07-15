@@ -7,7 +7,11 @@ class GenericSessionsController < ApplicationController
 
 
 	def create
-		user = User.authenticate(params[:login], params[:password])
+    if params[:passwordless]
+		  user = User.find_by_username(SimpleEncryption.decrypt(params[:passwordless])) 
+    else
+		  user = User.authenticate(params[:login], params[:password])
+    end
 		sign_in(:user, user) if user && user.status == 'active'
 		authenticate_user! if user && user.status == 'active' 
 		session[:return_uri] = nil
