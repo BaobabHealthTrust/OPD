@@ -38,6 +38,7 @@ class ClinicController < GenericClinicController
       ['/clinic/users','User accounts/settings'],
       ['/clinic/management','Drug Management'],
       ['/clinic/location_management','Location Management']
+
     ]
     @landing_dashboard = 'clinic_administration'
     #    render :template => 'clinic/administration', :layout => 'clinic'

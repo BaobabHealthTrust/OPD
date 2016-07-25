@@ -474,6 +474,27 @@ class GenericUserController < ApplicationController
   		@users = User.find(:all)
   end
 
+  def barcodes
+      @users = User.find(:all)
+  end
+
+  def generate_user_barcode
+
+    @user = User.find(params[:user_id])
+
+    username = @user.username
+    userpassword = @user.password
+    userpassword = first_5_chars = userpassword[0..4] 
+    barcode = username + userpassword
+    params[:barcode] = barcode
+    params[:label] = username
+    print_and_redirect("/barcodes/label?barcode=#{params[:barcode]}&label=#{params[:label]}", '/clinic')
+    
+
+  end
+
+
+
   def view_users
     @report_name = 'View users'
     logged_user = current_user
@@ -485,6 +506,11 @@ class GenericUserController < ApplicationController
 
   def retire_reason
     
+  end
+
+  def barcode_label
+    print_string = User.find(params[:id]). login_barcode rescue (raise "Unable to find User (#{params[:id]}) or generate a barcode label for that user")
+    send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
   
   def manage_user
