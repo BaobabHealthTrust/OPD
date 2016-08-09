@@ -7,6 +7,8 @@ config/application.yml
 config/settings.yml
 notes
 doc
+*.gem
+vendor/*
 development_structure.sql
 schema.rb
 *~
