@@ -78,6 +78,7 @@ DEPENDENCIES
   paginate
   passenger
   rails (= 2.3.5)
+  rake (= 0.8.7)
   rest-client
   settingslogic
   warden (= 0.10.7)
