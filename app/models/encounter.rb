@@ -10,12 +10,12 @@ class Encounter < ActiveRecord::Base
   belongs_to :patient, :conditions => {:voided => 0}
 
   has_one :program_encounter, :foreign_key => :encounter_id
-  
+
   # TODO, this needs to account for current visit, which needs to account for possible retrospective entry
   named_scope :current, :conditions => 'DATE(encounter.encounter_datetime) = CURRENT_DATE()'
 
   after_create :create_encounter_program
-  
+
   def before_save
     self.provider = User.current.person if self.provider.blank?
     # TODO, this needs to account for current visit, which needs to account for possible retrospective entry
@@ -27,17 +27,17 @@ class Encounter < ActiveRecord::Base
   end
 
   def after_void(reason = nil)
-    self.observations.each do |row| 
+    self.observations.each do |row|
       if not row.order_id.blank?
         ActiveRecord::Base.connection.execute <<EOF
 UPDATE drug_order SET quantity = NULL WHERE order_id = #{row.order_id};
 EOF
       end rescue nil
-      row.void(reason) 
+      row.void(reason)
     end rescue []
 
     self.orders.each do |order|
-      order.void(reason) 
+      order.void(reason)
     end
 
     void_encounter_program
@@ -54,7 +54,7 @@ EOF
 
   def to_s
     if name == 'REGISTRATION'
-      "Patient was seen at the registration desk at #{encounter_datetime.strftime('%I:%M')}" 
+      "Patient was seen at the registration desk at #{encounter_datetime.strftime('%I:%M')}"
     elsif name == 'TREATMENT'
       o = orders.collect{|order| order.to_s}.join("\n")
       o = "No prescriptions have been made" if o.blank?
@@ -66,11 +66,11 @@ EOF
       vitals = [weight_str = weight.first.answer_string + 'KG' rescue 'UNKNOWN WEIGHT',
         height_str = height.first.answer_string + 'CM' rescue 'UNKNOWN HEIGHT']
       temp_str = temp.first.answer_string + '°C' rescue nil
-      vitals << temp_str if temp_str                          
+      vitals << temp_str if temp_str
       vitals.join(', ')
-    else  
+    else
       observations.collect{|observation| "<b>#{(observation.concept.concept_names.last.name) rescue ""}</b>: #{observation.answer_string}"}.join(", ")
-    end  
+    end
   end
 
   def self.statistics(encounter_types, opts={})
@@ -79,7 +79,7 @@ EOF
     encounter_types_hash = encounter_types.inject({}) {|result, row| result[row.encounter_type_id] = row.name; result }
     database_sharing = CoreService.get_global_property_value("database.sharing").to_s == "true"
     opd_program_id = Program.find_by_name("OPD Program").program_id
-    
+
     if (database_sharing)
       with_scope(:find => opts) do
         rows = self.all(
@@ -88,7 +88,7 @@ EOF
           :group => 'encounter.encounter_type',
           :conditions => ['encounter_type IN (?) AND program_id =?', encounter_types.map(&:encounter_type_id), opd_program_id])
         return rows.inject({}) {|result, row| result[encounter_types_hash[row['encounter_type']]] = row['number']; result }
-      end   
+      end
     else
       with_scope(:find => opts) do
         rows = self.all(
@@ -96,7 +96,7 @@ EOF
           :group => 'encounter.encounter_type',
           :conditions => ['encounter_type IN (?)', encounter_types.map(&:encounter_type_id)])
         return rows.inject({}) {|result, row| result[encounter_types_hash[row['encounter_type']]] = row['number']; result }
-      end   
+      end
     end
 
   end
@@ -121,5 +121,26 @@ EOF
       end
     end
   end
-  
+
+#  def self.underline_diseases(patient_id)
+#  find_by_sql("SELECT C.name cname, O.* FROM concept_name C, obs O
+#              where O.value_coded = C.concept_id
+#              and C.concept_id = 5
+#              and C.concept_name_type = 'fully_specified'
+#              and person_id = #{patient_id}")
+#  rescue nils
+#end
+
+  def self.previous_body_weight(patient_id)
+  find_by_sql("SELECT * FROM obs where obs_id =
+             (select max(obs_id) from chintheche.obs
+              where concept_id = 5089
+              and person_id = #{patient_id})")
+  end
+
+  def  self.underline_diseases_set(patient_id)
+  concept_set_id = ConceptName.find_by_name('underlined IDSR diseases').concept_id
+  concept_ids = ConceptSet.find(:all,:conditions=>["concept_set=?",concept_set_id]).map(&:concept_id)
+  underlined_obs = Observation.find(:all,:conditions=>["value_coded IN (?) and person_id = ?",concept_ids,patient_id]).map(&:answer_string)
+  end
 end

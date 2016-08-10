@@ -638,7 +638,16 @@ class GenericPatientsController < ApplicationController
       @programs = restriction.filter_programs(@programs)
     end
 
-    render :template => 'dashboards/overview_tab', :layout => false
+#		underline_diseases_alerts(@patient.id) rescue nil
+
+@previousweight = Encounter.previous_body_weight(@patient.id)
+@previousweight.each do |p|
+@pweight =  p.value_text
+end
+
+@underline_diseases = Encounter.underline_diseases_set(@patient.id)
+
+    render :template => 'dashboards/eidsr_overview_tab', :layout => false
   end
 
   def visit_history

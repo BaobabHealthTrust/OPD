@@ -79,9 +79,10 @@
         </select>
 
         <select id="links">
-          <%  if @patient_bean.age.to_i < 14%>
-            <option value='/encounters/new/triage_paeds?patient_id=<%= @patient.id %>'>Triage</option>
-          <% else  %>
+          <!--%  if @patient_bean.age.to_i < 14%-->
+            <!--option value='/encounters/new/triage_paeds?patient_id=<!--%= @patient.id %>'>Triage</option>
+          <!--% else  %-->
+          <%  if @nurse  %>
             <option value='/encounters/new/vitals?patient_id=<%= @patient.id %>'>Triage</option>
           <% end %>
 
@@ -155,4 +156,3 @@
     </div>
   </body>
 </html>
-
