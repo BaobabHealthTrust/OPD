@@ -46,6 +46,8 @@ mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/regimen_indexes.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/retrospective_station_entries.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/openmrs_metadata_1_7.sql
 mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/create_dde_server_connection.sql
+mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/underlined_diseases_concept_metadata.sql
+
 
 #mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/privilege.sql
 #mysql --user=$USERNAME --password=$PASSWORD $DATABASE < db/bart2_role_privileges.sql
