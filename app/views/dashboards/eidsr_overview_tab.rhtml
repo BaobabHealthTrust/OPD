@@ -47,18 +47,20 @@
                                  <br /><font class='patient_state'>Current state: <%=h prog.patient_states.last.to_s.humanize.gsub('-art','-ART').gsub('arvs','ARVs') %></font>
                                </div>
                              </li>
-                             <% if @pweight.blank? %>
-                                 <div id="pweight">There are no any previous body weight record for this patient</div>
-                             <!--% end %-->
-                             <% else %>
-                             <br/><span id="pweight">Previous body weight:  <%= @pweight%>Kg</span>
-                           <% end %>
                            <% end %>
                            <% if @programs.empty? %>
                              <li class="data even">
                                <div class="program">There are no current programs for this patient</div>
                              </li>
                            <% end %>
+
+                           <% if @pweight.blank? %>
+                               <div id="pweight">There are no any previous body weight record for this patient</div>
+                           <% else %>
+                             <br/><li class="data">
+                               <span class="data">Previous body weight:  <%= @pweight%>Kg</span>
+                               </li>
+                         <% end %>
                            </ul>
                          </div>
                    </td>

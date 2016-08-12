@@ -121,26 +121,4 @@ EOF
       end
     end
   end
-
-#  def self.underline_diseases(patient_id)
-#  find_by_sql("SELECT C.name cname, O.* FROM concept_name C, obs O
-#              where O.value_coded = C.concept_id
-#              and C.concept_id = 5
-#              and C.concept_name_type = 'fully_specified'
-#              and person_id = #{patient_id}")
-#  rescue nils
-#end
-
-  def self.previous_body_weight(patient_id)
-  find_by_sql("SELECT * FROM obs where obs_id =
-             (select max(obs_id) from obs
-              where concept_id = 5089
-              and person_id = #{patient_id})")
-  end
-
-  def  self.underline_diseases_set(patient_id)
-  concept_set_id = ConceptName.find_by_name('underlined IDSR diseases').concept_id
-  concept_ids = ConceptSet.find(:all,:conditions=>["concept_set=?",concept_set_id]).map(&:concept_id)
-  underlined_obs = Observation.find(:all,:conditions=>["value_coded IN (?) and person_id = ?",concept_ids,patient_id]).map(&:answer_string)
-  end
 end
