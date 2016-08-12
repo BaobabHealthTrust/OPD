@@ -133,7 +133,7 @@ EOF
 
   def self.previous_body_weight(patient_id)
   find_by_sql("SELECT * FROM obs where obs_id =
-             (select max(obs_id) from chintheche.obs
+             (select max(obs_id) from obs
               where concept_id = 5089
               and person_id = #{patient_id})")
   end
