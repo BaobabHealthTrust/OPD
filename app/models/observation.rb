@@ -2,6 +2,7 @@ class Observation < ActiveRecord::Base
   set_table_name :obs
   set_primary_key :obs_id
   include Openmrs
+  include Extension
   belongs_to :person, :conditions => {:voided => 0}
   belongs_to :encounter, :conditions => {:voided => 0}
   belongs_to :order, :conditions => {:voided => 0}
@@ -47,7 +48,7 @@ class Observation < ActiveRecord::Base
 
   def value_coded_or_text=(value_coded_or_text)
     return if value_coded_or_text.blank?
-    
+
     value_coded_name = ConceptName.find_by_name(value_coded_or_text)
     if value_coded_name.nil?
       # TODO: this should not be done this way with a brittle hard ref to concept name
@@ -62,31 +63,31 @@ class Observation < ActiveRecord::Base
   end
 
   def self.find_most_common(concept_question, answer_string, limit = 10)
-    self.find(:all, 
-      :select => "COUNT(*) as count, concept_name.name as value", 
-      :joins => "INNER JOIN concept_name ON concept_name.concept_name_id = value_coded_name_id AND concept_name.voided = 0", 
+    self.find(:all,
+      :select => "COUNT(*) as count, concept_name.name as value",
+      :joins => "INNER JOIN concept_name ON concept_name.concept_name_id = value_coded_name_id AND concept_name.voided = 0",
       :conditions => ["obs.concept_id = ? AND (concept_name.name LIKE ? OR concept_name.name IS NULL)", concept_question, "%#{answer_string}%"],
-      :group => :value_coded_name_id, 
+      :group => :value_coded_name_id,
       :order => "COUNT(*) DESC",
       :limit => limit).map{|o| o.value }
   end
 
   def self.find_most_common_location(concept_question, answer_string, limit = 10)
-    self.find(:all, 
-      :select => "COUNT(*) as count, location.name as value", 
-      :joins => "INNER JOIN locations ON location.location_id = value_location AND location.retired = 0", 
+    self.find(:all,
+      :select => "COUNT(*) as count, location.name as value",
+      :joins => "INNER JOIN locations ON location.location_id = value_location AND location.retired = 0",
       :conditions => ["obs.concept_id = ? AND location.name LIKE ?", concept_question, "%#{answer_string}%"],
-      :group => :value_location, 
+      :group => :value_location,
       :order => "COUNT(*) DESC",
       :limit => limit).map{|o| o.value }
   end
 
   def self.find_most_common_value(concept_question, answer_string, value_column = :value_text, limit = 10)
     answer_string = "%#{answer_string}%" if value_column == :value_text
-    self.find(:all, 
-      :select => "COUNT(*) as count, #{value_column} as value", 
+    self.find(:all,
+      :select => "COUNT(*) as count, #{value_column} as value",
       :conditions => ["obs.concept_id = ? AND #{value_column} LIKE ?", concept_question, answer_string],
-      :group => value_column, 
+      :group => value_column,
       :order => "COUNT(*) DESC",
       :limit => limit).map{|o| o.value }
   end
@@ -115,7 +116,7 @@ class Observation < ActiveRecord::Base
     #we need to find a better way because value_coded can also be a location - not only a concept
     return coded_name unless coded_name.blank?
     answer = Concept.find_by_concept_id(self.value_coded).shortname rescue nil
-	
+
 	if answer.nil?
 		answer = Concept.find_by_concept_id(self.value_coded).fullname rescue nil
 	end
@@ -123,7 +124,7 @@ class Observation < ActiveRecord::Base
 	if answer.nil?
 		answer = Concept.find_with_voided(self.value_coded).fullname + ' - retired'
 	end
-	
+
 	return answer
   end
 
@@ -151,7 +152,7 @@ class Observation < ActiveRecord::Base
     formatted_name ||= self.concept.concept_names.first.name rescue 'Unknown concept name'
     "#{Location.find(self.answer_string(tags)).name}"
   end
-  
+
   def to_s_formatted
     text = "#{self.concept.fullname rescue 'Unknown concept name'}"
     text += ": #{self.answer_string}" if(self.answer_string.downcase != "yes" && self.answer_string.downcase != "unknown")
@@ -168,7 +169,7 @@ class Observation < ActiveRecord::Base
       diagnosis_name = Concept.find(concept_id).fullname
       diagnoses << diagnosis_name
     end
-    
+
     return diagnoses.sort
   end
 

@@ -1,0 +1,5 @@
+credentials:
+  url: http://localhost:3001/users/get_token
+  username: pike-msonda
+  password: "2580"
+  dashboard_url: http://localhost:3001/admin/save_visit_details

@@ -5,19 +5,19 @@ module Openmrs
       self.default_scope :conditions => "#{self.table_name}.voided = 0" if col_names.include?("voided")
       self.default_scope :conditions => "#{self.table_name}.retired = 0" if col_names.include?("retired")
     end
-    
+
     # We needed a way to break out of the default scope, so we introduce inactive
     def inactive(*args)
       col_names = self.columns.map(&:name)
       scope = {}
       scope = {:conditions => "#{self.table_name}.voided = 1"} if col_names.include?("voided")
-      scope = {:conditions => "#{self.table_name}.retired = 1"} if col_names.include?("retired")      
+      scope = {:conditions => "#{self.table_name}.retired = 1"} if col_names.include?("retired")
       with_scope({:find => scope}, :overwrite) do
         if ([:all, :first].include?(args.first))
           self.find(*args)
         else
-          self.all(*args)      
-        end  
+          self.all(*args)
+        end
       end
     end
 
@@ -33,13 +33,13 @@ module Openmrs
     def find_with_voided(options)
       with_exclusive_scope { self.find(options)}
     end
-  end  
+  end
 
   def self.included(base)
     base.extend(ClassMethods)
     base.assign_scopes
   end
-  
+
   def before_save
     super
     self.changed_by = User.current.id if self.attributes.has_key?("changed_by") and User.current != nil
@@ -61,11 +61,11 @@ module Openmrs
 
     self.uuid = ActiveRecord::Base.connection.select_one("SELECT UUID() as uuid")['uuid'] if self.attributes.has_key?("uuid")
   end
-  
+
   # Override this
   def after_void(reason = nil)
   end
-  
+
   def void(reason = "Voided through #{BART_VERSION}",date_voided = Time.now,
       voided_by = (User.current.user_id unless User.current.nil?))
     unless voided?
@@ -75,13 +75,13 @@ module Openmrs
       self.voided_by = voided_by
       self.save
       self.after_void(reason)
-    end    
+    end
   end
 
   def voided?
     self.attributes.has_key?("voided") ? voided == 1 : raise("Model does not support voiding")
-  end 
-  
+  end
+
   def add_location_obs
     obs = Observation.new()
     obs.person_id = self.patient_id
@@ -91,5 +91,5 @@ module Openmrs
     obs.obs_datetime = self.encounter_datetime
     obs.save
   end
-   
+
 end
