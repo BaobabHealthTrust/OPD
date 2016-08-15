@@ -2,7 +2,6 @@ class Observation < ActiveRecord::Base
   set_table_name :obs
   set_primary_key :obs_id
   include Openmrs
-  include Extension
   belongs_to :person, :conditions => {:voided => 0}
   belongs_to :encounter, :conditions => {:voided => 0}
   belongs_to :order, :conditions => {:voided => 0}
@@ -39,7 +38,7 @@ class Observation < ActiveRecord::Base
   def patient_id=(patient_id)
     self.person_id=patient_id
   end
-  
+
   def concept_name=(concept_name)
     self.concept_id = ConceptName.find_by_name(concept_name).concept_id
     rescue

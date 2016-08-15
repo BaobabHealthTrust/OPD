@@ -1,7 +1,9 @@
-module SurveillanceDashBoardService
+module DashBoardService
   require 'yaml'
-  CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),"../config/dashboard.yml")))
-  def self.push_to_couch
+  CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
+  "../config/dashboard.yml")))
+
+  def self.push_to_couch(data)
 
      auth_token = RestClient.post(CONFIG['credentials']['url'],
                                   :username =>CONFIG['credentials']['username'],
@@ -14,5 +16,8 @@ module SurveillanceDashBoardService
                                  :content_type=>:json)
    rescue RestClient::Exception => e
      raise e.http_body
+  end
+  def self.hello
+    raise "Hello World".inspect
   end
 end
