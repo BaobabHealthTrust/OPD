@@ -18,6 +18,9 @@ module DashBoardService
      raise e.http_body
   end
   def self.hello
-    raise "Hello World".inspect
+    patient_id = Observation.last.person_id
+    current_date = Observation.last.obs_datetime
+    facility = Location.current_health_center.name rescue 'Location Not Set'
+    raise facility.inspect
   end
 end

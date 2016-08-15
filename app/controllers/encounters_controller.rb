@@ -1,3 +1,4 @@
+require "dashboard_service.rb"
 class EncountersController < GenericEncountersController
 
 	#call method to send data to dashboard application after_filter
