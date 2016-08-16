@@ -49,7 +49,6 @@ module DashBoardService
   			:symptoms=>{},
   			:diagnosis => pull_diagnoses(observation)}
     end
-    #raise hash.inspect
     push_to_couch(hash)
   end
 
@@ -94,7 +93,7 @@ module DashBoardService
       diag_hash = {:full_name => diagnosis_full_name, :short_name => diagnosis_short_name}
       diagnoses.push diag_hash
     end
-    diagnoses
+   diagnoses
   end
 
 end
