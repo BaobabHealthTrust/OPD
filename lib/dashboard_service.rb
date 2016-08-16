@@ -49,7 +49,7 @@ module DashBoardService
   			:symptoms=>{},
   			:diagnosis => pull_diagnoses(observation)}
     end
-    raise hash.inspect
+    #raise hash.inspect
     push_to_couch(hash)
   end
 
