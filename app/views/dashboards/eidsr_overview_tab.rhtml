@@ -21,18 +21,28 @@
            <td rowspan="2" width ="50%" padding ="0">
                      <div id="qqq">
                        <ul class="list" style="height:295px; border-radius: 15px;">
-                         <!--% @underline_alerts.each do |u|%-->
-                         <% @underline_diseases.each do |u|%>
-                                 <li class="data <%= cycle('even', 'odd') %>" >
-                                   <div class="noneWarnings"><%=h u.squish%></div>
-                                 </li>
+                         <table border="0"; align="center"; width="100%">
+                           <tr bgcolor="#e7e7e7">
+                             <th>Underying disease</th>
+
+                             <th>Date diagonised</th>
+                           </tr>
+                             <% @underline_diseases.each do |u|%>
+                                 <!--li class="data <%= cycle('even', 'odd') %>" -->
+                                   <tr align="center">
+                                     <td><%=h u.name%></td>
+
+                                     <td><%=h u.obs_datetime.strftime("%Y/%m/%d")%></td>
+                                   </tr>
+                                   <!--div class="noneWarnings"><!--%=h u.squish%></div-->
+                                 <!--/li -->
                              <% end %>
-                         <!--% if @underline_alerts.blank? %-->
                          <% if @underline_diseases.blank? %>
                              <li class="data even">
                                <div class="alert">There are no underline disease alerts for this patient</div>
                              </li>
                          <% end %>
+                         </table>
                        </ul>
                      </div>
                    </td>

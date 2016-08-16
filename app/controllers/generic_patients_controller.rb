@@ -656,7 +656,7 @@ end
 @pweight =  p.value_text
 end
 
-@underline_diseases = UnderlinedDiseasesAlerts.underline_diseases_set(@patient.id)
+@underline_diseases = Encounter.underline_diseases_set(@patient.id)
 
     render :template => 'dashboards/eidsr_overview_tab', :layout => false
   end
