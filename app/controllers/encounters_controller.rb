@@ -2,10 +2,11 @@ require "dashboard_service.rb"
 class EncountersController < GenericEncountersController
 
 	#call method to send data to dashboard application after_filter
-  after_filter :only => [:create_complaints, :create_obs, :void,:create] do
-  	DashBoardService.hello
+  after_filter :only => [:create_complaints, :create_obs, :void,:create] do |c|
+    c.instance_eval do
+    	DashBoardService.push_to_dashboard(params)
+    end
 	end
-	
 	def new
 
     #raise @priority_signs_paeds.inspect
