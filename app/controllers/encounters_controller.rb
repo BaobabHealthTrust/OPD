@@ -2,12 +2,13 @@ require "dashboard_service.rb"
 class EncountersController < GenericEncountersController
 
 	#call method to send data to dashboard application after_filter
+
   after_filter :only => [:create_complaints, :create_obs, :void,:create] do |value|
   	value.instance_eval do 
   	  DashBoardService.hello(params)
   	end
 	end
-	
+
 	def new
 
     #raise @priority_signs_paeds.inspect

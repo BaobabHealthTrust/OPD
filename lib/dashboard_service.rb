@@ -17,6 +17,7 @@ module DashBoardService
    rescue RestClient::Exception => e
      raise e.http_body
   end
+
   def self.hello(params)
     observation = params[:observations]
     raise pull_diagnoses(observation).inspect
@@ -63,4 +64,5 @@ module DashBoardService
     end
     diagnoses
   end
+
 end
