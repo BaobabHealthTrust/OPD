@@ -169,6 +169,15 @@
   </body>
 
   <script>
+    if(window.location.pathname=="/report/process_la_report"){
+        $("#print").css("display","none");
+        var print_label = document.createElement("button");
+        print_label.id = "print_label";
+        print_label.innerHTML = "<span>Print Label</span>";
+        print_label.setAttribute("style","position:relative,float:right");
+        print_label.setAttribute("onmousedown","printLabel()");
+        $("#buttons").append(print_label);
+    }
     for (i=0; i<document.getElementsByTagName("th").length; i++){
 
       if (document.getElementsByTagName("td").length > 1) {

@@ -516,29 +516,7 @@
     <div id="cover"></div>
 
 
-    <script type="text/javascript">
-<% @preferred_diagnoses.each do |concept_id, values| %>
-    selectedHashData['<%= concept_id %>'] = {name: '<%= values[:name] %>'};
-<% end %>
 
-  $('html').click(function() {
-    $("#keypad").hide();
-    $("#popup-div").hide();
-    $("#cover").hide();
-  });
-
-  $('#keypad').click(function(event){
-    event.stopPropagation();
-  });
-
-  $('#popup-div').click(function(event){
-    event.stopPropagation();
-  });
-
-  $('#search').click(function(event){
-    event.stopPropagation();
-  });
-    </script>
 
   </body>
 

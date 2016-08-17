@@ -11,6 +11,7 @@ if current_user.admin?
   @reports << ['Create user',"/user/new"]
   @reports << ['Edit user',"/user/select_user"]
   @reports << ['Set user roles',"/user/users"]
+  @reports << ['Print User Barcode',"/user/barcodes"]
   @reports << ['Set related roles',"/user/set_role_role/#{current_user.id}"]
   if current_user.program_manager?
     @reports << ['View users',"/user/view_users"]

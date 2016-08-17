@@ -90,6 +90,7 @@ class GenericApplicationController < ActionController::Base
                                  FROM location_tag
                                  WHERE name = 'Workstation Location'))
              ORDER BY name ASC").collect{|name| name.send(field_name)} rescue []
+  
   end
 
   def site_prefix

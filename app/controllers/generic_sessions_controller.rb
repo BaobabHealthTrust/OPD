@@ -2,27 +2,42 @@ class GenericSessionsController < ApplicationController
 	skip_before_filter :authenticate_user!, :except => [:location, :update]
 	skip_before_filter :location_required
 
+
 	def new
 	end
 
 
 	def create
-		user = User.authenticate(params[:login], params[:password])
-		sign_in(:user, user) if user && user.status == 'active'
-		authenticate_user! if user && user.status == 'active' 
-		session[:return_uri] = nil
-		if user_signed_in?
-			current_user.reset_authentication_token
-			#my_token = current_user.authentication_token
-			#User.find_for_authentication_token()
-			#self.current_user = user
-      session[:username] = params[:login]
-      session[:password] = params[:password]
-			redirect_to '/clinic'
+		if !params[:login_barcode].empty?
+				user = User.decode_user_barcode(params[:login_barcode])
+				if user
+					params[:login]		= user.first.username
+					params[:password]	= user.first.password
+
+					user = User.check(params[:login], params[:password])
+					sign_in(:user, user) if user && user.status == 'pending'
+					authenticate_user! if user && user.status == 'pending'
+					#raise user.status.inspect
+					session[:return_uri] = nil
+				end
 		else
-			note_failed_signin
-			@login = params[:login]
-			render :action => 'new'
+				#raise params[:password].inspect
+				user = User.authenticate(params[:login], params[:password])
+				sign_in(:user, user) if user && user.status == 'active'
+				authenticate_user! if user && user.status == 'active' 
+				session[:return_uri] = nil
+				
+		end
+
+		if user_signed_in?
+
+		     	session[:username] = params[:login]
+		      	session[:password] = params[:password]
+				redirect_to '/clinic'
+		else
+				note_failed_signin
+				@login = params[:login]
+				render :action => 'new'
 		end
 	end
 
@@ -39,10 +54,12 @@ class GenericSessionsController < ApplicationController
 		# First try by id, then by name
 		location = Location.find(params[:location]) rescue nil
 		location ||= Location.find_by_name(params[:location]) rescue nil
+		#raise generic_locations.inspect
 
 		valid_location = (generic_locations.include?(location.name)) rescue false
-
+		
 		unless location and valid_location
+
 			flash[:error] = "Invalid workstation location"
 
 			@login_wards = (CoreService.get_global_property_value('facility.login_wards')).split(',') rescue []
@@ -67,6 +84,8 @@ class GenericSessionsController < ApplicationController
 		flash[:notice] = "You have been logged out."
 		redirect_back_or_default('/')
 	end
+
+
 
 	protected
 		# Track failed login attempts

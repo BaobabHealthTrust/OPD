@@ -38,6 +38,7 @@ class ClinicController < GenericClinicController
       ['/clinic/users','User accounts/settings'],
       ['/clinic/management','Drug Management'],
       ['/clinic/location_management','Location Management']
+
     ]
     @landing_dashboard = 'clinic_administration'
     #    render :template => 'clinic/administration', :layout => 'clinic'
@@ -59,7 +60,8 @@ class ClinicController < GenericClinicController
       #["Shift Report", "/cohort_tool/opd_menu?report_name=shift_report"],
       #["Graphical Reports", "/clinic/reports_tab_graphs"],
       ["Update DHIS2", "/report/update_dhis"],
-      ["Malaria Report", "/report/malaria_report_menu"]
+      ["Malaria Report", "/report/malaria_report_menu"],
+      ["LA Report", "/report/la_report_menu"]
     ]
     #if allowed_hiv_viewer
     #@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
@@ -117,7 +119,9 @@ class ClinicController < GenericClinicController
       ["show column prescription Interface", "/properties/creation?value=use_column_interface"],
       ["show Tasks button on patient dashboard", "/properties/creation?value=show_tasks_button"],
       ["Point of care system?", "/properties/creation?value=point_of_care_system"],
-      ["Activate Malaria Feature", "/properties/creation?value=is_this_malaria_enabled_facility?"]
+      ["Activate Malaria Feature", "/properties/creation?value=is_this_malaria_enabled_facility?"],
+      ["Shares Database with BART2?", "/properties/creation?value=does_this_system_share_database_with_bart?"],
+      ["Do you print specimen labels?", "/properties/creation?value=specimen_label_print?"],
     ]
     render :layout => false
   end

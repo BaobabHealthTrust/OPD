@@ -235,7 +235,10 @@ class GenericClinicController < ApplicationController
     @reports =  [
       ['/clinic/users_tab','User Accounts/Settings'],
       ['/clinic/location_management_tab','Location Management'],
+      ['/clinic/system_configurations','View System Configuraton'],
       ['/patients/patient_merge','Merge Patients']
+      
+
     ]
     
     if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")
@@ -306,6 +309,28 @@ class GenericClinicController < ApplicationController
     @user = User.find(current_user.user_id).name rescue ""
 
     render :template => 'clinic/lab_tab.rhtml' , :layout => false
+  end
+
+  def system_configurations
+    @current_location = Location.current_health_center.name
+    @malaria_enable_property = GlobalProperty.find_by_property("malaria.enabled.facility").property_value.to_s == "true"rescue "Not Set"
+    @ask_life_threatening_condition_property = GlobalProperty.find_by_property("ask.life.threatening.condition.questions").property_value.to_s == "true" rescue "Not Set"
+    @complaints_before_diagnosis_property = GlobalProperty.find_by_property("ask.complaints.before_diagnosis").property_value.to_s == "true" rescue "Not Set"
+    @complaint_under_vitals_property = GlobalProperty.find_by_property("ask.complaints.under.vitals").property_value.to_s == "true" rescue "Not Set"
+    @social_determinats_property = GlobalProperty.find_by_property("ask.social.determinants.questions").property_value.to_s == "true" rescue "Not Set"
+    @social_history_property = GlobalProperty.find_by_property("ask.social.history.questions").property_value.to_s == "true" rescue "Not Set"
+    @triage_category_property = GlobalProperty.find_by_property("ask.triage.category.questions").property_value.to_s == "true" rescue "Not Set"
+    @ask_vitals_before_property = GlobalProperty.find_by_property("ask.vitals.questions.before.diagnosis").property_value.to_s == "true" rescue "Not Set"
+    
+    @confirm_patience_creation_property = GlobalProperty.find_by_property("confirm.before.creating").property_value.to_s == "true" rescue 'Not Set'
+    @print_specimen_label_property = GlobalProperty.find_by_property("specimen.label.print").property_value.to_s == "true" rescue "Not Set"
+    @manage_roles_property = nil
+    @point_of_care_property = GlobalProperty.find_by_property("confirm.before.creating").property_value.to_s == "true" rescue 'Not Set'
+    @share_database_property = GlobalProperty.find_by_property("database.sharing").property_value.to_s == "true" rescue 'Not Set'
+    @show_lab_results_property = GlobalProperty.find_by_property("show.lab.results").property_value.to_s == "true" rescue 'Not Set'
+    @show_task_button_property = GlobalProperty.find_by_property("show.tasks.button").property_value.to_s == "true" rescue 'Not Set'
+    @show_column_interface_property = GlobalProperty.find_by_property("use.column.interface").property_value.to_s == "true" rescue 'Not Set'
+    render :layout => 'config'
   end
 
   def preferred_diagnosis

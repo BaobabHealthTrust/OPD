@@ -236,6 +236,8 @@ class ApplicationController < GenericApplicationController
   def confirm_before_creating                                                   
     property = GlobalProperty.find_by_property("confirm.before.creating")       
     property.property_value == 'true' rescue false                              
-  end                                                                           
+  end 
+
+                                                                            
      
 end

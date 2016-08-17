@@ -75,13 +75,14 @@
       }
 
     }
-    window.setTimeout("moveNext()", checkForBarcodeTimeout);
+    //window.setTimeout("moveNext()", checkForBarcodeTimeout);
   }
   
-  window.addEventListener("load", loadBarcodePage, false);
+  //window.addEventListener("load", loadBarcodePage, false);
 
   function updateAccessionNumber(id){
-    accesionNumber = $("barcode").value;
+    accesionNumber = $("barcode").value.split(":")[1];
+    console.log($("barcode"));
     $(id).value = accesionNumber;
   }
 
@@ -103,8 +104,8 @@
   }
   
 </script>
-<style>
-  .barcode{
+<style type="text/css">
+  /*.barcode{
     position: absolute;
     left: 26%;
     width: 5%;
@@ -124,9 +125,8 @@
   .messageBar {
     width: 500px !Important;
     left: 500px !Important;
-  }
+  }*/
 </style>
-
 
 <form action="/encounters/create" method='post'>
 
@@ -135,31 +135,39 @@
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
-  <%= text_field_tag :accession_number, '', {
-    :tt_onLoad => "formatBarcodeSpace(); changeDefultSettings();",
-    :id => 'barcode',
-    :class => 'touchscreenTextInput',
-    :field_type => 'number',
-    :tt_pageStyleClass => "Numeric NumbersOnly",
-    :helpText => "Scan Accession Number (#{@required_accession_number}) for #{@malaria_test_name}",
-    :style => 'position:absolute'
+<%#= text_field_tag :accession_number, '', {
+:tt_onLoad => "formatBarcodeSpace(); changeDefultSettings();",
+:id => 'barcode',
+:class => 'touchscreenTextInput',
+:field_type => 'number',
+:tt_pageStyleClass => "Numeric NumbersOnly",
+:helpText => "Scan Accession Number (#{@required_accession_number}) for #{@malaria_test_name}",
+:style => 'position:absolute'
+} %>
+
+  <%= select_tag "accession_number", options_for_select(@available_accesion_number_options),
+    {
+    :id => "barcode",
+    :tt_pageStyleclass => "LongListSelect",
+    :helpText => "Select Recent Tests Below"
   } %>
 
   <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@microscopy_options),
     {
     :id => "microscopy",
-    :tt_onLoad => "updateAccessionNumber('microscopy_'); resetDefaultSettings();",
+    :tt_onLoad => "updateAccessionNumber('microscopy_');",
     :accession_number => '',
-    :condition => "'#{@malaria_test_name}'.match(/MICROSCOPY/i) && parseInt($('barcode').value) == parseInt(#{@required_accession_number})",
+    :condition => "$('barcode').value.split(':')[0].match(/MICROSCOPY/i)",
     :helpText => "Select Microscopy Results Below"
   } %>
+
 
   <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@malaria_rdt_options),
     {
     :id => "mRDT",
-    :tt_onLoad => "updateAccessionNumber('mRDT_'); resetDefaultSettings();",
+    :tt_onLoad => "updateAccessionNumber('mRDT_');",
     :accession_number => '',
-    :condition => "'#{@malaria_test_name}'.toUpperCase().match(/MRDT/i) && parseInt($('barcode').value) == parseInt(#{@required_accession_number})",
+    :condition => "$('barcode').value.split(':')[0].match(/MRDT/i)",
     :helpText => "Select mRDT Results Below"
   } %>
 

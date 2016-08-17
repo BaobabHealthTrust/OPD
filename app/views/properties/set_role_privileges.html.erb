@@ -59,4 +59,7 @@
       :id => 'activities' ,
       :tt_onLoad => 'showSelected();',
       :multiple =>  true %>
+  <%if params[:view_configuration].present? && params[:view_configuration]=="true" %>
+      <%= hidden_field_tag "redirect", 'system_configurations' %>
+  <%end%>
 </form>
