@@ -237,6 +237,8 @@ class GenericClinicController < ApplicationController
       ['/clinic/location_management_tab','Location Management'],
       ['/clinic/system_configurations','View System Configuraton'],
       ['/patients/patient_merge','Merge Patients']
+      
+
     ]
     
     if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")

@@ -55,10 +55,25 @@ class User < ActiveRecord::Base
 		end
 	end
 
+	def self.check(username, password)
+		user = User.find_for_authentication(:username => username)
+		if !user.blank?
+			user.valid_check?(password) ? user : nil
+
+		end
+	end
+
+	def valid_check?(password)
+		return false if encrypted_password.blank?
+	  	is_valid = password == encrypted_password
+	end
+
+
 	def valid_password?(password)
 		return false if encrypted_password.blank?
 	  	is_valid = Digest::SHA1.hexdigest("#{password}#{salt}") == encrypted_password	|| encrypt(password, salt) == encrypted_password || Digest::SHA512.hexdigest("#{password}#{salt}") == encrypted_password
 	end
+
 
 	def first_name
 		self.person.names.first.given_name rescue ''
@@ -173,6 +188,31 @@ class User < ActiveRecord::Base
 	def self.current=(user)
 		Thread.current[:user] = user
 	end
+
+	 def self.decode_hash(login_barcode)
+		    space = GlobalProperty.find_by_property('server.secret_name_space').property_value.to_i
+
+		    login = ''
+		    login_array = login_barcode.scan(/./)
+		    position = space - 1
+		    6.times{
+		      login += login_array[position] rescue nil
+		      position += space
+		      
+		    }
+		   
+		    return User.find(:first, :conditions => {:username => login})
+  	end
+
+  	 def self.decode_user_barcode(login_barcode)
+  	 	login_barcode = login_barcode.gsub(/\$$/, '')
+    	password = login_barcode[-5..-1] || login_barcode
+    	username = login_barcode.sub! password, ''
+    	user = User.find_by_sql("SELECT * FROM users Where username = '" + username + "' AND password LIKE '%" + password +"%'")
+
+  	end
+
+
 
   def status
   user_status = self.user_activation.status rescue ''
