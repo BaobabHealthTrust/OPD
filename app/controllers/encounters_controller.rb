@@ -2,9 +2,12 @@ require "dashboard_service.rb"
 class EncountersController < GenericEncountersController
 
 	#call method to send data to dashboard application after_filter
-  after_filter :only => [:create_complaints, :create_obs, :void,:create] do |c|
+  after_filter :only => [:create_complaints, :create, :void] do |c|
     c.instance_eval do
-    	DashBoardService.push_to_dashboard(params)
+      encounters_to_process = ["NOTES","OUTPATIENT DIAGNOSIS"]
+      if encounters_to_process.include? params[:encounter][:encounter_type]
+    	  DashBoardService.push_to_dashboard(params)
+      end
     end
 	end
 	def new
