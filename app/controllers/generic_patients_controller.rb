@@ -640,23 +640,14 @@ class GenericPatientsController < ApplicationController
       @programs = restriction.filter_programs(@programs)
     end
 
-#		underline_diseases_alerts(@patient.id) rescue nil
+ @previousweight = UnderlinedDiseasesAlerts.previous_body_weight(@patient.id)
+ @previousweight.each do |p|
+ @pweight =  p.value_text
+ end
 
-=begin
-@previousweight = Encounter.previous_body_weight(@patient.id)
-@previousweight.each do |p|
-@pweight =  p.value_text
-end
+@underline_diseases = UnderlinedDiseasesAlerts.underline_diseases_set(@patient.id)
 
-@underline_diseases = Encounter.underline_diseases_set(@patient.id)
-=end
-
-@previousweight = UnderlinedDiseasesAlerts.previous_body_weight(@patient.id)
-@previousweight.each do |p|
-@pweight =  p.value_text
-end
-
-@underline_diseases = Encounter.underline_diseases_set(@patient.id)
+#@underline_diseases = Encounter.underline_diseases_set(@patient.id)
 
     render :template => 'dashboards/eidsr_overview_tab', :layout => false
   end
