@@ -24,7 +24,7 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
     gender = person.gender
 	  zone =  CoreService.get_global_property_value("zone")
     facility = Location.current_health_center.name rescue 'Location Not Set'
-    obs_date =  enc_params[:encounter][:encounter_datetime].to_date.to_s
+    obs_date =  enc_params[:encounter][:encounter_datetime].to_date
 
     #store common information
     hash[:general_data] = {:national_id=>national_id,:facility=>facility,
@@ -38,10 +38,11 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
   	 hash[:diagnosis] = pull_diagnoses(observations,obs_date,national_id,
                                        patient_id,age,gender)
     end
+
     push_to_couch(hash)
   end
 
-  def self.pull_diagnoses(observations,obs_date,national_id,patient_id,age,gender)
+  def self.pull_diagnoses(observation,obs_date,national_id,patient_id,age,gender)
     diagnoses = []
     concept_names = ['PRIMARY DIAGNOSIS','DETAILED PRIMARY DIAGNOSIS',
       'SECONDARY DIAGNOSIS','DETAILED SECONDARY DIAGNOSIS', 'SPECIFIC SECONDARY DIAGNOSIS',
@@ -51,7 +52,7 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
     diagnosis_obs = Observation.find(:all,
                                      :conditions =>["concept_id IN (?) AND
                                       DATE(obs_datetime) = ? AND person_id = ?",
-                                      diagnosis_concept_ids,obs_date.to_date,patient_id])
+                                      diagnosis_concept_ids,obs_date,patient_id])
     diagnosis_obs.each do |obs|
       next if obs.value_coded.blank? #Interested only in coded answers
       next if national_id.blank?
