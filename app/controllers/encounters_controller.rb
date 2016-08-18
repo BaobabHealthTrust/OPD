@@ -5,7 +5,7 @@ class EncountersController < GenericEncountersController
   after_filter :only => [:create_complaints, :create, :void] do |c|
     c.instance_eval do
       encounters_to_process = ["NOTES","OUTPATIENT DIAGNOSIS"]
-      if encounters_to_process.include? params[:encounter][:encounter_type]
+      if encounters_to_process.include? params[:encounter][:encounter_type_name]
     	  DashBoardService.push_to_dashboard(params)
       end
     end
