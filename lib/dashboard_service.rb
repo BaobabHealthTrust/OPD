@@ -31,7 +31,7 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
                         :obs_date=>obs_date,:gender=>gender,:age=>age,:zone=>zone}
 
     if enc_params[:encounter][:encounter_type_name] == "NOTES"
-      hash[:symptoms] = enc_params[:complaints].to_a.reject!{|s| s==""}
+      hash[:symptoms] = enc_params[:complaints].to_a.reject!{|s| s==""} #remove blank string
     end
     if enc_params[:encounter][:encounter_type_name] == "OUTPATIENT DIAGNOSIS"
      observations = enc_params[:observations]
@@ -41,7 +41,7 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
     push_to_couch(hash)
   end
 
-  def self.pull_diagnoses(observation,obs_date,national_id,patient_id,age,gender)
+  def self.pull_diagnoses(observations,obs_date,national_id,patient_id,age,gender)
     diagnoses = []
     concept_names = ['PRIMARY DIAGNOSIS','DETAILED PRIMARY DIAGNOSIS',
       'SECONDARY DIAGNOSIS','DETAILED SECONDARY DIAGNOSIS', 'SPECIFIC SECONDARY DIAGNOSIS',
@@ -54,8 +54,6 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
                                       diagnosis_concept_ids,obs_date.to_date,patient_id])
     diagnosis_obs.each do |obs|
       next if obs.value_coded.blank? #Interested only in coded answers
-      parent_obs = Observation.find(:all,:conditions=>["obs_group_id =?",obs.id])
-      next unless parent_obs.blank? #Not interested in parent obs that has child obs
       next if national_id.blank?
       diagnosis_full_name = Concept.find(obs.value_coded).fullname() rescue''
       diagnoses.push diagnosis_full_name
