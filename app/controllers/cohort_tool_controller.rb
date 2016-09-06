@@ -1278,7 +1278,7 @@ class CohortToolController < ApplicationController
     end
     render :layout => "opd_cohort"
   end
-  
+
 
   def opd_general_graph
   	@report_type = params[:selType]
@@ -1443,13 +1443,13 @@ class CohortToolController < ApplicationController
  		@details << ["Pud", report.pud]
 
  		@details << ["Gastritis",report.gastritis]
-    
+
     @current_location_name = Location.current_health_center.name
     if @type == "diagnoses" || @type == "diagnoses_adults" || @type == "diagnoses_paeds"
       @general = report.general
     end
-    
-    render :layout => "menu"		
+
+    render :layout => "menu"
   end
 
   def opd_menu
@@ -1531,7 +1531,7 @@ class CohortToolController < ApplicationController
       @total_surgical_patients+=encounters.map{|e| e.patient_id}.uniq.size
     }
     @surgical_encounter_ids = @surgical_encounter_ids.flatten
-    
+
     pyschiatric_concepts = ['chronic psychiatric disease', 'psychiatric disorder']
     @total_psychiatric_patients = 0
     @psychiatric_encounter_ids = []
@@ -1584,7 +1584,7 @@ class CohortToolController < ApplicationController
 
     @short_stay_admission_encounters_ids = @short_stay_admission_encounters_ids.flatten
     @short_stay_patient_ids = @short_stay_patient_ids.flatten.uniq
-    
+
     #to count total discharges for short stay ward patients
     @short_stay_discharges_encounters_ids = []
     discharge_patient_id = EncounterType.find_by_name("DISCHARGE PATIENT").encounter_type_id
@@ -1592,7 +1592,7 @@ class CohortToolController < ApplicationController
         encounter_type = ?', @short_stay_patient_ids, discharge_patient_id])
     @short_stay_discharges_encounters_ids = short_discharge_encounters.map(&:id).flatten
     @short_stay_discharges = short_discharge_encounters.map{|e| e.patient_id}.uniq.count
-    
+
     @other_admissions = []
     @other_admissions_encounters_ids = []
     other_admissions = Encounter.find(:all, :joins => [:type, :observations],\
@@ -1615,7 +1615,7 @@ class CohortToolController < ApplicationController
           ward.to_s])
       @medical_encounters_ids << encounters.map(&:id)
       @total_medical_admissions+=encounters.map{|e| e.patient_id}.uniq.size
-        
+
     }
     @medical_encounters_ids = @medical_encounters_ids.flatten
     #raise @medical_encounters_ids.inspect
@@ -1645,7 +1645,7 @@ class CohortToolController < ApplicationController
       @obs_gynae_admissions+=encounters.map{|e| e.patient_id}.uniq.size
     }
     @obs_gynae_encounter_ids = @obs_gynae_encounter_ids.flatten
-    
+
     transfer_out_encounter_id = EncounterType.find_by_name('TRANSFER OUT').id
     @brought_in_dead = []
     @brought_in_dead_encounters_ids = []
@@ -1669,7 +1669,7 @@ class CohortToolController < ApplicationController
     @assesment_area_dealths = @assesment_area_dealths.uniq
 
     #to find short stay ward dealths we need first to get encounters of the patients admitted in short stay wards
-		
+
     encounters = Encounter.find(:all, :joins => [:type], :conditions => ['encounter_type_id =? AND
         encounter_datetime >= ? AND encounter_datetime <= ? AND patient_id IN (?)', transfer_out_encounter_id, @start_time,
         @end_time, @short_stay_patient_ids ])
@@ -1690,7 +1690,7 @@ class CohortToolController < ApplicationController
     @current_location_name = Location.current_health_center.name
     category = params[:category]
     encounter_ids = params[:encounter_ids]
-    
+
     if category.upcase == 'MEDICAL'
       @report_name = 'Medical ward admission'
     elsif category.upcase == 'SURGICAL'
@@ -1756,7 +1756,7 @@ class CohortToolController < ApplicationController
     @medical_patients = @medical_patients.uniq
     render :layout => 'report'
   end
-  
+
   def count_patient_with_concept(concept, start_date, end_date)
 
     condition_string = "name LIKE \"#{concept}\" "
@@ -1773,7 +1773,7 @@ class CohortToolController < ApplicationController
       ).map{|e| e. patient_id}.uniq.size
 	end
 
-	
+
 	def total_registration
 
     @report_name = params[:report_name]
@@ -1858,7 +1858,7 @@ class CohortToolController < ApplicationController
       peoples.each do | person_id |
         person = Person.find(person_id)
         patient_bean = PatientService.get_patient(person)
-=begin        
+=begin
         name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
         @registered << [name, person.birthdate, person.gender,
         person.date_created.to_date,
@@ -1973,7 +1973,7 @@ class CohortToolController < ApplicationController
           end
 
         end
-						
+
         if (PatientService.age(person).to_i >= 50)
           if(PatientService.sex(person) == 'Male')
             @peoples['Over50YM'] +=1
@@ -2110,7 +2110,7 @@ class CohortToolController < ApplicationController
 
       @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
       @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
-      
+
       concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["Additional diagnosis","Diagnosis",
             "primary diagnosis","secondary diagnosis"]]).map(&:concept_id)
 
@@ -2234,7 +2234,7 @@ class CohortToolController < ApplicationController
 
 
     def patient_level_data
-  
+
       @report_name = params[:report_name]
       @age_groups = params[:age_groups]
       @logo = CoreService.get_global_property_value('logo').to_s
@@ -2430,11 +2430,15 @@ class CohortToolController < ApplicationController
       end_year = params[:end_year]
       end_month = params[:end_month]
       end_day = params[:end_day]
-      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      # @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+      # @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+
+      @start_date = params[:start_date]
+      @end_date = params[:end_date]
+
       @referral_locations = Hash.new(0)
-      @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
-      @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
+#      @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+#      @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
       @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
       report_trasfer_outs_and_refrerrals(@report_name)
       render :layout => "report"
@@ -2541,7 +2545,7 @@ class CohortToolController < ApplicationController
       Observation.find(:all, :include=>{:encounter=>{:type=>{}}, :concept=>{:concept_names=>{}}},
         :conditions => ["encounter_type.name = ? AND concept_name.name = ?
 											 									AND encounter.encounter_datetime >= TIMESTAMP(?) AND encounter.encounter_datetime  <= TIMESTAMP(?)",
-          report_encounter_name, obs_concept_name, @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59')]). each do |obs|
+          report_encounter_name, obs_concept_name, @start_date, @end_date]). each do |obs|
         @referral_locations[Location.find(obs.to_s(["short", "order"]).to_s.split(":")[1].to_i).name]+=1
       end
     end
