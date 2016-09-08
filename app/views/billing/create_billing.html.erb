@@ -1,0 +1,21 @@
+<form id='sessions' action="/sessions/create" method='post'>
+  <label for='account_number'>Account Number</label>
+  <%= text_field_tag(:login, nil, :helpText => 'Enter account number',
+                     :textCase => 'mixed', :field_type => 'text',
+                     :tt_onLoad => "inform(); barcodeId = 'touchscreenInput0'; moveNext(); focusForBarcodeInput();") %>
+  <br>
+
+  <label for='start_date'>Start Date</label>
+  <%= text_field_tag(:start_date, nil, :helpText => 'Enter start date',
+                         :textCase => 'lower', :field_type => 'date',
+                         :tt_onLoad => "inform(); barcodeId = 'touchscreenInput1';") %>
+  <br>
+
+  <label for='end_date'>End Date</label>
+  <%= text_field_tag(:end_date,   nil, :helpText => 'Enter end date',
+                     :textCase => 'lower', :field_type => 'date',
+                     :tt_onLoad => "inform(); barcodeId = 'touchscreenInput1';") %>
+  <br>
+
+  <%= submit_tag value='Submit' %>
+</form>

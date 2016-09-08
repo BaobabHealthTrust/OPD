@@ -1,0 +1,55 @@
+<script>
+    var covers = {};
+        <% (@insurances || {}).each do |i, insurances| %>
+            <% (insurances || []).each do |insurance| %>
+            if(covers[<%= i %>] === undefined) {
+              covers[<%= i %>] = [];
+            }
+              covers[<%= i %>].push({
+                cover_name: "<%= insurance[:cover_name] %>",
+                cover_id: <%= insurance[:cover_id] %>
+              })
+        <%  end
+        end %>
+
+    function clearCovers() {
+            var insurance_cover = document.getElementById('insurance_cover');
+            var len = insurance_cover.options.length;
+            for(var i = 0; i < len; i++) {
+                insurance_cover.remove(insurance_cover.options[i]);
+                //len = insurance_cover.options.length;
+            }
+    }
+
+    function getCovers(e) {
+        var insurance_id = document.getElementById('financial_type').value;
+        for(var i = 0; i < covers[insurance_id].length; i++) {
+            var option = document.createElement('option');
+            option.setAttribute('value',covers[insurance_id][i]["cover_id"]);
+            option.id = 'cover_option',
+            option.innerHTML = covers[insurance_id][i]["cover_name"];
+            document.getElementById('insurance_cover').appendChild(option);
+        }
+    }
+</script>
+
+<form id='sessions' action="/sessions/create" method='post'>
+  <select style='width: 100%' name='financial_type' id='financial_type'
+              helptext='Choose Financial Type' nested="true">
+    <option></option>
+    <% (@insurances || {}).each do |i, insurances| %>
+        <% (insurances || []).each do |insurance| %>
+              <option value="<%= i %>"><%= insurance[:insurance_name] %></option>
+        <%    break
+           end
+    end %>
+  </select>
+  <br>
+
+  <select style='width: 100%' name='insurance_cover' id='insurance_cover'
+          tt_onLoad = 'clearCovers(); getCovers(this);'  helptext='Select Insurance Cover'
+          nested="true" >
+  </select>
+
+  <%= submit_tag value='Submit' %>
+</form>
