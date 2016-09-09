@@ -1,21 +1,34 @@
 <form id='sessions' action="/sessions/create" method='post'>
-  <label for='account_number'>Account Number</label>
-  <%= text_field_tag(:login, nil, :helpText => 'Enter account number',
-                     :textCase => 'mixed', :field_type => 'text',
+    <label for='account_number'>Account Number</label>
+    <%= text_field_tag(:login, nil, :helpText => 'Enter account number',
+                     :textCase => 'mixed', :field_type => 'text', :id => 'account_number',
                      :tt_onLoad => "inform(); barcodeId = 'touchscreenInput0'; moveNext(); focusForBarcodeInput();") %>
-  <br>
+    <br>
 
-  <label for='start_date'>Start Date</label>
-  <%= text_field_tag(:start_date, nil, :helpText => 'Enter start date',
-                         :textCase => 'lower', :field_type => 'date',
-                         :tt_onLoad => "inform(); barcodeId = 'touchscreenInput1';") %>
-  <br>
+    <label for='start_date'>Start Date</label>
+    <%= text_field_tag(:start_date, nil, :helpText => 'Enter start date',
+                         :textCase => 'lower', :field_type => 'date', :id => 'start_date') %>
+    <br>
 
-  <label for='end_date'>End Date</label>
-  <%= text_field_tag(:end_date,   nil, :helpText => 'Enter end date',
-                     :textCase => 'lower', :field_type => 'date',
-                     :tt_onLoad => "inform(); barcodeId = 'touchscreenInput1';") %>
-  <br>
+    <label for='end_date'>End Date</label>
+    <%= text_field_tag(:end_date,   nil, :helpText => 'Enter end date',
+                     :textCase => 'lower', :field_type => 'date', :id => 'end_date') %>
+    <br>
 
-  <%= submit_tag value='Submit' %>
+    <label for='account_summary'>Summary</label>
+    <%= text_field_tag :summary, nil, { :tt_onLoad => "loadSummary();hideKeyBoard();", :optional => "true", :tt_pageStyleClass => "NoControls", :helpText => "Summary" } %>
+    <br>
+
+    <%= submit_tag value='Submit' %>
 </form>
+
+<script type="text/javascript">
+    function loadSummary() {
+        var display = "<div><span class='title'>Financial Type: " + $('account_number').value + "</span></div>";
+        display += "<div><span class='title'>Insurance Cover: " + $('start_date').value + "</span></div>";
+        display += "<div><span class='title'>Insurance Cover: " + $('end_date').value + "</span></div>";
+
+        $('inputFrame'+tstCurrentPage).innerHTML = '<div id="summary_field">' + display + '</div>' ;
+        $("clearButton").style.display = "none";
+    }
+</script>

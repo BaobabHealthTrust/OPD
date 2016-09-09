@@ -34,22 +34,36 @@
 </script>
 
 <form id='sessions' action="/sessions/create" method='post'>
-  <select style='width: 100%' name='financial_type' id='financial_type'
+    <select style='width: 100%' name='financial_type' id='financial_type'
               helptext='Choose Financial Type' nested="true">
-    <option></option>
-    <% (@insurances || {}).each do |i, insurances| %>
-        <% (insurances || []).each do |insurance| %>
-              <option value="<%= i %>"><%= insurance[:insurance_name] %></option>
-        <%    break
-           end
-    end %>
-  </select>
-  <br>
+        <option></option>
+        <% (@insurances || {}).each do |i, insurances| %>
+            <% (insurances || []).each do |insurance| %>
+                <option value="<%= i %>"><%= insurance[:insurance_name] %></option>
+            <%  break
+            end
+        end %>
+    </select>
+    <br>
 
-  <select style='width: 100%' name='insurance_cover' id='insurance_cover'
+    <select style='width: 100%' name='insurance_cover' id='insurance_cover'
           tt_onLoad = 'clearCovers(); getCovers(this);'  helptext='Select Insurance Cover'
           nested="true" >
-  </select>
+    </select>
 
-  <%= submit_tag value='Submit' %>
+    <label for='billing_summary'>Summary</label>
+    <%= text_field_tag :summary, nil, { :tt_onLoad => "loadSummary();hideKeyBoard();", :optional => "true", :tt_pageStyleClass => "NoControls", :helpText => "Summary" } %>
+    <br>
+
+    <%= submit_tag value='Submit' %>
 </form>
+
+<script type="text/javascript">
+    function loadSummary() {
+        var display = "<div><span class='title'>Financial Type: " + $('financial_type').value + "</span></div>";
+        display += "<div><span class='title'>Insurance Cover: " + $('insurance_cover').value + "</span></div>";
+
+        $('inputFrame'+tstCurrentPage).innerHTML = '<div id="summary_field">' + display + '</div>' ;
+        $("clearButton").style.display = "none";
+    }
+</script>
