@@ -1296,6 +1296,54 @@ class GenericEncountersController < ApplicationController
       redirect_to "/patients/show/#{@patient.patient_id}" and return
 	end
 
+  def	idsr_complaints
+    @newcomplaints = Encounter.new
+    @patient_id = params['patient_id']
+		@complaintss = ConceptName.complaintsconcepts
+    @complaints = ConceptName.complaintsconcepts.paginate({:page => params[:page], :per_page => 10})
+    @fever_syndrom = ConceptName.complaintsconcepts.paginate({:page => params[:page], :per_page => 2})
+    @influenza_syndrom = ConceptName.complaintsconcepts.paginate({:page => params[:page], :per_page => 8})
+    @respiratory_syndrom = ConceptName.complaintsconcepts.paginate({:page => params[:page], :per_page => 6})
+    @gastrointestinal_syndrom = ConceptName.complaintsconcepts.paginate({:page => params[:page], :per_page => 4})
+   # @resultlist, @results = paginate :results, :per_page => 10
+    render :layout => 'idsr_complaints'
+  end
+
+  def save_ids_complaints
+    @patient_id = params['patient_id']
+    encounter = create_idsr_encounters ('PRESENTING COMPLAINTS', @patient_id)
+
+   # complaints = ['Bites','Burns','Abscess']
+    complaints = ConceptName.complaintsconcepts.map(&:name)
+
+   params.reject! {|key, value| !complaints.include?(key)}
+    create = false
+
+    params.each do |key, value|
+
+      create = Observation.create({'person_id'=>@patient_id,
+                                   'concept_id'=> ConceptName.find_by_name(key).concept_id,
+                                   'encounter_id' => encounter.id,
+                                   'obs_datetime'=> Time.now,
+                                   'value_text'=> value})
+
+    end
+
+    if create
+      redirect_to :controller => 'patients', :action => 'show', :id => @patient_id
+    end
+  end
+
+  def create_idsr_encounters(name, patient_id)
+    encounter = Encounter.new()
+    encounter.encounter_type = EncounterType.find_by_name(name).id
+    encounter.patient_id = patient_id
+    encounter.encounter_datetime = Time.now
+
+    encounter.save
+    return encounter
+  end
+
   private
 
 	def create_obs(encounter , params)

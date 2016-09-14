@@ -10,17 +10,17 @@
       var hash_str = "|";
 
 
-      function getSelected(){                                                       
-        var choices = "";                                                           
-                                                                                
-        for(var o = 0; o < __$('choice').options.length; o++){                      
-          if(__$('choice').options[o].selected == true){                            
-            choices += __$('choice').options[o].innerHTML + " ";                    
-          }                                                                         
-        }                                                                           
-                                                                                
-        return choices;                                                             
-      } 
+      function getSelected(){
+        var choices = "";
+
+        for(var o = 0; o < __$('choice').options.length; o++){
+          if(__$('choice').options[o].selected == true){
+            choices += __$('choice').options[o].innerHTML + " ";
+          }
+        }
+
+        return choices;
+      }
 
 
     </script>
@@ -51,11 +51,11 @@
 
 
         <%= select_tag "choice", options_for_select(["","Presenting complaints","Clinical notes"]), 
-          { :helpText => 'Select task(s)', 
-            :id => "choice", 
+          { :helpText => 'Select task(s)',
+            :id => "choice",
             :multiple => true } %>
 
-      
+
 
         <!--   start -->
 
@@ -66,9 +66,9 @@
             <td>
             </td>
             <td>
-              <select class = "multi" style="width: 100%" 
+              <select class = "multi" style="width: 100%"
                       name="complaints[]" id="multiple"
-                      helptext="Select Complaint(s)" 
+                      helptext="Select Complaint(s)"
                       condition = "getSelected().match(/PRESENTING COMPLAINTS/i)"
                       multiple="multiple" nested="true" >
                 <option></option>

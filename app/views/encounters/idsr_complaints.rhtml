@@ -1,0 +1,31 @@
+<% form_tag :action => 'save_ids_complaints' do %>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+  <!--title>Patient Dashboard</title-->
+  <!--%= javascript_include_tag 'newvital' %-->
+  <%= stylesheet_link_tag 'idsr_complaints' %>
+</head>
+
+<body>
+
+
+<fieldset id="bdy">
+  <legend>Complaints</legend>
+
+<% @complaints.each do |compl| %>
+   <span class="chkbx"><%= check_box_tag compl.name, compl.name%><%= compl.name%></span>
+<%end%>
+</fieldset>
+
+<!--fieldset id="btns"-->
+    <%= submit_tag "Save symptoms", :id => 'svbtn' %>
+    <p id='pid'><%= hidden_field_tag 'patient_id', @patient_id%></p>
+
+<% end %>
+<!--%= will_paginate @complaints%-->
+<!--%= button_to 'Cancel', :controller => 'patients', :action => 'show', :id => @patient_id%>
+<button >Clear all</button>
+</fieldset-->
+
+</body>
+</html>

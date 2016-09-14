@@ -1,0 +1,32 @@
+/*span{border:red solid}*/
+/*p{border:red solid}*/
+p{width: 20%}
+body{}
+.text{font-size: 120%; width: 150%; word-wrap: break-word}
+.demo{width: 80%}
+/*pid{float: left; border: orange solid}*/
+
+.disabled prev_page{border: #ff2ae6 solid; margin-left: 2%; width: 5%}
+.prev_page{border: #33ff2b solid; margin-left: 2%; width: 5%}
+.disabled prev_page{border: #2743ff solid; margin-left: 2%; width: 5%}
+.current{border: #ff0000 solid; margin-left: 2%; width: 5%}
+.next_page{border: #ff2ae6 solid; margin-left: 2%; width: 5%}
+
+
+
+
+.chkbx{float: left; width: 29%; font-size: 200%; display: inline}
+table{width: 65%; text-align: center}
+#svbtn{float: right; margin: 10px; min-width: 150px}
+#bck{margin-left: 2%}
+#demos{margin-top: 2% ;background-color: #7426ff
+}
+bdy{margin-top: 2%; background-color: #c8cdb2}
+#btns{margin-top: 5%; height: 7%}
+
+#action{float: left; width: 30%; margin-left: 2%}
+#footers{position: absolute; bottom: 0; border: 5px solid red; width: 100%}
+#currage{float: left; width: 15%; margin-left: 2%}
+#sex{float: left; width: 15%; margin-left: 2%}
+#gurd{float: left; width: 15%; margin-left: 2%}*/
+/*<div class="pagination" id="pgnt"><span class="disabled prev_page">&laquo; Previous</span> <span class="current">1</span> <a href="/encounters/newcomplaints?page=2&amp;patient_id=6180" rel="next">2</a> <a href="/encounters/newcomplaints?page=3&amp;patient_id=6180">3</a> <a href="/encounters/newcomplaints?page=2&amp;patient_id=6180" class="next_page" rel="next">Next &raquo;</a></div>*/
