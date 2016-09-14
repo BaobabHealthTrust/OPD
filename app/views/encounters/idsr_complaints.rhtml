@@ -1,25 +1,65 @@
-<% form_tag :action => 'save_ids_complaints' do %>
-<html xmlns="http://www.w3.org/1999/html">
-<head>
+
+
   <!--title>Patient Dashboard</title-->
   <!--%= javascript_include_tag 'newvital' %-->
-  <%= stylesheet_link_tag 'idsr_complaints' %>
-</head>
-
-<body>
+ <%= stylesheet_link_tag 'idsr_complaints' %>
 
 
-<fieldset id="bdy">
-  <legend>Complaints</legend>
+<% form_tag :action => 'save_ids_complaints' do %>
 
-<% @complaints.each do |compl| %>
-   <span class="chkbx"><%= check_box_tag compl.name, compl.name%><%= compl.name%></span>
-<%end%>
-</fieldset>
+<% syndrome_g1 = ["fever","Influenza like illness","respiratory"] %>
+ <% syndrome_g2 = ["Gastrointestinal","Haema"] %>
+ <% syndrome_g3 = ["Nephro","Trauma","Cardiovascular"]
+    syndrome_g4 = ["General","Other"]
+ %>
+ <div class="syndrome" style="overflow: auto; display: none">
+       <% syndrome_g1.each do |synd| %>
+       <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
+       <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
+        <% symptoms = concept_set(synd)%>
+         <% symptoms.each do |compl| %>
+       <span class="chkbx"><%= check_box_tag compl, compl%><%= compl%></span>
+      <%end%>
+      </fieldset>
+      <%end%>
+ </div>
 
+ <div class = "syndrome" style="overflow: auto;display: block">
+        <% syndrome_g2.each do |synd| %>
+            <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
+              <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
+              <% symptoms = concept_set(synd)%>
+              <% symptoms.each do |compl| %>
+                  <span class="chkbx"><%= check_box_tag compl, compl%><%= compl%></span>
+              <%end%>
+            </fieldset>
+        <%end%>
+ </div>
+ <div class = "syndrome" style="overflow: auto; display: none">
+        <% syndrome_g3.each do |synd| %>
+            <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
+              <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
+              <% symptoms = concept_set(synd)%>
+              <% symptoms.each do |compl| %>
+                  <span class="chkbx"><%= check_box_tag compl, compl%><%= compl%></span>
+              <%end%>
+            </fieldset>
+        <%end%>
+   </div>
+  <div class="syndrome" style="overflow: auto;display: none">
+        <% syndrome_g4.each do |synd| %>
+            <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
+              <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
+              <% symptoms = concept_set(synd)%>
+              <% symptoms.each do |compl| %>
+                  <span class="chkbx"><%= check_box_tag compl, compl%><%= compl%></span>
+              <%end%>
+            </fieldset>
+        <%end%>
+  </div>
 <!--fieldset id="btns"-->
-    <%= submit_tag "Save symptoms", :id => 'svbtn' %>
-    <p id='pid'><%= hidden_field_tag 'patient_id', @patient_id%></p>
+    <!--%= submit_tag "Save symptoms", :id => 'svbtn' %-->
+<%= hidden_field_tag 'patient_id', @patient_id%>
 
 <% end %>
 <!--%= will_paginate @complaints%-->
@@ -27,5 +67,4 @@
 <button >Clear all</button>
 </fieldset-->
 
-</body>
-</html>
+

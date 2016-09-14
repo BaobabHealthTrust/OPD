@@ -32,32 +32,4 @@ class ConceptName < ActiveRecord::Base
     order by CN.name')
   end
 
-  def self.isdr_fever_complaints
-    find_by_sql ('select name from concept_name CN, concept_set CS
-    where CN.concept_id = CS.concept_id
-    and CS.concept_set = 8578
-    order by CN.name')
-  end
-
-  def self.isdr_influenza_complaints
-    find_by_sql ('select name from concept_name CN, concept_set CS
-    where CN.concept_id = CS.concept_id
-    and CS.concept_set = 8578
-    order by CN.name')
-  end
-
-  def self.isdr_respiratory_complaints
-    find_by_sql ('select name from concept_name CN, concept_set CS
-    where CN.concept_id = CS.concept_id
-    and CS.concept_set = 8578
-    order by CN.name')
-  end
-
-  def self.isdr_cardiovascular_complaints
-    find_by_sql ('select name from concept_name CN, concept_set CS
-    where CN.concept_id = CS.concept_id
-    and CS.concept_set = 8578
-    order by CN.name')
-  end
-
 end

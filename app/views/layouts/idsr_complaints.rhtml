@@ -1,9 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <%= @title = "#{controller.controller_name.humanize} #{controller.action_name.humanize}" rescue ""  %>
+    <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer="true"></script>
     <script language="javascript">
       tstUsername = "<%= current_user.username unless current_user.nil? %>";
       tstCurrentDate = "<%= Time.now.strftime("%Y-%m-%d") %>";
@@ -55,9 +56,10 @@
         <%= yield %>
         <div id="footer">
           <div id="buttons" style="top:0px">
-            <button id="finishButton" class="button navButton green" onclick="save function()"><span>Finish</span></button!-->
-            <button id="cancelButton" class="button navButton red" onclick="cancel function()"><span>Cancel</span></button>
+            <button id="finishButton" class="button navButton green"><span>Next</span></button>
             <button id="finishButton" class="button blue navButton" onclick="clear function"><span>Clear</span></button>
+            <button id="finishButton" class="button blue navButton" onclick="clear function"><span>Back</span></button>
+            <button id="cancelButton" class="button navButton red left" onclick="cancel function()"><span>Cancel</span></button>
                         </div>
            </div>
 
@@ -65,9 +67,28 @@
       </div>
     </div>
     <script>
+
       try {
         document.getElementById('navigation_value').innerHTML = current + " of " + total;
       } catch(e) { }
+
+       var pageCount = 0;
+       document.getElementById("finishButton").onclick = function(){
+          //get the items
+          var pagesArray = document.getElementsByClassName("syndrome");
+
+             for (var i = 0; i < pagesArray.length;i++){
+               pagesArray[i].style.display = "none";
+             }
+            if(pageCount==0) {
+               pagesArray[0].style.display = "block";
+             }else{
+               pagesArray[pageCount].style.display = "block";
+            }
+
+         pageCount++;
+
+       }
     </script>
   </body>
 </html>

@@ -1299,12 +1299,6 @@ class GenericEncountersController < ApplicationController
   def	idsr_complaints
     @newcomplaints = Encounter.new
     @patient_id = params['patient_id']
-		@complaintss = ConceptName.complaintsconcepts
-    @complaints = ConceptName.complaintsconcepts.paginate({:page => params[:page], :per_page => 10})
-    @fever_syndrom = ConceptName.complaintsconcepts.paginate({:page => params[:page], :per_page => 2})
-    @influenza_syndrom = ConceptName.complaintsconcepts.paginate({:page => params[:page], :per_page => 8})
-    @respiratory_syndrom = ConceptName.complaintsconcepts.paginate({:page => params[:page], :per_page => 6})
-    @gastrointestinal_syndrom = ConceptName.complaintsconcepts.paginate({:page => params[:page], :per_page => 4})
    # @resultlist, @results = paginate :results, :per_page => 10
     render :layout => 'idsr_complaints'
   end
