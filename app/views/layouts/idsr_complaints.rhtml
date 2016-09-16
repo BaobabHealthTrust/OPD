@@ -59,36 +59,37 @@
             <button id="finishButton" class="button navButton green"><span>Next</span></button>
             <button id="finishButton" class="button blue navButton" onclick="clear function"><span>Clear</span></button>
             <button id="finishButton" class="button blue navButton" onclick="clear function"><span>Back</span></button>
-            <button id="cancelButton" class="button navButton red left" onclick="cancel function()"><span>Cancel</span></button>
-                        </div>
+            <button id="cancelButton" class="button navButton red left"><span>Cancel</span></button>
+
            </div>
+        </div>
 
         </div>
       </div>
     </div>
     <script>
 
-      try {
-        document.getElementById('navigation_value').innerHTML = current + " of " + total;
-      } catch(e) { }
-
-       var pageCount = 0;
-       document.getElementById("finishButton").onclick = function(){
-          //get the items
-          var pagesArray = document.getElementsByClassName("syndrome");
-
-             for (var i = 0; i < pagesArray.length;i++){
-               pagesArray[i].style.display = "none";
-             }
-            if(pageCount==0) {
-               pagesArray[0].style.display = "block";
-             }else{
-               pagesArray[pageCount].style.display = "block";
-            }
-
-         pageCount++;
-
-       }
+      // try {
+      //   document.getElementById('navigation_value').innerHTML = current + " of " + total;
+      // } catch(e) { }
+      //
+      //  var pageCount = 0;
+      //  document.getElementById("finishButton").onclick = function(){
+      //     //get the items
+      //     var pagesArray = document.getElementsByClassName("syndrome");
+      //
+      //        for (var i = 0; i < pagesArray.length;i++){
+      //          pagesArray[i].style.display = "none";
+      //        }
+      //       if(pageCount==0) {
+      //          pagesArray[0].style.display = "block";
+      //        }else{
+      //          pagesArray[pageCount].style.display = "block";
+      //       }
+      //
+      //    pageCount++;
+      //
+      //  }
     </script>
   </body>
 </html>

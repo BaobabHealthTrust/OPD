@@ -1,30 +1,37 @@
 
 
   <!--title>Patient Dashboard</title-->
-  <!--%= javascript_include_tag 'newvital' %-->
+  <%= javascript_include_tag 'idsr_complaints' %>
  <%= stylesheet_link_tag 'idsr_complaints' %>
 
 
-<% form_tag :action => 'save_ids_complaints' do %>
+
+<form  action="/encounters/create_complaints" method="post">
+  <%= hidden_field_tag "encounter[encounter_type_name]", "NOTES" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient_id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
 <% syndrome_g1 = ["fever","Influenza like illness","respiratory"] %>
- <% syndrome_g2 = ["Gastrointestinal","Haema"] %>
- <% syndrome_g3 = ["Nephro","Trauma","Cardiovascular"]
-    syndrome_g4 = ["General","Other"]
- %>
- <div class="syndrome" style="overflow: auto; display: none">
+<% syndrome_g2 = ["Gastrointestinal","Haema"] %>
+<% syndrome_g3 = ["Nephro","Trauma","Cardiovascular"] %>
+<% syndrome_g4 = ["General","Other"] %>
+
+ <!--div class="syndrome" style="overflow: auto; display: block"-->
+ <div id="pages"
+ <div class="q w">
        <% syndrome_g1.each do |synd| %>
        <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
        <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
         <% symptoms = concept_set(synd)%>
          <% symptoms.each do |compl| %>
-       <span class="chkbx"><%= check_box_tag compl, compl%><%= compl%></span>
+       <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s%><%= compl%></span>
       <%end%>
       </fieldset>
       <%end%>
  </div>
 
- <div class = "syndrome" style="overflow: auto;display: block">
+ <div class = "w">
         <% syndrome_g2.each do |synd| %>
             <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
               <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
@@ -35,7 +42,8 @@
             </fieldset>
         <%end%>
  </div>
- <div class = "syndrome" style="overflow: auto; display: none">
+
+ <div class = "w">
         <% syndrome_g3.each do |synd| %>
             <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
               <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
@@ -46,7 +54,8 @@
             </fieldset>
         <%end%>
    </div>
-  <div class="syndrome" style="overflow: auto;display: none">
+
+  <div class="w">
         <% syndrome_g4.each do |synd| %>
             <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
               <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
@@ -57,14 +66,12 @@
             </fieldset>
         <%end%>
   </div>
+
 <!--fieldset id="btns"-->
     <!--%= submit_tag "Save symptoms", :id => 'svbtn' %-->
-<%= hidden_field_tag 'patient_id', @patient_id%>
 
-<% end %>
+
 <!--%= will_paginate @complaints%-->
 <!--%= button_to 'Cancel', :controller => 'patients', :action => 'show', :id => @patient_id%>
 <button >Clear all</button>
 </fieldset-->
-
-
