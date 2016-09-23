@@ -151,8 +151,8 @@
 
             <th id="ththth">
               <span><u>Out-Patient Cases</u></span> <br />
-              <span class="basic_span"><5yrs</span>
-              <span class="basic_span">=>5yrs</span>
+              <span class="basic_span"><5 yrs</span>
+              <span class="basic_span">=> 5yrs</span>
               <span class="basic_span">Total</span>
             </th>
 
@@ -171,15 +171,16 @@
             </th>
           </tr>
         </thead>
+
         <tbody>
 
           <% @diaggregated_paginated.each do |key,value| %>
-          
+
             <tr>
               <td> <span style="display:block; width:90%;"> <%= key.to_s %> </span> </td>
-              <td align="left" > <%= "<span class='basic_span bspan'> #{value["< 6 MONTHS"]["M"]} </span> <span class='basic_span bspan'> #{value["< 6 MONTHS"]["F"]}" %> </span> </td>
-              <td align="left" > <%= "<span class='basic_span bspan'> #{value["U5"]["M"]} </span> <span class='basic_span bspan'> #{value["U5"]["F"]}" %> </span> </td>
-              <td align="left" > <%= "<span class='basic_span bspan'> #{value["5-14"]["M"]} </span> <span class='basic_span bspan'> #{value["5-14"]["F"]}" %> </span> </td>
+
+              <td align="left" > <%= "<span class='basic_span bspan'> #{value["=<4"]}</span>
+                <span class='basic_span bspan'> #{value["=>5"]}" %> </span> </td>
             </tr>
           <% end %>
         </tbody>

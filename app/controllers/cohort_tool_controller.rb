@@ -2616,7 +2616,21 @@ class CohortToolController < ApplicationController
 
     end
 
+    def idsr_monthly_summary_report
+    end
+
     def idsr_monthly_summary
+
+#       @mberzu = Observation.find_by_sql("select P.birthdate,obs_datetime, O.person_id,concept_id,value_coded, count(value_coded) as count,
+# TIMESTAMPDIFF(YEAR,birthdate,obs_datetime) AS age
+# from obs O, person P
+# where O.person_id = P.person_id
+# and date(obs_datetime) = '2016-09-23'
+# and value_coded !=''
+# group by person_id;")
+#
+#       raise @mberzu.inspect
+
       @report_name = 'IDSR Monthly Summary'
       @logo = CoreService.get_global_property_value('logo').to_s
       @current_location_name =Location.current_health_center.name
@@ -2631,7 +2645,7 @@ class CohortToolController < ApplicationController
       # @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
 
       @start_date = '2016-09-01 00:00:00'
-      @end_date = '2016-09-20 23:59:59'
+      @end_date = '2016-09-23 23:59:59'
 
       @disaggregated_diagnosis = {}
       # @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
@@ -2651,30 +2665,21 @@ class CohortToolController < ApplicationController
           @start_date, @end_date, concept_ids])
 
       observation.each do | obs|
-      #  next if obs.person.blank?
-      #  next if obs.answer_concept.blank?
+        next if obs.person.blank?
+          next if obs.answer_concept.blank?
         previous_date = obs.obs_datetime.strftime('%Y-%m-%d').to_date
         sex = obs.person.gender
         age = PatientService.age(obs.person, previous_date)
         diagnosis_name = obs.answer_concept.fullname rescue ''
-        @disaggregated_diagnosis[diagnosis_name]={"U5" =>{"M"=> 0, "F"=>0},
-          "5-14" =>{"M"=> 0, "F"=>0},
-          ">14" =>{"M"=> 0, "F"=>0},
-          "< 6 MONTHS" =>{"M"=> 0, "F"=>0}
-        }	if @disaggregated_diagnosis[diagnosis_name].nil?
-
-        if age.to_i < 1
-          age_in_months = PatientService.age_in_months(obs.person, previous_date)
-          if age_in_months.to_i < 6
-            @disaggregated_diagnosis[diagnosis_name]["< 6 MONTHS"][sex]+=1
-          else age_in_months.to_i >= 6 && age.to_i < 5
-            @disaggregated_diagnosis[diagnosis_name]["U5"][sex]+=1
-          end
-        elsif age.to_i >= 1 and age.to_i <= 14
-          @disaggregated_diagnosis[diagnosis_name]["5-14"][sex]+=1
-        else
-          @disaggregated_diagnosis[diagnosis_name][">14"][sex]+=1
-        end
+        @disaggregated_diagnosis[diagnosis_name]={
+          "=<4" =>0,
+          "=>5" =>0
+        }if @disaggregated_diagnosis[diagnosis_name].nil?
+        if age.to_i < 5
+           @disaggregated_diagnosis[diagnosis_name]["=<4"]+=1
+         else
+           @disaggregated_diagnosis[diagnosis_name]["=>5"]+=1
+         end
 
       end
       @diaggregated_paginated = []
