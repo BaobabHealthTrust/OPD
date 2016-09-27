@@ -4,34 +4,34 @@
     <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer ></script>
 <script src="/touchscreentoolkit/lib/javascripts/standard.js"> </script>
     <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
-    
+
     <style>
-    
+
     </style>
-    
+
     <script language="javascript">
       tstUsername = "<%= current_user rescue "" %>";
       tstCurrentDate = "<%= @date %>";
       tt_cancel_destination = '/logout';
       tt_cancel_show = '/people/search';
-      
+
 	  function resetRegimen(){
 		element = document.getElementById('nextButton')
 		element.setAttribute("onmousedown", "gotoNextPage()")
 	  }
-	  
+
 		function showDHISupdate(msg){
 			if(!document.getElementById("popupBox")){
 				var  popupBox = document.createElement("div");
 				popupBox.id = "popupBox";
 				popupBox.style.display = "none";
-			   
+
 				popupBox.innerHTML = msg + "<br>" + "<button style='width: 200px;margin-top:20px;margin-left:101px;' onmousedown='popupBox.style.display = \"none\"; " +
 		"'><span>OK</span></button>";
-			   
+
 				document.getElementById("content").appendChild(popupBox);
 			}
-		
+
 			document.getElementById("popupBox").style.display = "block";
 			document.getElementById("popupBox").style.width = "400px";
 		}
@@ -46,7 +46,7 @@
             </tr>
             <h1 id='project_name'>
               <div style="font-size: 0.8em; margin-top: 28px;">
-                <%location_name = (@location.downcase == "outpatient" ? "OPD" : "OPD") 
+                <%location_name = (@location.downcase == "outpatient" ? "OPD" : "OPD")
                   if current_user.activities.include?('Manage Lab Orders') or current_user.activities.include?('Manage Lab Results') or
                   current_user.activities.include?('Manage Sputum Submissions') or current_user.activities.include?('Manage TB Clinic Visits') or
                   current_user.activities.include?('Manage TB Reception Visits') or current_user.activities.include?('Manage TB Registration Visits') or
@@ -65,7 +65,11 @@
             %>
             <div id="date" retrospective="<%= retrospective %>"><%= @date %></div>
             <div id="user"><%= @user %></div>
-
+            <% if @boarder  %>
+              <select id="tabs">
+                <option value='/clinic/temperature_readings_tab'>Temperature Readings</option>
+              </select>
+            <%end%>
             <select id="tabs">
               <option value='/clinic/overview_tab'>Overview</option>
               <option value='/clinic/reports_tab'>Reports</option>
@@ -102,14 +106,14 @@ on the rest of the stations %>
                 <%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
               <!--option link='regimen.html'>Regimen</option-->
             </select>
-           
+
 			<% if params[:dhis_status] == "SUCCESS" %>
 				<script> showDHISupdate('DHIS2 update <%="#{params[:dhis_status].downcase}"%>'); </script>
 			<% elsif !params[:dhis_status].blank? %>
 				<script> showMessage('DHIS2 update <%="#{params[:dhis_status]}"%>'); </script>
 			<% end%>
 
-            
+
             <tr>
               <td align='center'>
                 <input type='submit' value='Finish' />
