@@ -2,8 +2,8 @@
 NOTE: This class does not handle below the normal temperature
 It only handles the range of our threshold
 =end
-
 class TemperatureReader
+
   def initialize(filepath)
     @filepath = filepath  #constructor injection
     @notifier = INotify::Notifier.new
@@ -16,6 +16,7 @@ class TemperatureReader
         temperature_array = FasterCSV.read(@filepath) #TODO:read on the last line of the csv
         temperature = temperature_array.last[1].to_f
         patient_identifier= temperature_array.last[0]
+        location = temperature_array.last[3]
         #TODO: Get/Set patient_identifier for this reading
         if temperature > 37.8 && temperature < 38.0
           puts "/**********Saving Fever Temperature to OPD database********"
@@ -30,6 +31,8 @@ class TemperatureReader
         temperature_record = TemperatureRecord.new()
         temperature_record.patient_identifier = patient_identifier
         temperature_record.temperature = temperature
+        temperature_record.status = 'open'
+        temperature_record.location_id = location #assuming the machine will provide location information
         temperature_record.save #save temperature
       end
       @notifier.run
