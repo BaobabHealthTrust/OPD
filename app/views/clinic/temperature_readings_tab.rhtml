@@ -1,3 +1,9 @@
+<link type="text/css" href="/touchscreentoolkit/lib/stylesheets/touch-fancy.css" rel="stylesheet">
+<link type="text/css" href="/touchscreentoolkit/lib/stylesheets/dashboard.css" rel="stylesheet">
+<link type="text/css" href="/touchscreentoolkit/lib/stylesheets/graytabs.css" rel="stylesheet">
+<script type="text/javascript" src="/touchscreentoolkit/lib/javascripts/dashboard.js" language="javascript"></script>
+<script src="/touchscreentoolkit/lib/javascripts/standard.js"> </script>
+<script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer=""></script>
 <style type="text/css">
   body {
     -moz-user-select:none;
@@ -31,17 +37,21 @@
   }
 </style>
 <div id="tab" style="">
-  <h2>Temperature Readings for<% @location %></h2>
+  <!-- <h2>Temperature Readings for <%= @location %></h2> -->
     <div id="table_div">
     <table id="stats" cellpadding="14">
       <tr style="color: #fff; background-color: #666;">
         <th>Patient Identifier</th>
         <th>Temperature</th>
+        <th>Action</th>
       </tr>
     <% @temperature.each do |t| %>
       <tr class="<%= cycle('even', 'odd')%>">
         <td> <%=t.patient_identifier.strip %> </td>
         <td> <%=t.temperature %> </td>
+        <td>
+          <button id="triage" class="blue" style="margin: 5px 0px 0px; min-width: 100px;"><span>Triage</span></button>
+        </td>
       </tr>
     <%end%>
     </table>

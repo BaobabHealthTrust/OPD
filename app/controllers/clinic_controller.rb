@@ -329,7 +329,8 @@ class ClinicController < GenericClinicController
     @location = Location.find(session[:location_id]).name
     @temperature = TemperatureRecord.find(:all,:select=>"patient_identifier,temperature",
                                           :conditions =>["status='open' AND
-                                                    location_id=#{session[:location_id]}"])
+                                                    location_id=#{session[:location_id]}
+                                                    AND temperature >= 37.8"])
     render :layout => false
   end
   def load_malaria_dashboard_data
