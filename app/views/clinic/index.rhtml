@@ -65,7 +65,11 @@
             %>
             <div id="date" retrospective="<%= retrospective %>"><%= @date %></div>
             <div id="user"><%= @user %></div>
-
+            <% if @boarder  %>
+              <select id="tabs">
+                <option value='/clinic/temperature_readings_tab'>Fever Readings</option>
+              </select>
+            <%end%>
             <select id="tabs">
               <option value='/clinic/overview_tab'>Overview</option>
               <option value='/clinic/reports_tab'>Reports</option>

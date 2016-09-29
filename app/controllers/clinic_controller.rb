@@ -325,7 +325,14 @@ class ClinicController < GenericClinicController
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     render :layout => false
   end
-
+  def temperature_readings_tab
+    @location = Location.find(session[:location_id]).name
+    @temperature = TemperatureRecord.find(:all,:select=>"patient_identifier,temperature",
+                                          :conditions =>["status='open' AND
+                                                    location_id=#{session[:location_id]}
+                                                    AND temperature >= 37.8"])
+    render :layout => false
+  end
   def load_malaria_dashboard_data
 =begin
     malaria_ip_addresses = CoreService.get_global_property_value("malaria_ip_addresses").split(", ") rescue []
