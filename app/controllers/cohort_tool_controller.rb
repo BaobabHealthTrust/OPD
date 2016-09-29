@@ -2657,6 +2657,16 @@ class CohortToolController < ApplicationController
       #       "Diagnosis", "primary diagnosis","secondary diagnosis"]]).map(&:concept_id)
       # observation =Observation.find(:all,:include=>{:person=>{}},
 
+        qqq = ConceptName.find(:all, :conditions => ["name IN (?)",["Idsr Monthly Summary"]]).map(&:concept_id)
+      #  raise qqq.inspect
+    # #
+        www = ConceptSet.find(:all, :conditions => ["concept_set IN (?)",qqq]).map(&:concept_id)
+     #  raise www.inspect
+
+      eee = ConceptName.find(:all, :conditions => ["concept_name.concept_id IN (?)",www]).map(&:name)
+
+    #  raise eee.inspect
+
       concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["primary diagnosis"]]).map(&:concept_id)
       observation = Observation.find(:all,:include=>{:person=>{}},
 
