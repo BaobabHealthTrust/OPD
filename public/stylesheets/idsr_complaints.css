@@ -15,7 +15,7 @@ body{}
 
 
 
-.chkbx{float: left; width: 29%; font-size: 200%; display: inline}
+.chkbx{float: left; width: 33.2%; font-size:1.9em; display: inline-block}
 table{width: 65%; text-align: center}
 #svbtn{float: right; margin: 10px; min-width: 150px}
 #bck{margin-left: 2%}
