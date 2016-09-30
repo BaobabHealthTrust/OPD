@@ -31,14 +31,14 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
                         :obs_date=>obs_date,:gender=>gender,:age=>age,:zone=>zone}
 
     if enc_params[:encounter][:encounter_type_name] == "NOTES"
-      hash[:symptoms] = enc_params[:complaints].to_a.reject!{|s| s==""} #remove blank string
+      hash[:symptoms] = enc_params[:complaints]#.to_a.reject!{|s| s==""} #remove blank string
+      #TODO: check unnecessary strings.
     end
     if enc_params[:encounter][:encounter_type_name] == "OUTPATIENT DIAGNOSIS"
      observations = enc_params[:observations]
   	 hash[:diagnosis] = pull_diagnoses(observations,obs_date,national_id,
                                        patient_id,age,gender)
     end
-
     push_to_couch(hash)
   end
 

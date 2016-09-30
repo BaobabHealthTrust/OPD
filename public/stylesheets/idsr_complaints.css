@@ -12,6 +12,9 @@ body{}
 .current{border: #ff0000 solid; margin-left: 2%; width: 5%}
 .next_page{border: #ff2ae6 solid; margin-left: 2%; width: 5%}
 
+.w {display: none;}
+.q {display: block;}
+
 
 
 

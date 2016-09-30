@@ -10,7 +10,7 @@ class EncountersController < GenericEncountersController
       end
     end
 	end
-  
+
 	def new
 
     #raise @priority_signs_paeds.inspect

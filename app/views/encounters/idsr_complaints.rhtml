@@ -1,12 +1,11 @@
 
 
   <!--title>Patient Dashboard</title-->
-  <!--%= javascript_include_tag 'newvital' %-->
+  <%= javascript_include_tag 'idsr_complaints' %>
  <%= stylesheet_link_tag 'idsr_complaints' %>
   <%= stylesheet_link_tag "font-awesome/css/font-awesome.min"%>
 
  <style>
-
    .label{
        position: fixed;
        z-index: 1000;
@@ -151,7 +150,8 @@
             </fieldset>
         <%end%>
  </div>
- <div class = "syndrome" style="overflow: auto; display: none">
+
+ <div class = "syndrome">
         <% syndrome_g3.each do |synd| %>
             <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
               <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
@@ -162,7 +162,8 @@
             </fieldset>
         <%end%>
    </div>
-  <div class="syndrome" style="overflow: auto;display: none">
+
+  <div class="syndrome">
         <% syndrome_g4.each do |synd| %>
             <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
               <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
@@ -173,9 +174,10 @@
             </fieldset>
         <%end%>
   </div>
+
 <!--fieldset id="btns"-->
     <!--%= submit_tag "Save symptoms", :id => 'svbtn' %-->
-   </form>
+  </form>
 </div> <!--container ends here -->
 
 <div class="nav-controls">
@@ -186,5 +188,3 @@
 <!--%= button_to 'Cancel', :controller => 'patients', :action => 'show', :id => @patient_id%>
 <button >Clear all</button>
 </fieldset-->
-
-

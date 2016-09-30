@@ -2466,7 +2466,6 @@ class CohortToolController < ApplicationController
     end
 
     def disaggregated_diagnosis
-
       @report_name = params[:report_name]
       @logo = CoreService.get_global_property_value('logo').to_s
       @current_location_name =Location.current_health_center.name
@@ -2488,6 +2487,7 @@ class CohortToolController < ApplicationController
         :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
           @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
           concept_ids])
+
       observation.each do | obs|
         next if obs.person.blank?
         next if obs.answer_concept.blank?
@@ -2517,7 +2517,7 @@ class CohortToolController < ApplicationController
       end
       @diaggregated_paginated = []
       @disaggregated_diagnosis.each { | diag, value |
-        @diaggregated_paginated << [diag, value]
+      @diaggregated_paginated << [diag, value]
       }
       render :layout => 'report'
     end
@@ -2613,27 +2613,89 @@ class CohortToolController < ApplicationController
           @diagnosis_by_address[diagnosis_name][address]+=1
         end
       end
-=begin
-				Patient Level Data
-				if @report_name.upcase == "PATIENT_LEVEL_DATA"
-						visit_date = encounter.encounter_datetime.to_date.to_s
 
-						next if !((diagnosis_type.upcase == "PRIMARY DIAGNOSIS") ||
-									 (diagnosis_type.upcase == "SECONDARY DIAGNOSIS") || (encounter.name.upcase=="TREATMENT"))
+    end
 
-						@patient_level_data[visit_date] = {} if @patient_level_data[visit_date].nil?
-						@patient_level_data[visit_date][gender] = {} if @patient_level_data[visit_date][gender].nil?
-						@patient_level_data[visit_date][gender][person.id] = {} if @patient_level_data[visit_date][gender][person.id].nil?
-						@patient_level_data[visit_date][gender][person.id][patient] = {} if @patient_level_data[visit_date][gender][person.id][patient].nil?
-						@patient_level_data[visit_date][gender][person.id][patient][person.birthdate] = {"PRIMARY DIAGNOSIS"=> "",
-																																																			 "SECONDARY DIAGNOSIS"=> "",
-																																																			 "TREATMENT"=> "" } if @patient_level_data[visit_date][gender][person.id][patient.name][person.birthdate].nil?
+    def idsr_monthly_summary_report
+    end
 
-						@patient_level_data[visit_date][gender][person.id][patient][person.birthdate][diagnosis_type.upcase] = diagnosis_name
-						@patient_level_data[visit_date][gender][person.id][patient][person.birthdate]["TREATMENT"] = prescription if (encounter.name.upcase=="TREATMENT" && !prescription.blank?)
-				end
-=end
-      #end
+    def idsr_monthly_summary
 
+#       @mberzu = Observation.find_by_sql("select P.birthdate,obs_datetime, O.person_id,concept_id,value_coded, count(value_coded) as count,
+# TIMESTAMPDIFF(YEAR,birthdate,obs_datetime) AS age
+# from obs O, person P
+# where O.person_id = P.person_id
+# and date(obs_datetime) = '2016-09-23'
+# and value_coded !=''
+# group by person_id;")
+#
+#       raise @mberzu.inspect
+
+      @report_name = 'IDSR Monthly Summary'
+      @logo = CoreService.get_global_property_value('logo').to_s
+      @current_location_name =Location.current_health_center.name
+      start_year = params[:start_year]
+      start_month = params[:start_month]
+      start_day = params[:start_day]
+      end_year = params[:end_year]
+      end_month = params[:end_month]
+      end_day = params[:end_day]
+      @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
+      # @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+      # @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+
+      @start_date = '2016-09-01 00:00:00'
+      @end_date = '2016-09-23 23:59:59'
+
+      @disaggregated_diagnosis = {}
+      # @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+      # @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
+      @formated_start_date = @start_date
+      @formated_end_date = @end_date
+
+      # concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["Additional diagnosis",
+      #       "Diagnosis", "primary diagnosis","secondary diagnosis"]]).map(&:concept_id)
+      # observation =Observation.find(:all,:include=>{:person=>{}},
+
+        qqq = ConceptName.find(:all, :conditions => ["name IN (?)",["Idsr Monthly Summary"]]).map(&:concept_id)
+      #  raise qqq.inspect
+    # #
+        www = ConceptSet.find(:all, :conditions => ["concept_set IN (?)",qqq]).map(&:concept_id)
+     #  raise www.inspect
+
+      eee = ConceptName.find(:all, :conditions => ["concept_name.concept_id IN (?)",www]).map(&:name)
+
+    #  raise eee.inspect
+
+      concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["primary diagnosis"]]).map(&:concept_id)
+      observation = Observation.find(:all,:include=>{:person=>{}},
+
+        :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
+          # @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
+          @start_date, @end_date, concept_ids])
+
+      observation.each do | obs|
+        next if obs.person.blank?
+          next if obs.answer_concept.blank?
+        previous_date = obs.obs_datetime.strftime('%Y-%m-%d').to_date
+        sex = obs.person.gender
+        age = PatientService.age(obs.person, previous_date)
+        diagnosis_name = obs.answer_concept.fullname rescue ''
+        @disaggregated_diagnosis[diagnosis_name]={
+          "=<4" =>0,
+          "=>5" =>0
+        }if @disaggregated_diagnosis[diagnosis_name].nil?
+        if age.to_i < 5
+           @disaggregated_diagnosis[diagnosis_name]["=<4"]+=1
+         else
+           @disaggregated_diagnosis[diagnosis_name]["=>5"]+=1
+         end
+
+      end
+      @diaggregated_paginated = []
+      @disaggregated_diagnosis.each { | diag, value |
+      @diaggregated_paginated << [diag, value]
+      }
+      render :layout => 'report'
     end
   end

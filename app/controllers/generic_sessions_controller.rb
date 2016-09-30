@@ -2,7 +2,6 @@ class GenericSessionsController < ApplicationController
 	skip_before_filter :authenticate_user!, :except => [:location, :update]
 	skip_before_filter :location_required
 
-
 	def new
 	end
 
@@ -24,9 +23,9 @@ class GenericSessionsController < ApplicationController
 				#raise params[:password].inspect
 				user = User.authenticate(params[:login], params[:password])
 				sign_in(:user, user) if user && user.status == 'active'
-				authenticate_user! if user && user.status == 'active' 
+				authenticate_user! if user && user.status == 'active'
 				session[:return_uri] = nil
-				
+
 		end
 
 		if user_signed_in?
@@ -50,25 +49,26 @@ class GenericSessionsController < ApplicationController
 	end
 
 	# Update the session with the location information
-	def update    
+	def update
 		# First try by id, then by name
 		location = Location.find(params[:location]) rescue nil
 		location ||= Location.find_by_name(params[:location]) rescue nil
 		#raise generic_locations.inspect
 
 		valid_location = (generic_locations.include?(location.name)) rescue false
-		
+
 		unless location and valid_location
 
 			flash[:error] = "Invalid workstation location"
 
 			@login_wards = (CoreService.get_global_property_value('facility.login_wards')).split(',') rescue []
+
 			if (CoreService.get_global_property_value('select_login_location').to_s == "true" rescue false)
 				render :template => 'sessions/select_location'
 			else
 				render :action => 'location'
 			end
-			return    
+			return
 		end
 		self.current_location = location
 		if use_user_selected_activities and not location.name.match(/Outpatient/i)
