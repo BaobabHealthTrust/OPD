@@ -48,19 +48,19 @@
 
   </head>
   <body id="mateme">
-    <div id="container">
-      <div id="content" style = "position : relative; width : 96%; margin-left : -48%">
-
+    <div id="container" >
+      <div id="content" style = "position : relative; width : 96%; margin-left : -48%;">
 
 
         <%= yield %>
         <div id="footer">
           <div id="buttons" style="top:0px">
-            <button id="finishButton" class="button navButton green"><span>Next</span></button>
-            <button id="finishButton" class="button blue navButton" onclick="clear function"><span>Clear</span></button>
-            <button id="finishButton" class="button blue navButton" onclick="clear function"><span>Back</span></button>
-            <button id="cancelButton" class="button navButton red left"><span>Cancel</span></button>
+            <button id="finishButton" class="button navButton green"><span>Finish</span></button>
 
+            <button id="clear" class="button blue navButton" onclick="clear function"><span>Clear</span></button>
+
+            <button id="cancel" class="button navButton red left" onclick="cancel function()"><span>Cancel</span></button>
+             </div>
            </div>
         </div>
 
@@ -68,27 +68,142 @@
       </div>
     </div>
     <script>
-      // try {
-      //   document.getElementById('navigation_value').innerHTML = current + " of " + total;
-      // } catch(e) { }
-      //
-      //  var pageCount = 0;
-      //  document.getElementById("finishButton").onclick = function(){
-      //     //get the items
-      //     var pagesArray = document.getElementsByClassName("syndrome");
-      //
-      //        for (var i = 0; i < pagesArray.length;i++){
-      //          pagesArray[i].style.display = "none";
-      //        }
-      //       if(pageCount==0) {
-      //          pagesArray[0].style.display = "block";
-      //        }else{
-      //          pagesArray[pageCount].style.display = "block";
-      //       }
-      //
-      //    pageCount++;
-      //
-      //  }
+
+      try {
+        document.getElementById('navigation_value').innerHTML = current + " of " + total;
+      } catch(e) { }
+
+       var pageCount = 0;
+        init();
+
+        buttonNext.onclick = function(){
+          //get the items
+           if (pageCount < elements.length)
+              {
+                  goToPage("next");
+                  //hide all first
+                  for ( var  c = 0;c < elements.length;c++) {
+                          elements[c].style.display = "none";
+                   }
+
+
+                  if (pageCount == elements.length-1){
+                      buttonNext.style.display = "none";
+                      buttonFinish.style.display = "block";
+                  }
+                 elements[pageCount].style.display = "block";
+                  noteElement.innerHTML = "Presenting Complaints("+count+"/"+totalElements+")";
+              }
+
+          }
+
+       buttonBack.onclick = function () {
+           if (pageCount != 0)
+            {
+               goToPage("back");
+               //hide all first
+               for ( var  c = 0;c < elements.length;c++) {
+                   elements[c].style.display = "none";
+               }
+               //hide the finish button
+                //buttonFinish.style.display = "none";
+                buttonNext.style.display = "block";
+               if (pageCount == 0){
+                   buttonBack.style.display = "none"
+                   buttonNext.style.display = "block";
+                  // buttonFinish.style.display = "none";
+               }
+               elements[pageCount].style.display = "block";
+               //text to show page count
+               noteElement.innerHTML = "Presenting Complaints("+count+"/"+totalElements+")";
+           }
+         }
+      //send the form for saving
+      buttonFinish.onclick = function(){
+          if (anyCheckBoxChecked()) {
+              document.forms[0].submit();
+          }else{
+              alert("You must atleast select one symptom \nfor you to save the form");
+          }
+
+         }
+
+      buttonClear.onclick = function(){
+         // alert("I am working");
+          var checkBox = document.forms[0].elements["complaints[]"];
+          for(i in checkBox){
+              checkBox[i].checked = false;
+          }
+        }
+      buttonCancel.onclick = function(){
+          window.location = "/patients/show/<%= @patient_id%>";
+      }
+
+      function init(){
+            count = 1;
+            buttonNext =  document.getElementById("next");
+            buttonBack =  document.getElementById("back");
+            buttonFinish =  document.getElementById("finishButton");
+            buttonClear = document.getElementById("clear");
+            buttonCancel = document.getElementById("cancel");
+            noteElement = document.getElementById("label-text");
+            elements = document.getElementsByClassName("syndrome");
+            totalElements = elements.length;
+             if (elements.length == 1)
+              {
+               buttonNext.style.display = "none";
+               buttonBack.style.display = "none";
+               buttonFinish.style.display = "block";
+              }
+              if (pageCount == 0){
+                 buttonBack.style.display = "none";
+              }
+              if (elements.length > 1)
+                  {
+                   // buttonFinish.style.display = "none";
+
+                  }
+            for ( var  c = 0;c < elements.length;c++) {
+                if (c == 0){
+                    elements[c].style.display = "block";
+                     noteElement.innerHTML = "Presenting Complaints("+count+"/"+totalElements+")";
+                }
+                else {
+                    elements[c].style.display = "none";
+                }
+            }
+
+        }
+      function goToPage(where) {
+          if (where == "next") {
+              pageCount += 1;
+              count += 1
+          }else{
+              pageCount -= 1;
+              count -= 1;
+          }
+
+          if(pageCount > 0)
+          {
+              buttonBack.style.display = "block";
+          }else
+              buttonBack.style.display = "none";
+       }
+
+     function anyCheckBoxChecked(){
+         //get all checkbox elemnts
+         var checkBox = document.forms[0].elements["complaints[]"];
+         var checked = false;
+         //iterate through the check boxes and see if checked or not
+         for (i in checkBox){
+             if (checkBox[i].checked){
+                 checked = true;
+                 //break the loop if found
+                 break;
+             }
+         }
+       return checked
+     }
     </script>
   </body>
 </html>

@@ -3,65 +3,173 @@
   <!--title>Patient Dashboard</title-->
   <%= javascript_include_tag 'idsr_complaints' %>
  <%= stylesheet_link_tag 'idsr_complaints' %>
+  <%= stylesheet_link_tag "font-awesome/css/font-awesome.min"%>
 
+ <style>
+   .label{
+       position: fixed;
+       z-index: 1000;
+       border-radius: 5px;
+       float: right;
+       background: #008000;
+       opacity: 1;
+       color: #ffffff;
+       width: 330px;
+       height: 50px;
+       top: 15.6%;
+       right: 2.1%;
+       padding:10px;
+   }
+   .label span{
+       font-weight: bold;
+       font-size: 1.5em;
+   }
+   .nav-controls {width: 99%;
+                  padding-left: 5px;
+                  padding-right: 5px;
+                  margin-top: 0px;
+                  background: rgba(255, 255, 255, 0);;
+                 }
 
+   .nav_button{
+       color: rgba(255, 255, 255, 0.65);
+       background-image: -moz-linear-gradient(top, rgba(32, 32, 32, 0.82), rgba(24, 17, 32, 0.44)) !important;
+       background-image: none;
+       border-radius: 50%;
+       min-width: 63px;
+       min-height: 63px;
+       padding: 3px;
+       border: 2px solid  rgba(13, 118, 255, 0.75);
+   }
+   .nav_button:hover{
+       background-image: -moz-linear-gradient(top, rgba(32, 32, 32, 0.5), rgba(24, 17, 32, 0.44)) !important;
+   }
 
-<form  action="/encounters/create_complaints" method="post">
-  <%= hidden_field_tag "encounter[encounter_type_name]", "NOTES" %>
-  <%= hidden_field_tag "encounter[patient_id]", @patient_id %>
-  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+ .checkbox-custom, .radio-custom {
+       opacity: 0;
+       position: absolute;
+   }
 
-<% syndrome_g1 = ["fever","Influenza like illness","respiratory"] %>
-<% syndrome_g2 = ["Gastrointestinal","Haema"] %>
-<% syndrome_g3 = ["Nephro","Trauma","Cardiovascular"] %>
-<% syndrome_g4 = ["General","Other"] %>
+   .checkbox-custom, .checkbox-custom-label, .radio-custom, .radio-custom-label {
+       display: inline-block;
+       vertical-align: middle;
+       margin: 5px;
+       cursor: pointer;
+   }
 
- <!--div class="syndrome" style="overflow: auto; display: block"-->
- <div id="pages"
- <div class="q w">
+   .checkbox-custom-label, .radio-custom-label {
+       position: relative;
+       font-size: 0.9em;
+       padding: 4px;
+   }
+
+   .checkbox-custom + .checkbox-custom-label:before, .radio-custom + .radio-custom-label:before {
+       content: '';
+       background: #fff;
+       border: 3px solid rgba(18, 10, 24, 0.23);
+       border-radius: 2px;
+       display: inline-block;
+       vertical-align: middle;
+       width: 25px;
+       height: 25px;
+       padding: 2px;
+       margin-right: 15px;
+       text-align: center;
+   }
+
+   .checkbox-custom:checked + .checkbox-custom-label:before {
+       content: "\f00c";
+       font-family: 'FontAwesome';
+       font-size: 25px;
+       vertical-align: middle;
+       text-align: center;
+       background: rgba(11, 176, 85, 0.62); /*rebeccapurple;*/
+       /*background-image: -moz-linear-gradient(top, rgba(26, 95, 15, 0.90), #19ff56) !important;*/
+       color: #fff;
+   }
+
+   .radio-custom + .radio-custom-label:before {
+       border-radius: 50%;
+   }
+
+   .radio-custom:checked + .radio-custom-label:before {
+       /* content: "\f00c";*/
+       /*font-family: 'FontAwesome';*/
+       color: #bbb;
+       background: rgba(11, 176, 85, 0.62);
+       background-image: -moz-linear-gradient(top, rgba(26, 95, 15, 0.90), #19ff56) !important;
+   }
+
+   .checkbox-custom:focus + .checkbox-custom-label, .radio-custom:focus + .radio-custom-label {
+       outline: 1px solid #ddd; /* focus style */
+   }
+   .synd-content{
+       height: 600px;
+       padding-left: 10px;
+       padding-right: 10px;
+       padding-top: 1px;
+       width: 98%;
+       overflow: auto;
+       border-bottom: 1px solid lightgrey ;
+   }
+ </style>
+<div class="label"><span id="label-text"></span></div>
+
+ <div class="synd-content">
+   <form action="/encounters/create_complaints" method="post">
+     <%= hidden_field_tag "encounter[encounter_type_name]","NOTES" %>
+     <%= hidden_field_tag "encounter[patient_id]",@patient_id %>
+     <%= hidden_field_tag "encounter[encounter_datetime]",DateTime.now() %>
+     <%= hidden_field_tag "encounter[provider_id]",current_user.person_id %>
+
+     <% syndrome_g1 = ["fever","Influenza like illness","respiratory"] %>
+     <% syndrome_g2 = ["Gastrointestinal","Haema"] %>
+     <% syndrome_g3 = ["Nephro","Trauma","Cardiovascular"]
+        syndrome_g4 = ["General","Other"]
+     %>
+ <div class="syndrome" style="overflow: auto; display: none">
        <% syndrome_g1.each do |synd| %>
        <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
-       <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
+       <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
         <% symptoms = concept_set(synd)%>
          <% symptoms.each do |compl| %>
-       <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s%><%= compl%></span>
+       <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
       <%end%>
       </fieldset>
       <%end%>
  </div>
 
- <div class = "w">
+ <div class = "syndrome" style="overflow: auto;display: none">
         <% syndrome_g2.each do |synd| %>
             <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
-              <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
+              <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
               <% symptoms = concept_set(synd)%>
               <% symptoms.each do |compl| %>
-                  <span class="chkbx"><%= check_box_tag compl, compl%><%= compl%></span>
+                  <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
               <%end%>
             </fieldset>
         <%end%>
  </div>
 
- <div class = "w">
+ <div class = "syndrome">
         <% syndrome_g3.each do |synd| %>
             <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
-              <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
+              <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
               <% symptoms = concept_set(synd)%>
               <% symptoms.each do |compl| %>
-                  <span class="chkbx"><%= check_box_tag compl, compl%><%= compl%></span>
+                  <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
               <%end%>
             </fieldset>
         <%end%>
    </div>
 
-  <div class="w">
+  <div class="syndrome">
         <% syndrome_g4.each do |synd| %>
             <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
-              <legend style="font-size: 26px;font-weight: bold;"><%= synd %></legend>
+              <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
               <% symptoms = concept_set(synd)%>
               <% symptoms.each do |compl| %>
-                  <span class="chkbx"><%= check_box_tag compl, compl%><%= compl%></span>
+                  <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
               <%end%>
             </fieldset>
         <%end%>
@@ -69,8 +177,13 @@
 
 <!--fieldset id="btns"-->
     <!--%= submit_tag "Save symptoms", :id => 'svbtn' %-->
+  </form>
+</div> <!--container ends here -->
 
-
+<div class="nav-controls">
+  <button class="nav_button left" id="back" style="float:left;"><i class="fa fa-chevron-left fa-2x"></i></button>
+  <button class="nav_button right" id="next" style="float: right"><i class="fa fa-chevron-right fa-2x"></i></button>
+</div>
 <!--%= will_paginate @complaints%-->
 <!--%= button_to 'Cancel', :controller => 'patients', :action => 'show', :id => @patient_id%>
 <button >Clear all</button>
