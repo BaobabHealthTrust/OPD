@@ -59,7 +59,7 @@
 
             <button id="clear" class="button blue navButton" onclick="clear function"><span>Clear</span></button>
 
-            <button id="cancelButton" class="button navButton red left" onclick="cancel function()"><span>Cancel</span></button>
+            <button id="cancel" class="button navButton red left" onclick="cancel function()"><span>Cancel</span></button>
              </div>
            </div>
         </div>
@@ -114,12 +114,29 @@
                   // buttonFinish.style.display = "none";
                }
                elements[pageCount].style.display = "block";
+               //text to show page count
                noteElement.innerHTML = "Presenting Complaints("+count+"/"+totalElements+")";
            }
          }
       //send the form for saving
       buttonFinish.onclick = function(){
-          document.forms[0].submit();
+          if (anyCheckBoxChecked()) {
+              document.forms[0].submit();
+          }else{
+              alert("You must atleast select one symptom \nfor you to save the form");
+          }
+
+         }
+
+      buttonClear.onclick = function(){
+         // alert("I am working");
+          var checkBox = document.forms[0].elements["complaints[]"];
+          for(i in checkBox){
+              checkBox[i].checked = false;
+          }
+        }
+      buttonCancel.onclick = function(){
+          window.location = "/patients/show/<%= @patient_id%>";
       }
 
       function init(){
@@ -128,6 +145,7 @@
             buttonBack =  document.getElementById("back");
             buttonFinish =  document.getElementById("finishButton");
             buttonClear = document.getElementById("clear");
+            buttonCancel = document.getElementById("cancel");
             noteElement = document.getElementById("label-text");
             elements = document.getElementsByClassName("syndrome");
             totalElements = elements.length;
@@ -171,6 +189,21 @@
           }else
               buttonBack.style.display = "none";
        }
+
+     function anyCheckBoxChecked(){
+         //get all checkbox elemnts
+         var checkBox = document.forms[0].elements["complaints[]"];
+         var checked = false;
+         //iterate through the check boxes and see if checked or not
+         for (i in checkBox){
+             if (checkBox[i].checked){
+                 checked = true;
+                 //break the loop if found
+                 break;
+             }
+         }
+       return checked
+     }
     </script>
   </body>
 </html>
