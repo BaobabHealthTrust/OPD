@@ -133,7 +133,7 @@
        <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
         <% symptoms = concept_set(synd)%>
          <% symptoms.each do |compl| %>
-       <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
+       <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
       <%end%>
       </fieldset>
       <%end%>
@@ -145,7 +145,7 @@
               <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
               <% symptoms = concept_set(synd)%>
               <% symptoms.each do |compl| %>
-                  <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
+                  <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
               <%end%>
             </fieldset>
         <%end%>
@@ -157,7 +157,7 @@
               <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
               <% symptoms = concept_set(synd)%>
               <% symptoms.each do |compl| %>
-                  <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
+                  <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
               <%end%>
             </fieldset>
         <%end%>
@@ -169,7 +169,7 @@
               <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
               <% symptoms = concept_set(synd)%>
               <% symptoms.each do |compl| %>
-                  <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
+                  <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
               <%end%>
             </fieldset>
         <%end%>
