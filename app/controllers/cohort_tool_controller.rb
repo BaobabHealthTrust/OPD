@@ -2647,6 +2647,8 @@ class CohortToolController < ApplicationController
       @start_date = '2016-09-01 00:00:00'
       @end_date = '2016-09-23 23:59:59'
 
+      @report_month = '2015-09'
+
       @disaggregated_diagnosis = {}
       # @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
       # @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
@@ -2657,22 +2659,19 @@ class CohortToolController < ApplicationController
       #       "Diagnosis", "primary diagnosis","secondary diagnosis"]]).map(&:concept_id)
       # observation =Observation.find(:all,:include=>{:person=>{}},
 
-        qqq = ConceptName.find(:all, :conditions => ["name IN (?)",["Idsr Monthly Summary"]]).map(&:concept_id)
-      #  raise qqq.inspect
-    # #
-        www = ConceptSet.find(:all, :conditions => ["concept_set IN (?)",qqq]).map(&:concept_id)
-     #  raise www.inspect
+      idsr_monthly_set = ConceptName.find(:all, :conditions => ["name IN (?)",["Idsr Monthly Summary"]]).map(&:concept_id)
+      idsr_monthly_set_members = ConceptSet.find(:all, :conditions => ["concept_set IN (?)",idsr_monthly_set]).map(&:concept_id)
 
-      eee = ConceptName.find(:all, :conditions => ["concept_name.concept_id IN (?)",www]).map(&:name)
+    #  concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["primary diagnosis"]]).map(&:concept_id) #yabwino
 
-    #  raise eee.inspect
-
-      concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["primary diagnosis"]]).map(&:concept_id)
+      concept_ids = ConceptName.find(:all, :conditions => ["concept_name.concept_id IN (?)",idsr_monthly_set_members]).map(&:concept_id)
       observation = Observation.find(:all,:include=>{:person=>{}},
 
-        :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.concept_id IN (?)",
+        :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.value_coded IN (?)",
+          ##:conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.value_coded IN (?)",
           # @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
-          @start_date, @end_date, concept_ids])
+          @report_month, concept_ids])
+        #  @start_date, @end_date, concept_ids])
 
       observation.each do | obs|
         next if obs.person.blank?
