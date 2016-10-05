@@ -2616,10 +2616,9 @@ class CohortToolController < ApplicationController
 
     end
 
-    def idsr_monthly_summary_report
-    end
 
     #This action is used to retrieve data to be display on the IDSR MONTHLY REPORT
+    # Is called by Ajax and renders results in json
     def idsr_monthly_report_summary
       date = params[:year_month].split('-')
       @start_date = Date.new(date[0].to_i,date[1].to_i)
@@ -2634,7 +2633,7 @@ class CohortToolController < ApplicationController
       concept_ids = ConceptName.find(:all,
        :conditions => ["concept_name.concept_id IN (?)",
          idsr_monthly_set_members]).map(&:concept_id)
-         
+
       observation = Observation.find(:all,:include=>{:person=>{}},
            :conditions => ["obs.obs_datetime >= ? AND obs.obs_datetime <= ?
              AND obs.value_coded IN (?)",@start_date, @end_date,concept_ids])
