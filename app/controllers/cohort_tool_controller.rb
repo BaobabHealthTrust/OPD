@@ -2616,85 +2616,59 @@ class CohortToolController < ApplicationController
 
     end
 
-    def idsr_monthly_summary_report
-    end
 
-    def idsr_monthly_summary
-
-#       @mberzu = Observation.find_by_sql("select P.birthdate,obs_datetime, O.person_id,concept_id,value_coded, count(value_coded) as count,
-# TIMESTAMPDIFF(YEAR,birthdate,obs_datetime) AS age
-# from obs O, person P
-# where O.person_id = P.person_id
-# and date(obs_datetime) = '2016-09-23'
-# and value_coded !=''
-# group by person_id;")
-#
-#       raise @mberzu.inspect
-
-      @report_name = 'IDSR Monthly Summary'
-      @logo = CoreService.get_global_property_value('logo').to_s
-      @current_location_name =Location.current_health_center.name
-      start_year = params[:start_year]
-      start_month = params[:start_month]
-      start_day = params[:start_day]
-      end_year = params[:end_year]
-      end_month = params[:end_month]
-      end_day = params[:end_day]
-      @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-      # @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      # @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
-
-      @start_date = '2016-09-01 00:00:00'
-      @end_date = '2016-09-23 23:59:59'
-
-      @report_month = '2015-09'
-
+    #This action is used to retrieve data to be display on the IDSR MONTHLY REPORT
+    # Is called by Ajax and renders results in json
+    def idsr_monthly_report_summary
+      date = params[:year_month].split('-')
+      @start_date = Date.new(date[0].to_i,date[1].to_i)
+      @end_date = @start_date + 1.month - 1.day
       @disaggregated_diagnosis = {}
-      # @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
-      # @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
-      @formated_start_date = @start_date
-      @formated_end_date = @end_date
 
-      # concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["Additional diagnosis",
-      #       "Diagnosis", "primary diagnosis","secondary diagnosis"]]).map(&:concept_id)
-      # observation =Observation.find(:all,:include=>{:person=>{}},
+      idsr_monthly_set = ConceptName.find(:all,
+        :conditions=>["name IN (?)",["Idsr Monthly Summary"]]).map(&:concept_id)
+      idsr_monthly_set_members = ConceptSet.find(:all,
+        :conditions=>["concept_set IN (?)",idsr_monthly_set]).map(&:concept_id)
 
-      idsr_monthly_set = ConceptName.find(:all, :conditions => ["name IN (?)",["Idsr Monthly Summary"]]).map(&:concept_id)
-      idsr_monthly_set_members = ConceptSet.find(:all, :conditions => ["concept_set IN (?)",idsr_monthly_set]).map(&:concept_id)
+      concept_ids = ConceptName.find(:all,
+       :conditions => ["concept_name.concept_id IN (?)",
+         idsr_monthly_set_members]).map(&:concept_id)
 
-    #  concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)",["primary diagnosis"]]).map(&:concept_id) #yabwino
-
-      concept_ids = ConceptName.find(:all, :conditions => ["concept_name.concept_id IN (?)",idsr_monthly_set_members]).map(&:concept_id)
       observation = Observation.find(:all,:include=>{:person=>{}},
-
-        :conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.value_coded IN (?)",
-          ##:conditions => ["obs.obs_datetime >= TIMESTAMP(?) AND obs.obs_datetime  <= TIMESTAMP(?) AND obs.value_coded IN (?)",
-          # @start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),
-          @report_month, concept_ids])
-        #  @start_date, @end_date, concept_ids])
+           :conditions => ["obs.obs_datetime >= ? AND obs.obs_datetime <= ?
+             AND obs.value_coded IN (?)",@start_date, @end_date,concept_ids])
 
       observation.each do | obs|
         next if obs.person.blank?
           next if obs.answer_concept.blank?
-        previous_date = obs.obs_datetime.strftime('%Y-%m-%d').to_date
-        sex = obs.person.gender
-        age = PatientService.age(obs.person, previous_date)
-        diagnosis_name = obs.answer_concept.fullname rescue ''
-        @disaggregated_diagnosis[diagnosis_name]={
-          "=<4" =>0,
-          "=>5" =>0
-        }if @disaggregated_diagnosis[diagnosis_name].nil?
-        if age.to_i < 5
-           @disaggregated_diagnosis[diagnosis_name]["=<4"]+=1
-         else
-           @disaggregated_diagnosis[diagnosis_name]["=>5"]+=1
-         end
+         previous_date = obs.obs_datetime.strftime('%Y-%m-%d').to_date
+         sex = obs.person.gender
+         age = PatientService.age(obs.person, previous_date)
+         diagnosis_name = obs.answer_concept.fullname rescue ''
 
+         @disaggregated_diagnosis[diagnosis_name]={
+           "=<4" =>0,
+           "=>5" =>0
+         }
+        if @disaggregated_diagnosis[diagnosis_name].nil?
+           if age.to_i < 5
+            @disaggregated_diagnosis[diagnosis_name]["=<4"]+=1
+          else
+            @disaggregated_diagnosis[diagnosis_name]["=>5"]+=1
+          end
+        end
       end
-      @diaggregated_paginated = []
-      @disaggregated_diagnosis.each { | diag, value |
-      @diaggregated_paginated << [diag, value]
-      }
-      render :layout => 'report'
+       @diaggregated_paginated = []
+       @disaggregated_diagnosis.each { | diag, value |
+       @diaggregated_paginated << [diag, value]
+     }
+      render :json=> @diaggregated_paginated
+    end
+
+    #This action is used to display form content on the IDSR MONTHLY REPORT
+    def idsr_monthly_summary
+      @report_name = 'IDSR Monthly Summary'
+      @logo = CoreService.get_global_property_value('logo').to_s
+      @current_location_name =Location.current_health_center.name
     end
   end
