@@ -50,7 +50,7 @@
         <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 
 
-        <%= select_tag "choice", options_for_select(["","Presenting complaints","Clinical notes"]), 
+        <%= select_tag "choice", options_for_select(["","Presenting complaints","Clinical notes"]),
           { :helpText => 'Select task(s)',
             :id => "choice",
             :multiple => true } %>

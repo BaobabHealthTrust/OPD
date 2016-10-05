@@ -87,8 +87,9 @@
           <% end %>
 
           <% if  session[:datetime].blank? %>
-          <option value='/encounters/idsr_complaints?patient_id=<%= @patient.id %>'>IDSR complaints</option>
-            <option value='/encounters/new/presenting_complaints?patient_id=<%= @patient.id %>'>Clinical Notes</option>
+          <option value='/encounters/idsr_complaints?patient_id=<%= @patient.id %>'>Presenting Complaints</option>
+            <!--option value='/encounters/new/presenting_complaints?patient_id=<!--%= @patient.id %>'>Clinical Notes</option-->
+            <option value='/encounters/new/idsr_clinical_notes?patient_id=<%= @patient.id %>'>Clinical Notes</option>
             <option value='/encounters/new/lab_orders?patient_id=<%= @patient.id -%>'>Lab Orders</option>
             <option value='/encounters/new/malaria_lab_results?patient_id=<%= @patient.id %>'>Lab Results</option>
           <% end %>
