@@ -1,36 +1,25 @@
 <html>
   <head>
     <%= stylesheet_link_tag 'idsr_monthly_summary' %>
+    <!-- <%= javascript_include_tag 'jquery' %> -->
     <%= stylesheet_link_tag 'jquery-ui' %>
     <%= javascript_include_tag 'jquery-3.1.1.min' %>
     <%= javascript_include_tag 'jquery.mtz.monthpicker' %>
-
     <script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script>
     <script>
-      jQuery(document).ready(function($) {
-        $('#table_id').dataTable({
-          "bAutoWidth": true,
-          "bPaginate": false,
-          "bProcessing": true,
-          "sScrollY": "400px",
-          "bInfo": true,
-          "bPaginate": false
-        });
-        search_box = $('#table_id').dataTable()
-        search = document.getElementsByTagName("input")[0];
-        search.setAttribute("id","search");
-        document.getElementById('search').setAttribute("onclick","showKeyboard();");
-        document.getElementById("find").innerHTML = "<span>Back</span>";
-        document.getElementById("find").style.cssFloat = "left";
-        //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-        keyboard = document.getElementsByClassName("keypad")[0]
-        function getCharButtonSetID(character,id){
-          return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' +"<span style='width:32px'>"+character+"</span>"+ "</button>";
-        }
+    jQuery(document).ready(function($) {
+       $('#table_id').dataTable({
+         "bAutoWidth": true,
+         "bPaginate": false,
+         "bProcessing": true,
+         "sScrollY": "400px",
+         "bInfo": true,
+         "bPaginate": false
+       });
+     })
     </script>
-
   </head>
-  <body >
+  <body>
     <%= image_tag(@logo, :class => "logo")%>
     <br /><b style="margin-left:75px"><%= @current_location_name %></b><br />
 
@@ -38,7 +27,7 @@
 
     <!-- <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Dates : <--%= "#{@formated_start_date} to #{@formated_end_date}"%> <--%= "<br> Total Registered: #{@total_registered.length}" if (@report_name.upcase == "TOTAL_REGISTERED") %></b> -->
     <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px">
-      Reporting Year and Month:<input type="text" id="month_year"></b>
+      Reporting Year and Month:<input type="text" id="year_month"></b>
  <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"></b>
 
     <div>
@@ -71,21 +60,8 @@
             </th>
           </tr>
         </thead>
+        <tbody id="table_content">
 
-        <tbody>
-
-          <% @diaggregated_paginated.each do |key,value| %>
-
-            <tr>
-              <td> <span style="display:block; width:90%;"> <%= key.to_s %> </span> </td>
-
-              <td align="left" > <%= "<span class='basic_span bspan'> #{value["=<4"]}</span>
-                <span class='basic_span bspan'> #{value["=>5"]}" %> </span>
-
-                <% totals = value["=<4"] + value["=>5"] %>
-                <%= "<span class='basic_span bspan'> #{totals}" %></span </td>
-            </tr>
-          <% end %>
         </tbody>
       </table>
     </div>
@@ -100,7 +76,7 @@
     </center>
   </div>
   <script>
-  $('#month_year').monthpicker({pattern: 'yyyy-mm',
+  $('#year_month').monthpicker({pattern: 'yyyy-mm',
       selectedYear: 2015,
       startYear: 1900,
       finalYear: 2016,});
@@ -110,6 +86,18 @@
       finalYear: 2018,
       openOnFocus: false // Let's now use a button to show the widget
   };
+  </script>
+  <script>
+jQuery("#year_month").change(function(e){
+    var year_month =  document.getElementById("year_month").value;
+    jQuery("#table_id tbody").empty();
+    jQuery.ajax({url: "/cohort_tool/idsr_monthly_report_summary?year_month="+year_month,
+            success: function(response){
+              jQuery.each(response,function(index, value){
+                jQuery("#table_id tbody").append('<tr><td><span style="display:block; width:90%;">'+value[0]+'</span></td><td><span class="basic_span bspan">'+value[1]['=>5']+'</span><span class="basic_span bspan">'+value[1]['=<4']+'</span><span class="basic_span bspan">'+ eval(value[1]['=<4'] + value[1]['=>5'])+'</span></td></tr>');
+              })
+            }});
+  });
   </script>
 </body>
 </html>
