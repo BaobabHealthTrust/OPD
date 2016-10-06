@@ -90,7 +90,7 @@
   <script>
 jQuery("#year_month").change(function(e){
     var year_month =  document.getElementById("year_month").value;
-    jQuery("#table_id tbody").empty();
+    jQuery("#table_id tbody").empty(); // Clear the form
     jQuery.ajax({url: "/cohort_tool/idsr_monthly_report_summary?year_month="+year_month,
             success: function(response){
               jQuery.each(response,function(index, value){
