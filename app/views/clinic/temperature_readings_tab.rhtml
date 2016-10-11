@@ -1,9 +1,7 @@
-<link type="text/css" href="/touchscreentoolkit/lib/stylesheets/touch-fancy.css" rel="stylesheet">
+<!-- <link type="text/css" href="/touchscreentoolkit/lib/stylesheets/touch-fancy.css" rel="stylesheet"> -->
 <link type="text/css" href="/touchscreentoolkit/lib/stylesheets/dashboard.css" rel="stylesheet">
-<link type="text/css" href="/touchscreentoolkit/lib/stylesheets/graytabs.css" rel="stylesheet">
-<script type="text/javascript" src="/touchscreentoolkit/lib/javascripts/dashboard.js" language="javascript"></script>
+<!-- <link type="text/css" href="/touchscreentoolkit/lib/stylesheets/graytabs.css" rel="stylesheet"> -->
 <script src="/touchscreentoolkit/lib/javascripts/standard.js"> </script>
-<script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer=""></script>
 <style type="text/css">
   body {
     -moz-user-select:none;
@@ -51,6 +49,7 @@
         <td> <%=t.temperature %> </td>
         <td>
           <button id="triage" class="blue" style="margin: 5px 0px 0px; min-width: 100px;"><span>Triage</span></button>
+          <!-- <%= button_to "Triage", '', :method => :post, :class => "blue" %> -->
         </td>
       </tr>
     <%end%>
