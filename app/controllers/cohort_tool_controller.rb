@@ -2622,11 +2622,14 @@ class CohortToolController < ApplicationController
     def idsr_monthly_report_summary
       date = params[:year_month].split('-')
       @start_date = Date.new(date[0].to_i,date[1].to_i)
+
       @end_date = @start_date + 1.month - 1.day
       @disaggregated_diagnosis = {}
 
       idsr_monthly_set = ConceptName.find(:all,
         :conditions=>["name IN (?)",["Idsr Monthly Summary"]]).map(&:concept_id)
+
+
       idsr_monthly_set_members = ConceptSet.find(:all,
         :conditions=>["concept_set IN (?)",idsr_monthly_set]).map(&:concept_id)
 
@@ -2650,6 +2653,7 @@ class CohortToolController < ApplicationController
            "=<4" =>0,
            "=>5" =>0
          }
+
         if @disaggregated_diagnosis[diagnosis_name].nil?
            if age.to_i < 5
             @disaggregated_diagnosis[diagnosis_name]["=<4"]+=1
@@ -2670,5 +2674,6 @@ class CohortToolController < ApplicationController
       @report_name = 'IDSR Monthly Summary'
       @logo = CoreService.get_global_property_value('logo').to_s
       @current_location_name =Location.current_health_center.name
+      raise @curr
     end
   end
