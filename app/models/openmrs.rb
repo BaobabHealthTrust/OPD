@@ -87,7 +87,7 @@ module Openmrs
     obs.person_id = self.patient_id
     obs.encounter_id = self.id
     obs.concept_id = ConceptName.find_by_name("WORKSTATION LOCATION").concept_id
-    obs.value_text = Location.current_location.name
+    obs.value_text = Location.current_location.name rescue nil
     obs.obs_datetime = self.encounter_datetime
     obs.save
   end
