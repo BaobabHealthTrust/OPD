@@ -2654,7 +2654,7 @@ class CohortToolController < ApplicationController
            "=>5" =>0
          }
 
-        if @disaggregated_diagnosis[diagnosis_name].nil?
+        if @disaggregated_diagnosis[diagnosis_name] != nil
            if age.to_i < 5
             @disaggregated_diagnosis[diagnosis_name]["=<4"]+=1
           else
@@ -2666,6 +2666,7 @@ class CohortToolController < ApplicationController
        @disaggregated_diagnosis.each { | diag, value |
        @diaggregated_paginated << [diag, value]
      }
+     #raise @diaggregated_paginated.inspect
       render :json=> @diaggregated_paginated
     end
 
@@ -2674,6 +2675,6 @@ class CohortToolController < ApplicationController
       @report_name = 'IDSR Monthly Summary'
       @logo = CoreService.get_global_property_value('logo').to_s
       @current_location_name =Location.current_health_center.name
-      raise @curr
+      @obs_start_year =  Observation.first.obs_datetime.year
     end
   end

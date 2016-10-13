@@ -77,9 +77,9 @@
   </div>
   <script>
   $('#year_month').monthpicker({pattern: 'yyyy-mm',
-      selectedYear: 2015,
-      startYear: 1900,
-      finalYear: 2016,});
+      selectedYear: new Date().getFullYear(),
+      startYear: <%= @obs_start_year%>,
+      finalYear: new Date().getFullYear()});
   	var options = {
       selectedYear: 2015,
       startYear: 2008,
