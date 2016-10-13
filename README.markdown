@@ -14,7 +14,9 @@ Get a source code from github by typing "git clone git@github.com:BaobabHealthTr
 Enter into the root of your application by typing "cd OPD"
 Type "cp config/application.yml.example config/application.yml"
 Type "cp config/database.yml.example config/database.yml"
+Type "cp config/dashboard.yml.example config/dashboard.yml"
 Note: Open config/database.yml and edit the file. Provide any database name to be used in your application. Do not forget to provide mysql password in the same file.
+Note: Open dashboard.yml and change the username and password to match the one active on the surveillance dashboard system.
 Type "script/initial_database_setup.sh development mpc". Please be patient while the script is running. This may take some time.
 Type "script/runner script/load_user_activation_table.rb" This script is for activating users.
 Type "sudo bundle install"
