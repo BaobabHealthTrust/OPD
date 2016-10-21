@@ -2654,18 +2654,19 @@ class CohortToolController < ApplicationController
            "=>5" =>0
          }
 
-        if @disaggregated_diagnosis[diagnosis_name] != nil
+    #    if @disaggregated_diagnosis[diagnosis_name] != nil
            if age.to_i < 5
             @disaggregated_diagnosis[diagnosis_name]["=<4"]+=1
           else
             @disaggregated_diagnosis[diagnosis_name]["=>5"]+=1
           end
-        end
-      end
+  #      end
+  #    end
        @diaggregated_paginated = []
        @disaggregated_diagnosis.each { | diag, value |
        @diaggregated_paginated << [diag, value]
      }
+   end
      #raise @diaggregated_paginated.inspect
       render :json=> @diaggregated_paginated
     end

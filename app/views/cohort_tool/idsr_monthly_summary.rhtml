@@ -95,8 +95,11 @@ jQuery("#year_month").change(function(e){
             success: function(response){
               jQuery.each(response,function(index, value){
                 jQuery("#table_id tbody")
-                .append('<tr><td><span style="display:block; width:90%;">'+value[0]+'</span></td><td><span class="basic_span bspan">'+value[1]['=>5']+'</span><span class="basic_span bspan">'
-                +value[1]['=<4']+'</span><span class="basic_span bspan">'+ eval(value[1]['=<4'] + value[1]['=>5'])+'</span></td></tr>');
+                .append('<tr><td><span style="display:block; width:90%;">'
+                +value[0]+'</span></td><td><span class="basic_span bspan">'
+                +value[1]['=<4']+'</span><span class="basic_span bspan">'
+                +value[1]['=>5']+'</span><span class="basic_span bspan">'
+                + eval(value[1]['=<4'] + value[1]['=>5'])+'</span></td></tr>');
               })
             }});
   });
