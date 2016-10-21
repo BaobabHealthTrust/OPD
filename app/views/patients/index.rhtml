@@ -109,6 +109,7 @@
             <% end %>
           <% end %>
           <option value='/patients/treatment_dashboard/<%= @patient.id %>'>Dispensation</option>
+          <option value='/encounter_types?patient_id=<%= @patient.id -%>'>Outcomes</option>
 
           <%  if @spine_clinician  %>
             <option value="/encounters/new/influenza_data?patient_id=<%=@patient.patient_id%>"> Influenza </option>
@@ -140,7 +141,7 @@
 
               <option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Tasks</option>
             <% else %>
-              <option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Outcomes</option>
+              <!--option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Outcomes</option-->
             <% end %>
             <!--<% if show_lab_results %>
                                                                                                                                         <option link="/lab/results/<%=@patient.id -%>">Lab results</option>

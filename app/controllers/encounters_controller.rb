@@ -175,7 +175,13 @@ class EncountersController < GenericEncountersController
 			@ipd_wards = @ipd_wards.compact.sort
 		end
 
-		redirect_to "/" and return unless @patient
+    if (params[:encounter_type].upcase rescue '') == "REFER_PATIENT_OUT"
+			@facilities = Location.all.map { |e| e.name}
+			@facilities = @facilities.compact.sort
+
+		end
+
+		redirect_to "/patients/show/<%= params[:patient_id]" and return unless @patient
 
 		redirect_to next_task(@patient) and return unless params[:encounter_type]
 

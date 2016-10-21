@@ -8,7 +8,7 @@
 </style>
 
 <script>
-  var tt_cancel_destination = "/patients/programs_dashboard/<%= @patient.patient_id %>"
+  var tt_cancel_destination = "/patients/show/<%= params[:patient_id] %>"
   var program_date_completed = "<%= @program_date_completed %>"
 
   var current_state_input_box = null
@@ -144,102 +144,24 @@
 	//		} );
 		})(jQuery);
   }
-
-	function submitExitFromCareForm(){
-		if (selectedValue('initial_state').toUpperCase() == "PATIENT DIED") {
-			prepareExitFromCareForm();
-		}
-		document.getElementById('program').submit();
-	}
-
-	function setFinishButtonToSubmitExitFromCareForm() {
-		if(selectedValue('initial_state').toUpperCase() == 'PATIENT DIED') {
-			document.getElementById('nextButton').setAttribute("onmousedown","submitExitFromCareForm()");
-		}
-	}
 </script>
-<form id='program' action="/programs/update" method = 'post'>
+
+
+<form id='outcome' action="/encounters/create" method='post'>
   <%= hidden_field_tag :patient_id, @patient.id %>
   <%= hidden_field_tag :patient_program_id, @patient_program_id %>
   <%= hidden_field_tag :location_id, Location.current_health_center.id %>
 
-  <%= select_tag 'current_state', params[:current_state],
+  <%= touch_select_tag "REFER OUT", @patient, options_for_select(@facilities),
       {:id => 'initial_state',
        :field_type => 'alpha',
-       :helpText => "New outcome",
+       :helpText => "Refer out to",
        :tt_onLoad => "resetNextButtonCaption();set_workflow_for_states();",
-       :ajaxURL => "",
        :validationJS =>"validProgram()",
-       :validationMessage => "#{@program_name}<br/>is closed<br/>Closed on: #{@program_date_completed}",
        :tt_pageStyleClass => "NoKeyboard",
-       :allowFreeText => false } %>
+       :allowFreeText => true } %>
 
   <% initial_date = "#{session[:datetime].strftime('%Y-%m-%d')}" rescue "#{(Date.today).strftime('%Y-%m-%d')}"%>
-
-  <%= text_field_tag 'current_date', initial_date,
-        {:id => 'current_date',
-         :field_type => 'date',
-         :tt_onLoad => "changeNextButtonCaption()",
-         :helpText => "New outcome start date",
-         :max => "#{(Date.today).strftime('%Y-%m-%d')}",
-         :validationJS =>"validStartDate()",
-         :validationMessage => "Start date is overlapping with other states start dates",
-         :tt_pageStyleClass => "Date DatesOnly"} %>
-
-  <script>
-    function resetNextButtonCaption(){
-      $('nextButton').innerHTML = "<span>Next</span>";
-    }
-
-    function changeNextButtonCaption(){
-      if((current_state_input_box.value.toUpperCase() != 'PATIENT TRANSFERRED OUT') && (current_state_input_box.value.toUpperCase() != 'REFERRED TO ANOTHER FACILITY')){
-        $('nextButton').innerHTML = "<span>Finish</span>";
-      }
-    }
-
-    function resetNextButtonCaption(){
-      $('nextButton').innerHTML = "<span>Next</span>";
-    }
-
-    function changeNextButtonText(){
-      if((current_state_input_box.value.toUpperCase() == 'REFERRED TO ANOTHER FACILITY')){
-        $('nextButton').innerHTML = "<span>Finish</span>";
-      }
-    }
-  </script>
-
-	<%= touch_select_tag "Reason for exiting care", @patient, concept_set_options("Place of Death"),
-		{
-			:id => "place_of_death",
-			:multiple => false,
-    	:condition => "(selectedValue('initial_state').toUpperCase() == 'PATIENT DIED')",
-    	:tt_onLoad => "changeNextButtonCaption();setFinishButtonToSubmitExitFromCareForm()",
-			:helpText => 'Place where death occured'
-		} %>
-
-  <%= select_tag 'transfer_out_location_id', nil,
-      {:id => 'transfer_out_location_id',
-       :field_type => 'alpha',
-       :helpText => "Referral out facility",
-       :ajaxURL => '/programs/locations?q=',
-       :tt_onLoad => "changeNextButtonText();",
-       :condition => "current_state_input_box.value.toUpperCase() == 'REFERRED TO ANOTHER FACILITY'",
-       :allowFreeText => true } %>
-
-  <%= select_tag 'transfer_out_location_id', nil,
-      {:id => 'transfer_out_location_id',
-       :field_type => 'alpha',
-       :helpText => "Transfer out to location",
-       :ajaxURL => '/programs/locations?q=',
-       :condition => "current_state_input_box.value.toUpperCase() == 'PATIENT TRANSFERRED OUT'",
-       :allowFreeText => true } %>
-
-  <%= touch_yes_no_unknown_tag "TRANSFER WITHIN RESPONSIBILITY", @patient, nil,
-      {:id => "transfer_within_responsibility",
-       :optional => false,
-       :condition => "current_state_input_box.value.toUpperCase() == 'PATIENT TRANSFERRED OUT'",
-       :helpText => "Transfer within responsibility (e.g. District)" } %>
-
 
   <%= hidden_field_tag "encounter[encounter_type_name]", "TRANSFER OUT" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
