@@ -8,7 +8,10 @@
 </style>
 
 <script>
-  var tt_cancel_destination = "/patients/show/<%= params[:patient_id] %>"
+  var tt_cancel_destination = "/patients/show/<%= @patient.id%>"
+  </script>
+
+  <script>
   var program_date_completed = "<%= @program_date_completed %>"
 
   var current_state_input_box = null
