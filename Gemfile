@@ -13,5 +13,8 @@ gem 'mechanize', '2.7.0'
 gem 'mysql'
 gem 'activerecord-mysql2-adapter','0.0.3'
 gem 'paginate'
+<<<<<<< HEAD
+=======
 gem 'rake', '0.8.7'
+>>>>>>> 994c2602d27fd9ec58811002b7b4c53910f37f90
 gem 'passenger', '4.0.53'
