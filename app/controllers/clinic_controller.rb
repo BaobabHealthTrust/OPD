@@ -62,7 +62,7 @@ class ClinicController < GenericClinicController
       ["Update DHIS2", "/report/update_dhis"],
       ["Malaria Report", "/report/malaria_report_menu"],
       ["LA Report", "/report/la_report_menu"],
-      ["IDSR Monthly Summary", "/cohort_tool/idsr_monthly_summary"]
+      ["IDSR Monthly Summary", "/cohort_tool/monthly_idsr_report_menu"]
     ]
     #if allowed_hiv_viewer
     #@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]

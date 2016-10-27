@@ -2677,5 +2677,77 @@ class CohortToolController < ApplicationController
       @logo = CoreService.get_global_property_value('logo').to_s
       @current_location_name =Location.current_health_center.name
       @obs_start_year =  Observation.first.obs_datetime.year
+
+      render :layout => 'report'
+    end
+
+    def monthly_idsr_report_menu
+      @report_name = 'idsr monthly summary report'
+    end
+
+    def monthly_idsr_report
+      @report_name = params[:report_name]
+      @logo = CoreService.get_global_property_value('logo').to_s
+      @current_location_name =Location.current_health_center.name
+      start_year = params[:start_year]
+      start_month = params[:start_month]
+      start_day = params[:start_day]
+      end_year = params[:end_year]
+      end_month = params[:end_month]
+      end_day = params[:end_day]
+      @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
+      # @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+      # @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+
+      # @start_date = '2016-10-01 00:00:00'
+      # @end_date = '2016-10-27 26:59:59'
+
+      @start_date = params[:start_date].to_date
+      @end_date = params[:end_date].to_date
+
+      @disaggregated_diagnosis = {}
+      @formated_start_date = @start_date
+      @formated_end_date = @end_date
+
+      idsr_monthly_set = ConceptName.find(:all,
+        :conditions=>["name IN (?)",["Idsr Monthly Summary"]]).map(&:concept_id)
+
+
+      idsr_monthly_set_members = ConceptSet.find(:all,
+        :conditions=>["concept_set IN (?)",idsr_monthly_set]).map(&:concept_id)
+
+      concept_ids = ConceptName.find(:all,
+       :conditions => ["concept_name.concept_id IN (?)",
+         idsr_monthly_set_members]).map(&:concept_id)
+
+      observation = Observation.find(:all,:include=>{:person=>{}},
+           :conditions => ["obs.obs_datetime >= ? AND obs.obs_datetime <= ?
+             AND obs.value_coded IN (?)",@start_date.strftime('%Y-%m-%d 00:00:00'), @end_date.strftime('%Y-%m-%d 23:59:59'),concept_ids])
+
+      observation.each do | obs|
+        next if obs.person.blank?
+        next if obs.answer_concept.blank?
+        previous_date = obs.obs_datetime.strftime('%Y-%m-%d').to_date
+        sex = obs.person.gender
+        age = PatientService.age(obs.person, previous_date)
+        diagnosis_name = obs.answer_concept.fullname rescue ''
+        @disaggregated_diagnosis[diagnosis_name]={
+          "=<4" =>0,
+          "=>5" =>0
+
+        }	if @disaggregated_diagnosis[diagnosis_name].nil?
+
+        if age.to_i < 5
+            @disaggregated_diagnosis[diagnosis_name]["=<4"]+=1
+          else
+            @disaggregated_diagnosis[diagnosis_name]["=>5"]+=1
+         end
+
+      end
+      @diaggregated_paginated = []
+      @disaggregated_diagnosis.each { | diag, value |
+      @diaggregated_paginated << [diag, value]
+      }
+      render :layout => 'report'
     end
   end
