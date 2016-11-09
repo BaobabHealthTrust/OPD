@@ -38,11 +38,12 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
      observations = enc_params[:observations]
   	 hash[:diagnosis] = pull_diagnoses(observations,obs_date,national_id,
                                        patient_id,age,gender)
+     hash[:symptoms] = pull_symptoms
     end
     push_to_couch(hash)
   end
 
-  def self.pull_diagnoses(observation,obs_date,national_id,patient_id,age,gender)
+ def self.pull_diagnoses(observation,obs_date,national_id,patient_id,age,gender)
     diagnoses = []
     concept_names = ['PRIMARY DIAGNOSIS','DETAILED PRIMARY DIAGNOSIS',
       'SECONDARY DIAGNOSIS','DETAILED SECONDARY DIAGNOSIS', 'SPECIFIC SECONDARY DIAGNOSIS',
@@ -61,5 +62,21 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
     end
    diagnoses
   end
+
+ def self.pull_symptoms( )
+     symptoms = params[:complaints]
+     return symptoms
+ end
+
+ def syndrome_map
+   #map_hash = {:SG_FEVER=>"",:SG_URI=>"",:SG_LRI=>"",:SG_RI=>"",:SG_GI=>"",
+               #:SG_UGI=>"",:SG_LGI=>:NCD=>"",:IDSR_DZ=>""}
+
+   #["fever","Influenza like illness","respiratory"]
+   #["Gastrointestinal","Haema"]
+   #["Nephro","Trauma","Cardiovascular"]
+   #["General","Other"]
+
+ end
 
 end
