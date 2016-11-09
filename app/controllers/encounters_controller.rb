@@ -7,7 +7,7 @@ class EncountersController < GenericEncountersController
     c.instance_eval do
       notes = params[:observations][0][:concept_name] rescue "" #TODO: Find a better way of this.
       encounters_to_process = ["NOTES","OUTPATIENT DIAGNOSIS"]
-      if encounters_to_process.include? params[:encounter][:encounter_type_name] && notes != "CLINICAL NOTES CONSTRUCT"
+      if encounters_to_process.include? params[:encounter][:encounter_type_name] #&& notes != "CLINICAL NOTES CONSTRUCT"
     	  DashBoardService.push_to_dashboard(params)
       end
     end

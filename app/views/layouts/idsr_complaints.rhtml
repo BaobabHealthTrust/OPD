@@ -138,7 +138,14 @@
       buttonCancel.onclick = function(){
           window.location = "/patients/show/<%= @patient_id%>";
            }
+      container.onscroll = function(){
+          if(container.scrollTop > 50){
+              document.getElementById("top-space").style.borderBottom = "1px solid lightgrey";
+          }else{
+              document.getElementById("top-space").style.borderBottom = "none";
+          }
 
+      }
       function init(){
             count = 1;
             buttonNext =  document.getElementById("next");
@@ -148,6 +155,8 @@
             buttonCancel = document.getElementById("cancel");
             noteElement = document.getElementById("label-text");
             elements = document.getElementsByClassName("syndrome");
+            container = document.getElementById("cont");
+
             totalElements = elements.length;
              if (elements.length == 1)
               {
@@ -204,6 +213,7 @@
          }
        return checked
      }
+     var con
     </script>
   </body>
 </html>

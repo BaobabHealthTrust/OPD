@@ -104,19 +104,25 @@
        outline: 1px solid #ddd; /* focus style */
    }
    .synd-content{
-       height: 600px;
+       height: 580px;
        padding-left: 10px;
        padding-right: 10px;
-       padding-top: 1px;
+       padding-top: 0px;
        width: 98%;
+       margin-top: 0px;
        overflow: auto;
        border-bottom: 1px solid lightgrey ;
+    }
+   .top-space{
+       height: 20px;
+       width: 98%;
+       /*border-bottom: 1px solid lightgrey ;*/
    }
  </style>
 <div class="label"><span id="label-text"></span></div>
-
- <div class="synd-content">
-   <form action="/encounters/create_complaints" method="post">
+ <div class="top-space" id="top-space"><span>&nbsp;&nbsp;</div>
+ <div class="synd-content" id="cont">
+   <form action="/encounters/create_complaints" method="post" style="padding-top: 0px">
      <%= hidden_field_tag "encounter[encounter_type_name]","NOTES" %>
      <%= hidden_field_tag "encounter[patient_id]",@patient_id %>
      <%= hidden_field_tag "encounter[encounter_datetime]",DateTime.now() %>
