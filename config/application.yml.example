@@ -15,6 +15,7 @@ production:
   ipd.wards.tag: Ward
   show.enroll.in.program.button: false
   show.dispense.button: false
+  ask_ancestral_details: false
   logo: mw.gif
   application.name: OPD
   create.from.dde.server: false
@@ -45,6 +46,7 @@ development:
   application_generic_medication: OPD Medication
   use.filing.number: false
   filing.number.limit: 300
+  ask_ancestral_details: false
   show.patient.confirmation: false
   create_from_remote: false
   use.user.selected.activities: false
