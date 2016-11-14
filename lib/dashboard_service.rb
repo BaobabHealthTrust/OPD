@@ -38,7 +38,7 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
      observations = enc_params[:observations]
   	 hash[:diagnosis] = pull_diagnoses(observations,obs_date,national_id,
                                        patient_id,age,gender)
-     hash[:symptoms] = pull_symptoms
+     hash[:symptoms] = pull_symptoms(patient_id)
     end
     push_to_couch(hash)
   end
@@ -63,12 +63,30 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
    diagnoses
   end
 
- def self.pull_symptoms( )
-     symptoms = params[:complaints]
-     return symptoms
- end
+ def self.pull_symptoms( patient_id)
+     #symptoms = params[:complaints]
+    # return symptoms
+   enc_type = EncounterType.find_by_name("notes")
+   encounter_ids = Encounter.find(:all,:conditions=>["DATE(encounter_datetime) = ?
+                                  AND patient_id = ? AND encounter_type = ? ",
+                                  Date.today.to_s,patient_id,enc_type.id]).map(&:id)
 
- def syndrome_map
+   complaint_obs = Observation.find(:all,:conditions=>["encounter_id IN (?)",encounter_ids])
+   #group and symptom
+    child_obs = {}
+    group_and_symptom = []
+   complaint_obs .map do |complaint_ob|
+      next if complaint_ob.obs_group_id.blank?
+      child_obs[complaint_ob.obs_group_id] = complaint_ob.value_text
+   end
+   child_obs.each do |key,value|
+      parent_ob = Observation.find(:first,:conditions=>["obs_id = ?",key]).value_text rescue nil
+      group_symp_comb = parent_ob+":"+value if parent_ob
+      group_and_symptom << group_symp_comb
+   end
+ return group_and_symptom
+ end
+def syndrome_map
    #map_hash = {:SG_FEVER=>"",:SG_URI=>"",:SG_LRI=>"",:SG_RI=>"",:SG_GI=>"",
                #:SG_UGI=>"",:SG_LGI=>:NCD=>"",:IDSR_DZ=>""}
 
