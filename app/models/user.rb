@@ -191,7 +191,6 @@ class User < ActiveRecord::Base
 
 	 def self.decode_hash(login_barcode)
 		    space = GlobalProperty.find_by_property('server.secret_name_space').property_value.to_i
-
 		    login = ''
 		    login_array = login_barcode.scan(/./)
 		    position = space - 1
@@ -206,13 +205,12 @@ class User < ActiveRecord::Base
 
   	 def self.decode_user_barcode(login_barcode)
   	 	login_barcode = login_barcode.gsub(/\$$/, '')
-    	password = login_barcode[-5..-1] || login_barcode
-    	username = login_barcode.sub! password, ''
-    	user = User.find_by_sql("SELECT * FROM users Where username = '" + username + "' AND password LIKE '%" + password +"%'")
-
+    	barcode = login_barcode[-5..-1] || login_barcode
+    	username = SimpleEncryption.decrypt(barcode)
+    	password = User.find_by_sql("SELECT password FROM users Where username = '" + username + "'") unless username.blank?
+    	password_str = password[0].password.to_s
+    	user = User.find_by_sql("SELECT * FROM users Where username = '" + username + "' AND password LIKE '%" + password_str +"%'")
   	end
-
-
 
   def status
   user_status = self.user_activation.status rescue ''

@@ -7,14 +7,10 @@ gem 'will_paginate', '2.3.16'
 gem 'json', '1.5.0'
 gem 'settingslogic'
 gem 'fastercsv'
-gem 'rest-client'
+gem 'rest-client', '~> 1.6.0'
 gem 'nokogiri', '1.5.0'
 gem 'mechanize', '2.7.0' 
 gem 'mysql'
 gem 'activerecord-mysql2-adapter','0.0.3'
-gem 'paginate'
-<<<<<<< HEAD
-=======
 gem 'rake', '0.8.7'
->>>>>>> 994c2602d27fd9ec58811002b7b4c53910f37f90
 gem 'passenger', '4.0.53'

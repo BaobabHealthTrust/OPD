@@ -570,4 +570,22 @@ class GenericUserController < ApplicationController
     end
 
   end
+
+  def print_login_password
+    print_and_redirect("/user/login_label?user_id=#{params[:user_id]}", "/logout")
+  end
+
+  def login_label
+    username = SimpleEncryption.encrypt(User.current.username)
+    label = ZebraPrinter::StandardLabel.new
+    label.font_size = 2
+    label.font_horizontal_multiplier = 2
+    label.font_vertical_multiplier = 2
+    label.left_margin = 50
+    label.draw_barcode(50,180,0,1,4,15,120,false,"#{username}")
+    send_data(label.print(1),:type=>"application/label; charset=utf-8", 
+      :stream=> false, :filename=>"#{User.current.id}#{rand(10000)}.lbl", 
+      :disposition => "inline")
+  end
+
 end

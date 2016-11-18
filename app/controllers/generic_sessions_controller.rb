@@ -9,16 +9,24 @@ class GenericSessionsController < ApplicationController
 
 	def create
 		if !params[:login_barcode].empty?
-				user = User.decode_user_barcode(params[:login_barcode])
-				if user
-					params[:login]		= user.first.username
-					params[:password]	= user.first.password
 
+			begin
+				user = User.decode_user_barcode(params[:login_barcode]) 
+			rescue Exception => e
+
+				flash[:notice] = "Invalid login barcode"
+				redirect_to "/" and return
+			end
+
+				if user
+					params[:login]		= user[0].username
+					params[:password]	= user[0].password
 					user = User.check(params[:login], params[:password])
-					sign_in(:user, user) if user && user.status == 'pending'
-					authenticate_user! if user && user.status == 'pending'
-					#raise user.status.inspect
+					sign_in(:user, user) if user && user.status == 'active'
+					authenticate_user! if user && user.status == 'active'
 					session[:return_uri] = nil
+				else
+					redirect_to "/" and return
 				end
 		else
 				#raise params[:password].inspect
@@ -28,6 +36,16 @@ class GenericSessionsController < ApplicationController
 				session[:return_uri] = nil
 				
 		end
+
+
+    if params[:passwordless]
+		  user = User.find_by_username(SimpleEncryption.decrypt(params[:passwordless])) 
+    else
+		  user = User.authenticate(params[:login], params[:password])
+    end
+		sign_in(:user, user) if user && user.status == 'active'
+		authenticate_user! if user && user.status == 'active' 
+		session[:return_uri] = nil
 
 		if user_signed_in?
 
