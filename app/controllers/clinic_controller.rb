@@ -61,7 +61,8 @@ class ClinicController < GenericClinicController
       #["Graphical Reports", "/clinic/reports_tab_graphs"],
       ["Update DHIS2", "/report/update_dhis"],
       ["Malaria Report", "/report/malaria_report_menu"],
-      ["LA Report", "/report/la_report_menu"]
+      ["LA Report", "/report/la_report_menu"],
+      ["Drug Report", "/report/drug_report"]
     ]
     #if allowed_hiv_viewer
     #@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
