@@ -50,7 +50,7 @@ class ClinicController < GenericClinicController
     @reports = [
       #["OPD General", "/cohort_tool/opd_report_index"],
       ["Disaggregated Diagnosis", "/cohort_tool/opd_menu?report_name=disaggregated_diagnosis"],
-      #["Diagnosis (By address)", "/cohort_tool/opd_menu?report_name=diagnosis_by_address"],
+      ["Diagnosis (By address)", "/cohort_tool/opd_menu?report_name=diagnosis_by_address"],
       #["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"],
       ["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report"],
       ["Diagnosis Specific Report", "/cohort_tool/diagnosis_specific_report_menu?report_name=diagnosis_specific_report"],

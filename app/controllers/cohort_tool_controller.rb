@@ -2090,6 +2090,22 @@ class CohortToolController < ApplicationController
       render :layout => "report"
     end
 
+    def patient_details
+      @report_name = "Diagnosis By Address"
+      @logo = CoreService.get_global_property_value('logo').to_s
+      @current_location_name = Location.current_health_center.name
+
+      person_ids = params[:person_ids].split(',')
+      @people = []
+      person_ids.each do |person_id|
+        person = Person.find(person_id)
+        person_obj = PatientService.get_patient(person)
+        @people << person_obj
+      end
+
+      render :layout => false
+    end
+
     def diagnosis_specific_report
 
       @report_name = params[:report_name]
@@ -2333,8 +2349,8 @@ class CohortToolController < ApplicationController
           if (PatientService.age_in_months(obs.person).to_i < 6 )
             diagnosis_name = obs.answer_concept.fullname rescue ''
             @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = [] if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] << obs.person_id
           end
         end
 
@@ -2342,8 +2358,8 @@ class CohortToolController < ApplicationController
           if (PatientService.age_in_months(obs.person).to_i >= 6 && PatientService.age(obs.person).to_i < 1)
             diagnosis_name = obs.answer_concept.fullname rescue ''
             @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = [] if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] << obs.person_id
           end
         end
 
@@ -2351,8 +2367,8 @@ class CohortToolController < ApplicationController
           if (PatientService.age(obs.person).to_i >= 1 && PatientService.age(obs.person).to_i < 5)
             diagnosis_name = obs.answer_concept.fullname rescue ''
             @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = [] if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] << obs.person_id
           end
         end
 
@@ -2360,8 +2376,8 @@ class CohortToolController < ApplicationController
           if (PatientService.age(obs.person).to_i >= 5 && PatientService.age(obs.person).to_i < 14)
             diagnosis_name = obs.answer_concept.fullname rescue ''
             @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = [] if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] << obs.person_id
           end
         end
 
@@ -2369,8 +2385,8 @@ class CohortToolController < ApplicationController
           if (PatientService.age(obs.person).to_i >= 14 && PatientService.age(obs.person).to_i < 20)
             diagnosis_name = obs.answer_concept.fullname rescue ''
             @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = [] if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] << obs.person_id
           end
         end
 
@@ -2378,8 +2394,8 @@ class CohortToolController < ApplicationController
           if (PatientService.age(obs.person).to_i >= 20 && PatientService.age(obs.person).to_i < 30)
             diagnosis_name = obs.answer_concept.fullname rescue ''
             @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = [] if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] << obs.person_id
           end
         end
 
@@ -2387,8 +2403,8 @@ class CohortToolController < ApplicationController
           if (PatientService.age(obs.person).to_i >= 30 && PatientService.age(obs.person).to_i < 40)
             diagnosis_name = obs.answer_concept.fullname rescue ''
             @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = [] if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] << obs.person_id
           end
         end
 
@@ -2396,16 +2412,16 @@ class CohortToolController < ApplicationController
           if (PatientService.age(obs.person).to_i >= 40 && PatientService.age(obs.person).to_i < 50)
             diagnosis_name = obs.answer_concept.fullname rescue ''
             @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = [] if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+            @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] << obs.person_id
           end
         end
 
         if (@age_groups.include?("ALL"))
           diagnosis_name = obs.answer_concept.fullname rescue ''
           @diagnosis_by_address[diagnosis_name] = {} if @diagnosis_by_address[diagnosis_name].nil?
-          @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = 0 if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
-          @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] += 1
+          @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] = [] if @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district].nil?
+          @diagnosis_by_address[diagnosis_name][obs.person.addresses.first.county_district] << obs.person_id
         end
       end
       @diagn_address = []
@@ -2413,7 +2429,7 @@ class CohortToolController < ApplicationController
         diagnosis = diagn[0]
         address_total = diagn[1]
         address_total.each { |address,total|
-          @diagn_address << [diagnosis,address,total]
+          @diagn_address << [diagnosis,address,total.length, total]
         }
       }
       render :layout => "report"

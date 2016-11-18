@@ -78,6 +78,11 @@
     table_length.setAttribute("style","width:100px;");
 
   })
+
+  function showPatients(obj){
+    person_ids = obj.getAttribute("person_ids");
+    window.location = "/cohort_tool/patient_details?person_ids=" + person_ids;
+  }
     </script>
 
     <script>
@@ -219,6 +224,15 @@
       #num{ display:none; }
       #char{ display:none; }
 
+      #number {
+    background-color: #4a708b;
+    border-bottom: 1px outset black;
+    color: white;
+    padding: 10px 16px 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
     </style>
   </head>
   <body >
@@ -248,12 +262,13 @@
           <% diagnosis =0
          village=1
          total=2
+         person_ids = 3
       %>
         <% @diagn_address.each do |address| %>
       <tr>
         <td width="35%"> <span style="display:block; width:90%;"> <%= address[diagnosis] %> </span> </td>
         <td width="35%" align="left" > <%= "<span class='basic_span' > #{ address[village]} </span> " %> </td>
-        <td width="30%" align="right" > <%= "<span class='basic_span' > #{ address[total]} </span> " %> </td>
+        <td onclick="showPatients(this)" person_ids ="<%= address[person_ids].join(', ') %>" id="number" width="30%"  > <%= "<span class='basic_span' style='width: 100%'> #{ address[total]} </span> " %> </td>
       </tr>
     <% end %>
         </tbody>
