@@ -8,8 +8,6 @@ config/settings.yml
 config/dashboard.yml
 notes
 doc
-*.gem
-vendor/*
 development_structure.sql
 schema.rb
 *~

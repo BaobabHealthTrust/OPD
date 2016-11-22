@@ -1,5 +1,5 @@
 credentials:
-  url: http://localhost:3001/users/get_token
-  username: pike-msonda
-  password: "2580"
-  dashboard_url: http://localhost:3001/admin/save_visit_details
+  url: http://localhost:data_api_port/users/get_token
+  username: data_api_login_username
+  password: data_api_login_password
+  dashboard_url: http://localhost:data_api_port/admin/save_visit_details
