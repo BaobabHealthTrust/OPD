@@ -253,8 +253,8 @@
         </thead>
         <tbody>
           <tr style="background-color: #FFEBCD;">
-            <td><%= @total_tabs_prescribed %></td>
-            <td>&nbsp;</td>
+            <td style="text-align: center; font-weight: bold;"><%= @total_tabs_prescribed %></td>
+            <td style="font-weight: bold;"><%= @total_tabs_dispensed %></td>
           </tr>
         </tbody>
       </table>
@@ -267,5 +267,13 @@
       </span>
     </div>
 
+    <script type="text/javascript">
+                    
+      window.onload = function(){
+        jQuery("#print").css("display", "none");
+      }
+
+    </script>
+    
   </body>
 </html>

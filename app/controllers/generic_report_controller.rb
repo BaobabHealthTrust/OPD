@@ -927,7 +927,7 @@ class GenericReportController < ApplicationController
         o.order_type_id = #{drug_order_type_id} AND DATE(e.encounter_datetime) >= \"#{start_date}\"
         AND DATE(e.encounter_datetime) <= \"#{end_date}\"
         AND e.voided=0 GROUP BY do.drug_inventory_id"
-    ).last.total_prescribed_drugs
+    ).last.total_prescribed_drugs rescue 0
 
     @total_tabs_dispensed = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
         INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
@@ -938,7 +938,7 @@ class GenericReportController < ApplicationController
         AND DATE(e.encounter_datetime) >= \"#{start_date}\"
         AND DATE(e.encounter_datetime) <= \"#{end_date}\"
         AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
-    ).last.total_dispensed_drugs
+    ).last.total_dispensed_drugs rescue 0
 
     render :layout => "report"
   end
