@@ -22,6 +22,53 @@ class GenericDispensationsController < ApplicationController
 
 	end
 
+  def change_amount_dispensed
+    @patient = Patient.find(params[:patient_id])
+    @order = Order.find(params[:order_id])
+    @order_id = @order.order_id
+    @drug_name = @order.drug_order.drug.name
+    @drug_value = @order.drug_order.drug.drug_id
+    session_date = session[:datetime] || Time.now()
+    
+    if params[:filter] and !params[:filter][:provider].blank?
+      user_person_id = User.find_by_username(params[:filter][:provider]).person_id
+    elsif params[:location]
+      user_person_id = params[:provider_id]
+    else
+      user_person_id = current_user.person_id
+    end
+
+    @encounter = current_dispensation_encounter(@patient, session_date, user_person_id)
+
+    if request.post?
+      ActiveRecord::Base.transaction do
+        drug_order = @order.drug_order
+        drug_order.quantity = nil #Reset the quantity 
+        drug_order.save
+        
+        obs_orders = Observation.find(:all, :conditions => ["order_id =?", @order.order_id])
+        obs_orders.each do |obs_order|
+          obs_order.void #void all related observations of this order
+        end
+
+        obs = Observation.new(
+          :concept_name => "AMOUNT DISPENSED",
+          :order_id => @order_id,
+          :person_id => @patient.person.person_id,
+          :encounter_id => @encounter.id,
+          :value_drug => @drug_value,
+          :value_numeric => params[:quantity],
+          :obs_datetime => session_date || Time.now()
+        )
+
+        obs.save
+
+      end
+
+      redirect_to "/patients/treatment_dashboard?id=#{@patient.patient_id}&dispensed_order_id=#{@order_id}"
+    end
+  end
+
   def create
     if (params[:identifier])
       params[:drug_id] = params[:identifier].match(/^\d+/).to_s

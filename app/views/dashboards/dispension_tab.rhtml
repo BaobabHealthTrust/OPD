@@ -50,6 +50,13 @@
     if (total_dispensed > 0)
       document.getElementById('set_appointment').style.display='inline';*/
   }
+
+  var patientID = '<%= @patient.id -%>';
+
+  function changeAmountDispensed(orderID){
+    window.parent.document.location = "/dispensations/change_amount_dispensed?patient_id=" + patientID + "&order_id=" + orderID;
+  }
+
 </script>
 
 <body onload="showAppointmentButton();">
@@ -82,7 +89,7 @@
                       <script>
                         total_dispensed += parseFloat("<%=total_dispensed%>");
                       </script>
-                      <tr class = 'dispensation_data' id = "<%=order.id%>">
+                      <tr class = 'dispensation_data' id = "<%=order.id%>" style=" line-height: 1.7em;">
                         <!--<td style="text-align:center;vertical-align: middle;" onmousedown = "voiding('<%=order.id%>');">
                           <img src="/images/cancel_flat_small.png"/>
                         </td>-->
@@ -97,6 +104,10 @@
                           <td style="text-align:right;"><%= total_dispensed %></td>
                         <% else %>
                           <td style="text-align:right;"><%= drug_stock_status %></td>
+                        <% end %>
+
+                        <% if total_dispensed > 0 %>
+                          <td style="width: 271px; border: 0px; background-color: white;"><span class="md-button" onclick="changeAmountDispensed('<%= order.order_id %>')">Change Amount Dispensed</span></td>
                         <% end %>
                       </tr>
                     <% end %>
@@ -128,9 +139,11 @@
           </div>
         </div>
       </div>
-      </body>
+    </div>
+  </div>
+</body>
 
-      <script>
+<script>
 
 
 <% @prescriptions.each do | order | %>
@@ -146,4 +159,20 @@
     document.getElementById(order_id).style.background = 'lightGreen';
 
 
-      </script>
+</script>
+<style type="text/css">
+  .md-button {
+    padding: 9px 27px;
+    border-radius: 3px;
+    font-size: 14px;
+    text-align: center;
+    text-transform: uppercase;
+    text-decoration:none;
+    border: none;
+    outline: none;
+    background-color: #4876FF;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+</style>

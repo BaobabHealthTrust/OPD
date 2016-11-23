@@ -1,0 +1,40 @@
+<style type="text/css">
+  .tt_controls_quantity #char {
+    display: none;
+  }
+
+  #decimal{
+    display: none;
+  }
+</style>
+
+<script type="text/javascript">
+  var tt_cancel_destination = "/patients/treatment_dashboard/<%= @patient.patient_id %>"
+  var patientID = "<%= @patient.patient_id %>";
+
+</script>
+
+<form action="/dispensations/change_amount_dispensed" method='post'>
+
+  <%= hidden_field_tag :patient_id, @patient.patient_id %>
+  <%= hidden_field_tag :order_id, @order.order_id %>
+
+  <%= text_field_tag :quantity, nil, {
+    :id => 'quantity',
+    :field_type => 'number',
+    :units => '',
+    :helpText => "Quantity(Tabs) for #{@drug_name}",
+    :validationRule => "([0-9]+\\.?[0-9]*)|Unknown$",
+    :validationMessage => "You must enter a number (for example: 5<b>.0</b>)",
+    :allowFreeText => "true",
+    :tt_pageStyleClass => "NumbersOnlyWithDecimal"}%>
+
+  <% session_date = session[:datetime].to_date rescue nil
+  if session_date %>
+
+    <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+      <%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+  <% else %>
+    <%= hidden_field_tag "filter[provider]", nil %>
+  <%end%>
+</form>
