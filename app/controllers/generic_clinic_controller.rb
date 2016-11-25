@@ -11,6 +11,14 @@ class GenericClinicController < ApplicationController
 
     @roles = current_user.user_roles.collect{|r| r.role} rescue []
 
+    auto_session = CoreService.get_global_property_value('auto.session').to_s == "true" rescue false
+    session_date = session[:datetime].to_date rescue nil
+    if session_date.blank?
+      if auto_session
+        session[:datetime] = Date.today if session[:date_reset].blank? #Set session datetime to today when when auto session property is true
+      end
+    end
+
     render :template => 'clinic/index', :layout => false
   end
 

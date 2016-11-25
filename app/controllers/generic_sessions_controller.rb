@@ -99,6 +99,7 @@ class GenericSessionsController < ApplicationController
 	def destroy
 		sign_out(current_user) if !current_user.blank?
 		self.current_location = nil
+    reset_session #Remove every session
 		flash[:notice] = "You have been logged out."
 		redirect_back_or_default('/')
 	end

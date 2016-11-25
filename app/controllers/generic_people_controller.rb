@@ -535,6 +535,7 @@ class GenericPeopleController < ApplicationController
 
   def reset_datetime
     session[:datetime] = nil
+    session[:date_reset] = true
     if params[:id].blank?
       redirect_to :action => "index" and return
     else

@@ -54,10 +54,12 @@
     property = 'database.sharing'
   when 'specimen_label_print?'
     property = 'specimen.label.print'
+  when 'auto_session'
+    property = 'auto.session'
   end
 %>
   <%if params[:redirect].present? %>
-      <%= hidden_field_tag "redirect", params[:redirect] %>
+    <%= hidden_field_tag "redirect", params[:redirect] %>
   <%end%>
   <%= hidden_field_tag "property", property %>
 
