@@ -106,6 +106,21 @@ class EncountersController < GenericEncountersController
     @patient_malaria_notification = "This patient is tested negative using #{malaria_test_name}" if @malaria_test_status.match(/negative/i)
 
     if  ['INPATIENT_DIAGNOSIS', 'OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
+      #check if complaints have been captured.
+      #if not captured rediret to idsr_complaints
+      current_patient_id = params[:patient_id]
+      complaints_count = Observation.find_by_sql("SELECT * FROM obs 
+                                      left join encounter on 
+                                        encounter.encounter_id = obs.encounter_id 
+                                      left join encounter_type on 
+                                        encounter_type_id =encounter.encounter_type 
+                                        where encounter_type.name = 'NOTES' 
+                                        AND obs.obs_datetime >= DATE(now()) 
+                                        AND encounter.patient_id = "+current_patient_id).count
+      if( complaints_count == 0 && params[:encounter_type].upcase == 'OUTPATIENT_DIAGNOSIS')
+          redirect_to :action => "idsr_complaints", :patient_id => params[:patient_id] and return
+      end
+      #proceeding with the normal flow after complaints have been captured.
 			diagnosis_concept_set_id = ConceptName.find_by_name("Diagnoses requiring specification").concept.id
 			diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set_id])
 			@diagnoses_requiring_specification = diagnosis_concepts.map{|concept| concept.fullname.upcase}.join(';')
