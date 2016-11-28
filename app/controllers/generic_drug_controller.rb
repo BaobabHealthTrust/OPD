@@ -161,4 +161,16 @@ class GenericDrugController < ApplicationController
     render :text => "<li>" + @names.map{|n| n } .join("</li><li>") + "</li>"
   end
 
+  def receive_products
+
+  end
+
+  def relocate_products
+
+  end
+
+  def mark_loss_damage_of_products
+    
+  end
+  
 end
