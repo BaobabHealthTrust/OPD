@@ -320,7 +320,7 @@ function notifier(){
 
     popupHeader = document.createElement('div');
     popupHeader.className = 'popup-header-notifier';
-    popupHeader.innerHTML = 'Notifications';
+    popupHeader.innerHTML = 'Notification';
     popupHeader.style.borderBottom = '2px solid #7D9EC0';
     popupHeader.style.backgroundColor = '#FFFFFF';
     popupHeader.style.paddingTop = '5px';

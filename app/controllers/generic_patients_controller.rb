@@ -1,14 +1,15 @@
+require 'underlined_diseases_alerts'
+
 class GenericPatientsController < ApplicationController
 	before_filter :find_patient, :except => [:void]
-  
+
 	def show
-		
 		return_uri = session[:return_uri]
 		if !return_uri.blank?
     		redirect_to return_uri.to_s
     		return
 		end
- 		
+
 		session[:mastercard_ids] = []
 		session_date = session[:datetime].to_date rescue Date.today
 		@patient_bean = PatientService.get_patient(@patient.person)
@@ -20,7 +21,7 @@ class GenericPatientsController < ApplicationController
 		@programs = @patient.patient_programs.all
 		@alerts = alerts(@patient, session_date) rescue nil
 		@restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
-		@restricted.each do |restriction|    
+		@restricted.each do |restriction|
 			@encounters = restriction.filter_encounters(@encounters)
 			@prescriptions = restriction.filter_orders(@prescriptions)
 			@programs = restriction.filter_programs(@programs)
@@ -29,7 +30,7 @@ class GenericPatientsController < ApplicationController
 		@date = (session[:datetime].to_date rescue Date.today).strftime("%Y-%m-%d")
 
 		@location = Location.find(session[:location_id]).name rescue ""
-	
+
 
 		if @location.downcase == "outpatient" || params[:source]== 'opd'
 			render :template => 'dashboards/opdtreatment_dashboard', :layout => false
@@ -38,7 +39,7 @@ class GenericPatientsController < ApplicationController
 			@hiv_status = PatientService.patient_hiv_status(@patient)
 			@reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
 			if  !@reason_for_art_eligibility.nil? && @reason_for_art_eligibility.upcase == 'NONE'
-				@reason_for_art_eligibility = nil				
+				@reason_for_art_eligibility = nil
 			end
 			@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
 			render :template => 'patients/index', :layout => false
@@ -47,7 +48,7 @@ class GenericPatientsController < ApplicationController
 
   def opdcard
     @patient = Patient.find(params[:id])
-    render :layout => 'menu' 
+    render :layout => 'menu'
   end
 
   def opdshow
@@ -58,13 +59,13 @@ class GenericPatientsController < ApplicationController
       :joins => "INNER JOIN encounter_type ON encounter_type_id = encounter_type",
       :conditions =>["patient_id = ? AND encounter_type IN (?) AND DATE(encounter_datetime) = ?",
         params[:id],encounter_types,session_date],
-      :group => 'encounter_type').collect do |rec| 
+      :group => 'encounter_type').collect do |rec|
         if current_user.user_roles.map{|r|r.role}.join(',').match(/Registration|Clerk/i)
           next unless rec.observations[0].to_s.match(/Workstation location:   Outpatient/i)
         end
-        [ rec.encounter_id , rec.encounter_type_name , rec.c ] 
+        [ rec.encounter_id , rec.encounter_type_name , rec.c ]
       end
-    
+
     render :template => 'dashboards/opdoverview_tab', :layout => false
   end
 
@@ -93,18 +94,18 @@ class GenericPatientsController < ApplicationController
       :joins => "INNER JOIN encounter e USING (encounter_id)",
       :conditions => ["encounter_type = ? AND e.patient_id = ? AND DATE(encounter_datetime) = ?",
         type.id,@patient.id,session_date])
-        
-    if !allowed_hiv_viewer   
+
+    if !allowed_hiv_viewer
       @prescriptions = remove_art_encounters(@prescriptions, 'prescription')
     end
-    
+
     @restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
     @restricted.each do |restriction|
       @prescriptions = restriction.filter_orders(@prescriptions)
     end
- 
+
     @encounters = @patient.encounters.find_by_date(session_date)
-    
+
     if !allowed_hiv_viewer
      @encounters = remove_art_encounters(@encounters, 'encounter')
     end
@@ -130,13 +131,13 @@ class GenericPatientsController < ApplicationController
     @prescriptions = Order.find(:all,
       :joins => "INNER JOIN encounter e USING (encounter_id)",
       :conditions => ["encounter_type = ? AND e.patient_id = ?",type.id,@patient.id])
-            
+
     @historical = @patient.orders.historical.prescriptions.all
-    
-    if !allowed_hiv_viewer   
+
+    if !allowed_hiv_viewer
       @historical = remove_art_encounters(@historical, 'prescription')
     end
-    
+
     @restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
     @restricted.each do |restriction|
       @historical = restriction.filter_orders(@historical)
@@ -173,12 +174,12 @@ class GenericPatientsController < ApplicationController
 		  end
         @patient_arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
         @patient_bean = PatientService.get_patient(@patient.person)
-    	render :template => 'dashboards/relationships', :layout => 'dashboard' 
+    	render :template => 'dashboards/relationships', :layout => 'dashboard'
   	end
   end
 
   def problems
-    render :template => 'dashboards/problems', :layout => 'dashboard' 
+    render :template => 'dashboards/problems', :layout => 'dashboard'
   end
 
   def personal
@@ -192,16 +193,16 @@ class GenericPatientsController < ApplicationController
 
     if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
       @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]
-    end 
+    end
 
     if use_filing_number and PatientService.get_patient_identifier(patient, 'Filing Number').blank?
       @links << ["Filing Number (Create)","/patients/set_filing_number/#{patient.id}"]
-    end 
+    end
 
     if use_user_selected_activities
       @links << ["Change User Activities","/user/activities/#{current_user.id}?patient_id=#{patient.id}"]
     end
-      
+
     if show_lab_results
       @links << ["Lab trail", "/lab/results/#{patient.id}"]
     end
@@ -213,16 +214,16 @@ class GenericPatientsController < ApplicationController
   end
 
   def history
-    render :template => 'dashboards/history', :layout => 'dashboard' 
+    render :template => 'dashboards/history', :layout => 'dashboard'
   end
 
   def programs
     @programs = @patient.patient_programs.all
-    
+
     if ! allowed_hiv_viewer
       @programs = remove_art_encounters(@programs, 'program')
     end
-    
+
     @restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
     @restricted.each do |restriction|
       @programs = restriction.filter_programs(@programs)
@@ -238,34 +239,34 @@ class GenericPatientsController < ApplicationController
 
   def graph
     @currentWeight = params[:currentWeight]
-    render :template => "graphs/#{params[:data]}", :layout => false 
+    render :template => "graphs/#{params[:data]}", :layout => false
   end
 
-  def void 
+  def void
     @encounter = Encounter.find(params[:encounter_id])
     @encounter.void
     show and return
   end
-  
+
   def print_registration
-    print_and_redirect("/patients/national_id_label/?patient_id=#{@patient.id}", next_task(@patient))  
+    print_and_redirect("/patients/national_id_label/?patient_id=#{@patient.id}", next_task(@patient))
   end
-  
+
   def dashboard_print_national_id
     unless params[:redirect].blank?
       redirect = "/#{params[:redirect]}/#{params[:id]}"
     else
       redirect = "/patients/show/#{params[:id]}"
     end
-    print_and_redirect("/patients/national_id_label?patient_id=#{params[:id]}", redirect)  
+    print_and_redirect("/patients/national_id_label?patient_id=#{params[:id]}", redirect)
   end
-  
+
   def dashboard_print_visit
     print_and_redirect("/patients/visit_label/?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")
   end
-  
+
   def print_visit
-    print_and_redirect("/patients/visit_label/?patient_id=#{@patient.id}", next_task(@patient))  
+    print_and_redirect("/patients/visit_label/?patient_id=#{@patient.id}", next_task(@patient))
   end
 
   def print_mastercard_record
@@ -275,20 +276,20 @@ class GenericPatientsController < ApplicationController
   def print_demographics
     print_and_redirect("/patients/patient_demographics_label/#{@patient.id}", "/patients/show/#{params[:id]}")
   end
- 
+
   def print_filing_number
-    print_and_redirect("/patients/filing_number_label/#{params[:id]}", "/patients/show/#{params[:id]}")  
+    print_and_redirect("/patients/filing_number_label/#{params[:id]}", "/patients/show/#{params[:id]}")
   end
-   
+
   def print_transfer_out_label
-    print_and_redirect("/patients/transfer_out_label?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")  
+    print_and_redirect("/patients/transfer_out_label?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")
   end
-   
+
   def patient_demographics_label
     print_string = demographics_label(params[:id])
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
-  
+
   def national_id_label
     print_string = PatientService.patient_national_id_label(@patient) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a national id label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
@@ -313,14 +314,14 @@ class GenericPatientsController < ApplicationController
     label_commands = patient_filing_number_label(patient)
     send_data(label_commands,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{patient.id}#{rand(10000)}.lbl", :disposition => "inline")
   end
- 
+
   def filing_number_and_national_id
     patient = Patient.find(params[:patient_id])
     label_commands = PatientService.patient_national_id_label(patient) + patient_filing_number_label(patient)
 
     send_data(label_commands,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{patient.id}#{rand(10000)}.lbl", :disposition => "inline")
   end
- 
+
   def visit_label
 	session_date = session[:datetime].to_date rescue Date.today
     print_string = patient_visit_label(@patient, session_date) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
@@ -341,9 +342,9 @@ class GenericPatientsController < ApplicationController
   def transfer_out_label
     print_string = patient_transfer_out_label(params[:patient_id])
     send_data(print_string,
-      :type=>"application/label; charset=utf-8", 
-      :stream=> false, 
-      :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", 
+      :type=>"application/label; charset=utf-8",
+      :stream=> false,
+      :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl",
       :disposition => "inline")
   end
 
@@ -354,7 +355,7 @@ class GenericPatientsController < ApplicationController
 
   def mastercard
     @type = params[:type]
-    
+
     if session[:from_report].to_s == "true"
 			@from_report = true
 			session[:from_report] = false
@@ -363,30 +364,30 @@ class GenericPatientsController < ApplicationController
     @quarter = params[:quarter]
     @arv_start_number = params[:arv_start_number]
     @arv_end_number = params[:arv_end_number]
-    
+
     if params[:show_mastercard_counter].to_s == "true" && !params[:current].blank?
 			@show_mastercard_counter = true
 			session[:mastercard_counter] = params[:current].to_i - 1
       @patient_id = session[:mastercard_ids][session[:mastercard_counter]]
-      
+
       @prev_button_class = "yellow"
       @next_button_class = "yellow"
-      
+
       if params[:current].to_i ==  1
         @prev_button_class = "gray"
       elsif params[:current].to_i ==  session[:mastercard_ids].length
         @next_button_class = "gray"
       end
-      
+
     elsif params[:patient_id].blank?
-      @patient_id = session[:mastercard_ids][session[:mastercard_counter]] 
-           
+      @patient_id = session[:mastercard_ids][session[:mastercard_counter]]
+
     elsif session[:mastercard_ids].length.to_i != 0
       @patient_id = params[:patient_id]
-      
+
     else
       @patient_id = params[:patient_id]
-      
+
     end
 
     unless params.include?("source")
@@ -396,7 +397,7 @@ class GenericPatientsController < ApplicationController
     end
 
     render :layout => false
-    
+
   end
 
   def mastercard_printable
@@ -413,7 +414,7 @@ class GenericPatientsController < ApplicationController
       if !params[:current].blank?
         session[:mastercard_counter] = params[:current].to_i - 1
       end
-      
+
       @prev_button_class = "yellow"
       @next_button_class = "yellow"
       if params[:current].to_i ==  1
@@ -446,7 +447,7 @@ class GenericPatientsController < ApplicationController
   end
 
   def visit
-    @patient_id = params[:patient_id] 
+    @patient_id = params[:patient_id]
     @date = params[:date].to_date
     @patient = Patient.find(@patient_id)
     @patient_bean = PatientService.get_patient(@patient.person)
@@ -459,11 +460,11 @@ class GenericPatientsController < ApplicationController
     next_available_arv_number = PatientIdentifier.next_available_arv_number
     render :text => next_available_arv_number.gsub(PatientIdentifier.site_prefix,'').strip rescue nil
   end
-  
+
   def assigned_arv_number
     assigned_arv_number = PatientIdentifier.find(:all,:conditions => ["voided = 0 AND identifier_type = ?",
         PatientIdentifierType.find_by_name("ARV Number").id]).collect{|i| i.identifier.gsub("#{PatientIdentifier.site_prefix}-ARV-",'').strip.to_i} rescue nil
-    render :text => assigned_arv_number.sort.to_json rescue nil 
+    render :text => assigned_arv_number.sort.to_json rescue nil
   end
 
   def mastercard_modify
@@ -571,15 +572,15 @@ class GenericPatientsController < ApplicationController
       }
 
     end
-    
+
     redirect_to request.request_uri.to_s.gsub('print_mastercard', 'mastercard') and return
   end
-  
+
   def demographics
 	  @patient_bean = PatientService.get_patient(@patient.person)
     render :layout => false
   end
-   
+
   def index
     session[:mastercard_ids] = []
     session_date = session[:datetime].to_date rescue Date.today
@@ -594,14 +595,14 @@ class GenericPatientsController < ApplicationController
       @prescriptions = restriction.filter_orders(@prescriptions)
       @programs = restriction.filter_programs(@programs)
     end
-    
+
     @date = (session[:datetime].to_date rescue Date.today).strftime("%Y-%m-%d")
     @task = main_next_task(Location.current_location,@patient,session_date)
-    
+
     @hiv_status = PatientService.patient_hiv_status(@patient)
     @reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
     @arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
- 
+
     render :template => 'patients/index', :layout => false
   end
 
@@ -612,12 +613,12 @@ class GenericPatientsController < ApplicationController
      if !allowed_hiv_viewer
  	@prescriptions = []
  	arv_drug_list = []
- 	
+
  	concept_set("Antiretroviral drugs").each{|drug| arv_drug_list << drug.uniq.to_s}
   	@patient.orders.unfinished.prescriptions.all.each{|prescription|
  		prescription_drug = Concept.find(prescription.concept_id).fullname
   		if ! arv_drug_list.include? prescription_drug
-  			@prescriptions << prescription 
+  			@prescriptions << prescription
  		end
     }
     else
@@ -639,7 +640,16 @@ class GenericPatientsController < ApplicationController
       @programs = restriction.filter_programs(@programs)
     end
 
-    render :template => 'dashboards/overview_tab', :layout => false
+ @previousweight = UnderlinedDiseasesAlerts.previous_body_weight(@patient.id)
+ @previousweight.each do |p|
+ @pweight =  p.value_text
+ end
+
+@underline_diseases = UnderlinedDiseasesAlerts.underline_diseases_set(@patient.id)
+
+#@underline_diseases = Encounter.underline_diseases_set(@patient.id)
+
+    render :template => 'dashboards/eidsr_overview_tab', :layout => false
   end
 
   def visit_history
@@ -648,18 +658,18 @@ class GenericPatientsController < ApplicationController
   	start_date = session_date.strftime('%Y-%m-%d 00:00:00')
   	end_date = session_date.strftime('%Y-%m-%d 23:59:59')
     @encounters = Encounter.find(:all, 	:conditions => [" patient_id = ? AND encounter_datetime >= ? AND encounter_datetime <= ?", @patient.id, start_date, end_date])
-    
+
     if ! allowed_hiv_viewer
       @encounters = remove_art_encounters(@encounters, 'encounter')
     end
-    
+
     @creator_name = {}
     @encounters.each do |encounter|
     	id = encounter.creator
 			user_name = User.find(id).person.names.first
 			@creator_name[id] = '(' + user_name.given_name.first + '. ' + user_name.family_name + ')'
     end
-    
+
     @prescriptions = @patient.orders.unfinished.prescriptions.all
     #@programs = @patient.patient_programs.all
     if allowed_hiv_viewer
@@ -690,13 +700,13 @@ class GenericPatientsController < ApplicationController
   end
 
   def past_visits_summary
-  	
+
     @previous_visits = get_previous_encounters(params[:patient_id])
-    
+
     if !allowed_hiv_viewer
       @previous_visits = remove_art_encounters(@previous_visits, 'encounter')
-    end   
-    
+    end
+
     @encounter_dates = @previous_visits.map{|encounter| encounter.encounter_datetime.to_date}.uniq.reverse.first(6) rescue []
 
     @past_encounter_dates = []
@@ -704,9 +714,9 @@ class GenericPatientsController < ApplicationController
     @encounter_dates.each do |encounter|
       @past_encounter_dates << encounter if encounter < (session[:datetime].to_date rescue Date.today.to_date)
     end
- 
+
     @patient_bean = PatientService.get_patient(Person.find(params[:patient_id]))
-  
+
     render :layout => "menu"
   end
 
@@ -722,35 +732,35 @@ class GenericPatientsController < ApplicationController
     @show_history = current_user_roles.include?("Doctor") unless @show_history
     @show_history = current_user_roles.include?("Program Manager") unless @show_history
     @show_history = current_user_roles.include?("System Developer") unless @show_history
- 
+
     @encounters = {}
     @encounter_dates = []
 
-    if @show_history 
+    if @show_history
       last_visit_date = patient.encounters.last.encounter_datetime.to_date rescue Date.today
       latest_encounters = Encounter.find(:all,
         :order => "encounter_datetime ASC,date_created ASC",
-        :conditions => ["patient_id = ? AND 
+        :conditions => ["patient_id = ? AND
         encounter_datetime >= ? AND encounter_datetime <= ?",patient.patient_id,
         last_visit_date.strftime('%Y-%m-%d 00:00:00'),
         last_visit_date.strftime('%Y-%m-%d 23:59:59')])
 
       (latest_encounters || []).each do |encounter|
         next if encounter.name.match(/TREATMENT/i)
-        @encounters[encounter.name.upcase] = {:data => nil, 
+        @encounters[encounter.name.upcase] = {:data => nil,
           :time => encounter.encounter_datetime.strftime('%H:%M:%S')}
         @encounters[encounter.name.upcase][:data] = encounter.observations.collect{|obs|
           next if obs.to_s.match(/Workstation/i)
-          obs.to_s 
+          obs.to_s
         }.compact
       end
 
       @encounters = @encounters.sort_by { |name, values| values[:time] }
 
       @encounter_dates = patient.encounters.collect{|e|e.encounter_datetime.to_date}.uniq
-      @encounter_dates = (@encounter_dates || []).sort{|a,b|b <=> a} 
+      @encounter_dates = (@encounter_dates || []).sort{|a,b|b <=> a}
     end
-    render :layout => "menu"                                                    
+    render :layout => "menu"
   end
 
   def treatment_dashboard
@@ -764,7 +774,7 @@ class GenericPatientsController < ApplicationController
       :joins => "INNER JOIN encounter e USING (encounter_id)",
       :conditions => ["encounter_type = ? AND e.patient_id = ? AND DATE(encounter_datetime) = ?",
         type.id,@patient.id,session_date]).each{|order|
-      
+
       @amount_needed = @amount_needed + (order.drug_order.amount_needed.to_i rescue 0)
 
       @amounts_required = @amounts_required + (order.drug_order.total_required rescue 0)
@@ -825,18 +835,18 @@ class GenericPatientsController < ApplicationController
   def programs_dashboard
 	  @patient_bean = PatientService.get_patient(@patient.person)
     @reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
-    
+
     if ! allowed_hiv_viewer
       @reason_for_art_eligibility = ""
     end
-    
+
     @arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
     render :template => 'dashboards/programs_dashboard', :layout => false
   end
 
   def general_mastercard
     @type = nil
-    
+
     case params[:type]
     when "1"
       @type = "yellow"
@@ -851,15 +861,15 @@ class GenericPatientsController < ApplicationController
     @mastercard = mastercard_demographics(@patient)
     @patient_art_start_date = PatientService.patient_art_start_date(@patient.id)
     @visits = visits(@patient)   # (@patient, (session[:datetime].to_date rescue Date.today))
-    
+
     @age_in_months_for_days = {}
     @visits.keys.each do|day|
 		@age_in_months_for_days[day] = PatientService.age_in_months(@patient.person, day.to_date)
     end
-    
+
     @patient_age_at_initiation = PatientService.patient_age_at_initiation(@patient,
                                               PatientService.patient_art_start_date(@patient.id))
-                                              
+
     @patient_bean = PatientService.get_patient(@patient.person)
 	@guardian_phone_number = PatientService.get_attribute(Person.find(@patient.person.relationships.first.person_b), 'Cell phone number') rescue nil
 	@patient_phone_number = PatientService.get_attribute(@patient.person, 'Cell phone number')
@@ -930,8 +940,8 @@ class GenericPatientsController < ApplicationController
     render :layout => 'menu'
   end
 
-  def alerts(patient, session_date = Date.today) 
- 
+  def alerts(patient, session_date = Date.today)
+
     # next appt
     # adherence
     # drug auto-expiry
@@ -940,15 +950,15 @@ class GenericPatientsController < ApplicationController
     alerts = []
 =begin
     type = EncounterType.find_by_name("APPOINTMENT")
-    
-    @show_change_app_date = Observation.find(:first,                          
-    :order => "encounter_datetime DESC,encounter.date_created DESC",          
+
+    @show_change_app_date = Observation.find(:first,
+    :order => "encounter_datetime DESC,encounter.date_created DESC",
     :joins => "INNER JOIN encounter ON obs.encounter_id = encounter.encounter_id",
     :conditions => ["concept_id = ? AND encounter_type = ? AND patient_id = ?
     AND encounter_datetime >= ? AND encounter_datetime <= ?",
-    ConceptName.find_by_name('Appointment date').concept_id,                  
+    ConceptName.find_by_name('Appointment date').concept_id,
     type.id, patient.id,session_date.strftime("%Y-%m-%d 00:00:00"),
-    session_date.strftime("%Y-%m-%d 23:59:59")]) != nil                    
+    session_date.strftime("%Y-%m-%d 23:59:59")]) != nil
 
     next_appt = Observation.find(:first,:order => "encounter_datetime DESC,encounter.date_created DESC",
                :joins => "INNER JOIN encounter ON obs.encounter_id = encounter.encounter_id",
@@ -964,7 +974,7 @@ class GenericPatientsController < ApplicationController
       e.encounter_datetime.strftime("%Y-%m-%d")
     }.uniq
 
-    missed_appt = patient.encounters.find_last_by_encounter_type(type.id, 
+    missed_appt = patient.encounters.find_last_by_encounter_type(type.id,
       :conditions => ["NOT (DATE_FORMAT(encounter_datetime, '%Y-%m-%d') IN (?)) AND encounter_datetime < NOW()",
         encounter_dates], :order => "encounter_datetime").observations.last.to_s rescue nil
     alerts << ('Missed ' + missed_appt).capitalize unless missed_appt.blank?
@@ -976,7 +986,7 @@ class GenericPatientsController < ApplicationController
     type = EncounterType.find_by_name("ART ADHERENCE")
 
     observations = Observation.find(:all,:joins =>"INNER JOIN encounter e USING(encounter_id)",
-      :conditions =>["concept_id = ? AND encounter_type = ? AND patient_id = ? AND 
+      :conditions =>["concept_id = ? AND encounter_type = ? AND patient_id = ? AND
       encounter_datetime >= ? AND encounter_datetime <= ?",@adherence_level,type,
       patient.id,session_date.strftime("%Y-%m-%d 00:00:00"),session_date.strftime("%Y-%m-%d 23:59:59")],
       :order => "obs_datetime DESC")
@@ -987,7 +997,7 @@ class GenericPatientsController < ApplicationController
         drug_name = adh.order.drug_order.drug.concept.shortname rescue adh.order.drug_order.drug.name
         alerts << "Adherence: #{drug_name} (#{adh.value_numeric}%)"
       end
-    end 
+    end
 
     type = EncounterType.find_by_name("DISPENSING")
     patient.encounters.find_last_by_encounter_type(type.id, :order => "encounter_datetime").observations.each do | obs |
@@ -1004,7 +1014,7 @@ class GenericPatientsController < ApplicationController
       bmi_alert = current_bmi_alert(PatientService.get_patient_attribute_value(patient, "current_weight"), PatientService.get_patient_attribute_value(patient, "current_height"))
       alerts << bmi_alert if bmi_alert
     end
-    
+
     program_id = Program.find_by_name("HIV PROGRAM").id
     location_id = Location.current_health_center.location_id
 
@@ -1032,7 +1042,7 @@ class GenericPatientsController < ApplicationController
 	if allowed_hiv_viewer
     	alerts
    	else
-   		alerts.reject! { |item| 
+   		alerts.reject! { |item|
    			#item =~/^HIV/||item =~/^ART/||item =~/^CD4/
         item.match(/HIV/) || item.match(/ART/) || item.match(/CD4/)|| item.match(/ADHERENCE/i)
    		}
@@ -1042,7 +1052,7 @@ class GenericPatientsController < ApplicationController
 
   def cd4_count_datetime(patient)
     session_date = session[:datetime].to_date rescue Date.today
-  
+
   #raise session_date.to_yaml
     hiv_staging = Encounter.find(:last,:conditions =>["encounter_type = ? and patient_id = ?",
           EncounterType.find_by_name("HIV Staging").id,patient.id]) rescue nil
@@ -1463,12 +1473,12 @@ class GenericPatientsController < ApplicationController
   def patient_lab_orders_label(patient_id)
     patient = Patient.find(patient_id)
     patient_bean = PatientService.get_patient(patient.person)
-    
+
     lab_orders = Encounter.find(:last,:conditions =>["encounter_type = ? and patient_id = ?",
         EncounterType.find_by_name("LAB ORDERS").id,patient.id]).observations
       labels = []
       i = 0
-      
+
       while i <= lab_orders.size do
         accession_number = "#{lab_orders[i].accession_number rescue nil}"
 		patient_national_id_with_dashes = PatientService.get_national_id_with_dashes(patient)
@@ -1672,7 +1682,7 @@ class GenericPatientsController < ApplicationController
       end
     end rescue []
     visits.tb_status_at_initiation = (!visits.tb_status.nil? ? "Curr" :
-          (!visits.tb_within_last_two_yrs.nil? ? (visits.tb_within_last_two_yrs.upcase == "YES" ? 
+          (!visits.tb_within_last_two_yrs.nil? ? (visits.tb_within_last_two_yrs.upcase == "YES" ?
               "Last 2yrs" : "Never/ >2yrs") : "Never/ >2yrs"))
 
     hiv_clinic_registration = Encounter.find(:last,:conditions =>["encounter_type = ? and patient_id = ?",
@@ -1716,7 +1726,7 @@ class GenericPatientsController < ApplicationController
     clinic_encounters = ["APPOINTMENT", "HEIGHT","WEIGHT","REGIMEN","TB STATUS","SYMPTOMS",
       "VISIT","BMI","PILLS BROUGHT",'ADHERENCE','NOTES','DRUGS GIVEN']
     clinic_encounters.map do |field|
-      gave_hash = Hash.new(0) 
+      gave_hash = Hash.new(0)
       observations.map do |obs|
          encounter_name = obs.encounter.name rescue []
          next if encounter_name.blank?
@@ -1727,19 +1737,19 @@ class GenericPatientsController < ApplicationController
          case field
           when 'APPOINTMENT'
             concept_name = obs.concept.fullname
-            next unless concept_name.upcase == 'APPOINTMENT DATE' 
+            next unless concept_name.upcase == 'APPOINTMENT DATE'
             patient_visits[visit_date].appointment_date = obs.value_datetime
           when 'HEIGHT'
             concept_name = obs.concept.fullname rescue nil
-            next unless concept_name.upcase == 'HEIGHT (CM)' 
+            next unless concept_name.upcase == 'HEIGHT (CM)'
             patient_visits[visit_date].height = obs.answer_string
           when "WEIGHT"
             concept_name = obs.concept.fullname rescue []
-            next unless concept_name.upcase == 'WEIGHT (KG)' 
+            next unless concept_name.upcase == 'WEIGHT (KG)'
             patient_visits[visit_date].weight = obs.answer_string
           when "BMI"
             concept_name = obs.concept.fullname rescue []
-            next unless concept_name.upcase == 'BODY MASS INDEX, MEASURED' 
+            next unless concept_name.upcase == 'BODY MASS INDEX, MEASURED'
             patient_visits[visit_date].bmi = obs.answer_string
           when "VISIT"
             concept_name = obs.concept.fullname.upcase rescue []
@@ -1749,7 +1759,7 @@ class GenericPatientsController < ApplicationController
             patient_visits[visit_date].visit_by+= "G" if obs.to_s.squish.match(/Responsible person present: Yes/i)
           when "TB STATUS"
             concept_name = obs.concept.fullname rescue []
-            next unless concept_name.upcase == 'TB STATUS' 
+            next unless concept_name.upcase == 'TB STATUS'
             status = ConceptName.find(obs.value_coded_name_id).name.upcase rescue nil
             patient_visits[visit_date].tb_status = status
             patient_visits[visit_date].tb_status = 'noSup' if status == 'TB NOT SUSPECTED'
@@ -1758,7 +1768,7 @@ class GenericPatientsController < ApplicationController
             patient_visits[visit_date].tb_status = 'Rx' if status == 'CONFIRMED TB ON TREATMENT'
           when "DRUGS GIVEN"
             concept_name = obs.concept.fullname rescue []
-            next unless concept_name.upcase == 'AMOUNT DISPENSED' 
+            next unless concept_name.upcase == 'AMOUNT DISPENSED'
             drug = Drug.find(obs.value_drug) rescue nil
             next if drug.blank?
             drug_name = drug.concept.shortname rescue drug.name
@@ -1779,18 +1789,18 @@ class GenericPatientsController < ApplicationController
             end
           when "REGIMEN"
             concept_name = obs.concept.fullname rescue []
-            next unless concept_name.upcase == 'WHAT TYPE OF ANTIRETROVIRAL REGIMEN' 
+            next unless concept_name.upcase == 'WHAT TYPE OF ANTIRETROVIRAL REGIMEN'
             patient_visits[visit_date].reg =  Concept.find_by_concept_id(obs.value_coded).concept_names.typed("SHORT").first.name
           when "SYMPTOMS"
             concept_name = obs.concept.fullname rescue []
-            next unless concept_name.upcase == 'SYMPTOM PRESENT' 
+            next unless concept_name.upcase == 'SYMPTOM PRESENT'
             symptoms = obs.to_s.split(':').map do | sy |
-              sy.sub(concept_name,'').strip.capitalize 
+              sy.sub(concept_name,'').strip.capitalize
             end rescue []
             patient_visits[visit_date].s_eff = symptoms.join("<br/>") unless symptoms.blank?
           when "PILLS BROUGHT"
             concept_name = obs.concept.fullname rescue []
-            next unless concept_name.upcase == 'AMOUNT OF DRUG BROUGHT TO CLINIC' 
+            next unless concept_name.upcase == 'AMOUNT OF DRUG BROUGHT TO CLINIC'
             drug = Drug.find(obs.order.drug_order.drug_inventory_id) rescue nil
             next if drug.blank?
             drug_name = drug.concept.shortname rescue drug.name
@@ -1798,7 +1808,7 @@ class GenericPatientsController < ApplicationController
             patient_visits[visit_date].pills << [drug_name,obs.value_numeric] rescue []
           when "ADHERENCE"
             concept_name = obs.concept.fullname rescue []
-            next unless concept_name.upcase == 'WHAT WAS THE PATIENTS ADHERENCE FOR THIS DRUG ORDER' 
+            next unless concept_name.upcase == 'WHAT WAS THE PATIENTS ADHERENCE FOR THIS DRUG ORDER'
             next if obs.value_numeric.blank?
             patient_visits[visit_date].adherence = [] if patient_visits[visit_date].adherence.blank?
             patient_visits[visit_date].adherence << [Drug.find(obs.order.drug_order.drug_inventory_id).name,(obs.value_numeric.to_s + '%')]
@@ -1822,11 +1832,11 @@ class GenericPatientsController < ApplicationController
       patient_states = PatientState.find(:all,
                                     :joins => "INNER JOIN patient_program p ON p.patient_program_id = patient_state.patient_program_id",
                                     :conditions =>["patient_state.voided = 0 AND p.voided = 0 AND p.program_id = ? AND start_date = ? AND p.patient_id =?",
-                                    program_id,encounter_date.to_date,patient_obj.patient_id],:order => "patient_state_id ASC")  
-    end  
+                                    program_id,encounter_date.to_date,patient_obj.patient_id],:order => "patient_state_id ASC")
+    end
 
 =begin
-    patient_states.each do |state| 
+    patient_states.each do |state|
       visit_date = state.start_date.to_date rescue nil
       next if visit_date.blank?
       patient_visits[visit_date] = Mastercard.new() if patient_visits[visit_date].blank?
@@ -1835,13 +1845,13 @@ class GenericPatientsController < ApplicationController
     end
 =end
 
-    patient_visits.each do |visit_date,data| 
+    patient_visits.each do |visit_date,data|
       next if visit_date.blank?
       patient_visits[visit_date].outcome = latest_state(patient_obj,visit_date)
       patient_visits[visit_date].date_of_outcome = visit_date
     end
 
-    unless encounter_date.blank? 
+    unless encounter_date.blank?
       outcome = patient_visits[encounter_date].outcome rescue nil
       if outcome.blank?
         state = PatientState.find(:first,
@@ -1856,13 +1866,13 @@ class GenericPatientsController < ApplicationController
     end
 
     patient_visits
-  end  
+  end
 
   def mastercard_visit_label(patient,date = Date.today)
   	patient_bean = PatientService.get_patient(patient.person)
     visit = visits(patient,date)[date] rescue {}
 
-    return if visit.blank? 
+    return if visit.blank?
     visit_data = mastercard_visit_data(visit)
 #raise visit_data.to_yaml
     arv_number = patient_bean.arv_number || patient_bean.national_id
@@ -1894,9 +1904,9 @@ class GenericPatientsController < ApplicationController
       next if data.blank?
       bold = false
       #bold = true if key.include?("side_eff") and data !="None"
-      #bold = true if key.include?("arv_given") 
+      #bold = true if key.include?("arv_given")
       starting_index = values.first.to_i
-      starting_line = start_line 
+      starting_line = start_line
       starting_line = start_line + 30 if key.include?("2")
       starting_line = start_line + 60 if key.include?("3")
       starting_line = start_line + 90 if key.include?("4")
@@ -1913,7 +1923,7 @@ class GenericPatientsController < ApplicationController
 
   def adherence_to_show(adherence_data)
     #For now we will only show the adherence of the drug with the lowest/highest adherence %
-    #i.e if a drug adherence is showing 86% and their is another drug with an adherence of 198%,then 
+    #i.e if a drug adherence is showing 86% and their is another drug with an adherence of 198%,then
     #we will show the one with 198%.
     #in future we are planning to show all available drug adherences
 
@@ -1953,7 +1963,7 @@ class GenericPatientsController < ApplicationController
     data = {}
     data["outcome"] = visit.outcome rescue nil
     if visit.appointment_date and (data["outcome"].match(/ON ANTIRETROVIRALS/i) || data["outcome"].match(/Pre-ART/i) || data["outcome"].blank?)
-      data["outcome"] = "Next: #{visit.appointment_date.strftime('%b %d %Y')}" 
+      data["outcome"] = "Next: #{visit.appointment_date.strftime('%b %d %Y')}"
     else
       data["outcome_date"] = "#{visit.date_of_outcome.to_date.strftime('%b %d %Y')}" if visit.date_of_outcome
     end
@@ -1969,7 +1979,7 @@ class GenericPatientsController < ApplicationController
       string = "#{drug} (#{pills})"
       if string.length > 26
         line = string[0..25]
-        line2 = string[26..-1] 
+        line2 = string[26..-1]
         data["arv_given#{count}"] = "255",line
         data["arv_given#{count+=1}"] = "255",line2
       else
@@ -1984,11 +1994,11 @@ class GenericPatientsController < ApplicationController
 
     data
   end
-  
+
   def seen_by(patient,date = Date.today)
-    provider = patient.encounters.find_by_date(date).collect{|e| next unless e.name == 'HIV CLINIC CONSULTATION' ; [e.name,e.creator]}.compact 
+    provider = patient.encounters.find_by_date(date).collect{|e| next unless e.name == 'HIV CLINIC CONSULTATION' ; [e.name,e.creator]}.compact
     provider_username = "#{'Seen by: ' + User.find(provider[0].last).username}" unless provider.blank?
-    if provider_username.blank? 
+    if provider_username.blank?
       clinic_encounters = ["HIV CLINIC CONSULTATION","HIV STAGING","ART ADHERENCE","TREATMENT",'DISPENSION','HIV RECEPTION']
       encounter_type_ids = EncounterType.find(:all,:conditions =>["name IN (?)",clinic_encounters]).collect{| e | e.id }
       encounter = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type In (?)",
@@ -2201,7 +2211,7 @@ class GenericPatientsController < ApplicationController
     elsif @user_privilege.first.downcase.include?("registration clerk")
       @registration_clerk  = true
     end
-    
+
     @patient      = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
     void_encounter if (params[:void] && params[:void] == 'true')
     #@encounters   = @patient.encounters.current.active.find(:all)
@@ -2212,7 +2222,7 @@ class GenericPatientsController < ApplicationController
     @encounter_names = @patient.encounters.active.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
     ignored_concept_id = Concept.find_by_name("NO").id;
 
-    @observations = Observation.find(:all, :order => 'obs_datetime DESC', 
+    @observations = Observation.find(:all, :order => 'obs_datetime DESC',
       :limit => 50, :conditions => ["person_id= ? AND obs_datetime < ? AND value_coded != ?",
         @patient.patient_id, Time.now.to_date, ignored_concept_id])
 
@@ -2255,19 +2265,19 @@ class GenericPatientsController < ApplicationController
 
     # set the patient's medication period
     @patient_medication_period = DiabetesService.patient_diabetes_medication_duration(@patient.patient_id)
-    
+
     render :layout => false
   end
 
   def important_medical_history
       recent_screen_complications
   end
-  
+
   def recent_screen_complications
 	get_recent_screen_complications
-	render :layout => false   
+	render :layout => false
   end
-  
+
   def get_recent_screen_complications
     session_date = session[:datetime].to_date rescue Date.today
     #find the user priviledges
@@ -2303,7 +2313,7 @@ class GenericPatientsController < ApplicationController
     @encounter_names = @patient.encounters.active.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
     ignored_concept_id = Concept.find_by_name("NO").id;
 
-    @observations = Observation.find(:all, :order => 'obs_datetime DESC', 
+    @observations = Observation.find(:all, :order => 'obs_datetime DESC',
       :limit => 50, :conditions => ["person_id= ? AND obs_datetime < ? AND value_coded != ?",
         @patient.patient_id, Time.now.to_date, ignored_concept_id])
 
@@ -2338,7 +2348,7 @@ class GenericPatientsController < ApplicationController
 
     @arv_number = patient_bean.arv_number
     @status     = PatientService.patient_hiv_status(@patient)
-    
+
     #@status =Concept.find(Observation.find(:first,  :conditions => ["voided = 0 AND person_id= ? AND concept_id = ?",@patient.person.id, Concept.find_by_name('HIV STATUS').id], :order => 'obs_datetime DESC').value_coded).name.name rescue 'UNKNOWN'
     @hiv_test_date    = PatientService.hiv_test_date(@patient.id).strftime("%d/%b/%Y") rescue "UNKNOWN"
     @hiv_test_date = "Unkown" if @hiv_test_date.blank?
@@ -2351,7 +2361,7 @@ class GenericPatientsController < ApplicationController
   end
 
   def patient_medical_history
-  
+
       @patient = Patient.find(params[:patient_id] || session[:patient_id]) if (!@patient)
       void_encounter if (params[:void] && params[:void] == 'true')
 
@@ -2367,15 +2377,15 @@ class GenericPatientsController < ApplicationController
       @encounters   = @patient.encounters.find(:all, :order => 'encounter_datetime DESC',
         :conditions => ["patient_id= ? AND encounter_type in (?)",
           @patient.patient_id,@encounter_type_ids])
-                      
+
       @encounter_names = @patient.encounters.map{|encounter| encounter.name}.uniq
 
       @encounter_datetimes = @encounters.map { |each|each.encounter_datetime.strftime("%b-%Y")}.uniq
     render :template => false, :layout => false
   end
-  
+
 	def hiv
-		
+
 		get_recent_screen_complications
 		render :template => 'patients/hiv', :layout => false
 	end
@@ -2387,27 +2397,27 @@ class GenericPatientsController < ApplicationController
     @ds_number = DiabetesService.ds_number(@patient)
     @patient_bean = PatientService.get_patient(@person)
     @address = @person.addresses.last
-    
+
     @phone = PatientService.phone_numbers(@person)['Cell phone number']
     @phone = 'Unknown' if @phone.blank?
     render :layout => 'edit_demographics'
   end
-  
+
   def dashboard_graph
     session_date = session[:datetime].to_date rescue Date.today
     @patient      = Patient.find(params[:id] || session[:patient_id]) rescue nil
-    
+
     patient_bean = PatientService.get_patient(@patient.person)
 
     #@encounters   = @patient.encounters.current.active.find(:all)
     @encounters   = @patient.encounters.find(:all, :conditions => ['DATE(encounter_datetime) = ?',session_date.to_date])
     excluded_encounters = ["Registration", "Diabetes history","Complications", #"Diabetes test",
       "General health", "Diabetes treatments", "Diabetes admissions","Hospital admissions",
-      "Hypertension management", "Past diabetes medical history"] 
+      "Hypertension management", "Past diabetes medical history"]
     @encounter_names = @patient.encounters.active.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
     ignored_concept_id = Concept.find_by_name("NO").id;
 
-    @observations = Observation.find(:all, :order => 'obs_datetime DESC', 
+    @observations = Observation.find(:all, :order => 'obs_datetime DESC',
       :limit => 50, :conditions => ["person_id= ? AND obs_datetime < ? AND value_coded != ?",
         @patient.patient_id, Time.now.to_date, ignored_concept_id])
 
@@ -2452,20 +2462,20 @@ class GenericPatientsController < ApplicationController
     @patient_medication_period = DiabetesService.patient_diabetes_medication_duration(@patient.patient_id)
     render :layout => false
   end
-  
+
   def graph_main
     session_date = session[:datetime].to_date rescue Date.today
-    
+
     @patient      = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
     #@encounters   = @patient.encounters.current.active.find(:all)
     @encounters   = @patient.encounters.find(:all, :conditions => ['DATE(encounter_datetime) = ?',session_date.to_date])
     excluded_encounters = ["Registration", "Diabetes history","Complications", #"Diabetes test",
       "General health", "Diabetes treatments", "Diabetes admissions","Hospital admissions",
-      "Hypertension management", "Past diabetes medical history"] 
+      "Hypertension management", "Past diabetes medical history"]
     @encounter_names = @patient.encounters.active.map{|encounter| encounter.name}.uniq.delete_if{ |encounter| excluded_encounters.include? encounter.humanize } rescue []
     ignored_concept_id = Concept.find_by_name("NO").id;
 
-    @observations = Observation.find(:all, :order => 'obs_datetime DESC', 
+    @observations = Observation.find(:all, :order => 'obs_datetime DESC',
       :limit => 50, :conditions => ["person_id= ? AND obs_datetime < ? AND value_coded != ?",
         @patient.patient_id, Time.now.to_date, ignored_concept_id])
 
@@ -2495,12 +2505,12 @@ class GenericPatientsController < ApplicationController
     @medical_history_ids = selected_medical_history.map { |medical_history| Concept.find_by_name(medical_history).id }
     @significant_medical_history = []
     @observations.each { |obs| @significant_medical_history << obs if @medical_history_ids.include? obs.concept_id}
-    
+
 	patient_bean = PatientService.get_patient(@patient.person)
 
     @arv_number = patient_bean.arv_number
     @status     = PatientService.patient_hiv_status(@patient)
-    
+
     #@status =Concept.find(Observation.find(:first,  :conditions => ["voided = 0 AND person_id= ? AND concept_id = ?",@patient.person.id, Concept.find_by_name('HIV STATUS').id], :order => 'obs_datetime DESC').value_coded).name.name rescue 'UNKNOWN'
     @hiv_test_date    = PatientService.hiv_test_date(@patient.id).strftime("%d/%b/%Y") rescue "UNKNOWN"
     @hiv_test_date = "Unkown" if @hiv_test_date.blank?
@@ -2510,10 +2520,10 @@ class GenericPatientsController < ApplicationController
 
     # set the patient's medication period
     @patient_medication_period = DiabetesService.patient_diabetes_medication_duration(@patient.patient_id)
-    render :layout => 'menu'    
-    
+    render :layout => 'menu'
+
   end
-  
+
   def generate_booking
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 
@@ -2527,8 +2537,8 @@ class GenericPatientsController < ApplicationController
       @enc.each do |e|
       	 observations = []
          observations = e.observations
-       
-			   observations.each do |obs| 
+
+			   observations.each do |obs|
 					  if !obs.value_datetime.blank?
 					    obs_date = obs.value_datetime
 					    yr = obs_date.to_date.strftime("%Y")
@@ -2546,18 +2556,18 @@ class GenericPatientsController < ApplicationController
 			    end
       end
     end
-    
+
   end
-  
+
   def remove_booking
     if(params[:patient_id])
       @type = EncounterType.find_by_name("APPOINTMENT").id rescue nil
       @patient = Patient.find(params[:patient_id])
-      
+
       if(@type)
         @enc = @patient.encounters.find(:all, :joins => :observations,
               :conditions => ['encounter_type = ?', @type])
-        
+
         if(@enc)
           reason = ""
 
@@ -2574,7 +2584,7 @@ class GenericPatientsController < ApplicationController
           end
 
           @enc.each do |encounter|
-            
+
             @voided = false
 
             encounter.observations.each do |o|
@@ -2588,19 +2598,19 @@ class GenericPatientsController < ApplicationController
                 @voided = true
               end
             end
-            
+
             if @voided == true
               encounter.update_attributes(:voided => 1, :date_voided => Time.now.to_date,
                 :voided_by => current_user.user_id, :void_reason => reason)
             end
           end
-          
+
         end
       end
     end
     render :text => ""
   end
-  
+
   def complications
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
     void_encounter if (params[:void] && params[:void] == 'true')
@@ -2642,7 +2652,7 @@ class GenericPatientsController < ApplicationController
     end
 
     @foot_check_obs = {}
-    
+
     @foot_check_encounters.each{|e|
       value = @patient.person.observations.find(:all,
         :joins => :encounter,
@@ -2666,9 +2676,9 @@ class GenericPatientsController < ApplicationController
     if @visual_acuity_encounters.nil?
       @visual_acuity_encounters = []
     end
-    
+
     @visual_acuity_obs = {}
-    
+
     @visual_acuity_encounters.each{|e|
       @visual_acuity_obs[e.encounter_id] = @patient.person.observations.find(:all,
         :joins => :encounter,
@@ -2691,7 +2701,7 @@ class GenericPatientsController < ApplicationController
     end
 
     @fundoscopy_obs = {}
-    
+
     @fundoscopy_encounters.each{|e|
       @fundoscopy_obs[e.encounter_id] = @patient.person.observations.find(:all,
         :joins => :encounter,
@@ -2699,7 +2709,7 @@ class GenericPatientsController < ApplicationController
           diabetes_test_id, e.encounter_id],
         :order => 'obs_datetime DESC')
     }
-    
+
     # Urea
     urea_id = Concept.find_by_name('UREA').id
     @urea_obs = @patient.person.observations.find(:all,
@@ -2718,18 +2728,18 @@ class GenericPatientsController < ApplicationController
       :order => 'obs_datetime DESC')
     render :layout => 'complications'
   end
-  
+
   def print_complications
     @patient = Patient.find(params[:id] || params[:patient_id] || session[:patient_id]) rescue nil
     next_url = "/patients/complications?patient_id=#{@patient.id}"
     print_and_redirect("/patients/complications_label/?patient_id=#{@patient.id}", next_url)
   end
-  
+
   def complications_label
     print_string = DiabetesService.complications_label(@patient, current_user.user_id) #rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
-  
+
   def void_encounter
     @encounter = Encounter.find(params[:encounter_id])
     ActiveRecord::Base.transaction do
@@ -2738,8 +2748,8 @@ class GenericPatientsController < ApplicationController
     return
   end
 
-  def dashboard_display_number_of_booked_patients                                                
-    date = (params[:date].sub("Next appointment:","").sub(/\((.*)/,"")).to_date                                                
+  def dashboard_display_number_of_booked_patients
+    date = (params[:date].sub("Next appointment:","").sub(/\((.*)/,"")).to_date
     encounter_type = EncounterType.find_by_name('APPOINTMENT')
     concept_id = ConceptName.find_by_name('APPOINTMENT DATE').concept_id
     count = Observation.count(:all,
@@ -2749,44 +2759,44 @@ class GenericPatientsController < ApplicationController
     count = count.values unless count.blank?
     count = '0' if count.blank?
     render :text => "Next appointment: #{date.strftime('%d %B %Y')} (#{count})"
-  end 
+  end
 
-  def pdash_summary                                                                     
-    latest_encounters = Encounter.find(:all,                                    
-      :order => "encounter_datetime ASC,date_created ASC",                      
-      :conditions => ["patient_id = ? AND                                       
-      encounter_datetime >= ? AND encounter_datetime <= ?",params[:patient_id],  
-      params[:date].to_date.strftime('%Y-%m-%d 00:00:00'),                            
-      params[:date].to_date.strftime('%Y-%m-%d 23:59:59')])                           
-                                                                                
-    @encounters = {}                                                            
-                                                                                
-    (latest_encounters || []).each do |encounter|                               
-      next if encounter.name.match(/TREATMENT/i)                                
-      @encounters[encounter.name.upcase] = {:data => nil,                       
-        :time => encounter.encounter_datetime.strftime('%H:%M:%S')}             
+  def pdash_summary
+    latest_encounters = Encounter.find(:all,
+      :order => "encounter_datetime ASC,date_created ASC",
+      :conditions => ["patient_id = ? AND
+      encounter_datetime >= ? AND encounter_datetime <= ?",params[:patient_id],
+      params[:date].to_date.strftime('%Y-%m-%d 00:00:00'),
+      params[:date].to_date.strftime('%Y-%m-%d 23:59:59')])
+
+    @encounters = {}
+
+    (latest_encounters || []).each do |encounter|
+      next if encounter.name.match(/TREATMENT/i)
+      @encounters[encounter.name.upcase] = {:data => nil,
+        :time => encounter.encounter_datetime.strftime('%H:%M:%S')}
       @encounters[encounter.name.upcase][:data] = encounter.observations.collect{|obs|
-        next if obs.to_s.match(/Workstation/i)                                  
-        obs.to_s                                                                
-      }.compact                                                                 
-    end                                                                         
-    
+        next if obs.to_s.match(/Workstation/i)
+        obs.to_s
+      }.compact
+    end
+
     @html = ''
     @encounters = @encounters.sort_by { |name, values| values[:time] }
 
     @encounters.each do |name,values|
-      @html+="<div class='data'>"                                                       
-      @html+="<b>#{name}<span class='time'>#{values[:time]}</span></b><br />"     
-      values[:data].each do |value|                                    
+      @html+="<div class='data'>"
+      @html+="<b>#{name}<span class='time'>#{values[:time]}</span></b><br />"
+      values[:data].each do |value|
         if value.match(/Referred from:/i)
           @html+= 'Referred from: ' + Location.find(value.sub('Referred from:','').to_i).name rescue value
         else
-          @html+="#{value}<br />"                                                    
+          @html+="#{value}<br />"
         end
-      end                                                               
-      @html+="</div><br />"                                                              
+      end
+      @html+="</div><br />"
     end
-                                                                            
+
     render :text => @html.to_s
   end
 

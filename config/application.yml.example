@@ -1,150 +1,110 @@
 production:
- encounter_privilege_map: Procedures done:Manage procedures done,Outpatient diagnosis:Manage outpatient diagnoses,Update hiv status:Manage HIV Status Visits,Vitals:Manage Vitals,Give drugs:Manage Give Drugs,Lab orders:Manage Lab Orders,Symptoms:Manage Symptoms,Social history:Manage Social History, Admit patient:Manage Patient Admissions,Discharge patient:Manage Patient Discharges,Referral:Manage referrals
- outcome_privilege_map: Admit patient:Manage Patient Admissions,Referral:Manage referrals,Patient Sent Home:Manage Patient Release
- application_diagnosis_concept: Qech outpatient diagnosis list
- application_generic_medication: OPD Medication
- use.filing.number: false
- filing.number.limit: 300
- show.patient.confirmation: false
- create_from_remote: false
- use.user.selected.activities: false
- advanced.prescription.interface: true
- auto_set_appointment: false
- is_referral_centre: true
- ipd.wards.tag: Ward
- show.enroll.in.program.button: false
- show.dispense.button: false
- logo: mw.gif
- application.name: OPD
- create.from.dde.server: false
- zone: zone_c_west
- malaria_ip_addresses: localhost:4000, localhost:5000
- simple_application_dashboard: true
- anti_malaria_drugs:
-   Lumefantrine + Arthemether 1 x 6:
-    duration: "3"
-    frequency: "BD"
-    strength: "1.0"
-    units: tabs
-    drug_name: Lumefantrine + Arthemether 1 x 6
-    tabs: "6"
-   Lumefantrine + Arthemether 2 x 6:
-    duration: "3"
-    frequency: BD
-    strength: "2.0"
-    units: tabs
-    drug_name: Lumefantrine + Arthemether 2 x 6
-    tabs: "12"
-   Lumefantrine + Arthemether 3 x 6:
-    duration: "3"
-    frequency: BD
-    strength: "3.0"
-    units: tabs
-    drug_name: Lumefantrine + Arthemether 3 x 6
-    tabs: "18"
-   Lumefantrine + Arthemether 4 x 6:
-    duration: "3"
-    frequency: BD
-    strength: "4.0"
-    units: tabs
-    drug_name: Lumefantrine + Arthemether 4 x 6
-    tabs: "24"
-
- blood:
-  Full blood count, Malaria (mRDT), Malaria (Microscopy),  Group and Cross match, Urea and electrolytes, CD4(cluster of differentiation 4) count,
-  Viral load, Cryptococcal Antigen, Lactate, Fasting blood sugar, Random blood sugar,
-  Liver function test, Hepatitis test, sickling test,ESR(erythrocyte sedimentation rate),
-  Culture and sensitivity, Widal test,ELISA(enzyme-linked immunosorbent assay),
-  ASO(Antistreptoysin-0) titre, Rheumatoid factor, Cholesterol, Tryglicerides, Calcium,
-  Creatinine, VDRL(venereal disease research laboratory), Direct Coombs, Indirect Coombs,
-  Blood Test NOS
- csf:
-  Full CSF analysis, Indian ink, Protein and Sugar, White cell count, Culture and sensitivity
- urine:
-  Urine microscopy, Urinalysis, Culture and sensitivity
- aspirate:
-  Full aspirate analysis
- sputum:
-  AAFB (1st), AAFB (2nd), AAFB (3rd)
- stool:
-  Full stool analysis, Culture and sensitivity
- swab:
-  Microscopy, Culture and sensitivity
-
+  encounter_privilege_map: Procedures done:Manage procedures done,Outpatient diagnosis:Manage outpatient diagnoses,Update hiv status:Manage HIV Status Visits,Vitals:Manage Vitals,Give drugs:Manage Give Drugs,Lab orders:Manage Lab Orders,Symptoms:Manage Symptoms,Social history:Manage Social History, Admit patient:Manage Patient Admissions,Discharge patient:Manage Patient Discharges,Referral:Manage referrals
+  outcome_privilege_map: Admit patient:Manage Patient Admissions,Referral:Manage referrals,Patient Sent Home:Manage Patient Release,Discharge patient:Manage Patient Discharges,Refer patient out:Manage Patient Refer Out
+  application_diagnosis_concept: Qech outpatient diagnosis list
+  application_generic_medication: OPD Medication
+  use.filing.number: false
+  filing.number.limit: 300
+  show.patient.confirmation: false
+  create_from_remote: false
+  use.user.selected.activities: false
+  advanced.prescription.interface: true
+  auto_set_appointment: false
+  skip_patient_visit_histroy_page: true
+  is_referral_centre: true
+  ipd.wards.tag: Ward
+  show.enroll.in.program.button: false
+  show.dispense.button: false
+  ask_ancestral_details: false
+  logo: mw.gif
+  application.name: OPD
+  create.from.dde.server: false
+  blood:
+    Full blood count, Malaria parasite, Group and Cross match, Urea and electrolytes, CD4(cluster of differentiation 4) count,
+    Viral load, Cryptococcal Antigen, Lactate, Fasting blood sugar, Random blood sugar,
+    Liver function test, Hepatitis test, sickling test,ESR(erythrocyte sedimentation rate),
+    Culture and sensitivity, Widal test,ELISA(enzyme-linked immunosorbent assay),
+    ASO(Antistreptoysin-0) titre, Rheumatoid factor, Cholesterol, Tryglicerides, Calcium,
+    Creatinine, VDRL(venereal disease research laboratory), Direct Coombs, Indirect Coombs,
+    Blood Test NOS
+  csf:
+    Full CSF analysis, Indian ink, Protein and Sugar, White cell count, Culture and sensitivity
+  urine:
+    Urine microscopy, Urinalysis, Culture and sensitivity
+  aspirate:
+    Full aspirate analysis
+  sputum:
+    AAFB (1st), AAFB (2nd), AAFB (3rd)
+  stool:
+    Full stool analysis, Culture and sensitivity
+  swab:
+    Microscopy, Culture and sensitivity
 development:
- encounter_privilege_map: Procedures done:Manage procedures done,Outpatient diagnosis:Manage outpatient diagnoses,Update hiv status:Manage HIV Status Visits,Vitals:Manage Vitals,Give drugs:Manage Give Drugs,Lab orders:Manage Lab Orders,Symptoms:Manage Symptoms,Social history:Manage Social History, Admit patient:Manage Patient Admissions,Discharge patient:Manage Patient Discharges,Referral:Manage referrals
- outcome_privilege_map: Admit patient:Manage Patient Admissions,Referral:Manage referrals,Patient Sent Home:Manage Patient Release
- application_diagnosis_concept: Qech outpatient diagnosis list
- application_generic_medication: OPD Medication
- use.filing.number: false
- filing.number.limit: 300
- show.patient.confirmation: false
- create_from_remote: false
- use.user.selected.activities: false
- advanced.prescription.interface: true
- auto_set_appointment: false
- is_referral_centre: true
- ipd.wards.tag: Ward
- show.enroll.in.program.button: false
- show.dispense.button: false
- logo: mw.gif
- application.name: OPD
- create.from.dde.server: false
- zone: zone_c_west
- malaria_ip_addresses: localhost:4000, localhost:5000
- simple_application_dashboard: true
- anti_malaria_drugs:
-   Lumefantrine + Arthemether 1 x 6:
-    duration: "3"
-    frequency: "BD"
-    strength: "1.0"
-    units: tabs
-    drug_name: Lumefantrine + Arthemether 1 x 6
-    tabs: "6"
-   Lumefantrine + Arthemether 2 x 6:
-    duration: "3"
-    frequency: BD
-    strength: "2.0"
-    units: tabs
-    drug_name: Lumefantrine + Arthemether 2 x 6
-    tabs: "12"
-   Lumefantrine + Arthemether 3 x 6:
-    duration: "3"
-    frequency: BD
-    strength: "3.0"
-    units: tabs
-    drug_name: Lumefantrine + Arthemether 3 x 6
-    tabs: "18"
-   Lumefantrine + Arthemether 4 x 6:
-    duration: "3"
-    frequency: BD
-    strength: "4.0"
-    units: tabs
-    drug_name: Lumefantrine + Arthemether 4 x 6
-    tabs: "24"
- blood:
-  Full blood count, Malaria (mRDT), Malaria (Microscopy),  Group and Cross match, Urea and electrolytes, CD4(cluster of differentiation 4) count,
-  Viral load, Cryptococcal Antigen, Lactate, Fasting blood sugar, Random blood sugar,
-  Liver function test, Hepatitis test, sickling test,ESR(erythrocyte sedimentation rate),
-  Culture and sensitivity, Widal test,ELISA(enzyme-linked immunosorbent assay),
-  ASO(Antistreptoysin-0) titre, Rheumatoid factor, Cholesterol, Tryglicerides, Calcium,
-  Creatinine, VDRL(venereal disease research laboratory), Direct Coombs, Indirect Coombs,
-  Blood Test NOS
- csf:
-  Full CSF analysis, Indian ink, Protein and Sugar, White cell count, Culture and sensitivity
- urine:
-  Urine microscopy, Urinalysis, Culture and sensitivity
- aspirate:
-  Full aspirate analysis
- sputum:
-  AAFB (1st), AAFB (2nd), AAFB (3rd)
- stool:
-  Full stool analysis, Culture and sensitivity
- swab:
-  Microscopy, Culture and sensitivity
+  encounter_privilege_map: Procedures done:Manage procedures done,Outpatient diagnosis:Manage outpatient diagnoses,Update hiv status:Manage HIV Status Visits,Vitals:Manage Vitals,Give drugs:Manage Give Drugs,Lab orders:Manage Lab Orders,Symptoms:Manage Symptoms,Social history:Manage Social History, Admit patient:Manage Patient Admissions,Discharge patient:Manage Patient Discharges,Referral:Manage referrals
+  outcome_privilege_map: Admit patient:Manage Patient Admissions,Referral:Manage referrals,Patient Sent Home:Manage Patient Release,Discharge patient:Manage Patient Discharges,Refer patient out:Manage Patient Refer Out
+  application_diagnosis_concept: Qech outpatient diagnosis list
+  application_generic_medication: OPD Medication
+  use.filing.number: false
+  filing.number.limit: 300
+  ask_ancestral_details: false
+  show.patient.confirmation: false
+  create_from_remote: false
+  use.user.selected.activities: false
+  advanced.prescription.interface: true
+  auto_set_appointment: false
+  is_referral_centre: true
+  skip_patient_visit_histroy_page: true
+  ipd.wards.tag: Ward
+  show.enroll.in.program.button: false
+  show.dispense.button: false
+  logo: mw.gif
+  application.name: OPD
+  create.from.dde.server: false
+  blood:
+    Full blood count, Malaria parasite, Group and Cross match, Urea and electrolytes, CD4(cluster of differentiation 4) count,
+    Viral load, Cryptococcal Antigen, Lactate, Fasting blood sugar, Random blood sugar,
+    Liver function test, Hepatitis test, sickling test,ESR(erythrocyte sedimentation rate),
+    Culture and sensitivity, Widal test,ELISA(enzyme-linked immunosorbent assay),
+    ASO(Antistreptoysin-0) titre, Rheumatoid factor, Cholesterol, Tryglicerides, Calcium,
+    Creatinine, VDRL(venereal disease research laboratory), Direct Coombs, Indirect Coombs,
+    Blood Test NOS
+  csf:
+    Full CSF analysis, Indian ink, Protein and Sugar, White cell count, Culture and sensitivity
+  urine:
+    Urine microscopy, Urinalysis, Culture and sensitivity
+  aspirate:
+    Full aspirate analysis
+  sputum:
+    AAFB (1st), AAFB (2nd), AAFB (3rd)
+  stool:
+    Full stool analysis, Culture and sensitivity
+  swab:
+    Microscopy, Culture and sensitivity
+  # Radiology examination type for radiology exam, e.g. CR, DR etc.
+  # NOTE: this is only for development, you'll need to move all these to production.
+  # NOTE: you'll have to create more type in concept_name table(or where you store your order type name).
+  shoulder:
+    Left, Right
+  arms:
+    Left, Right
+  legs:
+    Left, Right
+  foot:
+    Left, Right
+  ftp_host:
+    192.168.1.202
+  pacs_user:
+    'xero'
+  pacs_pw:
+    'xero'
+  ftp_user_name:
+    pacs
+  ftp_pw:
+    pacs
+
 test: &TEST
- create_from_remote: no
- use.user.selected.activities: yes
+  create_from_remote: no
+  use.user.selected.activities: yes
 
 cucumber:
   <<: *TEST

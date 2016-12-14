@@ -8,7 +8,7 @@ class ClinicController < GenericClinicController
       ["Stock report","/drug/date_select"]
     ]
 
-    render :template => 'clinic/reports', :layout => 'clinic' 
+    render :template => 'clinic/reports', :layout => 'clinic'
   end
 
   def supervision
@@ -19,7 +19,7 @@ class ClinicController < GenericClinicController
 
     @landing_dashboard = 'clinic_supervision'
 
-    render :template => 'clinic/supervision', :layout => 'clinic' 
+    render :template => 'clinic/supervision', :layout => 'clinic'
   end
 
   def properties
@@ -30,7 +30,7 @@ class ClinicController < GenericClinicController
       ["Set site code", "/properties/site_code"],
       ["Set appointment limit", "/properties/set_appointment_limit"]
     ]
-    render :template => 'clinic/properties', :layout => 'clinic' 
+    render :template => 'clinic/properties', :layout => 'clinic'
   end
 
   def administration
@@ -62,14 +62,15 @@ class ClinicController < GenericClinicController
       ["Update DHIS2", "/report/update_dhis"],
       ["Malaria Report", "/report/malaria_report_menu"],
       ["LA Report", "/report/la_report_menu"],
-      ["Drug Report", "/report/drug_report"]
+      ["Drug Report", "/report/drug_report"],
+      ["IDSR Monthly Summary", "/cohort_tool/monthly_idsr_report_menu"]
     ]
     #if allowed_hiv_viewer
     #@reports << ["Patient Level Data", "/cohort_tool/opd_menu?report_name=patient_level_data"]
     #end
     render :layout => false
   end
-  
+
   def reports_tab_graphs
     session[:observation] = nil
     session[:people] = nil
@@ -88,7 +89,7 @@ class ClinicController < GenericClinicController
       ["Diagnosis Report", "/cohort_tool/opd_menu?report_name=diagnosis_report_graph"],
       ["Total Registered", "/cohort_tool/opd_menu?report_name=total_registered_graph"],
       ["Transfer Out", "/cohort_tool/opd_menu?report_name=referals_graph"]
-      						
+
     ]
     render :layout => false
   end
@@ -155,12 +156,12 @@ class ClinicController < GenericClinicController
         AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MICROSCOPY'
         AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
-    
+
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MICROSCOPY QUERIES START>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @microscopy_total_orders = microscopy_order_observations.count
     microscopy_order_accession_numbers = microscopy_order_observations.map(&:accession_number).compact
     microscopy_order_accession_numbers = [0] if microscopy_order_accession_numbers.blank?
-    
+
     microscopy_positive_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
         ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
         AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
@@ -206,7 +207,7 @@ class ClinicController < GenericClinicController
         AND UPPER(o.value_text) = 'MALARIA RDT POSITIVE'
         AND e.voided=0 AND DATE(e.encounter_datetime) <= '#{Date.today}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
-    
+
     @mrdt_positive_results_count = mrdt_positive_results_observations.count
 
     mrdt_negative_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
@@ -248,10 +249,10 @@ class ClinicController < GenericClinicController
         WHERE e.encounter_type = #{treatment_encounter_type_id}
         AND do.drug_inventory_id = #{la_one_drug_id} AND
         o.order_type_id = #{drug_order_type_id} AND e.encounter_datetime <= \"#{Date.today} 23:59:59\"
-        AND e.voided=0 GROUP BY do.drug_inventory_id" 
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
     ).last.total_prescribed_drugs rescue 0
 
-    @total_la_one_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e 
+    @total_la_one_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
         INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
         INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
         INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
@@ -301,7 +302,7 @@ class ClinicController < GenericClinicController
         AND do.drug_inventory_id = #{la_three_drug_id}
         AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
     ).last.total_dispensed_drugs rescue 0
-    
+
     @total_la_four_prescribed_drugs = Order.find_by_sql("
         SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
         FROM encounter e INNER JOIN encounter_type et
@@ -326,7 +327,14 @@ class ClinicController < GenericClinicController
     #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     render :layout => false
   end
-
+  def temperature_readings_tab
+    @location = Location.find(session[:location_id]).name
+    @temperature = TemperatureRecord.find(:all,:select=>"patient_identifier,temperature",
+                                          :conditions =>["status='open' AND
+                                                    location_id=#{session[:location_id]}
+                                                    AND temperature >= 37.8"])
+    render :layout => false
+  end
   def load_malaria_dashboard_data
 =begin
     malaria_ip_addresses = CoreService.get_global_property_value("malaria_ip_addresses").split(", ") rescue []
@@ -337,5 +345,5 @@ class ClinicController < GenericClinicController
     end
 =end
   end
-  
+
 end

@@ -243,6 +243,7 @@ class GenericPrescriptionsController < ApplicationController
 
     antimalaria_drugs = CoreService.get_global_property_value("anti_malaria_drugs")
     @antimalarial_drugs_hash = {}
+    unless antimalaria_drugs.blank? # execute code only when malaria drugs available
     antimalaria_drugs.each do |key, values|
       drug_id = Drug.find_by_name(key).drug_id rescue nil
       next if drug_id.blank?
@@ -254,7 +255,7 @@ class GenericPrescriptionsController < ApplicationController
       @antimalarial_drugs_hash[drug_id]["drug_name"] = values["drug_name"]
       @antimalarial_drugs_hash[drug_id]["tabs"] = values["tabs"]
     end
-
+   end
     lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
     malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
     today =  session[:datetime].to_date rescue Date.today

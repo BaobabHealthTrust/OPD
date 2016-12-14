@@ -5,6 +5,7 @@
 config/database.yml
 config/application.yml
 config/settings.yml
+config/dashboard.yml
 notes
 doc
 development_structure.sql

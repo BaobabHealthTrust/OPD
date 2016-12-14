@@ -19,6 +19,12 @@ class GenericClinicController < ApplicationController
       end
     end
 
+    border_name_list = ["KIA-VIP","KIA-REGULAR"] #store border location names
+
+    if border_name_list.include?(@location)
+      @boarder =true #set if it is a border site
+    end
+    
     render :template => 'clinic/index', :layout => false
   end
 
@@ -30,7 +36,7 @@ class GenericClinicController < ApplicationController
       ["Stock report","/drug/date_select"]
     ]
 
-    render :template => 'clinic/reports', :layout => 'clinic' 
+    render :template => 'clinic/reports', :layout => 'clinic'
   end
 
   def supervision
@@ -41,7 +47,7 @@ class GenericClinicController < ApplicationController
 
     @landing_dashboard = 'clinic_supervision'
 
-    render :template => 'clinic/supervision', :layout => 'clinic' 
+    render :template => 'clinic/supervision', :layout => 'clinic'
   end
 
   def properties
@@ -52,7 +58,7 @@ class GenericClinicController < ApplicationController
       ["Set site code", "/properties/site_code"],
       ["Set appointment limit", "/properties/set_appointment_limit"]
     ]
-    render :template => 'clinic/properties', :layout => 'clinic' 
+    render :template => 'clinic/properties', :layout => 'clinic'
   end
 
   def management
@@ -64,15 +70,15 @@ class GenericClinicController < ApplicationController
       ["Removed from shelves","date_select"],
       ["Stock report","date_select"]
     ]
-    render :template => 'clinic/management', :layout => 'clinic' 
+    render :template => 'clinic/management', :layout => 'clinic'
   end
 
   def printing
-    render :template => 'clinic/printing', :layout => 'clinic' 
+    render :template => 'clinic/printing', :layout => 'clinic'
   end
 
   def users
-    render :template => 'clinic/users', :layout => 'clinic' 
+    render :template => 'clinic/users', :layout => 'clinic'
   end
 
   def administration
@@ -82,7 +88,7 @@ class GenericClinicController < ApplicationController
       ['/clinic/location_management','Location Management']
     ]
     @landing_dashboard = 'clinic_administration'
-    render :template => 'clinic/administration', :layout => 'clinic' 
+    render :template => 'clinic/administration', :layout => 'clinic'
   end
 
   def overview_tab
@@ -115,7 +121,7 @@ class GenericClinicController < ApplicationController
       :conditions => ['encounter_datetime BETWEEN ? AND ?',
         Date.today.strftime('%Y-01-01 00:00:00'),
         Date.today.strftime('%Y-12-31 23:59:59')])
-      
+
     @ever = Encounter.statistics(@types)
 =end
     if simple_overview
@@ -147,7 +153,7 @@ class GenericClinicController < ApplicationController
        person.birthdate)/365 < ? AND DATE(patient.date_created) =?', 14, Date.today]).count
       @today_reg_above_14 = Patient.find(:all,:joins => [:person], :conditions => ['DATEDIFF(NOW(),
        person.birthdate)/365 >= ? AND DATE(patient.date_created) =? ', 14, Date.today]).count
-    
+
       @me_ret_pt_below_14 =  Encounter.find(:all, :joins => [:type, [:patient => :person] ],
         :group=>'patient.patient_id', :conditions => ['encounter_type_id IN (?) AND
        DATE(patient.date_created) <> ? AND DATE(encounter.encounter_datetime) =?  AND
@@ -180,7 +186,7 @@ class GenericClinicController < ApplicationController
       render :template => 'clinic/overview_simple.rhtml' , :layout => false
       return
     end
-    
+
     render :layout => false
   end
 
@@ -248,14 +254,13 @@ class GenericClinicController < ApplicationController
       ['/drug/receive_products','Receive Products'],
       ['/drug/relocate_products','Relocate Products'],
       ['/drug/mark_loss_damage_of_products','Register Loss/Damage Of Products']
-
     ]
-    
+
     if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")
       @reports << ['/clinic/preferred_diagnosis','Set Top 10 Diagnoses']
       @reports << ['/clinic/preferred_drugs','Set Top 10 Drugs']
     end
-    
+
     if current_user.admin?
       @reports << ['/clinic/management_tab','Drug Management']
     end
@@ -284,7 +289,7 @@ class GenericClinicController < ApplicationController
       ['/location.new?act=delete','Delete location'],
       ['/location/new?act=print','Print location']
     ]
-    render :template => 'clinic/location_management', :layout => 'clinic' 
+    render :template => 'clinic/location_management', :layout => 'clinic'
   end
 
   def location_management_tab
@@ -309,7 +314,7 @@ class GenericClinicController < ApplicationController
     ]
     render :layout => false
   end
-  
+
   def lab_tab
     #only applicable in the sputum submission area
     enc_date = session[:datetime].to_date rescue Date.today
@@ -331,7 +336,7 @@ class GenericClinicController < ApplicationController
     @social_history_property = GlobalProperty.find_by_property("ask.social.history.questions").property_value.to_s == "true" rescue "Not Set"
     @triage_category_property = GlobalProperty.find_by_property("ask.triage.category.questions").property_value.to_s == "true" rescue "Not Set"
     @ask_vitals_before_property = GlobalProperty.find_by_property("ask.vitals.questions.before.diagnosis").property_value.to_s == "true" rescue "Not Set"
-    
+
     @confirm_patience_creation_property = GlobalProperty.find_by_property("confirm.before.creating").property_value.to_s == "true" rescue 'Not Set'
     @print_specimen_label_property = GlobalProperty.find_by_property("specimen.label.print").property_value.to_s == "true" rescue "Not Set"
     @manage_roles_property = nil
@@ -410,9 +415,9 @@ class GenericClinicController < ApplicationController
   def preferred_drugs
     @generic_drugs = MedicationService.generic
     @preferred_drugs = []
-    preferred_diagnosis_concept_ids = GlobalProperty.find(:last, 
+    preferred_diagnosis_concept_ids = GlobalProperty.find(:last,
       :conditions => ["property =?", 'preferred.drugs.concept_id']).property_value.split(", ") rescue []
-    
+
     preferred_diagnosis_concept_ids.each do |concept_id|
       drug_name = Concept.find(concept_id).fullname
       @preferred_drugs << [concept_id, drug_name]
@@ -424,14 +429,14 @@ class GenericClinicController < ApplicationController
   def preferred_drugs_search
     search_string = params[:search_string].upcase
     generic_drugs = MedicationService.generic
-    
+
     generic_drugs = generic_drugs.map{|generic_drug|
 			drug_name = generic_drug[0]
 			drug_name.upcase.include?(search_string) ? generic_drug : nil rescue nil
 		}.compact
 
     hash = {}
-    
+
     generic_drugs.each do |drug|
       name = drug[0]
       concept_id  = drug[1]
@@ -455,5 +460,5 @@ class GenericClinicController < ApplicationController
 
     redirect_to("/clinic/preferred_drugs") and return
   end
-  
+
 end

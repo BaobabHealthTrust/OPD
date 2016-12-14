@@ -166,17 +166,30 @@ class GenericPeopleController < ApplicationController
           end
         end
 
+        #getting a setting preference for patient dashboard
+        go_straight_to_dashboard = CoreService.get_global_property_value("skip_patient_visit_histroy_page")
+
         if params[:relation]
           redirect_to search_complete_url(found_person.id, params[:relation]) and return
         elsif national_id_replaced.to_s == "true"
           DDEService.create_footprint(PatientService.get_patient(found_person).national_id, "OPD")
           print_and_redirect("/patients/national_id_label?patient_id=#{found_person.id}", next_task(found_person.patient)) and return
-          redirect_to :controller =>'patients',:action => 'patient_dashboard',
-            :found_person_id => found_person.id, :relation => params[:relation] and return
+          if go_straight_to_dashboard
+            redirect_to :controller =>'patients',:action => 'show',
+                        :id => found_person.id, :relation => params[:relation] and return
+          else
+            redirect_to :controller =>'patients',:action => 'patient_dashboard',
+                        :found_person_id => found_person.id, :relation => params[:relation] and return
+          end
         else
           DDEService.create_footprint(PatientService.get_patient(found_person).national_id, "OPD")
-          redirect_to :controller =>'patients',:action => 'patient_dashboard',
-            :found_person_id => found_person.id, :relation => params[:relation] and return
+          if go_straight_to_dashboard
+            redirect_to :controller =>'patients',:action => 'show',
+                        :id => found_person.id, :relation => params[:relation] and return
+          else
+            redirect_to :controller =>'patients',:action => 'patient_dashboard',
+                        :found_person_id => found_person.id, :relation => params[:relation] and return
+          end
         end
       end
     end

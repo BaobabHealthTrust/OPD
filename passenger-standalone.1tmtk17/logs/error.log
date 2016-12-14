@@ -1,0 +1,1 @@
+2016/10/27 14:37:09 [emerg] 11526#0: open() "/var/www/opd/log/passenger.3002.log" failed (13: Permission denied)

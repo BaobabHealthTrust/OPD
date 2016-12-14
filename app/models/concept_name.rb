@@ -9,7 +9,7 @@ class ConceptName < ActiveRecord::Base
   named_scope :typed, lambda{|tags| tags.blank? ? {} : {:conditions => ['concept_name_type IN (?)', Array(tags)]}}
   self.default_scope :joins => :concept, :conditions => "concept_name.voided = 0 AND concept.retired = 0 AND concept_name.name != ''"
 
-	#TODO Need 
+	#TODO Need
   # This method gets the collection of all short forms of frequencies as used into make this method a lot more generic
   # the Diabetes Module and returns only no-empty values or an empty array if none
   # exist
@@ -25,5 +25,11 @@ class ConceptName < ActiveRecord::Base
                         }.compact rescue []
   end
 
-end
+  def self.complaintsconcepts #redo this once the mapping is done
+    find_by_sql ('select name from concept_name CN, concept_set CS
+    where CN.concept_id = CS.concept_id
+    and CS.concept_set = 8578
+    order by CN.name')
+  end
 
+end
