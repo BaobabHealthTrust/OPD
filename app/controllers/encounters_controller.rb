@@ -631,7 +631,6 @@ class EncountersController < GenericEncountersController
   end
 
   def create_complaints
-    raise params[:complaints].to_yaml
     encounter = Encounter.new()
     if params['encounter']['encounter_type_name'].upcase == 'NOTES'
       encounter.encounter_type = EncounterType.find_by_name("NOTES").id

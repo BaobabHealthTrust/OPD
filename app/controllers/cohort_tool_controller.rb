@@ -1786,8 +1786,18 @@ class CohortToolController < ApplicationController
     end_month = params[:end_month]
     end_day = params[:end_day]
     @age_groups = params[:age_groups].map{|g|g.upcase}
-    @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-    @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+    #Checks is start year is null,
+    #if null, it gets start date and end date from the current date picker
+    #else, it creates the date from the old date picker
+    if start_year.nil?
+      start_date = params[:start_date]
+      end_date = params[:end_date]
+      @start_date = start_date.to_date
+      @end_date = end_date.to_date 
+    else
+      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+    end
     @total_registered = []
       @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
       @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
@@ -1886,8 +1896,18 @@ class CohortToolController < ApplicationController
       end_month = params[:end_month]
       end_day = params[:end_day]
 
-      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      #Checks is start year is null,
+      #if null, it gets start date and end date from the current date picker
+      #else, it creates the date from the old date picker
+      if start_year.nil?
+        start_date = params[:start_date]
+        end_date = params[:end_date]
+        @start_date = start_date.to_date
+        @end_date = end_date.to_date 
+      else
+        @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+        @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      end
       @total_registered = 0
       @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
       @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
@@ -2012,8 +2032,18 @@ class CohortToolController < ApplicationController
         @age_groups = ["ALL"]
       end
       @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      #Checks is start year is null,
+      #if null, it gets start date and end date from the current date picker
+      #else, it creates the date from the old date picker
+      if start_year.nil?
+        start_date = params[:start_date]
+        end_date = params[:end_date]
+        @start_date = start_date.to_date
+        @end_date = end_date.to_date 
+      else
+        @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+        @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      end
       @disaggregated_diagnosis = {}
       @diagnosis_by_address = {}
       @diagnosis_name = {}
@@ -2121,8 +2151,18 @@ class CohortToolController < ApplicationController
 
       diagnosis_concept_id = Concept.find_by_name(params[:diagnosis]).concept_id
       @diagnosis_name = params[:diagnosis]
-      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      #Checks is start year is null,
+      #if null, it gets start date and end date from the current date picker
+      #else, it creates the date from the old date picker
+      if start_year.nil?
+        start_date = params[:start_date]
+        end_date = params[:end_date]
+        @start_date = start_date.to_date
+        @end_date = end_date.to_date 
+      else
+        @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+        @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      end
 
       @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
       @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
@@ -2165,8 +2205,18 @@ class CohortToolController < ApplicationController
 
       @age_groups = age_groups.map{|g|g.upcase}
       @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      #Checks is start year is null,
+      #if null, it gets start date and end date from the current date picker
+      #else, it creates the date from the old date picker
+      if start_year.nil?
+        start_date = params[:start_date]
+        end_date = params[:end_date]
+        @start_date = start_date.to_date
+        @end_date = end_date.to_date 
+      else
+        @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+        @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      end
       @disaggregated_diagnosis = {}
       @diagnosis_by_address = {}
       @diagnosis_name = {}
@@ -2269,8 +2319,18 @@ class CohortToolController < ApplicationController
         end_day = params[:end_day]
         @age_groups = age_groups.map{|g|g.upcase}
         @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-        @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-        @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+        #Checks is start year is null,
+        #if null, it gets start date and end date from the current date picker
+        #else, it creates the date from the old date picker
+        if start_year.nil?
+          start_date = params[:start_date]
+          end_date = params[:end_date]
+          @start_date = start_date.to_date
+          @end_date = end_date.to_date 
+        else
+          @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+          @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+        end
         @diagnosis_name = {}
       else
         @start_date = params[:start_date].to_date
@@ -2327,8 +2387,18 @@ class CohortToolController < ApplicationController
       end_day = params[:end_day]
       @age_groups = age_groups.map{|g|g.upcase}
       @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      #Checks is start year is null,
+      #if null, it gets start date and end date from the current date picker
+      #else, it creates the date from the old date picker
+      if start_year.nil?
+        start_date = params[:start_date]
+        end_date = params[:end_date]
+        @start_date = start_date.to_date
+        @end_date = end_date.to_date 
+      else
+        @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+        @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      end
       @diagnosis_by_address = {}
       @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
       @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
@@ -2446,12 +2516,18 @@ class CohortToolController < ApplicationController
       end_year = params[:end_year]
       end_month = params[:end_month]
       end_day = params[:end_day]
-      # @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      # @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
-
-      @start_date = params[:start_date]
-      @end_date = params[:end_date]
-
+      #Checks is start year is null,
+      #if null, it gets start date and end date from the current date picker
+      #else, it creates the date from the old date picker
+      if start_year.nil?
+        start_date = params[:start_date]
+        end_date = params[:end_date]
+        @start_date = start_date.to_date
+        @end_date = end_date.to_date 
+      else
+        @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+        @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      end
       @referral_locations = Hash.new(0)
 #      @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
 #      @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
@@ -2471,8 +2547,18 @@ class CohortToolController < ApplicationController
       end_year = params[:end_year]
       end_month = params[:end_month]
       end_day = params[:end_day]
-      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      #Checks is start year is null,
+      #if null, it gets start date and end date from the current date picker
+      #else, it creates the date from the old date picker
+      if start_year.nil?
+        start_date = params[:start_date]
+        end_date = params[:end_date]
+        @start_date = start_date.to_date
+        @end_date = end_date.to_date 
+      else
+        @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+        @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      end
       @referral_locations = Hash.new(0)
       @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
       @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
@@ -2492,8 +2578,18 @@ class CohortToolController < ApplicationController
       end_month = params[:end_month]
       end_day = params[:end_day]
       @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-      @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      #Checks is start year is null,
+      #if null, it gets start date and end date from the current date picker
+      #else, it creates the date from the old date picker
+      if start_year.nil?
+        start_date = params[:start_date]
+        end_date = params[:end_date]
+        @start_date = start_date.to_date
+        @end_date = end_date.to_date 
+      else
+        @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+        @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      end
       @disaggregated_diagnosis = {}
       @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
       @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
@@ -2712,14 +2808,18 @@ class CohortToolController < ApplicationController
       end_month = params[:end_month]
       end_day = params[:end_day]
       @required = ["TREATMENT","OUTPATIENT DIAGNOSIS"]
-      # @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
-      # @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
-
-      # @start_date = '2016-10-01 00:00:00'
-      # @end_date = '2016-10-27 26:59:59'
-
-      @start_date = params[:start_date].to_date
-      @end_date = params[:end_date].to_date
+      #Checks is start year is null,
+      #if null, it gets start date and end date from the current date picker
+      #else, it creates the date from the old date picker
+      if start_year.nil?
+        start_date = params[:start_date]
+        end_date = params[:end_date]
+        @start_date = start_date.to_date
+        @end_date = end_date.to_date 
+      else
+        @start_date = (start_year + "-" + start_month + "-" + start_day).to_date
+        @end_date = (end_year + "-" + end_month + "-" + end_day).to_date
+      end
 
       @disaggregated_diagnosis = {}
       @formated_start_date = @start_date
