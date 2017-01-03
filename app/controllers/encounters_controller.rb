@@ -115,7 +115,8 @@ class EncountersController < GenericEncountersController
                                       left join encounter_type on 
                                         encounter_type_id =encounter.encounter_type 
                                         where encounter_type.name = 'NOTES' 
-                                        AND obs.obs_datetime >= DATE(now()) 
+                                        AND obs.obs_datetime >= DATE(now())
+					AND obs.voided = 0 
                                         AND encounter.patient_id = "+current_patient_id).count
       if( complaints_count == 0 && params[:encounter_type].upcase == 'OUTPATIENT_DIAGNOSIS')
           redirect_to :action => "idsr_complaints", :patient_id => params[:patient_id] and return
