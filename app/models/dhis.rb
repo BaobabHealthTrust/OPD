@@ -268,5 +268,10 @@ class Dhis
     
 		return report_values
 	end
+
+	def get_hmis_report_values()
+
+
+	end
 end
 

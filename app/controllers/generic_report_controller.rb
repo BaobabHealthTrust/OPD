@@ -495,6 +495,7 @@ class GenericReportController < ApplicationController
   
   def set_appointments
     @select_date = params[:user_selected_date].to_date
+    @end_date = params[:user_selected_date].to_date + 28
     @patients = Report.set_appointments(@select_date)
     render :layout => 'menu'
   end
@@ -509,6 +510,12 @@ class GenericReportController < ApplicationController
   	@logo = CoreService.get_global_property_value('logo') rescue nil
   	@report = params[:report]
   	@report_name = ""
+    
+
+    db_values= Dhis.new(@select_date,@end_date)
+
+      
+
   	@idsr_mothly = {}
   	if @report == "IDSR Monthly"
   		@report_name = @report
@@ -528,7 +535,7 @@ class GenericReportController < ApplicationController
 					"Out-patient cases"=>
 					{
 						:dataElement=>"DTZU9thFC85",
-						:value=>0,
+						:value=>db_values.get_all_report_values[:male_urethral_discharge],
 						:categoryOptionCombo=>coc_out_patient_cases
 					 }
 			},
@@ -560,7 +567,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"CRArwtJppcy",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:meningitis],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 				"In-patient cases"=>
@@ -582,7 +589,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"jPH2HL1zlTU",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:pneumonia_severe_less_5],
 					:categoryOptionCombo=>coc_out_patient_cases
 				}
 			},
@@ -592,7 +599,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"p494BDUSEUz",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:intestinal_schistosomiasis],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 				"In-patient cases"=>
@@ -614,7 +621,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"WDQ9DoNW1gI",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:malaria_less_than_5_uncomplicated],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 		  	},
@@ -624,7 +631,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"gMQn2Hgv3ud",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:male_genital_ulcer],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 			},
@@ -650,7 +657,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"fYpGGzLiVbe",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:new_aids_cases],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 				"In-patient cases"=>
@@ -672,7 +679,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"BnbLe0vUHIM",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:measles],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 				"In-patient cases"=>
@@ -694,7 +701,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"YXnx3FepHlE",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:neontal_tetanus],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 				"In-patient cases"=>
@@ -716,7 +723,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"GERSeo2EiaP",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:diarrhoea_with_dehydration],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 				"In-patient cases"=>
@@ -738,7 +745,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"sUmQaUBzNy3",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:malaria_more_than_5_uncomplicated],
 					:categoryOptionCombo=>coc_out_patient_cases
 				}
 			},
@@ -764,7 +771,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"TxPvgF64DZB",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:female_genital_ulcer],
 					:categoryOptionCombo=>coc_out_patient_cases
 				}
 		    },
@@ -796,7 +803,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"cLEvPveMGfq",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:malaria_uncomplicated_in_pregnant_women],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 			},
@@ -828,7 +835,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"xRmq6560gDJ",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:cholera],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 				"In-patient cases"=>
@@ -850,7 +857,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"tvp6Blay8Yc",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:malaria_more_than_5_uncomplicated],
 					:categoryOptionCombo=>coc_out_patient_cases
 				}
 		  	},
@@ -876,7 +883,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"DpRXVfxBy1m",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:malaria_less_than_5_uncomplicated],
 					:categoryOptionCombo=>coc_out_patient_cases
 				}
 			},
@@ -886,7 +893,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"Zs6Bjgfyrct",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:plague],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 				"In-patient cases"=>
@@ -924,7 +931,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"XVNCLVde2Eu",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:diarrhoea_with_blood],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 				"In-patient cases"=>
@@ -962,7 +969,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"wDCBO0oRE18",
-					:value=>0,
+					:value=>db_values.get_all_report_values[:diarrhoea_with_blood],
 					:categoryOptionCombo=>coc_default
 				},
 				"In-patient cases"=>
@@ -986,7 +993,7 @@ class GenericReportController < ApplicationController
 				"In-patient cases"=>
 				{
 					:dataElement=>"kLWOyuVuvoW",
-					:value=>0,
+					:value=> 0,
 					:categoryOptionCombo=>coc_in_patient_cases
 				},
 				"In-patient deaths"=>
@@ -1014,7 +1021,23 @@ class GenericReportController < ApplicationController
   		
   		@report = @report + " (#{Date::MONTHNAMES[params[:month].to_i]} - #{params[:year]}) Report Preview"
   		render :template => 'report/dhis_idsr', :layout => 'dhis2'
-  	else
+    
+    elsif @report == "HMIS-15"
+      @report_name = @report
+
+
+      @report = @report + " (#{Date::MONTHNAMES[params[:month].to_i]} - #{params[:year]}) Report Preview"
+      render :template => 'report/dhis_hmis-15', :layout => 'dhis2'
+
+
+    elsif @report == "ANC Monthly Facility Report"
+      @report_name = @report
+
+
+      @report = @report + " (#{Date::MONTHNAMES[params[:month].to_i]} - #{params[:year]}) Report Preview"
+      render :template => 'report/dhis_anc', :layout => 'dhis2'
+
+    else
   		redirect_to "/report/update_dhis" and return
   	end
   end

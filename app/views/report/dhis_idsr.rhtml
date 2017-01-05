@@ -1,8 +1,14 @@
+<%= javascript_include_tag("numericKeypad")%>
+
+
 <style>
 	#t_id {
-		margin: 0px auto;
+		 
+		 margin: 0px;
+         width:100%;
 		 padding-bottom:30px;
 		 padding-top:20px;
+		 left:75px;
 	}
 	
      td , th{
@@ -33,11 +39,13 @@
       }
       
       #title {
-      	margin:0px auto;
+      	/*margin:0px auto;*/
+      	margin:0px;
       	text-align:left;
       	font-weight:bold;
       	font-size:21px;
-      	width:1100px;
+      	/*width:1400px;*/
+      	width:100%;
       }
       
       .disable {
@@ -48,12 +56,22 @@
       	font-weight:bold;
       }
       
-	  .logo {
+	/*  .logo {
+	  	float :left;
 	  	margin-left: 0px;
 	  	position:relative;
 		height: 4em;
 		z-index:5000;
-	  }
+	  }*/
+     
+     .logo {
+        float:left
+        position:relative;
+        height: 4.5em;
+        
+      }
+
+
 	  
 	 #base {
 		background-color: #333333;
@@ -62,7 +80,7 @@
 		height: 80px;
 		overflow: hidden;
 		margin: 0px auto;
-		width: 1110px;
+		width: 100%;
       }
       
       .lf {
@@ -75,14 +93,14 @@
 
 <div id="title">
 	<%= image_tag(@logo,:class=>"logo")%>
-	<%= "<span style='position:relative;left:64px;'>Malawi MoH DHIS2: #{@report}</span>" %>
+	<%= "<span style='position:relative;left:450px;'>Malawi MoH DHIS2: #{@report}</span>" %>
 	<%= image_tag("BaobabHealth.png",:class=>"logo lf")%>
 </div>
 <br >
 	  
-<div style="margin: 0px auto; width:1100px; max-height:556px;overflow:auto; border-style:solid;background-color:white;">
+<div style="margin: 0px auto; width:100%; max-height:556px;overflow:auto; border-style:solid;background-color:white;">
   
-  <table id="t_id">
+  <table id="t_id" >
     <thead>
 		<tr>
 			<th style="border:none; align:left"></th>
@@ -103,7 +121,7 @@
         <tr>
 			<td class ="left" rowspan="2"> Malaria < 5 years </td>
 			<td class ="left"> Uncomplicated </td>
-			<td> <%=@idsr_mothly["IDSR Malaria < 5 Years Uncomplicated".upcase]["Out-patient cases"][:value]%> </td>
+			<td> <%= @idsr_mothly ["IDSR Malaria < 5 Years Uncomplicated".upcase]["Out-patient cases"][:value] %></td>
 			<td class="disable"> </td>
 			<td class="disable"> </td>
         </tr>
@@ -111,8 +129,8 @@
         <tr>
 			<td class ="left"> Severe </td>
 			<td  class="disable">  </td>
-			<td> <%=@idsr_mothly["IDSR Malaria < 5 years severe".upcase]["In-patient cases"][:value]%> </td>
-			<td> <%=@idsr_mothly["IDSR Malaria < 5 years severe".upcase]["In-patient deaths"][:value]%> </td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Malaria < 5 years severe".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Malaria < 5 years severe".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr>
 			<td class ="left" rowspan="2"> Malaria >= 5 years </td>
@@ -124,8 +142,8 @@
         <tr>
 			<td class ="left"> Severe </td>
 			<td  class="disable"> </td>
-			<td><%=@idsr_mothly["IDSR Malaria >= 5 years severe".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Malaria >= 5 years severe".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Malaria >= 5 years severe".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Malaria >= 5 years severe".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr>
 			<td class ="left" rowspan="2"> Malaria in Pregnant women </td>
@@ -137,14 +155,14 @@
         <tr>
 			<td class ="left"> Severe </td>
 			<td  class="disable">  </td>
-			<td><%=@idsr_mothly["IDSR Malaria in Pregnant women severe".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Malaria in Pregnant women severe".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Malaria in Pregnant women severe".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Malaria in Pregnant women severe".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr>
 			<td class ="left" colspan="2"> In-patient malaria with severe anemia (<5y) </td>
 			<td  class="disable"> </td>
-			<td><%=@idsr_mothly["IDSR Malaria with severe anemia <5years".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Malaria with severe anemia <5years".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Malaria with severe anemia <5years".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Malaria with severe anemia <5years".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr>
 			<td class ="left"  colspan="2"> Uncomplicated malaria <5y, lab-confirmed </td>
@@ -160,35 +178,35 @@
         </tr>
         <tr>
 			<td class ="left"  colspan="2"> Pneumonia (<5 years) </td>
-			<td><%=@idsr_mothly["IDSR Pneumonia <5 years".upcase]["Out-patient cases"][:value]%></td>
+			<td ><%=@idsr_mothly["IDSR Pneumonia <5 years".upcase]["Out-patient cases"][:value]%></td>
 			<td class="disable">  </td>
 			<td class="disable">  </td>
         </tr>
         <tr>
 			<td class ="left"  colspan="2"> Severe pneumonia (<5 years) </td>
 			<td class="disable"> </td>
-			<td><%=@idsr_mothly["IDSR Severe pneumonia <5 years".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Severe pneumonia <5 years".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Severe pneumonia <5 years".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Severe pneumonia <5 years".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr>
 			<td class ="left"  colspan="2"> Very severe pneumonia (<5 years) </td>
 			<td class="disable">  </td>
-			<td><%=@idsr_mothly["IDSR Very severe pneumonia <5 years".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Very severe pneumonia <5 years".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Very severe pneumonia <5 years".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Very severe pneumonia <5 years".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         
         <tr>
 			<td class ="left"  colspan="2"> Diarrhoea with dehydration </td>
 			<td><%=@idsr_mothly["IDSR Diarrhoea with dehydration".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Diarrhoea with dehydration".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Diarrhoea with dehydration".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Diarrhoea with dehydration".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Diarrhoea with dehydration".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         
         <tr>
 			<td class ="left"  colspan="2"> New AIDS cases </td>
 			<td><%=@idsr_mothly["IDSR New AIDS cases".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR New AIDS cases".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR New AIDS cases".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR New AIDS cases".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR New AIDS cases".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr>
 			<td class ="left" colspan="2"> Male urethral discharge </td>
@@ -217,14 +235,14 @@
         <tr>
 			<td class ="left"  colspan="2"> Schistosomiasis urinary </td>
 			<td><%=@idsr_mothly["IDSR Schistosomiasis urinary".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Schistosomiasis urinary".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Schistosomiasis urinary".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Schistosomiasis urinary".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Schistosomiasis urinary".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr>
 			<td class ="left"  colspan="2"> Schistosomiasis intestinal </td>
 			<td><%=@idsr_mothly["IDSR Schistosomiasis intestinal".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Schistosomiasis intestinal".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Schistosomiasis intestinal".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Schistosomiasis intestinal".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Schistosomiasis intestinal".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr style="border:none;">
 			<td style="border:none;"> &nbsp; </td>
@@ -243,50 +261,50 @@
         <tr>
 			<td  class ="left"> AFP </td>
 			<td><%=@idsr_mothly["IDSR AFP".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR AFP".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR AFP".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR AFP".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR AFP".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr >
 			<td  class ="left"> Cholera </td>
 			<td><%=@idsr_mothly["IDSR Cholera".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Cholera".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Cholera".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Cholera".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Cholera".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr >
 			<td class ="left"> Measles </td>
 			<td><%=@idsr_mothly["IDSR Measles".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Measles".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Measles".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Measles".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Measles".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr>
 			<td  class ="left"> Meningitis </td>
 			<td><%=@idsr_mothly["IDSR Meningitis".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Meningitis".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Meningitis".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Meningitis".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Meningitis".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr>
 			<td class ="left"> Neonatal tetanus </td>
 			<td><%=@idsr_mothly["IDSR Neonatal tetanus".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Neonatal tetanus".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Neonatal tetanus".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Neonatal tetanus".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Neonatal tetanus".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr >
 			<td  class ="left"> Plague </td>
 			<td><%=@idsr_mothly["IDSR Plague".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Plague".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Plague".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Plague".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Plague".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr>
 			<td class ="left"> Viral Hemorrhagic Fever </td>
 			<td><%=@idsr_mothly["IDSR Plague".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Plague".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Plague".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Plague".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Plague".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
         <tr  >
 			<td class ="left"> Diarrhoea with blood </td>
 			<td><%=@idsr_mothly["IDSR Diarrhoea with bloody".upcase]["Out-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Diarrhoea with blood".upcase]["In-patient cases"][:value]%></td>
-			<td><%=@idsr_mothly["IDSR Diarrhoea with blood".upcase]["In-patient deaths"][:value]%></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Diarrhoea with blood".upcase]["In-patient cases"][:value]%></span></td>
+			<td onclick="numericKepadPopup(this)"><span><%=@idsr_mothly["IDSR Diarrhoea with blood".upcase]["In-patient deaths"][:value]%></span></td>
         </tr>
     </tbody>
   </table>
