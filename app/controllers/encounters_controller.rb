@@ -7,7 +7,7 @@ class EncountersController < GenericEncountersController
     c.instance_eval do
       notes = params[:observations][0][:concept_name] rescue "" #TODO: Find a better way of this.
       encounters_to_process = ["NOTES","OUTPATIENT DIAGNOSIS"]
-      if encounters_to_process.include? params[:encounter][:encounter_type_name] && notes != "CLINICAL NOTES CONSTRUCT"
+      if encounters_to_process.include? params[:encounter][:encounter_type_name] #&& notes != "CLINICAL NOTES CONSTRUCT"
     	  DashBoardService.push_to_dashboard(params)
       end
     end
@@ -116,7 +116,7 @@ class EncountersController < GenericEncountersController
                                         encounter_type_id =encounter.encounter_type 
                                         where encounter_type.name = 'NOTES' 
                                         AND obs.obs_datetime >= DATE(now())
-					AND obs.voided = 0 
+                                        AND obs.voided = 0 
                                         AND encounter.patient_id = "+current_patient_id).count
       if( complaints_count == 0 && params[:encounter_type].upcase == 'OUTPATIENT_DIAGNOSIS')
           redirect_to :action => "idsr_complaints", :patient_id => params[:patient_id] and return
