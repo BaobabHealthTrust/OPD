@@ -1,9 +1,12 @@
-class Dhis
-	attr_accessor :start_date, :end_date
+class Dhis2
+	attr_accessor :start_date, :end_date, :idsr_mothly 
 	
-	def initialize(start_date, end_date)
+	def initialize(start_date, end_date, idsr_mothly )
+		
 		@start_date = start_date
-		@end_date = "#{end_date} 23:59:59"
+		@end_date = "#{end_date} 23:59:59".to_date
+		@idsr_mothly = idsr_mothly 
+		#raise @idsr_mothly.inspect
 	end
 	
 	def get_opd_secondary_diagnosis(start_date=@start_date, end_date=@end_date, program="OPD PROGRAM")
@@ -108,7 +111,8 @@ class Dhis
 		all_diagnosis = primary_diagnosis + secondary_diagnosis
 	
 		#create a hash of the reporting values to be returned
-		report_values = {:malaria_uncomplicated => 0,
+	
+	 report_values = {:malaria_uncomplicated => 0,
 						 :malaria_more_than_5_uncomplicated => 0,
 						 :malaria_less_than_5_uncomplicated => 0,
 						 :malaria_severe => 0,
@@ -212,7 +216,7 @@ class Dhis
 				end
 			end
 =end			
-	 if diagnosis.to_s.downcase == 'urethral discharge'
+			if diagnosis.to_s.downcase == 'urethral discharge'
 
         report_values[:urethral_discharge] = diagnosis_list.count
 
@@ -271,163 +275,7 @@ class Dhis
 
 	def get_hmis_report_values()
 
-		#get all the primary diagnosis
-		primary_diagnosis = get_opd_primary_diagnosis()
-		#get all the secondary diagnosis
-		secondary_diagnosis = get_opd_secondary_diagnosis()
-		#add all the diagnosis into one array
-		all_diagnosis = primary_diagnosis + secondary_diagnosis
-	
-		#create a hash of the reporting values to be returned
-		hmis_report_values = {
-			             :malaria_more_than_5 => 0,
-						 :malaria_less_than_5 => 0,
-						 :sexually_transmitted_infections => 0,
-						 :hiv_confirmed_positive => 0,
-						 :diarrhoea_non_bloody => 0,
-						 :eye_infection => 0,
-						 :ear_infection => 0,
-						 :oral_conditions => 0,
-						 :leprosy => 0,
-                         :road_traffic_accidents => 0,
-			             :cholera => 0,
-			             :measles => 0,
-			      		 :neonatal_tetanus => 0,
-			             :meningitis => 0,
-			             :plague => 0,
-			             :acute_respiratory_infection_under_5 => 0,
-			             :schistosomiasis => 0,
-			             :ebola => 0,
-			             :malnutrition_under_5 => 0,
-			             :acute_flaccid_paralysis => 0,
-			             :rabies => 0,
-			             :syphillis_in_pregnancy => 0,
-			             :opportunistic_infection => 0, 
-			             :yellow_fever => 0,
-			             :dysentery =>0,
-			             :skin_infections => 0,
-			             :injuries_and_wounds =>0            
-				}
 
-		#loop through all_diagnoses, group by diagnoses to identify different elements
-		all_diagnosis.group_by(&:diagnosis).each do |diagnosis, diagnosis_list|
-
-			if diagnosis.to_s.downcase == 'malaria'
-				#write code for malaria here
-				#update the values
-				
-				
-				diagnosis_list.group_by(&:detailed_diagnosis).each do |malaria_dx, malaria_detail|
-
-					#Malaria Uncomplicated
-					if malaria_dx.to_s.downcase == 'uncomplicated'
-						hmis_report_values[:malaria_uncomplicated]=malaria_detail.count
-						hmis_report_values[:malaria_more_than_5]=malaria_detail.reject{|d| d.age.to_i<5}.count
-						hmis_report_values[:malaria_less_than_5]=malaria_detail.reject{|d| d.age.to_i>=5}.count
-						
-			        end
-		        end
-		    end     
-			    if diagnosis.to_s.downcase == 'acute respiratory infection'
-
-			    	diagnosis_list.group_by(&:detailed_diagnosis).each do |acute_respiratory_dx,acute_respiratory_detail|
-                       hmis_report_values[:acute_respiratory_infection_under_5] = acute_respiratory_detail.reject{|d| d.age.to_i>5}.count
-                    end
-                end     
-
-             
-               if diagnosis.to_s.downcase == 'malnutrition'
-
-			    	diagnosis_list.group_by(&:detailed_diagnosis).each do |malnutrition_dx,malnutrition_detail|
-                       hmis_report_values[:malnutrition_under_5] = malnutrition_detail.reject{|d| d.age.to_i>5}.count
-                    end   
-                end
-
-                if diagnosis.to_s.downcase == 'diarrhoea'
-
-			    	diagnosis_list.group_by(&:detailed_diagnosis).each do |diarrhoea_dx,diarrhoea_detail|
-                      hmis_report_values[:diarrhoea_non_bloody_under_5] = diarrhoea_detail.reject{|d| d.age.to_i>5}.count
-                    end
-                end
-             
-             if diagnosis.to_s.downcase == 'sexually transmitted infections'
-             hmis_report_values[:sexually_transmitted_infections] = diagnosis_list.count
-            end 
-
-            if diagnosis.to_s.downcase == 'hiv confirmed positive'
-             hmis_report_values[:hiv_confirmed_positive] = diagnosis_list.count
-            end  
-
-			if diagnosis.to_s.downcase == 'opportunistic infection'
-             hmis_report_values[:opportunistic_infection] = diagnosis_list.count
-            end  
-
-			if diagnosis.to_s.downcase == 'syphillis in pregnancy'
-             hmis_report_values[:syphillis_in_pregnancy] = diagnosis_list.count
-            end       
-		    
-            if diagnosis.to_s.downcase == 'road traffic accidents'
-             hmis_report_values[:road_traffic_accidents] = diagnosis_list.count
-            end
-            if diagnosis.to_s.downcase == 'schistosomiasis'
-             hmis_report_values[:schistosomiasis] = diagnosis_list.count
-            end 
-           
-            if diagnosis.to_s.downcase == 'eye infection'
-             hmis_report_values[:eye_infection] = diagnosis_list.count
-            end 
-            if diagnosis.to_s.downcase == 'oral conditions'
-             hmis_report_values[:oral_conditions] = diagnosis_list.count
-            end 
-            if diagnosis.to_s.downcase == 'leprosy'
-             hmis_report_values[:leprosy] = diagnosis_list.count
-            end 
-            if diagnosis.to_s.downcase == 'ear infection'
-             hmis_report_values[:ear_infection] = diagnosis_list.count
-            end 
-            if diagnosis.to_s.downcase == 'plague'
-             hmis_report_values[:plague] = diagnosis_list.count
-            end
-            if diagnosis.to_s.downcase == 'neonatal tetanus'
-             hmis_report_values[:neonatal_tetanus] = diagnosis_list.count
-            end
-            if diagnosis.to_s.downcase == 'measles'
-             hmis_report_values[:measles] = diagnosis_list.count
-            end
-            if diagnosis.to_s.downcase == 'cholera'
-             hmis_report_values[:cholera] = diagnosis_list.count
-            end
-            
-            if diagnosis.to_s.downcase == 'meningitis'
-             hmis_report_values[:meningitis] = diagnosis_list.count
-            end 
-            if diagnosis.to_s.downcase == 'rabies'
-             hmis_report_values[:rabies] = diagnosis_list.count
-            end 
-            if diagnosis.to_s.downcase == 'acute flaccid paralysis'
-             hmis_report_values[:acute_flaccid_paralysis] = diagnosis_list.count
-            end 
-            
-            if diagnosis.to_s.downcase == 'yellow fever'
-             hmis_report_values[:yellow_fever] = diagnosis_list.count
-            end 
-
-            if diagnosis.to_s.downcase == 'dysentery'
-             hmis_report_values[:dysentery] = diagnosis_list.count
-            end
-
-            if diagnosis.to_s.downcase == 'skin infections'
-             hmis_report_values[:skin_infections] = diagnosis_list.count
-            end 
-
-            if diagnosis.to_s.downcase == 'injuries and wounds'
-             hmis_report_values[:injuries_and_wounds] = diagnosis_list.count
-            end 
-
- 
-
-
-        end
-        return hmis_report_values
 	end
 end
+

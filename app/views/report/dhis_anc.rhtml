@@ -1,0 +1,462 @@
+
+<%= javascript_include_tag("numericKeypad")%>
+<style>
+    #t_id {
+	 margin: 0px auto;
+	 width:100%;
+	 padding-bottom:30px;
+	 padding-top:20px;
+	}
+
+     td , th{
+        border-style:solid;
+        border-width:thin;
+        padding:5px;
+        text-align:center;
+      }
+
+      thead {
+      	font-weight:bold;
+      }
+
+      .left {
+		text-align:left;
+      }
+
+      .center {
+        text-align:center;
+
+      }
+
+      #content {
+      	background-color:white;
+
+      }
+
+      #mateme {
+      	background-color:black;
+      }
+
+      #title {
+      	margin:0px auto;
+      	text-align:left;
+      	font-weight:bold;
+      	font-size:21px;
+      	width:100%;
+      }
+
+      .disable {
+      	background-color:grey;
+      }
+
+      .bold {
+      	font-weight:bold;
+      }
+
+	/* .logo {
+	  	float :left;
+	  	margin-left: 0px;
+	  	position:relative;
+		height: 4em;
+		z-index:5000;
+	  }*/
+
+     .logo {
+        float:left
+        position:relative;
+        height:4em;
+      }
+
+
+
+	 #base {
+		background-color: #333333;
+		bottom: 0;
+		color: #CADCEA;
+		height: 80px;
+		overflow: hidden;
+		margin: 0px auto;
+		/*width: 1110px;*/
+		width: 100%;
+      }
+
+      .lf {
+      	float:right;
+      	position:relative;
+      /*	height:4.5em; */
+      }
+
+</style>
+
+<br>
+
+<div id="title">
+	<%= image_tag(@logo,:class=>"logo")%>
+	<%= "<span style='position:relative;left:380px;'>Malawi MoH DHIS2: #{@report} " %>
+	<%= image_tag("BaobabHealth.png",:class=>"logo lf")%>
+</div>
+<br >
+
+<div style="margin: 0px auto; width:100%; max-height:556px;overflow:auto;  border-style:solid;background-color:white;">
+
+  <table id="t_id">
+
+    <tbody>
+
+		<tr>
+		</tr>
+		<tr valign="top"><!--first column begin -->
+			<td>
+			<table id="t_id">
+				<tbody>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" style="background-color: rgb(204, 204, 204);"><strong>Reporting 								Month (First Visits)</strong></td>
+					</tr>
+					<tr valign="top">
+						<td>&nbsp;</td>
+						<td>New Women Registered</td>
+						<!--It displays editable data from the database and it applies to others below-->
+						<td width = "150" onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1"><strong>Week Of First ANC visit<sup>1</sup></strong></td>
+					</tr>
+					<tr>
+						<td>6</td>
+						<td>Week 0-12</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>Week 13+</em></td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1"><strong>HIV Status First Visit<sup>1</sup></strong></td>
+					</tr>
+					<tr>
+						<td>18</td>
+						<td>Prev. Negative</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>19</td>
+						<td>Prev. Positive</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>20</td>
+						<td>New Negative</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>21</td>
+						<td>New Positive</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>22</td>
+						<td>Not Done</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>Total HIV+(19+21)</em></td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1"><strong>ART Status First Visit &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 							&nbsp;</strong><em>out of HIV+</em></td>
+					</tr>
+					<tr>
+						<td>25</td>
+						<td>Not on ART</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>26</td>
+						<td>On ART Before ANC</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>27</td>
+						<td>Start ART 0-27 weeks</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>28</td>
+						<td>Start ART 28+ weeks</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+					</tr>
+					<tr>
+					</tr>
+					<tr>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1" style="background-color: rgb(204, 204, 204);"><strong>Booking Cohort 							(Outcomes)</strong></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1"><strong>Visits Per Woman<sup>1</sup></strong></td>
+					</tr>
+					<tr>
+						<td>1</td>
+						<td>Tot. With 1 Visit</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>2</td>
+						<td>Tot. With 2 Visits</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>3</td>
+						<td>Tot. With 3 Visits</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>4</td>
+						<td>Tot. With 4 Visits</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>5</td>
+						<td>Tot. With 5+ Visits</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>Tot. Women In Cohort</em></td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+				</tbody>
+			</table>
+			</td>
+			<!--first column end --><!--second column begin-->
+			<td>
+			<table id="t_id">
+				<tbody>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2"><strong>(Pre)-Eclampsia&nbsp;<sup>1 &nbsp; &nbsp;&nbsp;</sup></strong></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>No</em></td>
+						<td width = "150" onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>7</td>
+						<td>Yes </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1">  <strong>TTV Doses<sup>1</sup></strong> </td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>  &lt;2 Doses </em></td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>8</td>
+						<td>  2+ Doses </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2">  <strong>SP Doses <sup>1</sup></strong> </td>
+					</tr>
+					<tr>
+						<td>9</td>
+						<td>  0 Doses </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>  10 </td>
+						<td>  1x3 Tabs </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>  11 </td>
+						<td>  2x3 Tabs </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1">  <strong>FeFo Tablets<sup>1</sup></strong> </td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>  &lt;120 Tabs </em></td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>12</td>
+						<td>  120+ Tabs </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1">  <strong>Albendazole Doses&nbsp;<sup>1</sup></strong> </td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>  None </em></td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>  13 </td>
+						<td>  1 Dose </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1">  <strong>ITN(bed nets) Given<sup>1</sup></strong> </td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>  None </em></td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>  14 </td>
+						<td>  Received ITN </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1">  <strong>Syphilis Status<sup>1</sup></strong> </td>
+					</tr>
+					<tr>
+						<td>  15 </td>
+						<td>  Negative </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>  16 </td>
+						<td>  Positive </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>  17 </td>
+						<td>  Unknown </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1">  <strong>HIV Status Final<sup>1</sup></strong> </td>
+					</tr>
+					<tr>
+						<td>  18 </td>
+						<td>  Prev. Negative </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>  19 </td>
+						<td>  Prev. Positive </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>  20 </td>
+						<td>  New Negative </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+				</tbody>
+			</table>
+			</td>
+			<!--second column end--><!--third column begin-->
+			<td>
+			<table id="t_id">
+				<tbody>
+					<tr>
+						<td>  21 </td>
+						<td><span style="line-height: 17.6px;">New Positive </td>
+						<td width = "150" onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td style="width: 10px;">  22 </td>
+						<td>  Not Done </td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>  Total HIV+ (19+21) </em></td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1">  <strong>On CPT &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 							&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong>  Out Of HIV + </td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>  Not On CPT </em></td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>23</td>
+						<td>  On CPT</td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1">  <strong>NVP Syrup Given &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 							&nbsp;</strong>   Out Of HIV + </td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><em>  No</em></td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>24</td>
+						<td>  Received NVP </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="2" rowspan="1">  <strong>ART status final &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 							&nbsp; </strong>  Out Of HIV + </td>
+					</tr>
+					<tr>
+						<td>25</td>
+						<td>  Not On ART </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>26</td>
+						<td>  On ART Before ANC </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>27</td>
+						<td>  Start ART 0-27 weeks </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+						<td>  28 </td>
+						<td>  Start ART 28+ Weeks </td>
+						<td onclick="numericKepadPopup(this)"><span></span></td>
+					</tr>
+					<tr>
+					</tr>
+					<tr>
+					</tr>
+				</tbody>
+			</table>
+			</td>
+			<!--third column end-->
+		</tr>
+	</tbody>
+	<tbody>
+	</tbody>
+</table>
+
+    </tbody>
+  </table>
+</div>

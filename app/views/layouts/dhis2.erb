@@ -1,4 +1,4 @@
-<% session[:from_report] = true rescue false %>
+  <% session[:from_report] = true rescue false %>
 <% session[:report_url] = request.request_uri.to_s rescue nil%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -8,7 +8,7 @@
     <title><%= @title = "#{controller.controller_name.humanize} #{controller.action_name.humanize}" rescue ""  %></title>
 
     <script language="javascript">
-	  <%#= raise @user['name'].to_yaml %>
+    <%#= raise @user['name'].to_yaml %>
       tstUsername = "<%= @user['name'] unless @user.nil? %>";
       tstCurrentDate = "<%= Time.now.strftime("%Y-%m-%d") %>";
       var tt_cancel_destination = null;
@@ -21,6 +21,9 @@
       jQuery(document).ready(function($) {
         $('#logout').click(function() {
               window.location = '/report/update_dhis2_report?report=<%=@report_name%>'
+            })
+          $('#cancel').click(function() {
+              window.location = '/clinic/index'
             })
         $('#find').click(function() {
 
@@ -100,42 +103,50 @@
         height:12px;
       }
       
-	.messageBar {
-		/*  height: 1em;*/
-		height: 70px;
-		width: 515px;
-		position: absolute;
-		top: 45%;
-		left: 33%;
-		font-size: 2.35em;
-		text-align: left;
-		z-index: 842;
-		border: thin solid black;
-		background: #40f999;
-		display: none;
-		padding: 20px;   
-		border: 5px outset #40f999;
-		border-radius: 15px;
-		z-index:11000;
-	}
+  .messageBar {
+    /*  height: 1em;*/
+    height: 70px;
+    width: 515px;
+    position: absolute;
+    top: 45%;
+    left: 33%;
+    font-size: 2.35em;
+    text-align: left;
+    z-index: 842;
+    border: thin solid black;
+    background: #40f999;
+    display: none;
+    padding: 20px;   
+    border: 5px outset #40f999;
+    border-radius: 15px;
+    z-index:11000;
+  }
       
     </style>
     
 <script>
-	function showDhisStatus(){
-		    var div = document.createElement("div");
-		    div.id = "progress_bar";
-		    div.className = "messageBar";
-		    div.innerHTML = "Updating DHIS2. Please wait...";
-		    
-		    document.getElementById("t_id").appendChild(div);
-		
-		document.getElementById("progress_bar").style.display = "block";
-	}
-	
-	function cancel(){
-		window.location = '/clinic/index';
-	}
+  function showDhisStatus(){
+        var div = document.createElement("div");
+        div.id = "progress_bar";
+        div.className = "messageBar";
+        div.innerHTML = "Updating DHIS2. Please wait...";
+        
+        document.getElementById("t_id").appendChild(div);
+
+        idsr_form=document.createElement("t_id");
+        
+    
+   
+
+       document.getElementById("progress_bar").style.display = "block";
+
+
+
+  }
+  
+  function cancel(){
+    window.location = '/clinic/index';
+  }
 
 </script>
 
@@ -149,17 +160,17 @@
         <div id="base" class="dark">
           <div id="buttons" class="buttons">
             
-            <button id="logout" class="green left" style="position :relative;margin-right:20px;margin-top:4px;float:right;"
-            	onmousedown="showDhisStatus();">
-            	<span>Update DHIS2</span>
+            <button id="update" type = "submit" class="green left" style="position :relative;margin-right:20px;margin-top:4px;float:right;"
+              onmousedown="showDhisStatus();">
+              <span>Update DHIS2</span>
             </button>
             
-            <button id="logout" class="red right" style="position :relative;margin-right:20px;margin-top:4px;float:left;"
-            	onmousedown="cancel();">
-            	<span>Cancel Update</span>
+            <button id="cancel" type = "button" class="red right" style="position :relative;margin-right:20px;margin-top:4px;float:left;"
+              onmousedown="cancel();">
+              <span>Cancel Update</span>
             </button>
 
-            
+            </form>
           </div>
         </div>
       </div>
@@ -167,19 +178,19 @@
   </body>
 
 <script>
-	for (i=0; i<document.getElementsByTagName("th").length; i++){
+  for (i=0; i<document.getElementsByTagName("th").length; i++){
 
-	if (document.getElementsByTagName("td").length > 1) {
-			if (document.getElementsByTagName("th")[i].offsetWidth < document.getElementsByTagName("td")[i].offsetWidth){
-					document.getElementsByTagName("th")[i].style.width = (document.getElementsByTagName("td")[i].offsetWidth) + 'px';
-					document.getElementsByTagName("td")[i].style.width = document.getElementsByTagName("th")[i].style.width;
-			}
-			else{
-					document.getElementsByTagName("td")[i].style.width = (document.getElementsByTagName("th")[i].offsetWidth) + 'px';
-					document.getElementsByTagName("th")[i].style.width = document.getElementsByTagName("td")[i].style.width;
-			}
-		}
-	}
+  if (document.getElementsByTagName("td").length > 1) {
+      if (document.getElementsByTagName("th")[i].offsetWidth < document.getElementsByTagName("td")[i].offsetWidth){
+          document.getElementsByTagName("th")[i].style.width = (document.getElementsByTagName("td")[i].offsetWidth) + 'px';
+          document.getElementsByTagName("td")[i].style.width = document.getElementsByTagName("th")[i].style.width;
+      }
+      else{
+          document.getElementsByTagName("td")[i].style.width = (document.getElementsByTagName("th")[i].offsetWidth) + 'px';
+          document.getElementsByTagName("th")[i].style.width = document.getElementsByTagName("td")[i].style.width;
+      }
+    }
+  }
 </script>
 
 </html>

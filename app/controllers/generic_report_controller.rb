@@ -511,8 +511,14 @@ class GenericReportController < ApplicationController
   	@report = params[:report]
   	@report_name = ""
     
+     @start_date="01" + "-"+ params[:month] + "-"+ params[:year]
+     @start_date=@start_date.to_date
+     @end_date=@start_date.to_date.end_of_month
 
-    db_values= Dhis.new(@select_date,@end_date)
+        
+    #instatiating an Dhis object from model dhis.rb
+   
+     db_values= Dhis.new(@start_date,@end_date)
 
       
 
@@ -701,7 +707,7 @@ class GenericReportController < ApplicationController
 				"Out-patient cases"=>
 				{
 					:dataElement=>"YXnx3FepHlE",
-					:value=>db_values.get_all_report_values[:neontal_tetanus],
+					:value=>db_values.get_all_report_values[:neonatal_tetanus],
 					:categoryOptionCombo=>coc_out_patient_cases
 				},
 				"In-patient cases"=>
@@ -1007,7 +1013,10 @@ class GenericReportController < ApplicationController
 
 		header="<dataValueSet dataSet=\"wmO5qvufx5b\" completeDate=\"2014-03-25\" period=\"201403\" orgUnit=\"rERxz2TtA3i\">\n"
 		c = header
+       
+
   		@idsr_mothly.each do |key, data|
+
   			data.each do |k,d|
   				c += "	<dataValue dataElement=\""+d[:dataElement].to_s + "\" categoryOptionCombo=\""+d[:categoryOptionCombo].to_s + "\" value=\""+d[:value].to_s + "\" />\n"
   			end
@@ -1025,6 +1034,113 @@ class GenericReportController < ApplicationController
     elsif @report == "HMIS-15"
       @report_name = @report
 
+      @hmis_report = {}
+       
+      @hmis_report = {  
+
+      
+"HMIS pregnant women starting antenatal care first trimester".upcase=>{:value=>0},    
+"HMIS total number of new antenatal attendees".upcase=>{:value=>0}, 
+"HMIS total antenatal visits".upcase=>{:value=>0}, 
+"HMIS deliveries attended by skilled health personnel".upcase=>{:value=>0}, 
+"HMIS women obstetric complications treated".upcase=>{:value=>0},
+"HMIS caesarean sections".upcase=>{:value=>0}, 
+"HMIS live births ".upcase=>{:value=>0}, 
+"HMIS babies born with weight less than 2500g".upcase=>{:value=>0}, 
+"HMIS abortion complications treated".upcase=>{:value=>0}, 
+"HMIS eclampsia cases treated".upcase=>{:value=>0}, 
+"HMIS postpartum haemorrhage treated".upcase=>{:value=>0}, 
+"HMIS sepsis cases treated".upcase=>{:value=>0}, 
+"HMIS pregnant women treated for severe anaemia".upcase=>{:value=>0}, 
+"HMIS newborn treated for complications".upcase=>{:value=>0}, 
+"HMIS  postpartum care within 2 weeks of delivery".upcase=>{:value=>0}, 
+"HMIS persons receiving 3 months supply of condoms".upcase=>{:value=>0}, 
+"HMIS persons receiving 3 months oral pills".upcase=>{:value=>0},
+"HMIS persons receiving depo-provera".upcase=>{:value=>0}, 
+"HMIS persons receiving norplant".upcase=>{:value=>0}, 
+"HMIS persons receiving iucd".upcase=>{:value=>0}, 
+"HMIS persons receiving sterilisation of fp".upcase=>{:value=>0}, 
+"HMIS under 1 fully immunised children".upcase=>{:value=>0}, 
+"HMIS under 1 bcg children".upcase=>{:value=>0}, 
+"HMIS under 1 children given pentavalent".upcase=>{:value=>0}, 
+"HMIS under 1 children given polio".upcase=>{:value=>0}, 
+"HMIS under 1 children given measles first doses".upcase=>{:value=>0}, 
+"HMIS vitmin A doses given to 6-59m children".upcase=>{:value=>0}, 
+"HMIS under weight children in under five clinic".upcase=>{:value=>0}, 
+"HMIS 15-49 years receiving testing and serostatus".upcase=>{:value=>0}, 
+"HMIS Number of 15 - 49 age group tested HIV positive".upcase=>{:value=>0}, 
+"HMIS ".upcase=>{:value=>0}, 
+"HMIS hiv positive persons receiving ARV treatment".upcase=>{:value=>0}, 
+"HMIS pregnant women tested HIV positive".upcase=>{:value=>0}, 
+"HMIS HIV positive women treated for PMTCT".upcase=>{:value=>0}, 
+"HMIS children attending under - five clinic".upcase=>{:value=>0},
+"HMIS OPD attendance".upcase=>{:value=>0}, 
+"HMIS confirmed TB new cases".upcase=>{:value=>0}, 
+"HMIS smear negative and extra-pulmonary cases completed treatment".upcase=>{:value=>0}, 
+"HMIS new smear sputum positive cases".upcase=>{:value=>0}, 
+"HMIS stock outs of SP for more than a week at a time".upcase=>{:value=>0}, 
+"HMIS any stock outs of ORS for more than a week at a time".upcase=>{:value=>0}, 
+"HMIS stock outs of contrimaxazole for more than a week at a time".upcase=>{:value=>0}, 
+"HMIS stock outs of SP , ORS and Contrimaxazole for more than a week".upcase=>{:value=>0}, 
+"HMIS functioning ambulances".upcase=>{:value=>0}, 
+"HMIS insecticide treated nets distributed".upcase=>{:value=>0}, 
+"HMIS households with access to safe drinking water".upcase=>{:value=>0}, 
+"HMIS households atleast a sanplat latrine".upcase=>{:value=>0}, 
+"HMIS HBC patents follow-up and provided treatment".upcase=>{:value=>0}, 
+"HMIS Do you have functioning water supply systems".upcase=>{:value=>0}, 
+"HMIS Do you have functioning Communication systems".upcase=>{:value=>0}, 
+"HMIS Do you have functioning Electricity".upcase=>{:value=>0}, 
+"HMIS Do you have functioning water supply,Electricity and Communication systems".upcase=>{:value=>0}, 
+"HMIS functional health center committee".upcase=>{:value=>0}, 
+"HMIS Were you supervised by DHMT ".upcase=>{:value=>0}, 
+  #getting values from HMIS_15 database
+"HMIS syphillis in pregnancy".upcase=>{:value=>db_values.get_hmis_report_values[:syphillis_in_pregnancy]},
+"HMIS opportunistic infection".upcase=>{:value=>db_values.get_hmis_report_values[:opportunistic_infection]},
+"HMIS acute respiratory infection under 5".upcase=>{:value=>db_values.get_hmis_report_values[:acute_respiratory_infection_under_5]},
+"HMIS diarrhoea non bloody".upcase=>{:value=>db_values.get_hmis_report_values[:diarrhoea_non_bloody]},
+"HMIS malnutrition less than 5".upcase=>{:value=>db_values.get_hmis_report_values[:malnutrition_under_5]},
+"HMIS malaria less than 5".upcase=>{:value=>db_values.get_hmis_report_values[:malaria_less_than_5]},
+"HMIS malaria more than 5".upcase=>{:value=>db_values.get_hmis_report_values[:malaria_more_than_5]},
+"HMIS neonatal tetanus".upcase=>{:value=>db_values.get_hmis_report_values[:neonatal_tetanus]},
+"HMIS cholera".upcase=>{:value=>db_values.get_hmis_report_values[:cholera]},
+"HMIS measles".upcase=>{:value=>db_values.get_hmis_report_values[:measles]},
+"HMIS acute flaccid paralysis".upcase=>{:value=>db_values.get_hmis_report_values[:acute_flaccid_paralysis]},
+"HMIS ebola".upcase=>{:value=>db_values.get_hmis_report_values[:ebola]},
+"HMIS meningitis".upcase=>{:value=>db_values.get_hmis_report_values[:meningitis]},
+"HMIS plague".upcase=>{:value=>db_values.get_hmis_report_values[:plague]},
+"HMIS rabies".upcase=>{:value=>db_values.get_hmis_report_values[:rabies]},
+"HMIS sexually transmitted infections".upcase=>{:value=>db_values.get_hmis_report_values[:sexually_transmitted_infections]},
+"HMIS hiv confirmed positive".upcase=>{:value=>db_values.get_hmis_report_values[:hiv_confirmed_positive]},
+"HMIS yellow fever".upcase=>{:value=>db_values.get_hmis_report_values[:yellow_fever]},
+"HMIS dysentery".upcase=>{:value=>db_values.get_hmis_report_values[:dysentery]},
+"HMIS eye infection".upcase=>{:value=>db_values.get_hmis_report_values[:eye_infection]},
+"HMIS ear_infection".upcase=>{:value=>db_values.get_hmis_report_values[:ear_infection]},
+"HMIS skin infections".upcase=>{:value=>db_values.get_hmis_report_values[:skin_infections]},
+"HMIS oral_conditions".upcase=>{:value=>db_values.get_hmis_report_values[:oral_conditions]},
+"HMIS schistosomiasis".upcase=>{:value=>db_values.get_hmis_report_values[:schistosomiasis]},
+"HMIS leprosy".upcase=>{:value=>db_values.get_hmis_report_values[:leprosy]},
+"HMIS injuries and wounds".upcase=>{:value=>db_values.get_hmis_report_values[:injuries_and_wounds]},   
+"HMIS road traffic accidents".upcase=>{:value=>db_values.get_hmis_report_values[:road_traffic_accidents]},
+
+
+"HMIS bed capacity".upcase=>{:value=>0},  
+"HMIS number of admissions".upcase=>{:value=>0},  
+"HMIS number of discharges".upcase=>{:value=>0},  
+"HMIS inpatient days".upcase=>{:value=>0}, 
+"HMIS number of inpatient deaths".upcase=>{:value=>0}, 
+"HMIS number of direct obstetric deaths".upcase=>{:value=>0},  
+"HMIS acute respiratory infections inpatient deaths under 5".upcase=>{:value=>0},  
+"HMIS diarrhoea non bloody inpatient deaths under 5 ".upcase=>{:value=>0},  
+"HMIS malnutrition inpatient deaths under 5".upcase=>{:value=>0},  
+"HMIS  tb inpatient deaths".upcase=>{:value=>0}, 
+"HMIS malaria inpatients deaths under 5".upcase=>{:value=>0}, 
+"HMIS malaria inpatient deaths over 5 ".upcase=>{:value=>0},  
+"HMIS  cholera inpatient deaths".upcase=>{:value=>0},  
+"HMIS dysentery inpatient deaths".upcase=>{:value=>0}, 
+"HMIS road traffic inpatient deaths".upcase=>{:value=>0}                          
+  }
+              
+
 
       @report = @report + " (#{Date::MONTHNAMES[params[:month].to_i]} - #{params[:year]}) Report Preview"
       render :template => 'report/dhis_hmis-15', :layout => 'dhis2'
@@ -1040,17 +1156,53 @@ class GenericReportController < ApplicationController
     else
   		redirect_to "/report/update_dhis" and return
   	end
+  sendValues = Dhis2.new(@start_date,@end_date,@idsr_mothly)
+  
+  #raise sendValues.inspect
   end
   
+  #sending values to couch
+
   def update_dhis2_report
-		result = `curl -d @dhis2/datavalueset.xml "http://localhost:8080/api/dataValueSets" -H "Content-Type:application/xml" -u admin:district -v`
-		puts result
-		result = result.scan(/<status>(.*)<\/status>/).to_s
-		
-		if result.empty?
-			result = "failed"
-		end
-		redirect_to "/clinic?dhis_status=#{result}" and return
+
+ 
+    @idsr_mothly = params[:@idsr_mothly]
+                  
+     create_condition_case_values(@idsr_mothly)
+      
+   
+    result = "SUCCESS"
+    redirect_to "/clinic?dhis_status=#{result}" and return
+       
   end
 
+
+  #method to set actual values to case keys
+  def create_condition_case_values(idsr_mothly)
+    
+
+    
+    report_date = params[:report_month].to_date
+
+
+        #We substitute mysql with couch DB for storing results
+    file = "#{Rails.root}/config/couchdb_config.yml"
+    couchdb_details = YAML.load(File.read(file))
+    data = {
+      "report_month" => report_date.strftime("%Y%m%d"),
+      "updated_on" => Date.today,
+      
+      "site_code" => couchdb_details["source_code"].downcase,
+      "site_name" => couchdb_details["source_name"].downcase,
+      "site_region"=> couchdb_details["source_region"].downcase,
+      "site_district" => couchdb_details["source_district"].downcase,
+      #assing values for cases here @idsr_mothly
+      "conditions" => @idsr_mothly,
+      "status_code" => "1",
+      
+    }
+    #raise data['site_name']
+    SendResultsToCouchdb.add_record(data)
+
+   end
 end
