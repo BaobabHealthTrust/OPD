@@ -124,7 +124,8 @@ class ClinicController < GenericClinicController
       ["Activate Malaria Feature", "/properties/creation?value=is_this_malaria_enabled_facility?"],
       ["Shares Database with BART2?", "/properties/creation?value=does_this_system_share_database_with_bart?"],
       ["Do you print specimen labels?", "/properties/creation?value=specimen_label_print?"],
-      ["Auto Session?", "/properties/creation?value=auto_session"]
+      ["Auto Session?", "/properties/creation?value=auto_session"],
+      ["Is this a Referral Facility?", "/properties/creation?value=referral_facility"]
     ]
     render :layout => false
   end

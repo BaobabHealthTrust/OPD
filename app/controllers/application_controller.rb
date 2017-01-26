@@ -22,6 +22,8 @@ class ApplicationController < GenericApplicationController
 		task.encounter_type = 'NONE'
 		task.url = "/patients/show/#{patient.id}"
 
+    referral_facility = CoreService.get_global_property_value("referral.facility").to_s == "true"
+
     if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")
       unless session[:datetime].blank? #Back Data Entry
 
@@ -103,7 +105,7 @@ class ApplicationController < GenericApplicationController
 		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true')
 			task.encounter_type = 'OUTPATIENT RECEPTION'
 			task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
-		end
+		end if referral_facility #Only do this if it is a referral facility
 
     if (location.name.match(/PHARMACY/i))
       task.url = "/patients/treatment_dashboard/#{patient.id}"
