@@ -122,19 +122,20 @@ class Dhis
 						 :pneumonia_very_severe_less_than_5 => 0,
 						 :diarrhoea => 0,
 						 :diarrhoea_with_dehydration => 0,
-             :urethral_discharge => 0,
-             :male_urethral_discharge => 0,
-             :urinary_schistosomiasis => 0,
-             :intestinal_schistosomiasis => 0,
-             :genital_ulcers => 0,
-             :male_genital_ulcer => 0,
-             :female_genital_ulcer => 0,
-             :cholera => 0,
-             :measles => 0,
-      			 :diarrhoea_with_blood => 0,
-      			 :neonatal_tetanus => 0,
-             :meningitis => 0,
-             :plague => 0
+			             :urethral_discharge => 0,
+			             :male_urethral_discharge => 0,
+			             :urinary_schistosomiasis => 0,
+			             :intestinal_schistosomiasis => 0,
+			             :genital_ulcers => 0,
+			             :male_genital_ulcer => 0,
+			             :female_genital_ulcer => 0,
+			             :cholera => 0,
+			             :measles => 0,
+			      		 :diarrhoea_with_blood => 0,
+			      		 :neonatal_tetanus => 0,
+			             :meningitis => 0,
+			             :plague => 0,
+			             :new_aids_cases => 0
 				}
 
 		#loop through all_diagnoses, group by diagnoses to identify different elements
@@ -198,12 +199,13 @@ class Dhis
 					end
 				end
 			end
-=begin			
+		
 			if diagnosis.to_s.downcase == 'aids'
 
 				report_values[:new_aids_cases] = diagnosis_list.count
+			end
 
-				diagnosis_list.group_by(&:detailed_diagnosis).each do |diarrhoea_dx, diarrhoea_detail|
+=begin				diagnosis_list.group_by(&:detailed_diagnosis).each do |diarrhoea_dx, diarrhoea_detail|
 
 					#diarrhoea with_dehydration
 					if diarrhoea_dx.to_s.downcase == 'dehydration'

@@ -1191,7 +1191,7 @@ class GenericReportController < ApplicationController
     data = {
       "report_month" => report_date.strftime("%Y%m%d"),
       "updated_on" => Date.today,
-      
+       
       "site_code" => couchdb_details["source_code"].downcase,
       "site_name" => couchdb_details["source_name"].downcase,
       "site_region"=> couchdb_details["source_region"].downcase,
