@@ -134,11 +134,11 @@
     syndrome_g4 = ["General","Other"]
   %>
     <div class="syndrome" style="overflow: auto; display: none">
-      <% syndrome_g1.each do |synd| %>
+      <% @idsr_complaints["syndrome_g1"].each do |synd, symptoms| %>
         <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
           <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
-          <% symptoms = concept_set(synd)%>
           <% symptoms.each do |compl| %>
+            <% compl = compl[0] %>
             <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
           <%end%>
         </fieldset>
@@ -146,11 +146,11 @@
     </div>
 
     <div class = "syndrome" style="overflow: auto;display: none">
-      <% syndrome_g2.each do |synd| %>
+      <% @idsr_complaints["syndrome_g2"].each do |synd, symptoms| %>
         <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
           <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
-          <% symptoms = concept_set(synd)%>
           <% symptoms.each do |compl| %>
+            <% compl = compl[0] %>
             <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
           <%end%>
         </fieldset>
@@ -158,11 +158,11 @@
     </div>
 
     <div class = "syndrome">
-      <% syndrome_g3.each do |synd| %>
+      <% @idsr_complaints["syndrome_g3"].each do |synd, symptoms| %>
         <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
           <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
-          <% symptoms = concept_set(synd)%>
           <% symptoms.each do |compl| %>
+            <% compl = compl[0] %>
             <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
           <%end%>
         </fieldset>
@@ -170,11 +170,11 @@
     </div>
 
     <div class="syndrome">
-      <% syndrome_g4.each do |synd| %>
+      <% @idsr_complaints["syndrome_g4"].each do |synd, symptoms| %>
         <fieldset id="bdy" style="margin: 10px;border-radius: 3px;margin-top: 15px !important;border:1px solid #808080;">
           <legend style="font-size: 26px;font-weight: bold;"><%= synd.to_s.titleize %></legend>
-          <% symptoms = concept_set(synd)%>
           <% symptoms.each do |compl| %>
+            <% compl = compl[0] %>
             <span class="chkbx"><%= check_box_tag 'complaints[]', synd.to_s+':'+compl.to_s,false,options={:class=>"checkbox-custom",:id=>synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")}%><label class="checkbox-custom-label" for=<%= synd.to_s.gsub(" ","-")+"-"+compl.to_s.gsub(" ","-")%>><%= compl%></label></span>
           <%end%>
         </fieldset>

@@ -141,8 +141,7 @@
   <% # Set ajaxURL in the script, but need to start it blank %>
   <%= text_field_tag :quantity, nil, {
     :id => 'quantity',
-    :tt_onLoad => "set_drug_for_quantity(); createStockedOutButton();",
-    :ajaxURL => "",
+    :tt_onLoad => "createStockedOutButton();",
     :field_type => 'number',
     :units => '',
     :helpText => "Quantity(Tabs)",

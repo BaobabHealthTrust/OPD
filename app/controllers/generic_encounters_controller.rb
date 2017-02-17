@@ -1300,6 +1300,7 @@ class GenericEncountersController < ApplicationController
     @newcomplaints = Encounter.new
     @patient_id = params['patient_id']
    # @resultlist, @results = paginate :results, :per_page => 10
+    @idsr_complaints = JSON.parse(File.read("#{Rails.root.to_s}/public/json/idsr_complaints.json"))
     render :layout => 'idsr_complaints'
   end
 
