@@ -193,7 +193,8 @@ class GenericPrescriptionsController < ApplicationController
 		@use_col_interface = CoreService.get_global_property_value("use.column.interface").to_s
 		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
     la_concept_id = Concept.find_by_name("LA(Lumefantrine + arthemether)").concept_id
-		@generics = MedicationService.generic.delete_if{|g| g if g[1] == la_concept_id} #Remove LA drug from list. Dosage + frequency + duration already known
+		#@generics = MedicationService.generic.delete_if{|g| g if g[1] == la_concept_id} #Remove LA drug from list. Dosage + frequency + duration already known
+    @generics = JSON.parse(File.read("#{Rails.root.to_s}/public/json/generics.json")).delete_if{|g| g if g[1] == la_concept_id}
     @preferred_drugs = Drug.preferred_drugs.delete_if{|p| p if p[1] == la_concept_id} #Remove LA drug from list. Dosage + frequency + duration already known
     
 		@frequencies = MedicationService.fully_specified_frequencies
@@ -239,7 +240,7 @@ class GenericPrescriptionsController < ApplicationController
 		}
     
     session[:formulations] = @formulations
-		@diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []
+		@diagnosis = []#@patient.current_diagnoses["DIAGNOSIS"] rescue []
 
     antimalaria_drugs = CoreService.get_global_property_value("anti_malaria_drugs")
     @antimalarial_drugs_hash = {}

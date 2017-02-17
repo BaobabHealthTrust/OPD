@@ -602,10 +602,12 @@ class GenericEncountersController < ApplicationController
 		diagnosis_set = CoreService.get_global_property_value("application_diagnosis_concept")
 		diagnosis_set = "Qech outpatient diagnosis list" if diagnosis_set.blank?
 		diagnosis_concept_set = ConceptName.find_by_name(diagnosis_set).concept
-		diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set.id])
+		#diagnosis_concepts = Concept.find(:all, :joins => :concept_sets, :conditions => ['concept_set = ?', diagnosis_concept_set.id])
+    diagnosis_concepts = JSON.parse(File.read("#{Rails.root.to_s}/public/json/diagnosis_concepts.json"))
 
 		valid_answers = diagnosis_concepts.map{|concept|
-			name = concept.fullname rescue nil
+			#name = concept.fullname rescue nil
+      name = concept
 			name.upcase.include?(search_string) ? name : nil rescue nil
 		}.compact
 
