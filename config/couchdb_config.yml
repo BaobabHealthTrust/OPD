@@ -1,9 +1,12 @@
-source_code : BBC
-source_name : Balaka BLM Clinic
+source_code : PHC
+source_name : Phimbi Health Centre
 source_district : Balaka
 source_region : Southern Region 
 source_address: 127.0.0.1
-source_database : opd_database
+#source_address: 192.168.18.199
+source_database : opd_couchdb_dhis_development
+#source_username : root
+#source_password : sam
 source_username : admin
 source_password : test
 source_port : 5984

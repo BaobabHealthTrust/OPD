@@ -29,8 +29,8 @@ class SendResultsToCouchdb < ActiveRecord::Base
 		RestClient.post("http://#{username}:#{password}@#{ip_address}:#{port}/#{database}", doc.to_json, :content_type => "application/json")
 	else
 		url = "http://#{username}:#{password}@#{ip_address}:#{port}/#{database}/"
-		RestClient.post(url, data.to_json, :content_type => "application/json")
+		 RestClient.post(url, data.to_json, :content_type => "application/json")
 	end
-	return 200
+
   end
 end
