@@ -127,8 +127,20 @@ class Observation < ActiveRecord::Base
 	return answer
   end
 
+  # Get the latest accession number assigned to a lab order or 00
+  # when no accession numbers have been assigned
+  def self.last_accession_number
+    lab_orders_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
+
+    Observation.find(:last,
+                     :joins => ["INNER JOIN encounter e ON obs.encounter_id = e.encounter_id"],
+                     :conditions => ["accession_number IS NOT NULL AND e.encounter_type = ?",
+                                     lab_orders_encounter_type_id],
+                     :order => "accession_number + 0").accession_number.to_s rescue "00"
+  end
+
   def self.new_accession_number
-    last_accn_number = Observation.find(:last, :conditions => ["accession_number IS NOT NULL" ], :order => "accession_number + 0").accession_number.to_s rescue "00" #the rescue is for the initial accession number start up
+    last_accn_number = last_accession_number
     last_accn_number_with_no_chk_dgt = last_accn_number.chop.to_i
     new_accn_number_with_no_chk_dgt = last_accn_number_with_no_chk_dgt + 1
     chk_dgt = PatientIdentifier.calculate_checkdigit(new_accn_number_with_no_chk_dgt)
