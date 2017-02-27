@@ -45,67 +45,74 @@ class EncountersController < GenericEncountersController
 		@min_height = PatientService.get_patient_attribute_value(@patient, "min_height")
 		@max_height = PatientService.get_patient_attribute_value(@patient, "max_height")
 		@select_options = select_options
+    
+    #if params[:encounter_type].upcase == "LAB_ORDERS"
+    
+      @malaria_tests = [
+        ["Malaria Rapid Diagnostic Test (mRDT)", "mRDT"],
+        ["Microscopy", "Microscopy"]
+      ]
 
-    @malaria_tests = [
-      ["Malaria Rapid Diagnostic Test (mRDT)", "mRDT"],
-      ["Microscopy", "Microscopy"]
-    ]
+      @microscopy_options = [
+        ["Thick Smear Positive", "Thick Smear Positive"],
+        ["Thick Smear Negative", "Thick Smear Negative"],
+        ["Unknown", "Unknown"]
+      ]
 
-    @microscopy_options = [
-      ["Thick Smear Positive", "Thick Smear Positive"],
-      ["Thick Smear Negative", "Thick Smear Negative"],
-      ["Unknown", "Unknown"]
-    ]
-
-    @malaria_rdt_options = [
-      ["Malaria RDT Positive", "Malaria RDT Positive"],
-      ["Malaria RDT Negative", "Malaria RDT Negative"],
-      ["Unknown", "Unknown"]
-    ]
-
-    @new_accession_number = Observation.new_accession_number
-
-    lab_order_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
-    test_ordered_concept_id = Concept.find_by_name("BLOOD").concept_id
-    malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
-    lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
-
-    malaria_test_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
-        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_order_encounter_type_id} AND e.patient_id=#{@patient.id}
-        AND o.concept_id = #{test_ordered_concept_id} AND e.voided=0 AND UPPER(o.value_text) IN ('MALARIA (MRDT)', 'MALARIA (MICROSCOPY)')
-        AND DATE(e.encounter_datetime) <= '#{session_date.to_date}' ORDER BY o.obs_id DESC").first
-
-    @required_accession_number = malaria_test_obs.accession_number rescue ''
-    @malaria_test_name = malaria_test_obs.answer_string.squish rescue ''
-    @malaria_test_name = "Unknown Test" if @malaria_test_name.blank?
-
-    unless @required_accession_number.blank?
-      malaria_test_result_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
-          ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id} AND e.patient_id=#{@patient.id}
-          AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0 AND o.accession_number = '#{@required_accession_number}'
-          AND DATE(e.encounter_datetime) <= '#{session_date.to_date}'
-          ORDER BY e.encounter_datetime DESC LIMIT 1").first
-
-      unless malaria_test_result_obs.blank?
-        @required_accession_number = "Results Detected"
+      @malaria_rdt_options = [
+        ["Malaria RDT Positive", "Malaria RDT Positive"],
+        ["Malaria RDT Negative", "Malaria RDT Negative"],
+        ["Unknown", "Unknown"]
+      ]
+      
+      
+      if params[:encounter_type].upcase == "LAB_ORDERS"
+        @new_accession_number = Observation.new_accession_number
       end
-    end
+      
+      
+      lab_order_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
+      test_ordered_concept_id = Concept.find_by_name("BLOOD").concept_id
+      malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+      lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
 
-    @available_accesion_number_options = Lab.malaria_tests_ordered(@patient)
+      malaria_test_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+          ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_order_encounter_type_id} AND e.patient_id=#{@patient.id}
+          AND o.concept_id = #{test_ordered_concept_id} AND e.voided=0 AND UPPER(o.value_text) IN ('MALARIA (MRDT)', 'MALARIA (MICROSCOPY)')
+          AND DATE(e.encounter_datetime) <= '#{session_date.to_date}' ORDER BY o.obs_id DESC").first
 
-    @required_accession_number = "No Order Detected" if @required_accession_number.blank?
+      @required_accession_number = malaria_test_obs.accession_number rescue ''
+      @malaria_test_name = malaria_test_obs.answer_string.squish rescue ''
+      @malaria_test_name = "Unknown Test" if @malaria_test_name.blank?
 
-    @patient_malaria_notification = ""
+      unless @required_accession_number.blank?
+        malaria_test_result_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+            ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id} AND e.patient_id=#{@patient.id}
+            AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0 AND o.accession_number = '#{@required_accession_number}'
+            AND DATE(e.encounter_datetime) <= '#{session_date.to_date}'
+            ORDER BY e.encounter_datetime DESC LIMIT 1").first
 
-    @malaria_test_status = Lab.malaria_test_result(@patient)
+        unless malaria_test_result_obs.blank?
+          @required_accession_number = "Results Detected"
+        end
+      end
 
-    malaria_accession_number = @malaria_test_status.split(/[^\d]/).last rescue nil #Get last digits
-    malaria_test_name = Lab.malaria_test_name(malaria_accession_number)
-    malaria_test_name = malaria_test_name.scan(/\(([^\)]+)\)/).last rescue nil #Get text in brackets () only e.g malaria(mRDT) returns mRDT"
+      @available_accesion_number_options = Lab.malaria_tests_ordered(@patient)
 
-    @patient_malaria_notification = "No any malaria test is ordered for this patient" if @malaria_test_status.match(/no_orders/i)
-    @patient_malaria_notification = "#{malaria_test_name} Results are not yet captured in the system" if @malaria_test_status.match(/waiting_results/i)
-    @patient_malaria_notification = "This patient is tested negative using #{malaria_test_name}" if @malaria_test_status.match(/negative/i)
+      @required_accession_number = "No Order Detected" if @required_accession_number.blank?
+
+      @patient_malaria_notification = ""
+
+      @malaria_test_status = Lab.malaria_test_result(@patient)
+
+      malaria_accession_number = @malaria_test_status.split(/[^\d]/).last rescue nil #Get last digits
+      malaria_test_name = Lab.malaria_test_name(malaria_accession_number)
+      malaria_test_name = malaria_test_name.scan(/\(([^\)]+)\)/).last rescue nil #Get text in brackets () only e.g malaria(mRDT) returns mRDT"
+
+      @patient_malaria_notification = "No any malaria test is ordered for this patient" if @malaria_test_status.match(/no_orders/i)
+      @patient_malaria_notification = "#{malaria_test_name} Results are not yet captured in the system" if @malaria_test_status.match(/waiting_results/i)
+      @patient_malaria_notification = "This patient is tested negative using #{malaria_test_name}" if @malaria_test_status.match(/negative/i)
+    #end
 
     if  ['INPATIENT_DIAGNOSIS', 'OUTPATIENT_DIAGNOSIS', 'ADMISSION_DIAGNOSIS', 'DISCHARGE_DIAGNOSIS'].include?((params[:encounter_type].upcase rescue ''))
       #check if complaints have been captured.
