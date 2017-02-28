@@ -5,34 +5,34 @@ function __$(id){
 }
 var currentNumericInput;
 
-numericPad = "<table cellspacing='0px' style='width:70%; left:10%; margin-left: 150px; font-size: 14pt;'>";
+numericPad = "<table border='0' color='gray' cellspacing='0px' style='width:70%; left:10%; margin-left: 130px; font-size: 14pt;'>";
 numericPad += "<tr>"
 
 
-numericPad += "<td onclick='updateNumericPadInput(1)' style='border-bottom: 1px solid blue; border-right:1px solid blue; padding:6px;'><button style = 'height:100%;width:100%'><span>1</span></button></td>";
-numericPad += "<td onclick='updateNumericPadInput(2)' style='border-bottom: 1px solid blue; border-right:1px solid blue; padding:6px;'><button style = 'height:100%;width:100%'><span>2</span></button></td>";
-numericPad += "<td onclick='updateNumericPadInput(3)' style='border-bottom: 1px solid blue; border-right:1px solid blue;padding:6px;'><button style = 'height:100%;width:100%' ><span>3</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(1)' style='border-bottom: 1px solid blue; border-right:1px solid blue; padding:0px;'><button style = 'height:100%;width:100%'><span>1</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(2)' style='border-bottom: 1px solid blue; border-right:1px solid blue; padding:0px;'><button style = 'height:100%;width:100%'><span>2</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(3)' style='border-bottom: 1px solid blue; border-right:1px solid blue;padding:0px;'><button style = 'height:100%;width:100%' ><span>3</span></button></td>";
 numericPad += "</tr>";
 
 numericPad += "<tr>"
-numericPad += "<td onclick='updateNumericPadInput(4)' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:8px;'><button style = 'height:100%;width:100%'><span>4</span></button></td>";
-numericPad += "<td onclick='updateNumericPadInput(5)' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:8px;'><button style = 'height:100%;width:100%'><span>5</span></button></td>";
-numericPad += "<td onclick='updateNumericPadInput(6)' style='border-bottom: 1px solid blue; border-right:1px solid blue;padding:8px;'><button style = 'height:100%;width:100%'><span>6</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(4)' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:0px;'><button style = 'height:100%;width:100%'><span>4</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(5)' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:0px;'><button style = 'height:100%;width:100%'><span>5</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(6)' style='border-bottom: 1px solid blue; border-right:1px solid blue;padding:0px;'><button style = 'height:100%;width:100%'><span>6</span></button></td>";
 numericPad += "</tr>";
 
 numericPad += "<tr>"
-numericPad += "<td onclick='updateNumericPadInput(7)' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:8px;'><button style = 'height:100%;width:100%'><span>7</span></button></td>";
-numericPad += "<td onclick='updateNumericPadInput(8)' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:8px;'><button style = 'height:100%;width:100%'><span>8</span></button></td>";
-numericPad += "<td onclick='updateNumericPadInput(9)' style='border-bottom: 1px solid blue; border-right:1px solid blue; padding:8px;'><button style = 'height:100%;width:100%'><span>9</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(7)' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:0px;'><button style = 'height:100%;width:100%'><span>7</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(8)' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:0px;'><button style = 'height:100%;width:100%'><span>8</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(9)' style='border-bottom: 1px solid blue; border-right:1px solid blue; padding:0px;'><button style = 'height:100%;width:100%'><span>9</span></button></td>";
 numericPad += "</tr>";
 
 numericPad += "<tr>"
-numericPad += "<td onclick='updateNumericPadInput(0)' colspan='2' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:8px; text-align: right;'><button style = 'height:100%;width:100%' ><span>0</span></button></td>";
-numericPad += "<td onclick='updateNumericPadInput(\".\")' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:8px; text-align: center;'><button style = 'height:100%;width:100%'><span>.</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(0)' colspan='2' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:0px; text-align: right;'><button style = 'height:100%;width:100%' ><span>0</span></button></td>";
+numericPad += "<td onclick='updateNumericPadInput(\".\")' style='border-bottom: 1px solid blue;border-right:1px solid blue; padding:0px; text-align: center;'><button style = 'height:100%;width:100%'><span>.</span></button></td>";
 numericPad += "</tr>";
 
 numericpad += "<tr>"
-numericpad += "<td style='border-bottom: 1px solid blue; padding:8px;'><button class= 'clearButton'><span> Clear </span> </button></td>"
+numericpad += "<td style='border-bottom: 1px solid blue; padding:0px;'><button class= 'clearButton'><span> Clear </span> </button></td>"
 numericPad += "</tr>";
 
 
@@ -45,7 +45,7 @@ function numericKepadPopup(obj){
     popupDiv = document.createElement('div');
     popupDiv.className = 'popup-div';
     popupDiv.style.backgroundColor = '#F4F4F4';
-    popupDiv.style.border = '2px solid #004C99';
+    popupDiv.style.border = '0px solid #004C99';
     popupDiv.style.borderRadius = '15px';
     popupDiv.style.height = '485px';
     popupDiv.style.top = '2%';
@@ -58,19 +58,31 @@ function numericKepadPopup(obj){
     popupDiv.style.zIndex = '991';
     content.appendChild(popupDiv);
 
+    popupLabel = document.createElement('div');
+    popupLabel.className ='popup-label';
+    popupLabel.innerHTML = "Please Enter Condition Value";
+    popupLabel.style.backgroundColor = '#blue';
+    popupLabel.style.paddingTop = '5px';
+    popupLabel.style.borderRadius = '15px 15px 0 0';
+    popupLabel.style.fontSize = '18pt';
+    popupLabel.style.textAlign = 'center';
+    popupLabel.style.color = 'white';
+    popupLabel.style.backgroundColor = '#004C99';
+    popupDiv.appendChild(popupLabel);
+
     popupHeader = document.createElement('div');
     popupHeader.className = 'popup-header';
-    popupHeader.innerHTML = "<textarea type='text' class='numeric-input' id='numeric-pad-input' rows='1px' cols ='100px'></textarea></strong><br /><br />";
+   // popupHeader.innerHTML =" <input type='text' fontSize= '18pt'  rows='1px' cols ='70px'>";
+    popupHeader.innerHTML = "<textarea type='text' fontSize= '44pt' class='numeric-input' id='numeric-pad-input' rows='1px' cols ='70px'></textarea></strong><br /><br />";
     popupHeader.style.borderBottom = '2px solid #7D9EC0';
-    popupHeader.style.backgroundColor = '#FFFFFF';
+    popupHeader.style.backgroundColor = '#F4F4F4';
     popupHeader.style.paddingTop = '10px';
     popupHeader.style.borderRadius = '15px 15px 0 0';
-    popupHeader.style.fontSize = '10pt';
+    popupHeader.style.fontSize = '14pt';
     popupHeader.style.textAlign = 'center';
     popupHeader.style.fontWeight = 'bolder';
-
-
     popupDiv.appendChild(popupHeader);
+
     popupData = document.createElement('div');
     popupData.className = 'popup-data';
     popupData.innerHTML = numericPad;
@@ -84,8 +96,8 @@ function numericKepadPopup(obj){
     clearButton.className = '';
     clearButton.innerHTML = 'Clear';
     clearButton.style.backgroundImage = 'none';
-    clearButton.style.border = '1px solid transparent';
-    clearButton.style.borderRadius = '4px';
+    clearButton.style.border = '0px solid transparent';
+    clearButton.style.borderRadius = '0px';
     clearButton.style.cursor = 'pointer';
     clearButton.style.display = 'inline-block';
     clearButton.style.fontSize = '20px';
@@ -93,7 +105,7 @@ function numericKepadPopup(obj){
     clearButton.style.lineHeight = '1.94857';
     clearButton.style.position = 'absolute';
     clearButton.style.bottom = '10px';
-    clearButton.style.padding = '9px 25px';
+    clearButton.style.padding = '9px 20px';
     clearButton.style.left = '10px';
     clearButton.style.textAlign = 'center';
     clearButton.style.verticalAlign = 'middle';
@@ -103,7 +115,6 @@ function numericKepadPopup(obj){
     clearButton.onclick = function(){
         clearNumericInput();
     }
-
     popupDiv.appendChild(clearButton);
 
     doneButton = document.createElement('span');

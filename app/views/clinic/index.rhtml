@@ -110,13 +110,13 @@ on the rest of the stations %>
 
 			<% if params[:dhis_status] == "SUCCESS" %>
 
-         <script>showMessage("Report sent to couch");</script>
+         <script>showMessage("Report sent for approval");</script>
            
 			<!--	<script> showDHISupdate('CouchDb update <%="#{params[:dhis_status].downcase}"%>'); </script>-->
 			
       <% elsif !params[:dhis_status].blank? %>
           
-           <script>showMessage("Report not sent to couch");</script>
+           <script>showMessage("There was a problem sending data fro approval");</script>
            
 			<!--	<script> showMessage('CouchDb update <%="#{params[:dhis_status]}"%>'); </script>-->
 			<% end%>

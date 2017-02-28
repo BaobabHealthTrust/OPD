@@ -1199,7 +1199,7 @@ class GenericReportController < ApplicationController
       "site_code" => couchdb_details["source_code"],
       "site_name" => couchdb_details["source_name"].downcase,
       "site_region"=> couchdb_details["source_region"].downcase,
-      "site_district" => couchdb_details["source_district"].downcase,
+      "site_district" => couchdb_details["source_district"],
       "report_type" => report_type,
 
       #passing values for reports
