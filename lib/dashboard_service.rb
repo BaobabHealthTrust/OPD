@@ -40,7 +40,7 @@ CONFIG = YAML.load_file(File.expand_path(File.join(File.dirname(__FILE__),
                                        patient_id,age,gender)
      hash[:symptoms] = pull_symptoms(patient_id)
     end
-    push_to_couch(hash)
+    push_to_couch(hash) rescue nil
   end
 
  def self.pull_diagnoses(observation,obs_date,national_id,patient_id,age,gender)
