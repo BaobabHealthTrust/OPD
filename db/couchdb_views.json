@@ -1,0 +1,7 @@
+{
+    "views": {
+        "by_date": {
+            "map": "function(doc) { emit(doc['date']) }"
+        }
+    }
+}

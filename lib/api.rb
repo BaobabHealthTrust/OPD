@@ -1,4 +1,4 @@
-class API
+module API
   def self.malaria_observations(start_date, end_date)
     outpatient_encounter_type_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
     malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
