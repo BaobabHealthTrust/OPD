@@ -52,7 +52,17 @@ namespace :dashboard do
 
         data_sources.each do |indicator, query|
           start = Time.now
-          results[category][indicator] = eval("API.#{query}('#{date_range[0].to_s}', '#{date_range[1].to_s}').count")
+					if indicator == "reported_cases"
+							rptd = []
+						 	rptd += eval("API.microscopy_positives('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
+						 	rptd += eval("API.mRDT_positives('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
+						 	rptd += eval("API.all_dispensations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
+						 	rptd += eval("API.malaria_observations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
+
+							results[category][indicator] = rptd.uniq
+					else
+          		results[category][indicator] = eval("API.#{query}('#{date_range[0].to_s}', '#{date_range[1].to_s}').count")
+					end
         end
       end
 
