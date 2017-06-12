@@ -246,7 +246,7 @@ module API
   end
 
   def self.malaria_in_pregnancy(start_date, end_date)
-    []
+    [] #Not yet in EMR
   end
 
   def self.under_five_malaria_cases(start_date, end_date, gender)

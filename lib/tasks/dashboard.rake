@@ -49,7 +49,6 @@ namespace :dashboard do
       date_ranges.each do |category, date_range|
 
         results[category] = {}
-
         data_sources.each do |indicator, query|
           start = Time.now
 					if indicator == "reported_cases"
@@ -60,6 +59,8 @@ namespace :dashboard do
 						 	rptd += eval("API.all_dispensations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
 						 	rptd += eval("API.malaria_observations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
 
+              treated_negatives = eval("API.treated_negatives('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
+
               counted = {}
               rptd.each do |m|
                 id = m.person_id rescue m.patient_id
@@ -67,7 +68,19 @@ namespace :dashboard do
                 counted[id] = {} if counted[id].blank?
                 next if !counted[id][i_date.to_date].blank? #case already counted
                 counted[id][i_date.to_date] = 1
-                total_reported << m
+                total_reported << (id.to_s + "_" + i_date.to_date.to_s)
+              end
+
+              if rptd.length > 0 && treated_negatives.length > 0
+                treated_negatives.each do |m|
+                  id = m.person_id rescue m.patient_id
+                  i_date = m.obs_datetime rescue m.encounter_datetime
+                  counted[id] = {} if counted[id].blank?
+                  next if !counted[id][i_date.to_date].blank? #case already counted
+                  counted[id][i_date.to_date] = 1
+                  puts (id.to_s + "_" + i_date.to_date.to_s)
+                  total_reported = total_reported - [(id.to_s + "_" + i_date.to_date.to_s)]
+                end
               end
 
 							results[category][indicator] = total_reported.count
@@ -102,7 +115,7 @@ namespace :dashboard do
         RestClient.post(url, data.to_json, :content_type => "application/json")
       end
 
-      `curl -X POST  http://127.0.0.1:5984/_replicate -d '{"source":"#{url}","target":"#{configs['sync_url']}", "continuous":false}' -H "Content-Type: application/json"`
+      `curl -X POST  http://127.0.0.1:5984/_replicate -d '{"source":"#{url}","target":"#{configs['sync_url']}", "continuous":true}' -H "Content-Type: application/json"`
 
     end
   end
