@@ -54,12 +54,23 @@ namespace :dashboard do
           start = Time.now
 					if indicator == "reported_cases"
 							rptd = []
+              total_reported = []
 						 	rptd += eval("API.microscopy_positives('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
 						 	rptd += eval("API.mRDT_positives('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
 						 	rptd += eval("API.all_dispensations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
 						 	rptd += eval("API.malaria_observations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
 
-							results[category][indicator] = rptd.uniq
+              counted = {}
+              rptd.each do |m|
+                id = m.person_id rescue m.patient_id
+                i_date = m.obs_datetime rescue m.encounter_datetime
+                counted[id] = {} if counted[id].blank?
+                next if !counted[id][i_date.to_date].blank? #case already counted
+                counted[id][i_date.to_date] = 1
+                total_reported << m
+              end
+
+							results[category][indicator] = total_reported.count
 					else
           		results[category][indicator] = eval("API.#{query}('#{date_range[0].to_s}', '#{date_range[1].to_s}').count")
 					end

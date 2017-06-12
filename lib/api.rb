@@ -40,6 +40,23 @@ module API
         GROUP BY o.person_id, DATE(o.obs_datetime)")
   end
 
+  def self.microscopy_result_u5(start_date, end_date, gender, value_text)
+    malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+    lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+
+    microscopy_order_accession_numbers = self.microscopy_orders(start_date, end_date).map(&:accession_number).compact
+    microscopy_order_accession_numbers = [0] if microscopy_order_accession_numbers.blank?
+
+    Observation.find_by_sql("SELECT o.* FROM encounter e
+        INNER JOIN person per ON per.person_id = e.patient_id AND per.voided = 0
+                AND TIMESTAMPDIFF(DAY, per.birthdate, e.encounter_datetime) < 1800 AND per.gender = '#{gender}'
+        INNER JOIN obs o ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
+        AND UPPER(o.value_text) = '#{value_text}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{start_date.to_date.to_s}' AND DATE(e.encounter_datetime) <= '#{end_date.to_date.to_s}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+  end
+
   def self.microscopy_unknown(start_date, end_date)
     malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
     lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
@@ -114,6 +131,25 @@ module API
         GROUP BY o.person_id, DATE(o.obs_datetime)")
   end
 
+
+  def self.mRDT_result_u5(start_date, end_date, gender, value_text)
+    malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+    lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+
+    mrdt_order_accession_numbers = self.mRDT_orders(start_date, end_date).map(&:accession_number).compact
+    mrdt_order_accession_numbers = [0] if mrdt_order_accession_numbers.blank?
+
+    Observation.find_by_sql("SELECT o.* FROM encounter e
+         INNER JOIN person per ON per.person_id = e.patient_id AND per.voided = 0
+                AND TIMESTAMPDIFF(DAY, per.birthdate, e.encounter_datetime) < 1800 AND per.gender = '#{gender}'
+        INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{mrdt_order_accession_numbers.join(', ')})
+        AND UPPER(o.value_text) = '#{value_text}'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{start_date.to_date.to_s}' AND DATE(e.encounter_datetime) <= '#{end_date.to_date.to_s}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+  end
+
   def self.first_line_dispensations(start_date, end_date)
     dispensing_encounter_type_id = EncounterType.find_by_name("DISPENSING").encounter_type_id
     amount_dispensed_concept = Concept.find_by_name('Amount dispensed').id
@@ -148,6 +184,29 @@ module API
 
     Order.find_by_sql("SELECT e.* FROM encounter e
         INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND DATE(e.encounter_datetime) >= '#{start_date.to_date.to_s}' AND DATE(e.encounter_datetime) <= '#{end_date.to_date.to_s}'
+        AND do.drug_inventory_id IN (#{drug_ids})
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY e.patient_id, DATE(e.encounter_datetime)"
+    )
+  end
+
+  def self.all_dispensations_u5(start_date, end_date, gender)
+    dispensing_encounter_type_id = EncounterType.find_by_name("DISPENSING").encounter_type_id
+    amount_dispensed_concept = Concept.find_by_name('Amount dispensed').id
+    drug_order_type_id = OrderType.find_by_name("Drug Order").order_type_id
+
+    drug_ids = [(Drug.find_by_name("Lumefantrine + Arthemether 1 x 6").drug_id rescue 0),
+                Drug.find_by_name("Lumefantrine + Arthemether 2 x 6").drug_id,
+                Drug.find_by_name("Lumefantrine + Arthemether 3 x 6").drug_id,
+                Drug.find_by_name("Lumefantrine + Arthemether 4 x 6").drug_id].join(", ")
+
+    Order.find_by_sql("SELECT e.* FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN person per ON per.person_id = e.patient_id AND per.voided = 0
+                AND TIMESTAMPDIFF(DAY, per.birthdate, e.encounter_datetime) < 1800 AND per.gender = '#{gender}'
         INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
         INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
         WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
@@ -200,13 +259,32 @@ module API
     end
 
     # < 1800 days is under five
-    Observation.find_by_sql(
+    observed = Observation.find_by_sql(
         "SELECT o.* FROM encounter e
         INNER JOIN obs o ON e.encounter_id = o.encounter_id AND e.encounter_type = #{outpatient_encounter_type_id}
         INNER JOIN person p ON p.person_id = o.person_id AND TIMESTAMPDIFF(DAY, p.birthdate, o.obs_datetime) < 1800 AND p.gender = '#{gender}'
         AND o.concept_id IN (#{diagnosis_concept_ids.join(', ')}) AND o.value_coded = #{malaria_concept_id}
         AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{start_date.to_date.to_s}' AND DATE(e.encounter_datetime) <= '#{end_date.to_date.to_s}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    dispensed = self.all_dispensations_u5(start_date, end_date, gender)
+
+    lab_orders = self.mRDT_result_u5(start_date, end_date, gender, 'MALARIA RDT POSITIVE') +
+        self.microscopy_result_u5(start_date, end_date, gender, 'MALARIA RDT POSITIVE')
+
+    total_reported = []
+    counted = {}
+    (observed + dispensed + lab_orders).each do |m|
+      id = m.person_id rescue m.patient_id
+      i_date = m.obs_datetime rescue m.encounter_datetime
+
+      counted[id] = {} if counted[id].blank?
+      next if !counted[id][i_date.to_date].blank?
+      counted[id][i_date.to_date] = 1
+      total_reported << m
+    end
+
+    total_reported
   end
 
   def self.under_five_malaria_cases_male(start_date, end_date)
