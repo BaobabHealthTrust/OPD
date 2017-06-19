@@ -90,7 +90,7 @@ namespace :dashboard do
           elsif indicator == 'treated_negatives'
             results[category][indicator] =  total_treated_negatives.count
           elsif indicator == 'presumed_and_confirmed'
-            results[category][indicator] == (total_reported - total_treated_negatives).count
+            results[category][indicator] = (total_reported - total_treated_negatives).count
 					else
           		results[category][indicator] = eval("API.#{query}('#{date_range[0].to_s}', '#{date_range[1].to_s}').count")
 					end
