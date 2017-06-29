@@ -57,7 +57,7 @@ namespace :dashboard do
         total_treated_negatives = []
         rptd += eval("API.microscopy_positives('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
         rptd += eval("API.mRDT_positives('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
-        rptd += eval("API.all_dispensations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
+        #rptd += eval("API.all_dispensations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
         rptd += eval("API.malaria_observations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
 
         counted = {}
@@ -69,12 +69,15 @@ namespace :dashboard do
           counted[id][i_date.to_date] = 1
           total_reported << (id.to_s + "_" + i_date.to_date.to_s)
         end
-
-        if rptd.length > 0 && treated_negatives.length > 0
+					
+        if treated_negatives.length > 0
+					counted = {}
           treated_negatives.each do |m|
+
             id = m.person_id rescue m.patient_id
             i_date = m.obs_datetime rescue m.encounter_datetime
             counted[id] = {} if counted[id].blank?
+						
             next if !counted[id][i_date.to_date].blank? #case already counted
             counted[id][i_date.to_date] = 1
             total_treated_negatives << (id.to_s + "_" + i_date.to_date.to_s)
