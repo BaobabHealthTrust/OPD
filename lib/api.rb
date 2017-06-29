@@ -274,7 +274,8 @@ module API
 
     total_reported = []
     counted = {}
-    (observed + dispensed + lab_orders).each do |m|
+    #(observed + dispensed + lab_orders).each do |m|
+    (observed + lab_orders).each do |m|
       id = m.person_id rescue m.patient_id
       i_date = m.obs_datetime rescue m.encounter_datetime
 
