@@ -57,7 +57,7 @@ namespace :dashboard do
         total_treated_negatives = []
         rptd += eval("API.microscopy_positives('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
         rptd += eval("API.mRDT_positives('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
-        #rptd += eval("API.all_dispensations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
+        rptd += eval("API.all_dispensations_without_lab_orders('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
         rptd += eval("API.malaria_observations('#{date_range[0].to_s}', '#{date_range[1].to_s}')")
 
         counted = {}

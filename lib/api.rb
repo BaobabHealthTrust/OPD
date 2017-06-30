@@ -193,7 +193,38 @@ module API
     )
   end
 
-  def self.all_dispensations_u5(start_date, end_date, gender)
+  def self.all_dispensations_without_lab_orders(start_date, end_date)
+
+    accession_numbers = self.mRDT_negatives(start_date, end_date).map(&:accession_number).compact
+    accession_numbers = [0] if accession_numbers.blank?
+
+    accession_numbers += self.microscopy_negatives(start_date, end_date).map(&:accession_number).compact
+
+    dispensing_encounter_type_id = EncounterType.find_by_name("DISPENSING").encounter_type_id
+    amount_dispensed_concept = Concept.find_by_name('Amount dispensed').id
+    drug_order_type_id = OrderType.find_by_name("Drug Order").order_type_id
+
+    drug_ids = [(Drug.find_by_name("Lumefantrine + Arthemether 1 x 6").drug_id rescue 0),
+                Drug.find_by_name("Lumefantrine + Arthemether 2 x 6").drug_id,
+                Drug.find_by_name("Lumefantrine + Arthemether 3 x 6").drug_id,
+                Drug.find_by_name("Lumefantrine + Arthemether 4 x 6").drug_id].join(", ")
+
+    Order.find_by_sql("SELECT e.* FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND DATE(e.encounter_datetime) >= '#{start_date.to_date.to_s}' AND DATE(e.encounter_datetime) <= '#{end_date.to_date.to_s}'
+        AND do.drug_inventory_id IN (#{drug_ids})
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY e.patient_id, DATE(e.encounter_datetime)
+        AND (SELECT count(*) FROM obs o2 WHERE DATE(o2.obs_datetime) = DATE(e.encounter_datetime) AND o2.person_id = e.patient_id
+          AND o2.accession_number IN (#{accession_numbers.join(', ')}) AND UPPER(o2.value_text) IN
+            ('MALARIA RDT NEGATIVE', 'THICK SMEAR NEGATIVE', 'MALARIA RDT POSITIVE', 'THICK SMEAR POSITIVE')) = 0
+      "
+    )
+  end
+
+  def self.all_dispensations_without_lab_orders_u5(start_date, end_date, gender)
     dispensing_encounter_type_id = EncounterType.find_by_name("DISPENSING").encounter_type_id
     amount_dispensed_concept = Concept.find_by_name('Amount dispensed').id
     drug_order_type_id = OrderType.find_by_name("Drug Order").order_type_id
@@ -267,15 +298,14 @@ module API
         AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{start_date.to_date.to_s}' AND DATE(e.encounter_datetime) <= '#{end_date.to_date.to_s}'
         GROUP BY o.person_id, DATE(o.obs_datetime)")
 
-    dispensed = self.all_dispensations_u5(start_date, end_date, gender)
+    dispensed = self.all_dispensations_without_lab_orders_u5(start_date, end_date, gender)
 
     lab_orders = self.mRDT_result_u5(start_date, end_date, gender, 'MALARIA RDT POSITIVE') +
         self.microscopy_result_u5(start_date, end_date, gender, 'MALARIA RDT POSITIVE')
 
     total_reported = []
     counted = {}
-    #(observed + dispensed + lab_orders).each do |m|
-    (observed + lab_orders).each do |m|
+    (observed + dispensed + lab_orders).each do |m|
       id = m.person_id rescue m.patient_id
       i_date = m.obs_datetime rescue m.encounter_datetime
 
