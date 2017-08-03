@@ -255,7 +255,10 @@ class GenericClinicController < ApplicationController
       ['/drug/relocate_products','Relocate Products'],
       ['/drug/mark_loss_damage_of_products','Register Loss/Damage Of Products']
     ]
-
+    if create_from_dde_server
+      @reports << ['/patients/dde_duplicates','Merge Patients (DDE)']
+    end
+      
     if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")
       @reports << ['/clinic/preferred_diagnosis','Set Top 10 Diagnoses']
       @reports << ['/clinic/preferred_drugs','Set Top 10 Drugs']

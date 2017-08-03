@@ -125,7 +125,8 @@ class ClinicController < GenericClinicController
       ["Shares Database with BART2?", "/properties/creation?value=does_this_system_share_database_with_bart?"],
       ["Do you print specimen labels?", "/properties/creation?value=specimen_label_print?"],
       ["Auto Session?", "/properties/creation?value=auto_session"],
-      ["Is this a Referral Facility?", "/properties/creation?value=referral_facility"]
+      ["Is this a Referral Facility?", "/properties/creation?value=referral_facility"],
+      ["DDE Properties", "/properties/dde_properties_menu"]
     ]
     render :layout => false
   end
@@ -331,7 +332,7 @@ class ClinicController < GenericClinicController
   def temperature_readings_tab
     @location = Location.find(session[:location_id]).name
     @temperature = TemperatureRecord.find(:all,:select=>"patient_identifier,temperature",
-                                          :conditions =>["status='open' AND
+      :conditions =>["status='open' AND
                                                     location_id=#{session[:location_id]}
                                                     AND temperature >= 37.8"])
     render :layout => false

@@ -42,6 +42,23 @@ class GenericApplicationController < ActionController::Base
     'create_remote', 'mastercard_printable', 'get_token', 'set_datetime', 'reset_datetime',
     'disease_surveillance_api']
 =end
+  before_filter :set_dde_token
+
+  def set_dde_token
+    if create_from_dde_server
+      if session[:dde_token].blank?
+        dde_authentication_token_result = PatientService.dde_authentication_token
+        session[:dde_token] = dde_authentication_token_result["data"]["token"]
+      else
+        token_status = PatientService.verify_dde_token_authenticity(session[:dde_token])
+        if token_status.to_s == '401'
+          dde_authentication_token_result = PatientService.dde_authentication_token
+          session[:dde_token] = dde_authentication_token_result["data"]["token"]
+        end
+      end
+    end
+  end
+  
 	def rescue_action_in_public(exception)
 		@message = exception.message
 		@backtrace = exception.backtrace.join("\n") unless exception.nil?
@@ -115,7 +132,13 @@ class GenericApplicationController < ActionController::Base
   end
 
   def create_from_dde_server                                                    
-    CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+    #CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+    dde_status = CoreService.get_global_property_value('dde.status').to_s.squish #New DDE API
+    if (dde_status == 'ON')
+      return true
+    else
+      return false
+    end
   end
 
   def concept_set(concept_name)
