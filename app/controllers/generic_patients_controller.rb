@@ -2868,7 +2868,7 @@ class GenericPatientsController < ApplicationController
     #@local_results = PatientService.search_by_identifier(identifier)
     #dde_search_results = PatientService.search_dde_by_identifier(identifier, session[:dde_token])
     #@remote_results = dde_search_results["data"]["hits"] rescue []
-    render :layout => "report"
+    render :layout => "menu"
   end
 
   def search_dde_by_name_and_gender
@@ -3071,4 +3071,17 @@ EOF
 		end
 
 	end
+
+  def cul_age(birthdate , birthdate_estimated , date_created = Date.today, today = Date.today)
+
+    # This code which better accounts for leap years
+    patient_age = (today.year - birthdate.year) + ((today.month - birthdate.month) + ((today.day - birthdate.day) < 0 ? -1 : 0) < 0 ? -1 : 0)
+
+    # If the birthdate was estimated this year, we round up the age, that way if
+    # it is March and the patient says they are 25, they stay 25 (not become 24)
+    birth_date = birthdate
+    estimate = birthdate_estimated == 1
+    patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  &&
+        today.month < birth_date.month && date_created.year == today.year) ? 1 : 0
+  end
 end

@@ -50,25 +50,25 @@
 
       #left_div {
         float: left;
-        width: 44.5%;
+        width: 44%;
         border-style:solid;
         border-width:1px;
         height: 53%;
         overflow: auto;
         position: fixed;
-        left: 20px;
+        left: 40px;
         top: 31%;
       }
 
       #right_div {
-        width: 48.8%;
+        width: 47%;
         border-style:solid;
         border-width:1px;
         height: 53%;
         overflow: auto;
         float: right;
         position: fixed;
-        right: 20px;
+        right: 45px;
         top: 31%;
       }
 
@@ -569,8 +569,8 @@
   <script type="text/javascript">
                   
     jQuery( document ).ready(function() {
-      logoutBtn = jQuery('#logout')[0];
-      logoutBtn.parentNode.removeChild(logoutBtn);
+      finishButton = jQuery('#finishButton')[0];
+      finishButton.parentNode.removeChild(finishButton);
       
       buttonsDiv = document.getElementById('buttons')
       mergeButtonHtml = '<button id="mergeBtn" onclick="mergePatients();" class="red left merge-btn" style="position :relative; float:right; width: 181px;"><span><< Merge Patients</span></button>';

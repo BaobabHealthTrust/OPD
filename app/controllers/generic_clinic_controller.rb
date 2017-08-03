@@ -250,7 +250,7 @@ class GenericClinicController < ApplicationController
       ['/clinic/users_tab','User Accounts/Settings'],
       ['/clinic/location_management_tab','Location Management'],
       ['/clinic/system_configurations','View System Configuraton'],
-      ['/patients/patient_merge','Merge Patients'],
+      ['/patients/patient_merge','Merge Patients (Local)'],
       ['/drug/receive_products','Receive Products'],
       ['/drug/relocate_products','Relocate Products'],
       ['/drug/mark_loss_damage_of_products','Register Loss/Damage Of Products']
