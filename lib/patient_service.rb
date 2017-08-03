@@ -139,14 +139,33 @@ module PatientService
       person.birthdate_estimated = params["person"]['birthdate_estimated'].to_i
     end
 
+    home_village = params["person"]["addresses"]["neighborhood_cell"]
+    home_village = "Other" if home_village.blank?
+
+    home_ta = params["person"]["addresses"]["county_district"]
+    home_ta = "Other" if home_ta.blank?
+
+    home_district = params["person"]["addresses"]["address2"]
+    home_district = "Other" if home_district.blank?
+
+    occupation =  params["person"]["occupation"]
+    occupation = "N/A" if occupation.blank?
+
+    cell_phone_number = params["person"]["cell_phone_number"]
+    cell_phone_number = "Unknown" if cell_phone_number.blank?
+
+    home_phone_number = params["person"]["home_phone_number"]
+    home_phone_number = "Unknown" if home_phone_number.blank?
+
     passed_params = {
       "family_name" => params["person"]["names"]["family_name"],
       "given_name" => params["person"]["names"]["given_name"],
       "middle_name" => params["person"]["names"]["middle_name"],
       "gender" => gender[params["person"]["gender"]],
       "attributes" => {
-        "occupation" => "House Wife",
-        "cell_phone_number" => "09999999999"
+        "occupation" => occupation,
+        "cell_phone_number" => cell_phone_number,
+        "home_phone_number" => home_phone_number
       },
       "birthdate" => person.birthdate.to_date.strftime("%Y-%m-%d"),
       "identifiers" => {},
@@ -156,12 +175,12 @@ module PatientService
       "current_ta" => params["filter"]["t_a"],
       "current_district" => params["person"]["addresses"]["state_province"],
 
-      "home_village" => params["person"]["addresses"]["neighborhood_cell"],
-      "home_ta" => params["person"]["addresses"]["county_district"],
-      "home_district" => params["person"]["addresses"]["address2"],
+      "home_village" => home_village,
+      "home_ta" => home_ta,
+      "home_district" => home_district,
       "token" => dde_token
     }
-
+    
     headers = {:content_type => "json" }
     received_params = RestClient.put(dde_address, passed_params.to_json, headers){|response, request, result|response}
     results = JSON.parse(received_params)

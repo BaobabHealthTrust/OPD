@@ -628,8 +628,7 @@ class GenericPeopleController < ApplicationController
 
       #If we are creating from DDE then we must create a footprint of the just created patient to
       #enable future
-
-      DDEService.create_footprint(PatientService.get_patient(person).national_id, "ART - #{ART_VERSION}")
+      DDEService.create_footprint(PatientService.get_patient(person).national_id, "OPD")
 
 
       #for now ART will use BART1 for patient/person creation until we upgrade BART1 to ART
