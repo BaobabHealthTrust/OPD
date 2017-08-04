@@ -1,4 +1,15 @@
 class PropertiesController < GenericPropertiesController
+  
+  def dde_properties_menu
+    @dde_status = GlobalProperty.find_by_property('dde.status').property_value rescue ""
+    @dde_status = 'Yes' if @dde_status.match(/ON/i)
+    @dde_status = 'No' if @dde_status.match(/OFF/i)
+    @dde_address = GlobalProperty.find_by_property('dde.address').property_value rescue ""
+    @dde_port = GlobalProperty.find_by_property('dde.port').property_value rescue ""
+    @dde_username = GlobalProperty.find_by_property('dde.username').property_value rescue ""
+    @dde_password = GlobalProperty.find_by_property('dde.password').property_value rescue ""
+  end
+  
   def create_dde_properties
     dde_status = params[:dde_status]
     if dde_status.squish.downcase == 'yes'
@@ -48,7 +59,7 @@ class PropertiesController < GenericPropertiesController
       }
       dde_token = PatientService.add_dde_user(data)
       if dde_token.blank?
-        flash[:notice] = "Failed to save your user."
+        flash[:notice] = "DDE user already exists."
         redirect_to("/properties/dde_properties_menu") and return
       end
       session[:dde_token] = dde_token unless dde_token.blank?

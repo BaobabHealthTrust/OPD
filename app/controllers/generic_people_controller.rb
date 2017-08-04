@@ -281,7 +281,7 @@ class GenericPeopleController < ApplicationController
       results.person_id = 0
       results.name = data["names"]["given_name"] + " " + data["names"]["family_name"]
       gender = data["gender"]
-      results.occupation = data["attributes"]["occupation"]
+      results.occupation = (data["attributes"]["occupation"] rescue nil)
       results.sex = (gender == 'M' ? 'Male' : 'Female')
       results.birthdate_estimated = (data["birthdate_estimated"]).to_i
       results.birth_date = birthdate_formatted((data["birthdate"]).to_date , results.birthdate_estimated)
@@ -447,6 +447,14 @@ class GenericPeopleController < ApplicationController
           dde_hits = dde_search_results["data"]["hits"] rescue []
           patient_exists_in_dde = dde_hits.length > 0
 
+          if (dde_hits.length == 1)
+            new_npid =  dde_hits[0]["npid"]
+            if (old_npid != new_npid)
+              PatientService.assign_new_dde_npid(person, old_npid, new_npid)
+              print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
+            end
+          end
+          
           if !patient_exists_in_dde
             dde_response = PatientService.add_dde_patient_after_search_by_name(dde_demographics)
 
