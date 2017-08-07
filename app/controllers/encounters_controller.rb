@@ -68,7 +68,7 @@ class EncountersController < GenericEncountersController
       
       if params[:encounter_type].upcase == "LAB_ORDERS"
         @new_accession_number = Observation.new_accession_number
-      end
+      end rescue nil
       
       
       lab_order_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
