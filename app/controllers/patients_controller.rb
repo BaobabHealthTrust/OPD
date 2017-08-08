@@ -643,6 +643,11 @@ class PatientsController < GenericPatientsController
       end
     } if person_attribute_params
 
+    if create_from_dde_server
+      #Updating the demographics to dde
+      PatientService.update_dde_patient(person, session[:dde_token]) rescue nil
+    end
+    
   end
 
   # Influenza method for accessing the influenza view

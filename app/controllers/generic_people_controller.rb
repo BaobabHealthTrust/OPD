@@ -175,6 +175,8 @@ class GenericPeopleController < ApplicationController
               PatientService.assign_new_dde_npid(p, old_npid, new_npid)
               national_id_replaced = true
             end
+
+            PatientService.update_local_demographics_from_dde(Person.find(local_results.first[:person_id].to_i), dde_hits[0]) rescue nil
           end
           ######################## REPLACING DDE TEMP ID END####################
 
