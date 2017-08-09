@@ -573,10 +573,10 @@
       finishButton.parentNode.removeChild(finishButton);
       
       buttonsDiv = document.getElementById('buttons')
-      mergeButtonHtml = '<button id="mergeBtn" onclick="mergePatients();" class="red left merge-btn" style="position :relative; float:right; width: 181px;"><span><< Merge Patients</span></button>';
+      mergeButtonHtml = '<button id="mergeBtn" onclick="mergePatients();" class="green left merge-btn" style="position :relative; float:right; width: 181px;"><span><< Merge Patients</span></button>';
       buttonsDiv.innerHTML += mergeButtonHtml;
 
-      cancelButtonHtml = '<button id="cancelBtn" class="blue" style="position :relative; float:left;"><span>Cancel</span></button>';
+      cancelButtonHtml = '<button id="cancelBtn" class="red" style="position :relative; float:left;"><span>Cancel</span></button>';
       buttonsDiv.innerHTML += cancelButtonHtml;
 
       cancelBtn = jQuery('#cancelBtn')[0];
