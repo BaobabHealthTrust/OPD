@@ -576,13 +576,13 @@
       mergeButtonHtml = '<button id="mergeBtn" onclick="mergePatients();" class="green left merge-btn" style="position :relative; float:right; width: 181px;"><span><< Merge Patients</span></button>';
       buttonsDiv.innerHTML += mergeButtonHtml;
 
-      cancelButtonHtml = '<button id="cancelBtn" class="red" style="position :relative; float:left;"><span>Cancel</span></button>';
+      cancelButtonHtml = '<button id="cancelBtn" onclick="goHome();" class="red" style="position :relative; float:left;"><span>Cancel</span></button>';
       buttonsDiv.innerHTML += cancelButtonHtml;
 
-      cancelBtn = jQuery('#cancelBtn')[0];
-      cancelBtn.onmousedown = function(){
-        window.location = "/";
-      }
+      //cancelBtn = jQuery('#cancelBtn')[0];
+      //cancelBtn.onmousedown = function(){
+      //window.location = "/";
+      //}
 
 <% if flash[:merge_notice] %>
       showMessage('<%=  flash[:merge_notice] %>');
@@ -593,6 +593,10 @@
 <% end %>
   });
 
+  function goHome(){
+    window.location = "/";
+  }
+  
   </script>
 
 </html>

@@ -30,6 +30,19 @@ class Patient < ActiveRecord::Base
   def self.merge(patient_id, secondary_patient_id)
     patient = Patient.find(patient_id, :include => [:patient_identifiers, :patient_programs, {:person => [:names]}])
     secondary_patient = Patient.find(secondary_patient_id, :include => [:patient_identifiers, :patient_programs, {:person => [:names]}])
+
+    national_ids = PatientIdentifier.find(:all, :conditions => ["patient_id =? AND identifier_type =?",
+        secondary_patient_id, PatientIdentifierType.find_by_name('National id').id]).map(&:identifier) rescue []
+
+    old_id = PatientIdentifierType.find_by_name("Old Identification Number").id
+    national_id = PatientIdentifierType.find_by_name("National id").id
+
+    unless national_ids.blank?
+      ActiveRecord::Base.connection.execute("
+          UPDATE patient_identifier SET identifier_type = #{old_id}, patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}
+          AND identifier_type = #{national_id}")
+    end
+    
   ActiveRecord::Base.transaction do
     secondary_patient.patient_identifiers.each {|r|
       if patient.patient_identifiers.map(&:identifier).each{| i | i.upcase }.include?(r.identifier.upcase)
