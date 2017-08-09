@@ -412,7 +412,7 @@
         lname = document.getElementById('slname').value;
         gender = document.getElementById('sgender').value;
       }
-      var url = "/patients/search_dde_by_name_and_gender/?fname=" + fname +  " &lname=" + lname + "&gender=" + gender + "&side=" + side;
+      var url = "/patients/search_local_by_name_and_gender?fname=" + fname +  " &lname=" + lname + "&gender=" + gender + "&side=" + side;
       response = new Ajax.Request(url,{method:'get',onSuccess: function(transport){
           text = transport.responseText || "";
           updateDiv(text);
@@ -584,8 +584,14 @@
         window.location = "/";
       }
 
+<% if flash[:merge_notice] %>
+      showMessage('<%=  flash[:merge_notice] %>');
+<%end%>
 
-    });
+<% if flash[:merge_error] %>
+      showMessage('<%=  flash[:merge_error] %>');
+<% end %>
+  });
 
   </script>
 

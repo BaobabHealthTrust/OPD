@@ -2927,22 +2927,105 @@ EOF
 
   end
 
+  def search_local_by_name_and_gender
+    passed_params = {
+      :given_name => params[:fname],
+      :family_name => params[:lname],
+      :gender => params[:gender].first.upcase,
+    }
+    side = params[:side]
+
+    people = PatientService.person_search(passed_params)
+
+    @html = <<EOF
+<html>
+<head>
+<style>
+  .color_blue{
+    border-style:solid;
+  }
+  .color_white{
+    border-style:solid;
+  }
+
+  th{
+    border-style:solid;
+  }
+</style>
+</head>
+<body>
+<br/>
+<table class="data_table" width="100%">
+EOF
+
+    color = 'blue'
+    people.each do |person|
+      patient = person.patient
+      next if patient.blank?
+      next if person.addresses.blank?
+      if color == 'blue'
+        color = 'white'
+      else
+        color='blue'
+      end
+      bean = PatientService.get_patient(patient.person)
+      total_encounters = patient.encounters.count rescue nil
+      latest_visit = patient.encounters.last.encounter_datetime.strftime("%a, %d-%b-%y") rescue nil
+      @html+= <<EOF
+<tr>
+  <td class='color_#{color} patient_#{patient.id}' style="text-align:left;" onclick="setPatient('#{patient.id}','#{color}','#{side}')">Name:&nbsp;#{bean.name || '&nbsp;'}</td>
+  <td class='color_#{color} patient_#{patient.id}' style="text-align:left;" onclick="setPatient('#{patient.id}','#{color}','#{side}')">Age:&nbsp;#{bean.age || '&nbsp;'}</td>
+</tr>
+<tr>
+  <td class='color_#{color} patient_#{patient.id}' style="text-align:left;" onclick="setPatient('#{patient.id}','#{color}','#{side}')">Guardian:&nbsp;#{bean.guardian rescue '&nbsp;'}</td>
+  <td class='color_#{color} patient_#{patient.id}' style="text-align:left;" onclick="setPatient('#{patient.id}','#{color}','#{side}')">ARV number:&nbsp;#{bean.arv_number rescue '&nbsp;'}</td>
+</tr>
+<tr>
+  <td class='color_#{color} patient_#{patient.id}' style="text-align:left;" onclick="setPatient('#{patient.id}','#{color}','#{side}')">National ID:&nbsp;#{bean.national_id rescue '&nbsp;'}</td>
+  <td class='color_#{color} patient_#{patient.id}' style="text-align:left;" onclick="setPatient('#{patient.id}','#{color}','#{side}')">TA:&nbsp;#{bean.home_district rescue '&nbsp;'}</td>
+</tr>
+<tr>
+  <td class='color_#{color} patient_#{patient.id}' style="text-align:left;" onclick="setPatient('#{patient.id}','#{color}','#{side}')">Total Encounters:&nbsp;#{total_encounters rescue '&nbsp;'}</td>
+  <td class='color_#{color} patient_#{patient.id}' style="text-align:left;" onclick="setPatient('#{patient.id}','#{color}','#{side}')">Latest Visit:&nbsp;#{latest_visit rescue '&nbsp;'}</td>
+</tr>
+EOF
+    end
+
+    @html+="</table></body></html>"
+    render :text => @html ; return
+  end
+  
   def dde_merge_similar_patients
     splitted_ids = params[:patient_ids].split(",")
-    primary_npid = splitted_ids[0]
-    secondary_npid = splitted_ids[1]
+    primary_id = splitted_ids[0]
+    secondary_id = splitted_ids[1]
 
-    primary_patient_dde_search_results = PatientService.search_dde_by_identifier(primary_npid, session[:dde_token])
-    primary_pt_demographics = PatientService.generate_dde_demographics_for_merge(primary_patient_dde_search_results)
+    if (primary_id.to_i != secondary_id.to_i)
+      primary_person = Person.find(primary_id)
+      secondary_person = Person.find(Person.find(secondary_id))
 
-    secondary_patient_dde_search_results = PatientService.search_dde_by_identifier(secondary_npid, session[:dde_token])
-    secondary_pt_demographics = PatientService.generate_dde_demographics_for_merge(secondary_patient_dde_search_results)
+      primary_npid = PatientService.get_patient(primary_person).national_id
+      secondary_npid = PatientService.get_patient(secondary_person).national_id
 
-    dde_results = PatientService.merge_dde_patients(primary_pt_demographics, secondary_pt_demographics, session[:dde_token])
-    if (dde_results["status"].to_i == 200)
-      flash[:notice] = "Merge is successful"
+      dde_primary_search_results = PatientService.search_dde_by_identifier(primary_npid, session[:dde_token])
+      dde_primary_hits = dde_primary_search_results["data"]["hits"] rescue []
+
+      dde_secondary_search_results = PatientService.search_dde_by_identifier(secondary_npid, session[:dde_token])
+      dde_secondary_hits = dde_secondary_search_results["data"]["hits"] rescue []
+
+      unless dde_primary_hits.blank?
+        unless dde_secondary_hits.blank?
+          primary_pt_demographics = PatientService.generate_dde_demographics_for_merge(dde_primary_search_results)
+          secondary_pt_demographics = PatientService.generate_dde_demographics_for_merge(dde_secondary_search_results)
+          PatientService.merge_dde_patients(primary_pt_demographics, secondary_pt_demographics, session[:dde_token])
+        end
+      end
+
+      Patient.merge(primary_id, secondary_id)
+
+      flash[:merge_notice] = "Merge is successful"
     else
-      flash[:error] = "Failed to merge"
+      flash[:merge_error] = "Failed to merge. You selected the same patient"
     end
 
     redirect_to("/patients/dde_duplicates") and return
