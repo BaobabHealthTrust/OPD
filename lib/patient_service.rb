@@ -302,6 +302,9 @@ module PatientService
       person.birthdate_estimated = data["person"]['birthdate_estimated'].to_i
     end
 
+    home_ta = data["person"]["addresses"]["county_district"]
+    home_ta = "Other" if home_ta.blank?
+
     demographics = {
       "family_name" => data["person"]["names"]["family_name"],
       "given_name" => data["person"]["names"]["given_name"],
@@ -320,10 +323,10 @@ module PatientService
       "current_district" => data["person"]["addresses"]["state_province"],
 
       "home_village" => data["person"]["addresses"]["neighborhood_cell"],
-      "home_ta" => data["person"]["addresses"]["county_district"],
+      "home_ta" => home_ta,
       "home_district" => data["person"]["addresses"]["address2"],
       "token" => dde_token
-    }
+    }.delete_if{|k, v|v.to_s.blank?}
 
     return demographics
   end
