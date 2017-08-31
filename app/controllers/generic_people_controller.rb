@@ -216,7 +216,7 @@ class GenericPeopleController < ApplicationController
         if create_from_dde_server
           #Results not found locally
           dde_search_results = PatientService.search_dde_by_identifier(params[:identifier], session[:dde_token])
-          dde_hits = dde_search_results["data"]["hits"]
+          dde_hits = dde_search_results["data"]["hits"] rescue []
           if dde_hits.length == 1
             found_person = PatientService.create_local_patient_from_dde(dde_hits[0])
           end
