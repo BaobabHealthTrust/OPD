@@ -207,7 +207,12 @@ class GenericPeopleController < ApplicationController
             PatientService.assign_new_dde_npid(person, old_npid, new_npid)
             national_id_replaced = true
           end
-        end
+
+          if (params[:identifier].to_s.squish != new_npid.to_s.squish) #if DDE has returned a new ID, Let's assume it is right
+            national_id_replaced = true #when the scanned ID is not equal to the one returned by dde, get ready for print
+          end rescue nil
+
+        end unless params[:identifier].match(/ARV|TB|HCC/i)
         found_person = local_results.first
       else
         # TODO - figure out how to write a test for this
@@ -654,7 +659,7 @@ class GenericPeopleController < ApplicationController
       end
     else
       success = true
-      params[:person].merge!({"identifiers" => {"National id" => identifier}}) unless identifier.blank?
+      params[:person].merge!({"identifiers" => {"Old Identification Number" => identifier}}) unless identifier.blank?
       person = PatientService.create_from_form(params[:person])
     end
 

@@ -97,5 +97,28 @@ class PeopleController < GenericPeopleController
   end
 =end
 
+  def dde_duplicates
+    @dde_duplicates = {}
+    dde_search_results = PatientService.search_dde_by_identifier(params[:npid], session[:dde_token])
+    dde_hits = dde_search_results["data"]["hits"] rescue []
+    i = 1
+
+    dde_hits.each do |dde_hit|
+      @dde_duplicates[i] = {}
+      @dde_duplicates[i]["first_name"] = dde_hit["names"]["given_name"]
+      @dde_duplicates[i]["family_name"] = dde_hit["names"]["family_name"]
+      @dde_duplicates[i]["gender"] = dde_hit["gender"]
+      @dde_duplicates[i]["birthdate"] = dde_hit["birthdate"]
+      @dde_duplicates[i]["npid"] = dde_hit["_id"]
+      @dde_duplicates[i]["current_village"] = dde_hit["addresses"]["current_village"]
+      @dde_duplicates[i]["home_village"] = dde_hit["addresses"]["home_village"]
+      @dde_duplicates[i]["current_residence"] = dde_hit["addresses"]["current_residence"]
+      @dde_duplicates[i]["home_district"] = dde_hit["addresses"]["home_district"]
+      i = i + 1;
+    end
+
+    render :layout => 'menu'
+  end
+  
 end
  
