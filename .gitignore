@@ -14,8 +14,6 @@ schema.rb
 mockups
 rerun.txt
 nbproject
-Gemfile.lock
 tmp
-*.lock
 .ruby-version
 .idea/*

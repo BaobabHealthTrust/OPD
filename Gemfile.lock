@@ -1,0 +1,85 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    actionmailer (2.3.5)
+      actionpack (= 2.3.5)
+    actionpack (2.3.5)
+      activesupport (= 2.3.5)
+      rack (~> 1.0.0)
+    activerecord (2.3.5)
+      activesupport (= 2.3.5)
+    activerecord-mysql2-adapter (0.0.3)
+      mysql2
+    activeresource (2.3.5)
+      activesupport (= 2.3.5)
+    activesupport (2.3.5)
+    daemon_controller (1.2.0)
+    devise (1.0.11)
+      warden (~> 0.10.3)
+    domain_name (0.5.20160310)
+      unf (>= 0.0.5, < 1.0.0)
+    fastercsv (1.5.5)
+    http-cookie (1.0.2)
+      domain_name (~> 0.5)
+    json (1.5.0)
+    mechanize (2.7.0)
+      domain_name (~> 0.5, >= 0.5.1)
+      http-cookie (~> 1.0.0)
+      mime-types (~> 1.17, >= 1.17.2)
+      net-http-digest_auth (~> 1.1, >= 1.1.1)
+      net-http-persistent (~> 2.5, >= 2.5.2)
+      nokogiri (~> 1.4)
+      ntlm-http (~> 0.1, >= 0.1.1)
+      webrobots (>= 0.0.9, < 0.2)
+    mime-types (1.25.1)
+    mysql (2.9.1)
+    mysql2 (0.2.18)
+    net-http-digest_auth (1.4)
+    net-http-persistent (2.9.4)
+    nokogiri (1.5.0)
+    ntlm-http (0.1.1)
+    paginate (1.0.1)
+    passenger (4.0.53)
+      daemon_controller (>= 1.2.0)
+      rack
+      rake (>= 0.8.1)
+    rack (1.0.1)
+    rails (2.3.5)
+      actionmailer (= 2.3.5)
+      actionpack (= 2.3.5)
+      activerecord (= 2.3.5)
+      activeresource (= 2.3.5)
+      activesupport (= 2.3.5)
+      rake (>= 0.8.3)
+    rake (0.8.7)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
+    settingslogic (2.0.9)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.7.2)
+    warden (0.10.7)
+      rack (>= 1.0.0)
+    webrobots (0.1.1)
+    will_paginate (2.3.16)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activerecord-mysql2-adapter (= 0.0.3)
+  devise (= 1.0.11)
+  fastercsv
+  json (= 1.5.0)
+  mechanize (= 2.7.0)
+  mysql
+  mysql2
+  nokogiri (= 1.5.0)
+  paginate
+  passenger
+  rails (= 2.3.5)
+  rake (= 0.8.7)
+  rest-client
+  settingslogic
+  warden (= 0.10.7)
+  will_paginate (= 2.3.16)
