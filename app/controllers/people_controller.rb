@@ -99,6 +99,7 @@ class PeopleController < GenericPeopleController
 
   def dde_duplicates
     @dde_duplicates = {}
+    session[:duplicate_npid] = params[:npid]
     dde_search_results = PatientService.search_dde_by_identifier(params[:npid], session[:dde_token])
     dde_hits = dde_search_results["data"]["hits"] rescue []
     i = 1

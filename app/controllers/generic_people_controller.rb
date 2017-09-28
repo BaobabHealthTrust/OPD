@@ -170,6 +170,12 @@ class GenericPeopleController < ApplicationController
             #new National ID assignment
             #There is a need to check the validity of the patient national ID before being marked as old ID
 
+            if params[:was_duplicate] #This parameter is coming from DDE duplicates page
+              if (session[:duplicate_npid].to_s.squish != new_npid.to_s.squish) #if DDE has returned a new ID, Let's assume it is right
+                national_id_replaced = true #when the scanned ID is not equal to the one returned by dde, get ready for print
+              end rescue nil
+            end
+            
             if (old_npid != new_npid) #if DDE has returned a new ID, Let's assume it is right
               p = Person.find(local_results.first[:person_id].to_i)
               PatientService.assign_new_dde_npid(p, old_npid, new_npid)

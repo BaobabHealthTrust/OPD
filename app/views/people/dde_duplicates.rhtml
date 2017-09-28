@@ -193,7 +193,7 @@
           <td><%= values["home_village"] %></td>
           <td><%= values["current_residence"] %></td>
           <td><%= values["home_district"] %></td>
-          <td class='anchor_class'><a href="/people/search?identifier=<%= values["npid"] %>">Select patient</a></td>
+          <td class='anchor_class'><a href="/people/search?identifier=<%= values["npid"] %>&was_duplicate=true">Select patient</a></td>
         </tr>
       <% end %>
     </tbody>
