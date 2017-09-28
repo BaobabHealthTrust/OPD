@@ -233,7 +233,7 @@ class GenericPeopleController < ApplicationController
           end
 
           if dde_hits.length > 1
-            redirect_to("/people/dde_duplicates") and return
+            redirect_to("/people/dde_duplicates?npid=#{params[:identifier]}") and return
           end
 
         end
