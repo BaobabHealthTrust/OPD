@@ -1,0 +1,54 @@
+<script type="text/javascript">
+  function showSyndromes(obj){
+    obj.className = "active-link";
+  }
+
+</script>
+
+<style type="text/css">
+  #ulComplaints li{
+    padding: 5px;
+    border-bottom: 1px solid;
+    cursor: pointer;
+  }
+
+  .active-link{
+    background-color: #345db5;
+    border-bottom: 1px solid #ccc;
+    color: #fff;
+    cursor: pointer;
+    margin-bottom: 5px;
+    padding: 15px 10px;
+    text-align: center;
+  }
+</style>
+
+<div id="parent_container" style="position: absolute; margin-top: -358px; top: 50%; left: 0%; height: 630px; width: 99%; overflow: hidden; z-index: 20; background-color: rgb(255, 255, 255);">
+  <div id="mainDiv" style="width: 960px; height: 590px; margin: 10px;">
+    <div style="width: 101%; height: 8%; background-color: rgb(255, 255, 255); float: left; padding-left: 5px; font-size: 1.8em;">
+	Presenting complaints       
+    </div>
+
+    <div style="position: absolute; width: 98%; height: 90%; margin-left: 4px; margin-top: 44px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); padding: 5px;">
+      <div style="width: 25%; height: 100%; margin-left: 2px; margin-top: 2px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); padding: 0px; float: left;">
+        <div style="font-size: 1.5em; height: 32px; padding: 5px; background-color: rgb(153, 153, 153); text-align: center; color: rgb(238, 238, 238);">Symptom
+        </div>
+        <div style="font-size: 1.5em; height: 89.5%; padding: 5px; overflow: auto; background-color: rgb(255, 255, 255);">
+          <ul id="ulComplaints" style="font-size: 1em; list-style: outside none none; padding: 0px;">
+            <li concept_id="" onclick="showSyndromes(this)">Influenza like illness</li>
+            <li concept_id="" onclick="showSyndromes(this)">Respiratory</li>
+            <li concept_id="" onclick="showSyndromes(this)">Fever</li>
+            <li concept_id="" onclick="showSyndromes(this)">Haemia</li>
+            <li concept_id="" onclick="showSyndromes(this)">Gastrointestinal</li>
+            <li concept_id="" onclick="showSyndromes(this)">Trauma</li>
+            <li concept_id="" onclick="showSyndromes(this)">Cardiovascular</li>
+            <li concept_id="" onclick="showSyndromes(this)">Nephro</li>
+            <li concept_id="" onclick="showSyndromes(this)">General</li>
+            <li concept_id="" onclick="showSyndromes(this)">Other</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

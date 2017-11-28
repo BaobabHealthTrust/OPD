@@ -1,4 +1,7 @@
 class PatientsController < GenericPatientsController
+  def simple_comlaints
+    render :layout => "menu"
+  end
 
 	def tab_social_history
 		@alcohol = nil
