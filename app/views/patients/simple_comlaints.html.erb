@@ -1,12 +1,130 @@
 <script type="text/javascript">
+  var currentSymptom = "";
+  var selectedElements = {};
+  var IDSRcomplaints = JSON.parse('<%= @idsr_complaints.to_json %>');
+  
   function showSyndromes(obj){
+    currentSymptom = obj.innerHTML;
     obj.className = "active-link";
+    syndrome_group = obj.getAttribute("group");
+    symptom = obj.getAttribute("symptom");
+    syndromes = IDSRcomplaints[syndrome_group][symptom];
+    html = "<ul>";
+    for (var i=0; i<= syndromes.length - 1; i++){
+      syndrome = syndromes[i][0];
+      concept_id = syndromes[i][1];
+      li = '<li id="' + syndrome + '" concept_id="' + concept_id + '" onclick="updateSummary(this)">' + syndrome+ '</li>';
+      html += li;
+    }
+    html += "</ul>"
+    document.getElementById("syndrome").innerHTML = html;
+    highlightPreviousSelectedValues();
+    unhighlightEmptySymptoms(obj);
+  }
+
+  function updateSummary(obj){
+    className = obj.className;
+    syndrome = obj.innerHTML;
+    if (!className){
+      obj.className = "selected-syndrome";
+      if (!selectedElements[currentSymptom]) selectedElements[currentSymptom] = [];
+      selectedElements[currentSymptom].push(syndrome);
+
+    } else{
+      obj.removeAttribute("class");
+      pos = selectedElements[currentSymptom].indexOf(syndrome);
+      removeElement(selectedElements[currentSymptom], syndrome);
+    }
+
+    html = "";
+    syndrome = document.getElementById("syndrome");
+    symptomDeselected = '<span style="font-size: 12pt; padding-left: 35%;">Symptom deselected</span>'
+    for (var symptom in selectedElements){
+      if (selectedElements[symptom].length > 0){
+        syndromes = selectedElements[symptom];
+        html += "<b>" + symptom + "</b>: &nbsp;"
+        html += "<i>" + syndromes.join(", ") + "</i>";
+        html += "<br /><br />";
+      }
+
+      if (selectedElements[symptom].length == 0){
+        clearSelectedSymptoms();
+        syndrome.innerHTML = symptomDeselected;
+        delete selectedElements[symptom];
+      }
+    }
+    
+    document.getElementById("summary").innerHTML = html;
+    summary = document.getElementById("summary");
+    
+    nothingToShow = '<span style="font-size: 12pt; padding-left: 40%;">Nothing to show</span>';
+    syndromeNothingToShow = '<span style="font-size: 12pt; padding-left: 35%;">Nothing to show</span>';
+
+    if (summary.innerHTML.length == 0){
+      summary.innerHTML = nothingToShow;
+      syndrome.innerHTML = syndromeNothingToShow;
+      clearSelectedSymptoms();
+    }
+
+  }
+
+  function clearSelectedSymptoms(){
+    for (var symptom in selectedElements){
+      if (selectedElements[symptom].length == 0){
+        liElement = document.getElementById(symptom.trim());
+        liElement.removeAttribute("class");
+      }
+    }
+  }
+  
+  function highlightPreviousSelectedValues(){
+    selectedItems = selectedElements[currentSymptom];
+    if (selectedItems){
+      for (var i=0; i<=selectedItems.length - 1; i++){
+        liElement = document.getElementById(selectedItems[i]);
+        if (liElement){
+          liElement.className = "selected-syndrome";
+        }
+      }
+    }
+  }
+
+  function unhighlightEmptySymptoms(obj){
+
+    elements = document.getElementById("ulSyndromes").getElementsByTagName("li");
+    for (var i=0; i<=elements.length - 1; i++){
+       if (elements[i].className.match(/active/i)){
+        if (elements[i].id.toUpperCase() != obj.id.toUpperCase()){
+          symptom = elements[i].innerHTML;
+          if (!selectedElements[symptom]) elements[i].removeAttribute("class")
+        }
+       }
+    }
+
+    elements = document.getElementsByClassName("active-link");
+    for (var i=0; i<=elements.length - 1; i++){
+      if (obj == elements[i]) continue;
+      symptom = elements[i].id;
+      //if (!selectedElements[symptom]) elements[i].removeAttribute("class")
+    }
+  }
+  
+  function removeElement(arr) {
+    //source: https://stackoverflow.com/questions/3954438/how-to-remove-item-from-array-by-value
+    var what, a = arguments, L = a.length, ax;
+    while (L > 1 && arr.length) {
+      what = a[--L];
+      while ((ax= arr.indexOf(what)) !== -1) {
+        arr.splice(ax, 1);
+      }
+    }
+    return arr;
   }
 
 </script>
 
 <style type="text/css">
-  #ulComplaints li{
+  #ulSyndromes li{
     padding: 5px;
     border-bottom: 1px solid;
     cursor: pointer;
@@ -21,6 +139,28 @@
     padding: 15px 10px;
     text-align: center;
   }
+
+  ul{
+    list-style: outside none none;
+    padding: 0px;
+  }
+
+  #syndrome li{
+    border: 1px solid #ccc;
+    cursor: pointer;
+    margin-bottom: 5px;
+    text-align: center;
+    box-shadow: 1px 1px;
+  }
+
+  .selected-syndrome{
+    background-color: #228B22;
+    color: white;
+  }
+
+  #summary{
+    font-size: 14pt !important;
+  }
 </style>
 
 <div id="parent_container" style="position: absolute; margin-top: -358px; top: 50%; left: 0%; height: 630px; width: 99%; overflow: hidden; z-index: 20; background-color: rgb(255, 255, 255);">
@@ -33,17 +173,23 @@
       <div style="width: 25%; height: 100%; margin-left: 2px; margin-top: 2px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); padding: 0px; float: left;">
         <div style="font-size: 1.5em; height: 32px; padding: 5px; background-color: rgb(153, 153, 153); text-align: center; color: rgb(238, 238, 238);">Symptom</div>
         <div style="font-size: 1.5em; height: 89.5%; padding: 5px; overflow: auto; background-color: rgb(255, 255, 255);">
-          <ul id="ulComplaints" style="font-size: 1em; list-style: outside none none; padding: 0px;">
-            <li concept_id="" onclick="showSyndromes(this)">Influenza like illness</li>
-            <li concept_id="" onclick="showSyndromes(this)">Respiratory</li>
-            <li concept_id="" onclick="showSyndromes(this)">Fever</li>
-            <li concept_id="" onclick="showSyndromes(this)">Haemia</li>
-            <li concept_id="" onclick="showSyndromes(this)">Gastrointestinal</li>
-            <li concept_id="" onclick="showSyndromes(this)">Trauma</li>
-            <li concept_id="" onclick="showSyndromes(this)">Cardiovascular</li>
-            <li concept_id="" onclick="showSyndromes(this)">Nephro</li>
-            <li concept_id="" onclick="showSyndromes(this)">General</li>
-            <li concept_id="" onclick="showSyndromes(this)">Other</li>
+          <ul id="ulSyndromes" style="font-size: 1em; list-style: outside none none; padding: 0px;">
+
+            <% @idsr_complaints["syndrome_g1"].each do |key, values| %>
+              <li id="<%= key.titleize %>" group="syndrome_g1" symptom="<%= key %>" onclick="showSyndromes(this)"><%= key.titleize %> </li>
+            <% end %>
+
+            <% @idsr_complaints["syndrome_g2"].each do |key, values| %>
+              <li id="<%= key.titleize %>" group="syndrome_g2" symptom="<%= key %>" onclick="showSyndromes(this)"><%= key.titleize %> </li>
+            <% end %>
+
+            <% @idsr_complaints["syndrome_g3"].each do |key, values| %>
+              <li id="<%= key.titleize %>" group="syndrome_g3" symptom="<%= key %>" onclick="showSyndromes(this)"><%= key.titleize %> </li>
+            <% end %>
+
+            <% @idsr_complaints["syndrome_g4"].each do |key, values| %>
+              <li id="<%= key.titleize %>" group="syndrome_g4" symptom="<%= key %>" onclick="showSyndromes(this)"><%= key.titleize %> </li>
+            <% end %>
           </ul>
         </div>
       </div>

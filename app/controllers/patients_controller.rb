@@ -1,5 +1,6 @@
 class PatientsController < GenericPatientsController
   def simple_comlaints
+    @idsr_complaints = JSON.parse(File.read("#{Rails.root.to_s}/public/json/idsr_complaints.json"))
     render :layout => "menu"
   end
 
