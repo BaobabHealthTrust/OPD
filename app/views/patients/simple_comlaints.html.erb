@@ -1,7 +1,10 @@
 <script type="text/javascript">
+  var patientID = "<%= params[:id]%>";
   var currentSymptom = "";
   var selectedElements = {};
   var IDSRcomplaints = JSON.parse('<%= @idsr_complaints.to_json %>');
+  var providerID = '<%= current_user.person_id %>';
+  var encounter_datetime = '<%= DateTime.now() %>';
   
   function showSyndromes(obj){
     currentSymptom = obj.innerHTML;
@@ -93,12 +96,12 @@
 
     elements = document.getElementById("ulSyndromes").getElementsByTagName("li");
     for (var i=0; i<=elements.length - 1; i++){
-       if (elements[i].className.match(/active/i)){
+      if (elements[i].className.match(/active/i)){
         if (elements[i].id.toUpperCase() != obj.id.toUpperCase()){
           symptom = elements[i].innerHTML;
           if (!selectedElements[symptom]) elements[i].removeAttribute("class")
         }
-       }
+      }
     }
 
     elements = document.getElementsByClassName("active-link");
@@ -121,6 +124,88 @@
     return arr;
   }
 
+  function addCustomButtons(){
+    buttonsDiv = document.getElementById("buttons");
+    cancelButton = '<button id="cancel" class="button navButton red left" onclick="cancel();"><span>Cancel</span></button>';
+    clearButton = '<button id="clear" class="button blue navButton" onclick="clearComplaints();"><span>Clear</span></button>';
+    buttonsDiv.innerHTML += cancelButton;
+    buttonsDiv.innerHTML += clearButton;
+
+    finishButton = document.getElementById("finishButton");
+    finishButton.removeAttribute("onclick");
+    finishButton.onclick = function(){
+      createComplaintsHiddenForm();
+    }
+  }
+
+  function createComplaintsHiddenForm(){
+    body = document.getElementsByTagName("body")[0]
+    theForm = document.createElement("form");
+    theForm.method = 'POST';
+    theForm.action="/encounters/create_complaints";
+    body.appendChild(theForm);
+    
+    addHidden(theForm, "encounter[encounter_type_name]", "NOTES");
+    addHidden(theForm, "encounter[patient_id]", patientID);
+    addHidden(theForm, "encounter[encounter_datetime]", encounter_datetime);
+    addHidden(theForm, "encounter[provider_id]", providerID);
+
+    complaints = [];
+    for (var symptom in selectedElements){
+      if (selectedElements[symptom].length > 0){
+        syndromes = selectedElements[symptom];
+        for (var i=0; i<=syndromes.length - 1; i++){
+          complaint = symptom.trim() + ":" + syndromes[i];
+          complaints.push(complaint);
+        }
+      }
+    }
+    
+    complaints = complaints.join(", ");
+    addHidden(theForm, "complaints[]", complaints);
+    theForm.submit();
+
+  }
+
+  function addHidden(theForm, key, value) {
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = value;
+    theForm.appendChild(input);
+  }
+
+  function clearComplaints(){
+    elements = document.getElementById("ulSyndromes").getElementsByTagName("li");
+    for (var i=0; i<=elements.length - 1; i++){
+      if (elements[i].className.match(/active/i)){
+        elements[i].removeAttribute("class")
+      }
+    }
+
+    syndromes  = document.getElementById("syndrome").getElementsByTagName("li");
+    for (var i=0; i<=syndromes.length - 1; i++){
+      if (syndromes[i].className.match(/selected/i)){
+        syndromes[i].removeAttribute("class")
+      }
+    }
+
+    summaryNothingToShow = '<span style="font-size: 12pt; padding-left: 40%;">Nothing to show</span>';
+    syndromeNothingToShow = '<span style="font-size: 12pt; padding-left: 35%;">Nothing to show</span>';
+
+    document.getElementById("summary").innerHTML = summaryNothingToShow;
+    document.getElementById("syndrome").innerHTML = syndromeNothingToShow;
+    selectedElements = {};
+  }
+
+  function cancel(){
+    window.location = "/patients/show/" + patientID;
+  }
+
+  window.onload = function(){
+    addCustomButtons();
+  }
+  
 </script>
 
 <style type="text/css">
