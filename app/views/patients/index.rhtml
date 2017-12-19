@@ -87,8 +87,10 @@
           <% end %>
 
           <% if  session[:datetime].blank? %>
-            <option value='/encounters/idsr_complaints?patient_id=<%= @patient.id %>'>Presenting Complaints</option>
-            <option value='/patients/simple_complaints/<%= @patient.id %>'>Simple Complaints</option>
+              <!--<option value='/encounters/idsr_complaints?patient_id=<%= @patient.id %>'>Presenting Complaints</option>-->
+            <% if @point_of_care == 'true' %>
+              <option value='/patients/simple_complaints/<%= @patient.id %>'>Presenting Complaints</option>
+            <% end %>
             <!--option value='/encounters/new/presenting_complaints?patient_id=<!--%= @patient.id %>'>Clinical Notes</option-->
             <option value='/encounters/new/idsr_clinical_notes?patient_id=<%= @patient.id %>'>Clinical Notes</option>
             <option value='/encounters/new/lab_orders?patient_id=<%= @patient.id -%>'>Lab Orders</option>
@@ -145,11 +147,11 @@
               <!--option link="/encounter_types?patient_id=<%= @patient.id -%>" ttSize = "160px">Outcomes</option-->
             <% end %>
             <!--<% if show_lab_results %>
-                                                                                                                                          <option link="/lab/results/<%=@patient.id -%>">Lab results</option>
+                                                                                                                                            <option link="/lab/results/<%=@patient.id -%>">Lab results</option>
             <%end%>-->
   <!--<option link='/patients/programs_dashboard/<%= @patient.id %>'>Programs</option>-->
 
-                                                                                                    <!--<option link="/encounters/new/lab_orders?patient_id=<%= @patient.id -%>" ttSize = "160px">Investigation</option>-->
+                                                                                                      <!--<option link="/encounters/new/lab_orders?patient_id=<%= @patient.id -%>" ttSize = "160px">Investigation</option>-->
 
             <option link='<%= ((session[:datetime].to_date rescue '') != '' ?
                         "/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
