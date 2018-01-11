@@ -3,7 +3,11 @@
 
 <script type="text/javascript">
   var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
-  var sessionDate = '<%= session[:datetime] %>'
+  var sessionDate = '<%= session[:datetime] %>';
+
+<% if @point_of_care == false %>
+    var sessionDate = '<%= Date.today %>' //No need for malaria popup confirmation when it is no point of care
+<% end %>
 
   function set_ajaxURL_for_suggestions(value) {
     url = "/encounters/concept_options?search_string=" + value

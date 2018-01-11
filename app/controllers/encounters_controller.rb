@@ -45,7 +45,8 @@ class EncountersController < GenericEncountersController
 		@min_height = PatientService.get_patient_attribute_value(@patient, "min_height")
 		@max_height = PatientService.get_patient_attribute_value(@patient, "max_height")
 		@select_options = select_options
-    
+
+    @point_of_care = (CoreService.get_global_property_value("point_of_care").to_s == 'true') rescue false
     #if params[:encounter_type].upcase == "LAB_ORDERS"
     
       @malaria_tests = [
