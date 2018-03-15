@@ -9,7 +9,37 @@ class PropertiesController < GenericPropertiesController
     @dde_username = GlobalProperty.find_by_property('dde.username').property_value rescue ""
     @dde_password = GlobalProperty.find_by_property('dde.password').property_value rescue ""
   end
-  
+
+  def portal_properties_menu
+    @portal_status = GlobalProperty.find_by_property('use_portal').property_value rescue ""
+    @portal_status = "Yes" if !@portal_status.blank? && @portal_status == "true"
+    @portal_status = "No" if @portal_status.blank? ||  @portal_status == "false"
+
+    @portal_address = GlobalProperty.find_by_property('portal_address').property_value rescue ""
+    @portal_port = GlobalProperty.find_by_property('portal_port').property_value rescue ""
+  end
+
+  def create_portal_properties
+
+    portal_status = GlobalProperty.find_by_property('use_portal') || GlobalProperty.new()
+    portal_status.property = 'use_portal'
+    portal_status.property_value = params[:portal_status] == "Yes" ? "true" : "false"
+    portal_status.save
+
+    portal_address = GlobalProperty.find_by_property('portal_address') || GlobalProperty.new()
+    portal_address.property = 'portal_address'
+    portal_address.property_value = params[:portal_address]
+    portal_address.save
+
+    portal_port = GlobalProperty.find_by_property('portal_port') || GlobalProperty.new()
+    portal_port.property = 'portal_port'
+    portal_port.property_value = params[:portal_port]
+    portal_port.save
+
+    flash[:notice] = "Portal configurations updated successfully"
+    redirect_to("/clinic") and return
+  end
+
   def create_dde_properties
     dde_status = params[:dde_status]
     if dde_status.squish.downcase == 'yes'
