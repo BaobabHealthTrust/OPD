@@ -356,7 +356,7 @@
               <li id="<%= key.titleize %>" group="syndrome_g3" symptom="<%= key %>" onclick="showSyndromes(this)"><%= key.titleize %> </li>
             <% end %>
 
-            <% @idsr_complaints["syndrome_g4"].each do |key, values| %>
+            <% @idsr_complaints["syndrome_g4"].sort.each do |key, values| %>
               <li id="<%= key.titleize %>" group="syndrome_g4" symptom="<%= key %>" onclick="showSyndromes(this)"><%= key.titleize %> </li>
             <% end %>
           </ul>
