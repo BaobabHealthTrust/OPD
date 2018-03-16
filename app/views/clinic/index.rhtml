@@ -2,7 +2,7 @@
   <head>
     <title>Clinic</title>
     <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer ></script>
-<script src="/touchscreentoolkit/lib/javascripts/standard.js"> </script>
+    <script src="/touchscreentoolkit/lib/javascripts/standard.js"> </script>
     <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
 
     <style>
@@ -15,26 +15,26 @@
       tt_cancel_destination = '/logout';
       tt_cancel_show = '/people/search';
 
-	  function resetRegimen(){
-		element = document.getElementById('nextButton')
-		element.setAttribute("onmousedown", "gotoNextPage()")
-	  }
+      function resetRegimen(){
+        element = document.getElementById('nextButton')
+        element.setAttribute("onmousedown", "gotoNextPage()")
+      }
 
-		function showDHISupdate(msg){
-			if(!document.getElementById("popupBox")){
-				var  popupBox = document.createElement("div");
-				popupBox.id = "popupBox";
-				popupBox.style.display = "none";
+      function showDHISupdate(msg){
+        if(!document.getElementById("popupBox")){
+          var  popupBox = document.createElement("div");
+          popupBox.id = "popupBox";
+          popupBox.style.display = "none";
 
-				popupBox.innerHTML = msg + "<br>" + "<button style='width: 200px;margin-top:20px;margin-left:101px;' onmousedown='popupBox.style.display = \"none\"; " +
-		"'><span>OK</span></button>";
+          popupBox.innerHTML = msg + "<br>" + "<button style='width: 200px;margin-top:20px;margin-left:101px;' onmousedown='popupBox.style.display = \"none\"; " +
+            "'><span>OK</span></button>";
 
-				document.getElementById("content").appendChild(popupBox);
-			}
+          document.getElementById("content").appendChild(popupBox);
+        }
 
-			document.getElementById("popupBox").style.display = "block";
-			document.getElementById("popupBox").style.width = "400px";
-		}
+        document.getElementById("popupBox").style.display = "block";
+        document.getElementById("popupBox").style.width = "400px";
+      }
     </script>
   </head>
   <body><div id='content'>
@@ -47,22 +47,22 @@
             <h1 id='project_name'>
               <div style="font-size: 0.8em; margin-top: 28px;">
                 <%location_name = (@location.downcase == "outpatient" ? "OPD" : "OPD")
-                  if current_user.activities.include?('Manage Lab Orders') or current_user.activities.include?('Manage Lab Results') or
-                  current_user.activities.include?('Manage Sputum Submissions') or current_user.activities.include?('Manage TB Clinic Visits') or
-                  current_user.activities.include?('Manage TB Reception Visits') or current_user.activities.include?('Manage TB Registration Visits') or
-                  current_user.activities.include?('Manage HIV Status Visits') %>
-                    <span style="font-size: 55px;">OPD</span>
+                if current_user.activities.include?('Manage Lab Orders') or current_user.activities.include?('Manage Lab Results') or
+                    current_user.activities.include?('Manage Sputum Submissions') or current_user.activities.include?('Manage TB Clinic Visits') or
+                    current_user.activities.include?('Manage TB Reception Visits') or current_user.activities.include?('Manage TB Registration Visits') or
+                    current_user.activities.include?('Manage HIV Status Visits') %>
+                  <span style="font-size: 55px;">OPD</span>
                 <%else%>
                   <%= location_name %>
-               <%end%>
+                <%end%>
               </div>
             </h1>
 
             <div id="facility"><%= @facility %></div>
             <div id="location"><%= @location %></div>
             <% retrospective = 'false'
-               retrospective = 'true' if session[:datetime]
-            %>
+            retrospective = 'true' if session[:datetime]
+          %>
             <div id="date" retrospective="<%= retrospective %>"><%= @date %></div>
             <div id="user"><%= @user %></div>
             <% if @boarder  %>
@@ -87,11 +87,11 @@
 <%# Show Find / Register Patient button on HIV Reception and Find by Name button
 on the rest of the stations %>
 
-              <%# if @location =~ /HIV Reception/ %>
-                <option value='/people/search' link='/people/search' ttSize="295px">Find or Register Patient</option>
-              <%# else %>
-                <!--<option value='/people/search' link='/people/search' ttSize="200px">Find By Name</option>-->
-              <%# end %>
+<%# if @location =~ /HIV Reception/ %>
+              <option value='/people/search' link='/people/search' ttSize="295px">Find or Register Patient</option>
+<%# else %>
+              <!--<option value='/people/search' link='/people/search' ttSize="200px">Find By Name</option>-->
+<%# end %>
 
 <%# Hide Find by ARV Number button on non-HIV workstations %>
               <% if @location =~ /HIV/ %>
@@ -105,13 +105,16 @@ on the rest of the stations %>
                           "/people/reset_datetime" : "/people/set_datetime") %>'  ttSize="100px">
                 <%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
               <!--option link='regimen.html'>Regimen</option-->
+              <% if portal_activated %>
+                <option value='<%= @portal_uri %>' link='#' ttSize="265px" id="portal">Portal</option>
+              <% end %>
             </select>
 
-			<% if params[:dhis_status] == "SUCCESS" %>
-				<script> showDHISupdate('DHIS2 update <%="#{params[:dhis_status].downcase}"%>'); </script>
-			<% elsif !params[:dhis_status].blank? %>
-				<script> showMessage('DHIS2 update <%="#{params[:dhis_status]}"%>'); </script>
-			<% end%>
+            <% if params[:dhis_status] == "SUCCESS" %>
+              <script> showDHISupdate('DHIS2 update <%="#{params[:dhis_status].downcase}"%>'); </script>
+            <% elsif !params[:dhis_status].blank? %>
+              <script> showMessage('DHIS2 update <%="#{params[:dhis_status]}"%>'); </script>
+            <% end%>
 
 
             <tr>

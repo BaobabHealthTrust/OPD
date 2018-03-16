@@ -76,6 +76,10 @@ module ApplicationHelper
     get_global_property_value("auto.session").to_s == "true" rescue false
   end
 
+  def portal_activated
+   get_global_property_value('use_portal').to_s.upcase == "TRUE" rescue false
+  end
+
   def ask_standard_art_side_effects
     get_global_property_value("art_visit.standard_art_side_effects").to_s == "true" rescue false
   end  
