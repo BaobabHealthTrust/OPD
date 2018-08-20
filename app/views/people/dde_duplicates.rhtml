@@ -1,0 +1,209 @@
+<script type="text/javascript">
+  var tt_cancel_destination = "/clinic";
+
+</script>
+<style type="text/css">
+  body {
+    -moz-user-select:none;
+  }
+
+  table {
+    vertical-align:center;
+    width: 100%;
+    -moz-user-select:none;
+  }
+
+  .container {
+    height: 92%;
+
+    margin: 20px 20px 20px 20px;
+    overflow: auto;
+  }
+
+  .data {
+    padding-left: 5px;
+  }
+
+  td {
+    text-align: left;
+    border-style: solid;
+    border-width: 1px;
+    text-align: left;
+    word-wrap: break-word;
+  }
+
+  th {
+    text-align: left;
+    border-style: solid;
+    border-width: 1px;
+    padding-left: 5px;
+    text-align: left;
+  }
+
+  a {
+    background-color: grey;
+    border-bottom: 1px outset #EEEEEE;
+    border-style: outset;
+    border-top: 1px outset #EEEEEE;
+    color: white;
+    display: block;
+    padding: 10px 16px 10px 10px;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .red a{
+    background-color: red !important;
+  }
+
+
+  .stock_level_message {
+    position: absolute;
+    width: 43%;
+    height: 24%;
+    top: 15%;
+    z-index: 991;
+    left: 25.5%;
+    border: 1px solid black;
+    background-color: #FFFFE0;
+    border-radius: 15px;
+  }
+
+  .stock_level_message_header{
+    height: 18%;
+    color:white;
+    background-color: #458B74;
+    border-radius: 15px 15px 0px 0px;
+    font-size: 14pt;
+    opacity: 0.8;
+  }
+
+  .stock_level_message_content{
+    font-size: 14pt;
+    text-align: center;
+    opacity: 0.9;
+    color:black;
+  }
+
+  .stock_level_message_footer{
+    position: absolute;
+    width: 100%;
+    height: 33%;
+    color:white;
+    background-color: #458B74;
+    border-radius: 0px 0px 15px 15px;
+    font-size: 14pt;
+    bottom: 0%;
+    opacity: 0.8;
+  }
+
+  .yes_button span{
+    background-color: #90EE90;
+    left: 2%;
+    padding: 1.5% 14%;
+    position: absolute;
+    top: 8%;
+    cursor: pointer;
+    border:1px solid white;
+    border-radius: 10px;
+    display:inline-block;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    font-weight:bold;
+    color: #FFFFFF;
+    background-color: #3093c7; background-image: -webkit-gradient(linear, left top, left bottom, from(#3093c7), to(#1c5a85));
+    background-image: -webkit-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -moz-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -ms-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -o-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: linear-gradient(to bottom, #3093c7, #1c5a85);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#3093c7, endColorstr=#1c5a85);
+  }
+
+  .cancel_button span{
+    background-color: lightblue;
+    border: 1px solid #EDEBEB;
+    right: 2%;
+    padding: 1.5% 14%;
+    position: absolute;
+    text-decoration: none;
+    top: 8%;
+    cursor: pointer;
+    border:1px solid white;
+    border-radius: 10px;
+    display:inline-block;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    font-weight:bold;
+    color: #FFFFFF;
+    background-color: #3093c7; background-image: -webkit-gradient(linear, left top, left bottom, from(#3093c7), to(#1c5a85));
+    background-image: -webkit-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -moz-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -ms-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -o-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: linear-gradient(to bottom, #3093c7, #1c5a85);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#3093c7, endColorstr=#1c5a85);
+
+  }
+
+  #cover{
+    position: absolute;
+    background-color: black;
+    width: 100%;
+    height: 100%;
+    left: 0%;
+    top: 0%;
+    z-index: 990;
+    opacity: 0.5;
+  }
+
+  #cancelButton{
+    float: left;
+  }
+
+  #finishButton{
+    display: none;
+  }
+</style>
+
+<div class="container">
+  <div>
+    <h2>
+      National ID duplicates
+    </h2>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:center;">First Name</th>
+        <th style="text-align:center;">Last Name</th>
+        <th style="text-align:center;">Gender</th>
+        <th style="text-align:center;">Date of Birth</th>
+        <th style="text-align:center;">Current Village</th>
+        <th style="text-align:center;">Home Village</th>
+        <th style="text-align:center;">Current Residence</th>
+        <th style="text-align:center;">Home District</th>
+        <th style="border-top: 0px; border-right: 0px;">&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @dde_duplicates.each do |key,values| %>
+        <tr>
+          <td><%= values["first_name"] %></td>
+          <td><%= values["family_name"] %></td>
+          <td style="text-align: center;"><%= values["gender"] %></td>
+          <td><%= values["birthdate"] %></td>
+          <td><%= values["current_village"] %></td>
+          <td><%= values["home_village"] %></td>
+          <td><%= values["current_residence"] %></td>
+          <td><%= values["home_district"] %></td>
+          <td class='anchor_class'><a href="/people/search?identifier=<%= values["npid"] %>&was_duplicate=true">Select patient</a></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  var cancelButtonHTML = '<button id="cancelButton" class="button navButton red" onclick="if (tt_cancel_destination) window.location = tt_cancel_destination;"><span>Cancel</span></button>';
+  window.onload = function(){
+    buttons = document.getElementById("buttons");
+    buttons.innerHTML += cancelButtonHTML;
+  }
+</script>

@@ -1,0 +1,408 @@
+<script type="text/javascript">
+  var patientID = "<%= params[:id]%>";
+  var currentSymptom = "";
+  var selectedElements = {};
+  var IDSRcomplaints = JSON.parse('<%= @idsr_complaints.to_json %>');
+  var providerID = '<%= current_user.person_id %>';
+  var encounter_datetime = '<%= DateTime.now() %>';
+
+  function showConfirmation(){
+    document.getElementById("popup-div").style.display = 'inline';
+    document.getElementById("cover").style.display = 'inline';
+  }
+
+  function hidePopup(){
+    document.getElementById("popup-div").style.display = 'none';
+    document.getElementById("cover").style.display = 'none';
+  }
+
+  function showSyndromes(obj){
+    currentSymptom = obj.innerHTML;
+    obj.className = "active-link";
+    syndrome_group = obj.getAttribute("group");
+    symptom = obj.getAttribute("symptom");
+    syndromes = IDSRcomplaints[syndrome_group][symptom];
+    html = "<ul>";
+    for (var i=0; i<= syndromes.length - 1; i++){
+      syndrome = syndromes[i][0];
+      concept_id = syndromes[i][1];
+      li = '<li id="' + syndrome + '" concept_id="' + concept_id + '" onclick="updateSummary(this)">' + syndrome+ '</li>';
+      html += li;
+    }
+    html += "</ul>"
+    document.getElementById("syndrome").innerHTML = html;
+    highlightPreviousSelectedValues();
+    unhighlightEmptySymptoms(obj);
+  }
+
+  function updateSummary(obj){
+    className = obj.className;
+    syndrome = obj.innerHTML;
+    if (!className){
+      obj.className = "selected-syndrome";
+      if (!selectedElements[currentSymptom]) selectedElements[currentSymptom] = [];
+      selectedElements[currentSymptom].push(syndrome);
+
+    } else{
+      obj.removeAttribute("class");
+      pos = selectedElements[currentSymptom].indexOf(syndrome);
+      removeElement(selectedElements[currentSymptom], syndrome);
+    }
+
+    html = "";
+    syndrome = document.getElementById("syndrome");
+    symptomDeselected = '<span style="font-size: 12pt; padding-left: 35%;">Symptom deselected</span>'
+    for (var symptom in selectedElements){
+      if (selectedElements[symptom].length > 0){
+        syndromes = selectedElements[symptom];
+        html += "<b>" + symptom + "</b>: &nbsp;"
+        html += "<i>" + syndromes.join(", ") + "</i>";
+        html += "<br /><br />";
+      }
+
+      if (selectedElements[symptom].length == 0){
+        clearSelectedSymptoms();
+        syndrome.innerHTML = symptomDeselected;
+        delete selectedElements[symptom];
+      }
+    }
+    
+    document.getElementById("summary").innerHTML = html;
+    summary = document.getElementById("summary");
+    
+    nothingToShow = '<span style="font-size: 12pt; padding-left: 40%;">Nothing to show</span>';
+    syndromeNothingToShow = '<span style="font-size: 12pt; padding-left: 35%;">Nothing to show</span>';
+
+    if (summary.innerHTML.length == 0){
+      summary.innerHTML = nothingToShow;
+      syndrome.innerHTML = syndromeNothingToShow;
+      clearSelectedSymptoms();
+    }
+
+  }
+
+  function clearSelectedSymptoms(){
+    for (var symptom in selectedElements){
+      if (selectedElements[symptom].length == 0){
+        liElement = document.getElementById(symptom.trim());
+        liElement.removeAttribute("class");
+      }
+    }
+  }
+  
+  function highlightPreviousSelectedValues(){
+    selectedItems = selectedElements[currentSymptom];
+    if (selectedItems){
+      for (var i=0; i<=selectedItems.length - 1; i++){
+        liElement = document.getElementById(selectedItems[i]);
+        if (liElement){
+          liElement.className = "selected-syndrome";
+        }
+      }
+    }
+  }
+
+  function unhighlightEmptySymptoms(obj){
+
+    elements = document.getElementById("ulSyndromes").getElementsByTagName("li");
+    for (var i=0; i<=elements.length - 1; i++){
+      if (elements[i].className.match(/active/i)){
+        if (elements[i].id.toUpperCase() != obj.id.toUpperCase()){
+          symptom = elements[i].innerHTML;
+          if (!selectedElements[symptom]) elements[i].removeAttribute("class")
+        }
+      }
+    }
+
+    elements = document.getElementsByClassName("active-link");
+    for (var i=0; i<=elements.length - 1; i++){
+      if (obj == elements[i]) continue;
+      symptom = elements[i].id;
+      //if (!selectedElements[symptom]) elements[i].removeAttribute("class")
+    }
+  }
+  
+  function removeElement(arr) {
+    //source: https://stackoverflow.com/questions/3954438/how-to-remove-item-from-array-by-value
+    var what, a = arguments, L = a.length, ax;
+    while (L > 1 && arr.length) {
+      what = a[--L];
+      while ((ax= arr.indexOf(what)) !== -1) {
+        arr.splice(ax, 1);
+      }
+    }
+    return arr;
+  }
+
+  function addCustomButtons(){
+    buttonsDiv = document.getElementById("buttons");
+    cancelButton = '<button id="cancel" class="button navButton red left" onclick="cancel();"><span>Cancel</span></button>';
+    clearButton = '<button id="clear" class="button blue navButton" onclick="clearComplaints();"><span>Clear</span></button>';
+    buttonsDiv.innerHTML += cancelButton;
+    buttonsDiv.innerHTML += clearButton;
+
+    finishButton = document.getElementById("finishButton");
+    finishButton.removeAttribute("onclick");
+    finishButton.onclick = function(){
+      if (Object.keys(selectedElements).length == 0){
+        showConfirmation("Nothing is selected")
+      } else{
+        createComplaintsHiddenForm();
+      }
+      
+    }
+  }
+
+  function createComplaintsHiddenForm(){
+    body = document.getElementsByTagName("body")[0]
+    theForm = document.createElement("form");
+    theForm.method = 'POST';
+    theForm.action="/encounters/create_complaints";
+    body.appendChild(theForm);
+    
+    addHidden(theForm, "encounter[encounter_type_name]", "NOTES");
+    addHidden(theForm, "encounter[patient_id]", patientID);
+    addHidden(theForm, "encounter[encounter_datetime]", encounter_datetime);
+    addHidden(theForm, "encounter[provider_id]", providerID);
+
+    complaints = [];
+    for (var symptom in selectedElements){
+      if (selectedElements[symptom].length > 0){
+        syndromes = selectedElements[symptom];
+        for (var i=0; i<=syndromes.length - 1; i++){
+          complaint = symptom.trim() + ":" + syndromes[i];
+          complaints.push(complaint);
+        }
+      }
+    }
+    
+    complaints = complaints.join(", ");
+    addHidden(theForm, "complaints[]", complaints);
+    theForm.submit();
+
+  }
+
+  function addHidden(theForm, key, value) {
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = value;
+    theForm.appendChild(input);
+  }
+
+  function clearComplaints(){
+    elements = document.getElementById("ulSyndromes").getElementsByTagName("li");
+    for (var i=0; i<=elements.length - 1; i++){
+      if (elements[i].className.match(/active/i)){
+        elements[i].removeAttribute("class")
+      }
+    }
+
+    syndromes  = document.getElementById("syndrome").getElementsByTagName("li");
+    for (var i=0; i<=syndromes.length - 1; i++){
+      if (syndromes[i].className.match(/selected/i)){
+        syndromes[i].removeAttribute("class")
+      }
+    }
+
+    summaryNothingToShow = '<span style="font-size: 12pt; padding-left: 40%;">Nothing to show</span>';
+    syndromeNothingToShow = '<span style="font-size: 12pt; padding-left: 35%;">Nothing to show</span>';
+
+    document.getElementById("summary").innerHTML = summaryNothingToShow;
+    document.getElementById("syndrome").innerHTML = syndromeNothingToShow;
+    selectedElements = {};
+  }
+
+  function cancel(){
+    window.location = "/patients/show/" + patientID;
+  }
+
+  window.onload = function(){
+    addCustomButtons();
+  }
+  
+</script>
+
+<style type="text/css">
+  #ulSyndromes li{
+    padding: 5px;
+    border-bottom: 1px solid;
+    cursor: pointer;
+  }
+
+  .active-link{
+    background-color: #345db5;
+    border-bottom: 1px solid #ccc;
+    color: #fff;
+    cursor: pointer;
+    margin-bottom: 5px;
+    padding: 15px 10px;
+    text-align: center;
+  }
+
+  ul{
+    list-style: outside none none;
+    padding: 0px;
+  }
+
+  #syndrome li{
+    border: 1px solid #ccc;
+    cursor: pointer;
+    margin-bottom: 5px;
+    text-align: center;
+    box-shadow: 1px 1px;
+  }
+
+  .selected-syndrome{
+    background-color: #228B22;
+    color: white;
+  }
+
+  #summary{
+    font-size: 14pt !important;
+  }
+
+  #popup-div{
+    display: none;
+    background-color: #F4F4F4;
+    border: 2px solid #E0E0E0;
+    border-radius: 15px;
+    height: 220px;
+    padding: 5px;
+    position: absolute;
+    margin-top: 100px;
+    width: 560px;
+    margin-left: 430px;
+    z-index: 991;
+  }
+
+  #popup-div-2{
+    height: 185px;
+  }
+
+  #popup-header{
+    border-bottom: 2px solid #7D9EC0;
+    margin-left: -5px;
+    width: 101.5%;
+    background-color: #FFFFFF;
+    margin-top: -5px;
+    padding-top: 5px;
+    border-radius: 15px 15px 0 0;
+    font-size: 14pt;
+    font-weight: bolder;
+  }
+
+  #cover{
+    display: none;
+    position: absolute;
+    background-color: black;
+    width: 100%;
+    height: 102%;
+    left: 0%;
+    top: 0%;
+    z-index: 990;
+    opacity: 0.65;
+  }
+
+  .my_button {
+    -moz-user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bolder;
+    line-height: 1.82857;
+    margin-bottom: 0;
+    padding: 6px 56px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+    color: #fff;
+    float: right;
+    margin-top: -5px;
+  }
+  #yes, #no {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+</style>
+
+<div id="parent_container" style="position: absolute; margin-top: -358px; top: 50%; left: 0%; height: 630px; width: 99%; overflow: hidden; z-index: 20; background-color: rgb(255, 255, 255);">
+  <div id="mainDiv" style="width: 960px; height: 590px; margin: 10px;">
+    <div style="width: 101%; height: 8%; background-color: rgb(255, 255, 255); float: left; padding-left: 5px; font-size: 1.8em;">
+	Presenting complaints       
+    </div>
+
+    <div style="position: absolute; width: 98%; height: 90%; margin-left: 4px; margin-top: 44px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); padding: 5px;">
+      <div style="width: 25%; height: 100%; margin-left: 2px; margin-top: 2px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); padding: 0px; float: left;">
+        <div style="font-size: 1.5em; height: 32px; padding: 5px; background-color: rgb(153, 153, 153); text-align: center; color: rgb(238, 238, 238);">Symptom</div>
+        <div style="font-size: 1.5em; height: 89.5%; padding: 5px; overflow: auto; background-color: rgb(255, 255, 255);">
+          <ul id="ulSyndromes" style="font-size: 1em; list-style: outside none none; padding: 0px;">
+
+            <% @idsr_complaints["syndrome_g1"].each do |key, values| %>
+              <li id="<%= key.titleize %>" group="syndrome_g1" symptom="<%= key %>" onclick="showSyndromes(this)"><%= key.titleize %> </li>
+            <% end %>
+
+            <% @idsr_complaints["syndrome_g2"].each do |key, values| %>
+              <li id="<%= key.titleize %>" group="syndrome_g2" symptom="<%= key %>" onclick="showSyndromes(this)"><%= key.titleize %> </li>
+            <% end %>
+
+            <% @idsr_complaints["syndrome_g3"].each do |key, values| %>
+              <li id="<%= key.titleize %>" group="syndrome_g3" symptom="<%= key %>" onclick="showSyndromes(this)"><%= key.titleize %> </li>
+            <% end %>
+
+            <% @idsr_complaints["syndrome_g4"].sort.each do |key, values| %>
+              <li id="<%= key.titleize %>" group="syndrome_g4" symptom="<%= key %>" onclick="showSyndromes(this)"><%= key.titleize %> </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div style="position: absolute; width: 98%; height: 90%; margin-left: 4px; margin-top: 44px; left: 30%; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); padding: 5px;">
+      <div style="width: 25%; height: 100%; margin-left: 2px; margin-top: 2px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); padding: 0px; float: left;">
+        <div style="font-size: 1.5em; height: 32px; padding: 5px; background-color: rgb(153, 153, 153); text-align: center; color: rgb(238, 238, 238);">Syndrome
+        </div>
+        <div id="syndrome" style="font-size: 1.5em; height: 89.5%; padding: 5px; overflow: auto; background-color: rgb(255, 255, 255);">
+          <span style="font-size: 12pt; padding-left: 35%;">Nothing to show</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="position: absolute; width: 98%; height: 90%; margin-left: 4px; margin-top: 44px; left: 60%; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); padding: 5px;">
+      <div style="width: 39%; height: 100%; margin-left: 2px; margin-top: 2px; background-color: rgb(255, 255, 255); border: 1px solid rgb(204, 204, 204); padding: 0px; float: left;">
+        <div style="font-size: 1.5em; height: 32px; padding: 5px; background-color: rgb(153, 153, 153); text-align: center; color: rgb(238, 238, 238);">Summary
+        </div>
+        <div id="summary" style="font-size: 1.5em; height: 89.5%; padding: 5px; overflow: auto; background-color: rgb(255, 255, 255);">
+          <span style="font-size: 12pt; padding-left: 40%;">Nothing to show</span>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+<div id="popup-div">
+  <div id="popup-header">
+    <center>Error</center>
+  </div><br />
+  <div>
+
+    <span style="font-size: 16pt;">
+      <center>
+        No presenting complaints is selected. Select a symptom from the list
+      </center>
+    </span>
+    <div style="padding-top: 65px;">
+      <span id="no" onclick="hidePopup();" class="my_button" style=" position: relative; right: 20px;">Okay</span>
+    </div>
+  </div>
+</div>
+
+<div id="cover"></div>

@@ -127,6 +127,7 @@ class ClinicController < GenericClinicController
       ["Auto Session?", "/properties/creation?value=auto_session"],
       ["Is this a Referral Facility?", "/properties/creation?value=referral_facility"],
       ["DDE Properties", "/dde/dde_login"]
+      ["Enable Portal", "/properties/portal_properties_menu"]
     ]
     render :layout => false
   end

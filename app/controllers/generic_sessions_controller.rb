@@ -100,8 +100,18 @@ class GenericSessionsController < ApplicationController
 		sign_out(current_user) if !current_user.blank?
 		self.current_location = nil
     reset_session #Remove every session
-		flash[:notice] = "You have been logged out."
-		redirect_back_or_default('/')
+
+    portal_status = GlobalProperty.find_by_property('use_portal').property_value rescue ""
+
+    if portal_status.present? && portal_status == "true"
+      portal_address = GlobalProperty.find_by_property('portal_address').property_value rescue ""
+      portal_port = GlobalProperty.find_by_property('portal_port').property_value rescue ""
+      portal_link = "http://#{portal_address}:#{portal_port}"
+      redirect_to portal_link
+    else
+      flash[:notice] = "You have been logged out."
+      redirect_back_or_default('/')
+    end
 	end
 
 

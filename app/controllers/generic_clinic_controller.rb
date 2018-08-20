@@ -24,6 +24,11 @@ class GenericClinicController < ApplicationController
     if border_name_list.include?(@location)
       @boarder =true #set if it is a border site
     end
+
+    portal_status = CoreService.get_global_property_value("portal.status").to_s.squish.upcase rescue ""
+    portal_address = CoreService.get_global_property_value("portal_address").to_s rescue ""
+    portal_port = CoreService.get_global_property_value("portal_port").to_s rescue ""
+    @portal_uri = "http://#{portal_address}:#{portal_port}" rescue ""
     
     render :template => 'clinic/index', :layout => false
   end

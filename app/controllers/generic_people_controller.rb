@@ -170,6 +170,12 @@ class GenericPeopleController < ApplicationController
             #new National ID assignment
             #There is a need to check the validity of the patient national ID before being marked as old ID
 
+            if params[:was_duplicate] #This parameter is coming from DDE duplicates page
+              if (session[:duplicate_npid].to_s.squish != new_npid.to_s.squish) #if DDE has returned a new ID, Let's assume it is right
+                national_id_replaced = true #when the scanned ID is not equal to the one returned by dde, get ready for print
+              end rescue nil
+            end
+            
             if (old_npid != new_npid) #if DDE has returned a new ID, Let's assume it is right
               p = Person.find(local_results.first[:person_id].to_i)
               PatientService.assign_new_dde_npid(p, old_npid, new_npid)
@@ -207,7 +213,12 @@ class GenericPeopleController < ApplicationController
             PatientService.assign_new_dde_npid(person, old_npid, new_npid)
             national_id_replaced = true
           end
-        end
+
+          if (params[:identifier].to_s.squish != new_npid.to_s.squish) #if DDE has returned a new ID, Let's assume it is right
+            national_id_replaced = true #when the scanned ID is not equal to the one returned by dde, get ready for print
+          end rescue nil
+
+        end unless params[:identifier].match(/ARV|TB|HCC/i)
         found_person = local_results.first
       else
         # TODO - figure out how to write a test for this
@@ -216,13 +227,13 @@ class GenericPeopleController < ApplicationController
         if create_from_dde_server
           #Results not found locally
           dde_search_results = PatientService.search_dde_by_identifier(params[:identifier], session[:dde_token])
-          dde_hits = dde_search_results["data"]["hits"]
+          dde_hits = dde_search_results["data"]["hits"] rescue []
           if dde_hits.length == 1
             found_person = PatientService.create_local_patient_from_dde(dde_hits[0])
           end
 
           if dde_hits.length > 1
-            redirect_to("/people/dde_duplicates") and return
+            redirect_to("/people/dde_duplicates?npid=#{params[:identifier]}") and return
           end
 
         end
@@ -654,7 +665,7 @@ class GenericPeopleController < ApplicationController
       end
     else
       success = true
-      params[:person].merge!({"identifiers" => {"National id" => identifier}}) unless identifier.blank?
+      params[:person].merge!({"identifiers" => {"Old Identification Number" => identifier}}) unless identifier.blank?
       person = PatientService.create_from_form(params[:person])
     end
 

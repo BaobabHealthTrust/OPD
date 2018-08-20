@@ -1,0 +1,32 @@
+<script type="text/javascript">
+  tt_cancel_destination = "/clinic";
+</script>
+
+<form action="/properties/create_portal_properties" method="POST">
+  <%= select_tag "portal_status", options_for_select([" ", "Yes", "No"], @portal_status),
+    {
+    :id => "portal_status",
+    :helpText  => "Enable portal?"
+  } %>
+
+  <%= text_field_tag "portal_address", @portal_address,
+    {
+    :field_type => "number",
+    :condition => "__$('portal_status').value.toUpperCase() == 'YES'",
+    :validationRule => "([0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\})",
+    :validationMessage => "You must enter a valid IP address e.g 192.168.100.200</b>",
+    :tt_pageStyleClass => "Keyboard Numeric NumbersOnlyWithDecimal",
+    :helpText => "Portal IP address"
+
+  } %>
+
+  <%= text_field_tag "portal_port", @portal_port,
+    {
+    :field_type => "number",
+    :condition => "__$('portal_status').value.toUpperCase() == 'YES'",
+    :tt_pageStyleClass => "Keyboard Numeric NumbersOnly",
+    :helpText => "Portal port"
+
+  } %>
+
+</form>
