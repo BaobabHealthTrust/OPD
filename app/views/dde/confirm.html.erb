@@ -1,0 +1,190 @@
+<style>
+.maindiv {
+  display: table;
+  border-spacing:10px;
+  width: 100%;
+}
+
+.maindivrow {
+  display: table-row;
+}
+
+.maindivcell {
+  display: table-cell;
+  border-style: solid;
+  border-width: 1px;
+  box-shadow: 5px 10px #888888;
+  margin: 15px 5px 0px 1px;
+  padding-left: 5px;
+  height: 500px;
+
+  text-align: left;
+  padding: 10px 0px 0px 10px;
+}
+
+.rightdiv {
+  float: right;
+  width: 47%;
+}
+
+.leftdiv {
+  float: left;
+  width: 47%;
+}
+
+</style>
+
+<script>
+function buildView() {
+  maindiv = document.createElement('div');
+  maindiv.setAttribute('class','maindiv');
+
+
+  maindivrow = document.createElement('div');
+  maindivrow.setAttribute('class','maindivrow');
+  maindiv.appendChild(maindivrow);
+  
+  maindivcell = document.createElement('div');
+  maindivcell.setAttribute('class','maindivcell leftdiv');
+  setupParams(maindivcell);
+  maindivrow.appendChild(maindivcell);
+  
+  maindivcell = document.createElement('div');
+  maindivcell.setAttribute('class','maindivcell rightdiv');
+  setupParams(maindivcell);
+  maindivrow.appendChild(maindivcell);
+  
+  var inputFrame = document.getElementById('inputFrame' + tstCurrentPage);
+
+  inputFrame.appendChild(maindiv);
+
+  setData('rightdiv');
+  setLocalData('leftdiv');
+}
+
+function setData(eID){
+  var div = document.getElementsByClassName(eID)[0];
+  var n = div.getElementsByClassName('client-name')[0];
+  n.innerHTML = "<%= @dde_results['given_name']%> <%= @dde_results['family_name']%>";
+
+  var n = div.getElementsByClassName('client-gender')[0];
+  n.innerHTML = "<%= @dde_results['gender']%>";
+
+  var n = div.getElementsByClassName('client-birthdate')[0];
+  n.innerHTML = "<%= @dde_results['birthdate'].to_date.strftime('%d/%b/%Y') rescue nil%>";
+
+  var n = div.getElementsByClassName('client-homedistrict')[0];
+  n.innerHTML = "<%= @dde_results['attributes']['home_district']%>";
+
+  var n = div.getElementsByClassName('client-hometa')[0];
+  n.innerHTML = "<%= @dde_results['attributes']['home_traditional_authority']%>";
+
+  var n = div.getElementsByClassName('client-homevillage')[0];
+  n.innerHTML = "<%= @dde_results['attributes']['home_village']%>";
+
+  var n = div.getElementsByClassName('client-currentdistrict')[0];
+  n.innerHTML = "<%= @dde_results['attributes']['current_district']%>";
+
+  var n = div.getElementsByClassName('client-currentta')[0];
+  n.innerHTML = "<%= @dde_results['attributes']['current_traditional_authority']%>";
+
+  var n = div.getElementsByClassName('client-currentvillage')[0];
+  n.innerHTML = "<%= @dde_results['attributes']['current_village']%>";
+
+}
+
+function setupParams(e) {
+  var t = document.createElement('table');
+  t.setAttribute('style','width: 100%;');
+
+  attributes = [
+    "Name", "Gender", "Birthdate","Home District","Home TA","Home Village",
+    "Current District","Current TA","Current Village"
+  ]
+
+  for(var a = 0; a < attributes.length; a++){
+    var r = document.createElement('tr');
+    var d = document.createElement('th');
+    d.innerHTML = attributes[a] + ':';
+    r.appendChild(d);
+     
+    var d = document.createElement('td');
+    d.setAttribute('class', "client-" + attributes[a].replace(/\s/g, "").toLowerCase());
+    r.appendChild(d);
+    t.appendChild(r);
+  }    
+  
+
+  e.appendChild(t);
+}
+
+function setLocalData(eID){
+  var div = document.getElementsByClassName(eID)[0];
+  var n = div.getElementsByClassName('client-name')[0];
+  n.innerHTML = "<%= @local_results[:name] %>";
+
+  var n = div.getElementsByClassName('client-gender')[0];
+  n.innerHTML = "<%= @local_results[:gender]%>";
+
+  var n = div.getElementsByClassName('client-birthdate')[0];
+  n.innerHTML = "<%= @local_results[:birthdate] %>";
+
+  var n = div.getElementsByClassName('client-homedistrict')[0];
+  n.innerHTML = "<%= @local_results[:home_district]%>";
+
+  var n = div.getElementsByClassName('client-hometa')[0];
+  n.innerHTML = "<%= @local_results[:home_ta]%>";
+
+  var n = div.getElementsByClassName('client-homevillage')[0];
+  n.innerHTML = "<%= @local_results[:home_village] %>";
+
+  var n = div.getElementsByClassName('client-currentdistrict')[0];
+  n.innerHTML = "<%= @local_results[:current_district]%>";
+
+  var n = div.getElementsByClassName('client-currentta')[0];
+  n.innerHTML = "<%= @local_results[:current_ta]%>";
+
+  var n = div.getElementsByClassName('client-currentvillage')[0];
+  n.innerHTML = "<%= @local_results[:current_village]%>";
+}
+
+function setAttributes() {
+  btnDIV = document.getElementById('buttons');
+  btnFinish = document.getElementById('nextButton');
+
+  btnFinish.innerHTML = "<span>Yes</span>";
+  btnFinish.setAttribute('onmousedown','sameClient();')
+
+  noBTN = document.createElement('button');
+  noBTN.setAttribute('class','button red navButton');
+  noBTN.setAttribute('onmousedown', "differentClient()");
+  noBTN.innerHTML = "<span>No</span>";
+
+
+  btnDIV.appendChild(noBTN);
+
+}
+
+function differentClient() {
+  document.location = "/people/confirm?found_person_id=<%= params[:person_id]%>";
+}
+
+function sameClient() {
+  document.getElementsByTagName('form')[0].submit();
+}
+
+
+</script>
+
+
+<form method="post" action="/dde/confirm">
+  <%= text_field_tag :summary, nil, { 
+      :tt_onLoad => "__$('keyboard').style.display = 'none';buildView();setAttributes();", 
+      :optional => "true", 
+      :helpText => 'Same client?',
+      :tt_pageStyleClass => "NoControls" } %>
+
+  <input type="hidden" name="doc_id" value="<%= params[:doc_id]%>" />
+  <input type="hidden" name="person_id" value="<%= params[:person_id]%>" />
+</form>
+

@@ -1,0 +1,439 @@
+<style>
+
+  #popup {
+    top: 50px;
+    height:80% ! important;
+  }
+
+  #reason_for_tb_treatment_change {
+    height:80%;
+    width:100%;
+    background:none repeat scroll 0 0 light-grey;
+    border-color: -moz-use-text-color -moz-use-text-color silver;
+    border-style: none none solid;
+    border-width: medium medium 1px;
+    font-family: "Nimbus Sans L","Arial Narrow",sans-serif;
+    font-size: 2.2em;
+    padding-left: 5px;
+
+  }
+
+  #main_head{
+    float: left;
+    width: 100%;
+    font-size: 32px;
+    font-weight:bold;
+  }
+
+  #reason_for_change{
+    height:311px;
+    width:100%;
+    border-style: none none solid;
+    border-width: medium medium 1px;
+    font-family: "Nimbus Sans L","Arial Narrow",sans-serif;
+    font-size: 2.2em;
+    padding-left: 5px;
+    color: black;
+    background-color:white;
+    border-radius: 20px ;
+    border-style:solid;
+    border-color:#ff0000 #0000ff;
+
+  }
+
+  .create_button {
+    background-color: #7784AE;
+    border-bottom: 1px outset black;
+    border-radius: 7px 7px 7px 7px;
+    border-style: outset;
+    border-top: 1px outset black;
+    color: #E8EAF1;
+    display: block;
+    padding: 10px 16px 10px 10px;
+    text-align: center;
+    text-decoration: none !important;
+    font-size:27px;
+    width: 138%
+  }
+
+  #ok {
+    float:right ! important;
+    width: 150px;
+  }
+
+  #cancel {
+    float:left ! important;
+    width: 150px;
+  }
+
+  #cover {
+    position: absolute;
+    background-color: black;
+    width: 100%;
+    height: 100%;
+    left: 0%;
+    top: 0%;
+    z-index: 500;
+    opacity: 0.5;
+    align: center;
+    display:none;
+  }
+
+  #newText{
+    top: 40%;
+    left: 40%;
+    margin-top: -200px;
+    margin-left: -250px;
+    position: absolute;
+    margin-right:auto;
+    width: 800px;
+    height: 38px;
+    padding-bottom: 10px;
+    font-size: 2em;
+    text-align: left;
+    background-color: white;
+    padding: 10px;
+    z-index: 999;
+    border: 5px outset blue;
+    border-radius: 15px;
+    z-index: 900;
+    display:none;
+  }
+
+  #alertPage{
+    top: 50%;
+    left: 40%;
+    margin-top: -200px;
+    margin-left: -250px;
+    position: absolute;
+    margin-right:auto;
+    width: 800px;
+    padding-bottom: 10px;
+    font-size: 1em;
+    text-align: center;
+    background-color: #7784AE;
+    padding: 10px;
+    z-index: 999;
+    border: 5px outset blue;
+    border-radius: 15px;
+    z-index: 900;
+  }
+
+  #remove {
+    float:right;
+  }
+
+ <% if national_lims_activated %>
+      #tab2 {
+          background-color: green;
+          border: 0 none;
+          color: white;
+          font-weight: bold;
+          border-left: 3px outset yellow;
+          border-radius: 10px;
+          border-right: 3px outset yellow;
+          border-top: 3px outset yellow;
+      }
+
+      .active-tab#tab2{
+          background-color: white !important;
+          border: 0 none;
+          color: black !important;
+          font-weight: bold;
+          border-left: 3px outset #333;
+          border-radius: 10px;
+          border-right: 3px outset #333;
+          border-top: 3px outset #333;
+          color: #fff;
+          cursor: pointer;
+          float: left;
+          font-size: 18px;
+          padding: 3px 8px 8px;
+          font-weight: normal;
+      }
+  <% end %>
+</style>
+<script language="javascript">
+
+  function setValue(td){
+    window.location ='/clinic/programs?user_id=<%=  params[:user_id] %>&location_id=<%= session[:location_id] || params[:location_id] %>&program=' + td.value;
+    //alert(td.value)
+  }
+
+  function remove(){
+    var ele = document.getElementById('cover')
+    var alert = document.getElementById('alertPage');
+    document.body.removeChild(alert)
+    ele.style.display = "none";
+  }
+  function selectProgram(){
+
+    var ele = document.getElementById('cover')
+    ele.style.display = "inline";
+    document.body.appendChild(ele);
+
+    var newDiv = document.createElement('div');
+    newDiv.id = "alertPage";
+    newDiv.style.left = "32%";
+    newDiv.style.top = "30%";
+    newDiv.style.width = "487px";
+    newDiv.style.height = "312px";
+
+    var display = "<div height='80%'>"//<div id = 'reason_for_change'>"
+    //display +=	'<input type="checkbox" id="reason_for_change" class="create_button" name="Asthma program" value="ASTHMA PROGRAM" onmousedown="setValue(this)">'
+    //display +=	'<label for="reason_for_change">Asthma program</label>'
+
+    display += '<div id = "reason_for_change">'
+    display += '<fieldset data-role="controlgroup">'
+    display += '<legend>Choose a action:</legend>'
+    display += '<table cellspacing="10"><tr>'
+
+    display += '<td align="center"><a href="/people/find_by_arv_number"  class="create_button">Find by ARV number</a></td></tr>'
+
+    display += '<tr>'
+    display += '<td align="center"><a href="/people/find_by_tb_number"  class="create_button">Find by TB number</a></td></tr>'
+
+    display += '</table>'
+
+    display += '</fieldset>'
+    display += "<div id='remove'><a href='#' ><img src='/images/minus.png' onclick='remove();' width='70px' height='67px'></a></div>"
+    display += '</div>'
+
+    //display += "<select id='reason_for_change' size='6'>";
+    ///display += "<option value=''></option>"
+    ///display += "<option value='ASTHMA PROGRAM' onmousedown='setValue(this)' class='create_button'>Asthma program</option>"
+    ///display += "<option value='HYPERTENSION PROGRAM' onmousedown='setValue(this)' class='create_button'>Hypertension and Diabetes Program</option>"
+    //display += "<option value='EPILEPSY PROGRAM' onmousedown='setValue(this)' class='create_button'>Epilepsy program</option>"
+    //for (x=0; x < reasons.length; x++){
+    // display += "<option value='" + reasons[x] + "' onmousedown='removeObs(this)' class='reasons'>" + reasons[x] + "</option>";
+    //}
+    display += "</div>";
+    newDiv.innerHTML = '<div id="popup">' + display + '</div>' ;
+    document.body.appendChild(newDiv);
+
+  }
+
+  function resetRegimen(){
+    element = document.getElementById('nextButton')
+    element.setAttribute("onmousedown", "gotoNextPage()")
+  }
+    function disableBarcode(){
+        var barcode = document.getElementById('barcode')
+
+        if (barcode) {
+            barcode.disabled = true;
+        }
+        else {
+            setTimeout('disableBarcode()', 50);
+        }
+    }
+</script>
+<div id="cover" align="center">
+</div>
+<html>
+  <head>
+    <title>Clinic</title>
+    <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer ></script>
+    <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
+    <script language="javascript">
+      tstUsername = "<%= current_user rescue "" %>";
+      tstCurrentDate = "<%= @date %>";
+      tt_cancel_destination = '/logout';
+      tt_cancel_show = '/dde/search';
+    </script>
+  </head>
+  <body><div id='content'>
+      <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
+        <form id = 'home' action=''>
+          <table cellpadding=10>
+            <tr>
+              <th colspan=2>Home Page</th>
+            </tr>
+            <h1 id='project_name'>
+              <div style="font-size: 0.8em; margin-top: 28px;">
+                <%location_name = (@location.downcase == "outpatient" ? "OPD" : "ART") %>
+                <span style="font-size: 55px;"><%=what_app?%></span>
+<%#= location_name %>
+              </div>
+            </h1>
+
+            <div id="facility"><%= @facility %></div>
+            <div id="location"><%= @location %></div>
+            <% retrospective = 'false'
+            retrospective = 'true' if session[:datetime]
+          %>
+            <div id="date" retrospective="<%= retrospective %>"><%= @date %></div>
+            <div id="user"><%= @user %></div>
+
+            <select id="tabs">
+              <%if @roles.include?("Pharmacist")%>
+                  <option value='/clinic/administration_tab'>Administration</option>
+                  <script language="JavaScript">
+                     disableBarcode();
+                  </script>
+              <%else%>
+                  <option value='/clinic/overview_tab'>Overview</option>
+                  <% if national_lims_activated %>
+                    <option value='/clinic/viral_load_tab'>Viral Load</option>
+                  <% end %>
+                  <option value='/clinic/reports_tab'>Reports</option>
+                  <%if @location == 'Chronic Cough'%>
+                    <option value='/clinic/lab_tab'>Laboratory</option>
+                  <%end%>
+                  <% if current_user.admin? %>
+                    <option value='/clinic/properties_tab'>Properties</option>
+                  <%end%>
+              <option value='/clinic/administration_tab'>Administration</option>
+              <%end%>
+
+            </select>
+            <select id="links">
+
+              <option value='/logout' link='/logout'>Logout</option>
+<%# Show Find / Register Patient button on HIV Reception and Find by Name button
+on the rest of the stations %>
+              <%if ! @roles.include?("Pharmacist")%>
+<%# if @location =~ /HIV Reception/ %>
+                  <option value='/dde/search' link='/dde/search' ttSize="295px">Find or Register Patient</option>
+    <%# else %>
+                  <!--<option value='/dde/search' link='/dde/search' ttSize="200px">Find By Name</option>-->
+    <%# end %>
+
+    <%# Hide Find by ARV Number button on non-HIV workstations %>
+
+                  <% if @location =~ /HIV/ or @location =~ /TB/ %>
+                   <% if what_app? == "TB-ART" %>
+                    <option value="javascript:selectProgram()" ttSize="265px">Find By?</option>
+                    <% else %>
+                    <!--<option value="/people/find_by_hcc_number" ttSize="180px">Find By HCC#</option>
+                    <option value="/people/find_by_arv_number" ttSize="180px">Find By ARV#</option>-->
+                    <option value="/people/find_by_menu" ttSize="180px">Find By</option>
+
+                    <% end %>
+                  <% end %>
+
+                  <% if show_swap_button %>
+                    <option value='/location?from=clinic' ttSize="100px">Swap Desk</option>
+                  <% end %>
+
+                  <option value='<%= ((session[:datetime].to_date rescue '') != '' ?
+                              "/people/reset_datetime" : "/people/set_datetime") %>'  ttSize="100px">
+                  <%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
+                  <!--option link='regimen.html'>Regimen</option-->
+              <% end %>
+            </select>
+            <tr>
+              <td align='center'>
+                <input type='submit' value='Finish' />
+              </td>
+            </tr>
+          </table>
+        </form>
+      </center>
+    </div>
+
+    <% form_tag("/dde/process_scan_data", "method" => 'post', "enctype" => 'multipart/form-data', 
+      "id" => 'dde-home', "class" => "form-horizontal", "autocomplete" => "off", "role" => "form", "novalidate" => "novalidate") do %>
+      
+      <textarea id="person" name="person" style="display: none;" condition="false"></textarea>
+      
+    <% end %>
+        
+    <script type="text/javascript">
+      <!--
+
+      var helpLinks = {
+          "Find Patient": "<%= @settings["help_base_url"] rescue "" %>find_patient",
+          "Register Patient": "<%= @settings["help_base_url"] rescue "" %>new_patient"/*,
+          "Cancel": "<%= @settings["help_base_url"] rescue "" %>cancel",
+          "New Person": "<%= @settings["help_base_url"] rescue "" %>add_patient",
+          "Select Person": "<%= @settings["help_base_url"] rescue "" %>select_patient"*/
+      };
+
+      var json = <%= {
+              "national_id" => nil,
+              "application" => "#{@settings["application_name"]}",
+              "site_code" => "#{@settings["site_code"]}",
+              "return_path" => "http://#{request.host_with_port}/process_result",
+              "names" =>
+              {
+                  "family_name" => nil,
+                  "given_name" => nil,
+                  "middle_name" => nil,
+                  "maiden_name" => nil
+              },
+              "gender" => "#{params["gender"]}",
+              "attributes" => {
+                  "occupation" => nil,
+                  "cell_phone_number" => nil,
+                  "home_phone_number" => nil,
+                  "office_phone_number" => nil,
+                  "citizenship" => nil,
+                  "country_of_residence" => nil,
+                  "race" => nil
+              },
+              "birthdate" => nil,
+              "patient" => {
+                  "identifiers" => []
+              },
+              "birthdate_estimated" => nil,
+              "addresses" => {
+                  "current_residence" => nil,
+                  "current_village" => nil,
+                  "current_ta" => nil,
+                  "current_district" => nil,
+                  "home_village" => nil,
+                  "home_ta" => nil,
+                  "home_district" => nil
+              }
+            }.to_json %>;
+  
+      <% if !@settings["dde_username"].blank? %>
+      
+        function barcodeScanAction(){
+          if(__$("barcode")){
+      
+              var npid = __$("barcode").value.replace("$", "");
+              
+              ajaxRequest(npid);
+            
+          }
+        }
+                
+        function ajaxRequest(id){
+          var url = "/process_data/" + id;
+          
+          var httpRequest = new XMLHttpRequest();
+          httpRequest.onreadystatechange = function() {
+              handleAjaxRequest(httpRequest);
+          };
+          try {
+              httpRequest.open("GET", url, true);
+              httpRequest.send(null);
+          } catch(e){
+          }
+        }
+        
+        function handleAjaxRequest(aXMLHttpRequest){
+          if (!aXMLHttpRequest) return;                    
+          
+          if (aXMLHttpRequest.readyState == 4 && (aXMLHttpRequest.status == 200 || 
+                aXMLHttpRequest.status == 304)) {
+                        
+              var result = aXMLHttpRequest.responseText;
+              
+              __$("person").innerHTML = result; 
+            
+              document.getElementById("dde-home").submit();
+                       
+          }
+        }
+        
+      <% end %>
+      
+      //-->
+    </script>
+
+    <script src="/javascripts/bht-help.js" defer></script>
+  </body>
+</html>

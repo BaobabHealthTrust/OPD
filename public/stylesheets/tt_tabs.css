@@ -1,0 +1,52 @@
+#ttp-tabs-content .ttp-tabs-container {
+    display: inline-block;
+    padding: 10px;
+    max-height: 550px;
+    height: 90%;
+}
+
+#ttp-tabs-select-pane {
+    border-right: 1px solid #777;
+    min-width: 25%;
+    float: left;
+    overflow-y: scroll;
+}
+
+#ttp-tabs-tab-view {
+    min-width: 75%;
+    float: right;
+    box-sizing: content-box;
+}
+
+td {
+    text-transform: capitalize;
+    padding: 10px;
+}
+
+#ttp-tabs-tab-view table {
+    width: 100%;
+}
+
+#ttp-tabs-select-pane > ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#ttp-tabs-select-pane  > ul > li {
+    border-bottom: 1px solid #777;
+    margin-bottom: 10px;
+}
+
+
+.list2 {
+    font-size: 11pt;
+    list-style-type: none;
+    font-style: italic;
+    margin-left: 10%;
+}
+
+/* Used for highlighting tab buttons when selected. */
+.ttp-selected-item {
+    color: blue;
+    font-weight: bolder;
+}

@@ -1,0 +1,58 @@
+<script>
+
+  var tt_cancel_destination = "/dde/edit_demographics?patient_id=<%= params[:patient_id]%>"
+
+</script>
+
+
+<% form_for :person, @person, :url => { :action => "update_address" } do |f| %>
+
+    <%= text_field "region" , 'region_name', 
+    :xhelpText => 'Region', 
+    :tt_requireNextClick => false, 
+    :helpText => "#{params[:field].split('_')[0].titleize} region", 
+    :ajaxURL => '/people/region/Region?field=role&value=', 
+    :tt_onLoad => "$('nextButton').style.display = 'none';"%>
+
+  <%= text_field_tag "person[addresses][address2]", 
+    params[:address2], 
+    {
+      :id => 'address2', 
+      :tt_requireNextClick => false, 
+      :ajaxURL => '', 
+      :field_type => 'alpha', 
+      :helpText => "#{params[:field].split('_')[0].titleize} District", 
+      :allowFreeText => false, 
+      :tt_onLoad => "set_ajaxURL_for_suggestions('/dde/district/District?filter_value=' , document.getElementById('region_region_name').value);$('nextButton').style.display = 'none';" } %>
+
+  
+  <%= text_field "person[addresses]" , 'county_district', 
+    :condition => '$("address2").value != "Other"', 
+    :helpText => "#{params[:field].split('_')[0].titleize} TA", 
+    :tt_requireNextClick => false, 
+    :ajaxURL => '', 
+    :tt_pageStyleClass => "azButton", 
+    :tt_onLoad => "set_ajaxURL_for_suggestions('/dde/traditional_authority/TraditionalAuthority?filter_value=' , document.getElementById('address2').value);$('nextButton').style.display = 'none';" %>
+  
+  <%= text_field_tag "person[addresses][neighborhood_cell]", params[:city_village],
+    {
+    :field_type => 'alpha',
+    :helpText => "#{params[:field].split('_')[0].titleize} Vilage", 
+    :tt_requireNextClick => true,
+    :tt_pageStyleClass => "azButton",
+    :ajaxURL => '/people/village?search_string=',
+    :allowFreeText => false ,
+    :tt_onLoad => "set_ajaxURL_for_suggestions('/dde/village/Village?filter_value=' ,document.getElementById('person_addresses_county_district').value);$('nextButton').style.display = 'inline';"}%>
+
+
+    <input type="hidden" name="address_type" value="<%= params[:field]%>" />
+    <input type="hidden" name="document_id" value="<%= params[:doc_id]%>" />
+    <input type="hidden" name="patient_id" value="<%=params[:patient_id]%>" />
+<%end%>
+
+<script>
+  function set_ajaxURL_for_suggestions(url, filter_value) {
+    $('touchscreenInput'+tstCurrentPage).setAttribute('ajaxURL', url + filter_value + "&search_string=");
+    listSuggestions(tstCurrentPage);
+  }
+</script>

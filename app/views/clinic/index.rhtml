@@ -88,7 +88,12 @@
 on the rest of the stations %>
 
               <%# if @location =~ /HIV Reception/ %>
-                <option value='/people/search' link='/people/search' ttSize="295px">Find or Register Patient</option>
+              <%if create_from_dde_server %>
+                  <option value='/dde/search' link='/dde/search' ttSize="295px">Find or Register Patient</option>
+                <%else%>
+                  <option value='/people/search' link='/people/search' ttSize="295px">Find or Register Patient</option>
+                <%end%>
+                <!--option value='/people/search' link='/people/search' ttSize="295px">Find or Register Patient</option-->
               <%# else %>
                 <!--<option value='/people/search' link='/people/search' ttSize="200px">Find By Name</option>-->
               <%# end %>
