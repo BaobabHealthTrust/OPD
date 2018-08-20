@@ -13,6 +13,15 @@ gem 'mechanize', '2.7.0'
 gem 'mysql2'
 gem 'mysql'
 gem 'activerecord-mysql2-adapter','0.0.3'
+<<<<<<< HEAD
 gem 'paginate'
 gem 'passenger'
 gem 'rake', '0.8.7'
+=======
+gem 'paginate', '1.0.1'
+gem 'rake', '0.8.7'
+gem 'passenger', '4.0.53'
+gem 'underlined_diseases_alerts', '0.1.1'
+gem 'rb-inotify'
+# gem 'underlined_diseases_alerts'
+>>>>>>> 9558f62792d489d2837cae08b866e7d2fd70a2c6

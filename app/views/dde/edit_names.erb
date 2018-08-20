@@ -1,0 +1,27 @@
+<script>
+  var tt_cancel_destination = "/dde/edit_demographics?patient_id=<%= params[:patient_id]%>"
+</script>
+<% form_for :person, @person, :url => { :action => "update_names" } do |f| %>
+
+  <% if params[:field] == "first_name" %>
+
+  <%= text_field_tag "person[names][given_name]", params[:given_name],
+    {:id => 'given_name',
+    :field_type => 'alpha',
+    :helpText => 'First name',
+    :ajaxURL => '/person_names/given_names?search_string=',
+    :allowFreeText => true} %>
+  <%end%>
+
+  <% if params[:field] == "last_name" %>
+
+  <%= text_field_tag "person[names][family_name]", "",
+    {:id => 'family_name',
+    :field_type => 'alpha',
+    :helpText => 'Last name',
+    :ajaxURL => '/person_names/family_names?search_string=',
+    :allowFreeText => true} %>
+  <%end%>
+    <input type="hidden" name="document_id" value="<%= params[:doc_id]%>" />
+    <input type="hidden" name="patient_id" value="<%=params[:patient_id]%>" />
+<%end%>

@@ -24,41 +24,77 @@ class GenericApplicationController < ActionController::Base
 	helper :all
 	helper_method :next_task
 	filter_parameter_logging :password
-	before_filter :authenticate_user!, :except => ['login', 'logout','remote_demographics',
+	before_filter :authenticate_user!, :except => ['normal_visits','transfer_in_visits', 're_initiation_visits','patients_without_any_encs','login', 'logout','remote_demographics','art_stock_info',
     'create_remote', 'mastercard_printable', 'get_token',
-    'disease_surveillance_api']
+    'cohort','demographics_remote', 'export_on_art_patients', 'art_summary',
+    'art_summary_dispensation', 'print_rules', 'rule_variables', 'print',
+    'new_prescription', 'search_for_drugs','mastercard_printable',
+    'remote_app_search', 'remotely_reassign_new_identifier',
+    'create_person_from_anc', 'create_person_from_dmht',
+    'find_person_from_dmht', 'reassign_remote_identifier',
+    'revised_cohort_to_print', 'revised_cohort_survival_analysis_to_print',
+    'revised_women_cohort_survival_analysis_to_print',
+    'revised_children_cohort_survival_analysis_to_print', 'create', 'render_date_enrolled_in_art', 'search_remote_people'
+  ]
 
-  before_filter :set_current_user, :except => ['login', 'logout','remote_demographics',
+  before_filter :set_current_user, :except => ['login', 'logout','remote_demographics','art_stock_info',
     'create_remote', 'mastercard_printable', 'get_token',
-    'disease_surveillance_api']
+    'cohort','demographics_remote', 'export_on_art_patients', 'art_summary',
+    'art_summary_dispensation', 'print_rules', 'rule_variables',
+    'print','new_prescription', 'search_for_drugs',
+    'mastercard_printable', 'remote_app_search',
+    'remotely_reassign_new_identifier', 'create_person_from_anc',
+    'create_person_from_dmht', 'find_person_from_dmht',
+    'reassign_remote_identifier','revised_cohort_to_print',
+    'revised_cohort_survival_analysis_to_print',
+    'revised_women_cohort_survival_analysis_to_print',
+    'revised_children_cohort_survival_analysis_to_print', 'render_date_enrolled_in_art', 'search_remote_people'
+  ]
 
-	before_filter :location_required, :except => ['login', 'logout', 'location',
+	before_filter :location_required, :except => ['patients_without_any_encs','login', 'logout', 'location',
     'demographics','create_remote',
-    'mastercard_printable',
-    'remote_demographics', 'get_token', 'single_sign_in',
-    'disease_surveillance_api']
-=begin
-  before_filter :set_auto_session, :except => ['login', 'logout','remote_demographics',
-    'create_remote', 'mastercard_printable', 'get_token', 'set_datetime', 'reset_datetime',
-    'disease_surveillance_api']
-=end
+    'mastercard_printable','art_stock_info',
+    'remote_demographics', 'get_token',
+    'cohort','demographics_remote', 'export_on_art_patients', 'art_summary',
+    'art_summary_dispensation', 'print_rules', 'rule_variables',
+    'print','new_prescription', 'search_for_drugs','mastercard_printable',
+    'remote_app_search', 'remotely_reassign_new_identifier',
+    'create_person_from_anc', 'create_person_from_dmht',
+    'find_person_from_dmht', 'reassign_remote_identifier',
+    'revised_cohort_to_print', 'revised_cohort_survival_analysis_to_print',
+    'revised_women_cohort_survival_analysis_to_print',
+    'revised_children_cohort_survival_analysis_to_print', 'render_date_enrolled_in_art', 'search_remote_people'
+  ]
+
+	before_filter :set_return_uri, :except => ['create_person_from_anc', 'create_person_from_dmht',
+    'find_person_from_dmht', 'reassign_remote_identifier', 'create', 'render_date_enrolled_in_art', 'search_remote_people']
+
   before_filter :set_dde_token
 
   def set_dde_token
     if create_from_dde_server
-      if session[:dde_token].blank?
-        dde_authentication_token_result = PatientService.dde_authentication_token
-        session[:dde_token] = dde_authentication_token_result["data"]["token"]
-      else
-        token_status = PatientService.verify_dde_token_authenticity(session[:dde_token])
-        if token_status.to_s == '401'
-          dde_authentication_token_result = PatientService.dde_authentication_token
-          session[:dde_token] = dde_authentication_token_result["data"]["token"]
+      unless current_user.blank?
+        if session[:dde_token].blank?
+          dde_token = DDEService.dde_authentication_token
+          puts "Am in"
+          session[:dde_token] = dde_token
+        else
+          token_status = DDEService.verify_dde_token_authenticity(session[:dde_token])
+          if token_status.to_s == '401' || token_status.blank?
+            dde_token = DDEService.dde_authentication_token
+            session[:dde_token] = dde_token
+          end
         end
       end
+    else
+      session[:dde_token] = nil  
     end
   end
-  
+
+  def create_from_dde
+    return false
+  end
+
 	def rescue_action_in_public(exception)
 		@message = exception.message
 		@backtrace = exception.backtrace.join("\n") unless exception.nil?
@@ -99,7 +135,11 @@ class GenericApplicationController < ActionController::Base
   def use_filing_number
     CoreService.get_global_property_value('use.filing.number').to_s == "true" rescue false
   end 
- 
+
+  def cervical_cancer_activated
+    CoreService.get_global_property_value('activate.cervical.cancer.screening').to_s == "true" rescue false
+  end
+
   def generic_locations
     field_name = "name"
 
@@ -109,13 +149,12 @@ class GenericApplicationController < ActionController::Base
                          FROM location_tag_map
                           WHERE location_tag_id = (SELECT location_tag_id
                                  FROM location_tag
-                                 WHERE name = 'Workstation Location'))
+                                 WHERE name = 'Workstation Location' LIMIT 1))
              ORDER BY name ASC").collect{|name| name.send(field_name)} rescue []
-  
   end
 
   def site_prefix
-    site_prefix = CoreService.get_global_property_value("site_prefix") rescue false
+    site_prefix = Location.current_health_center.neighborhood_cell
     return site_prefix
   end
 
@@ -133,12 +172,16 @@ class GenericApplicationController < ActionController::Base
 
   def create_from_dde_server                                                    
     #CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
-    dde_status = CoreService.get_global_property_value('dde.status').to_s.squish #New DDE API
-    if (dde_status == 'ON')
+    dde_status = GlobalProperty.find_by_property('dde.status').property_value.to_s.squish rescue 'NO'#New DDE API
+    if (dde_status.upcase == 'ON')
       return true
     else
       return false
     end
+  end
+
+  def military_site?
+    return false
   end
 
   def concept_set(concept_name)
@@ -195,16 +238,27 @@ class GenericApplicationController < ActionController::Base
     end
   end
 
-  def location_required
-    if not located? and params[:location]
-      location = Location.find(params[:location]) rescue nil
-      self.current_location = location if location
-    end
-    located? || location_denied
-  end
+	def location_required
+		if not located? and params[:location]
+			location = Location.find(params[:location]) rescue nil
+			self.current_location = location if location
+		end
+
+		if not located? and session[:sso_location]
+			location = Location.find(session[:sso_location]) rescue nil
+			self.current_location = location if location
+		end
+
+		located? || location_denied
+	end
+
+	def set_return_uri
+		if params[:return_uri]
+			session[:return_uri] = params[:return_uri]
+		end
+	end
 
   def located?
-      
     self.current_location
   end
 
@@ -259,15 +313,6 @@ class GenericApplicationController < ActionController::Base
     User.current = current_user
   end
 
-  def set_auto_session
-    auto_session = CoreService.get_global_property_value('auto.session').to_s == "true" rescue false
-    session_date = session[:datetime].to_date rescue nil
-    if session_date.blank?
-      if auto_session
-        ((session[:datetime] = Date.today) rescue nil) #During APIs session variable is not defined
-      end
-    end
-  end
 
   private
 
