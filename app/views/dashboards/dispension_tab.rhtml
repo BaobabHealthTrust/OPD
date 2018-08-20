@@ -50,6 +50,13 @@
     if (total_dispensed > 0)
       document.getElementById('set_appointment').style.display='inline';*/
   }
+
+  var patientID = '<%= @patient.id -%>';
+
+  function changeAmountDispensed(orderID){
+    window.parent.document.location = "/dispensations/change_amount_dispensed?patient_id=" + patientID + "&order_id=" + orderID;
+  }
+
 </script>
 
 <body onload="showAppointmentButton();">
@@ -64,61 +71,72 @@
               <% current_day = session[:datetime].strftime('%Y-%m-%d') rescue 'Today'%>
               <h2><%=current_day%>'s Treatment (possibly filtered)</h2>
               <div  style="height:220px; overflow: auto">
-              <% if not @prescriptions.blank? %>
-              <table id = 'dispensation' style = "width:100%;">
-                <tr style="text-align:left;">
-                  <th>&nbsp;</th>
-                  <th>Amount needed</th>
-                  <th>Drug</th>
-                  <th style="text-align:right;">Amount dispensed</th>
-                </tr>
-                <% @prescriptions.each do |order| %>
-                    <!--div class="void"><img src="/images/cancel_flat_small.png"/></div-->
+                <% if not @prescriptions.blank? %>
+                  <table id = 'dispensation' style = "width:100%;">
+                    <tr style="text-align:left;">
+                      <!--<th>&nbsp;</th>-->
+                      <th>Drug</th>
+                      <th>Amount needed</th>
+                      <th style="text-align:right;">Amount dispensed</th>
+                    </tr>
+                    <% @prescriptions.each do |order| %>
+                      <!--div class="void"><img src="/images/cancel_flat_small.png"/></div-->
                       <%
-                         amounts_dispensed = Observation.all(:conditions => ['concept_id = ? AND order_id = ?', 
-                                             ConceptName.find_by_name("AMOUNT DISPENSED").concept_id , order.id])
-                         total_dispensed = amounts_dispensed.sum{|amount| amount.value_numeric}
-                      %>
+                      amounts_dispensed = Observation.all(:conditions => ['concept_id = ? AND order_id = ?',
+                          ConceptName.find_by_name("AMOUNT DISPENSED").concept_id , order.id])
+                      total_dispensed = amounts_dispensed.sum{|amount| amount.value_numeric}
+                    %>
                       <script>
                         total_dispensed += parseFloat("<%=total_dispensed%>");
                       </script>
-                      <tr class = 'dispensation_data' id = "<%=order.id%>">
-                        <td style="text-align:center;vertical-align: middle;" onmousedown = "voiding('<%=order.id%>');">
+                      <tr class = 'dispensation_data' id = "<%=order.id%>" style=" line-height: 1.7em;">
+                        <!--<td style="text-align:center;vertical-align: middle;" onmousedown = "voiding('<%=order.id%>');">
                           <img src="/images/cancel_flat_small.png"/>
-                        </td>
+                        </td>-->
                         <% total_required = order.drug_order.total_required
-                          drug_unit  =  order.drug_order.units
-                          if total_required > total_dispensed then color = 'red' else color = '' end
-                        %>
-                        <td style="color:<%=color%>;"><%="#{total_required} #{drug_unit}"%></td>
+                        drug_unit  =  order.drug_order.units
+                        if total_required > total_dispensed then color = 'red' else color = '' end
+                      %>
                         <td><%=order.drug_order.drug.name%></td>
-                        <td style="text-align:right;"><%= total_dispensed %></td>
+                        <td style="color:<%=color%>;"><%="#{total_required} #{drug_unit}"%></td>
+                        <% drug_stock_status = DrugOrder.stock_status(order.order_id, @session_date) %>
+                        <% if drug_stock_status.blank? %>
+                          <td style="text-align:right;"><%= total_dispensed %></td>
+                        <% else %>
+                          <td style="text-align:right;"><%= drug_stock_status %></td>
+                        <% end %>
+
+                        <% if total_dispensed > 0 %>
+                          <td style="width: 271px; border: 0px; background-color: white;"><span class="md-button" onclick="changeAmountDispensed('<%= order.order_id %>')">Change Amount Dispensed</span></td>
+                        <% end %>
                       </tr>
-                <% end %>
-                </table>
+                    <% end %>
+                  </table>
 
                 <% else %>
                   <div class="data">No prescriptions are available for this patient (<%=current_day%>)</div>
                 <% end %>
                 <div>  
-    
+
+                </div>
+              </div>
             </div>
+
           </div>
         </div>
+        <div style="display: table-row">
+          <div style="display: table-cell;width: 945px;">
+            <div style="padding:10px;width:100%;">
+              <form id='barcodeForm' action="/dispensations/create?patient_id=<%= @patient.id -%>" method="post" target="_parent">
+                <div style="float:left;margin-top:-6px;"><label for="barcode" style="margin-top:-5px;">
+                    <img src="/images/barcode.jpg" style="vertical-align:top;background:white;"/></label>
+                </div>
+                <%= text_field_tag :identifier, '', {:id => 'barcode', :class => 'touchscreenTextInput', :style => 'position:absolute;width:230px' } %>
+                <%= submit_tag "Submit", :style => "display:none" %>
+              </form>
 
-      </div>
-    </div>
-    <div style="display: table-row">
-      <div style="display: table-cell;width: 945px;">
-        <div style="padding:10px;width:100%;">
-          <form id='barcodeForm' action="/dispensations/create?patient_id=<%= @patient.id -%>" method="post" target="_parent">
-            <div style="float:left;margin-top:-6px;"><label for="barcode" style="margin-top:-5px;">
-              <img src="/images/barcode.jpg" style="vertical-align:top;background:white;"/></label>
             </div>
-            <%= text_field_tag :identifier, '', {:id => 'barcode', :class => 'touchscreenTextInput', :style => 'position:absolute;width:230px' } %>
-            <%= submit_tag "Submit", :style => "display:none" %>
-          </form>
-
+          </div>
         </div>
       </div>
     </div>
@@ -128,17 +146,33 @@
 <script>
 
 
-    <% @prescriptions.each do | order | %>
-        row = document.getElementById("<%=order.id%>")
-        <% if MedicationService.tb_medication(order.drug_order.drug) %>
-            row.style.background = 'lightBlue';
-        <%else%>
-            row.style.background = '';
-        <% end %>        
-    <% end %>
-    order_id = "<%=params[:dispensed_order_id]%>";
-    if (order_id.length > 0)
-      document.getElementById(order_id).style.background = 'lightGreen';
+<% @prescriptions.each do | order | %>
+    row = document.getElementById("<%=order.id%>")
+  <% if MedicationService.tb_medication(order.drug_order.drug) %>
+      row.style.background = 'lightBlue';
+  <%else%>
+      row.style.background = '';
+  <% end %>
+<% end %>
+  order_id = "<%=params[:dispensed_order_id]%>";
+  if (order_id.length > 0)
+    document.getElementById(order_id).style.background = 'lightGreen';
 
 
 </script>
+<style type="text/css">
+  .md-button {
+    padding: 9px 27px;
+    border-radius: 3px;
+    font-size: 14px;
+    text-align: center;
+    text-transform: uppercase;
+    text-decoration:none;
+    border: none;
+    outline: none;
+    background-color: #4876FF;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+</style>

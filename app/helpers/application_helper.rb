@@ -72,6 +72,10 @@ module ApplicationHelper
     get_global_property_value("vitals.temperature").to_s == "true" rescue false
   end  
 
+  def auto_session
+    get_global_property_value("auto.session").to_s == "true" rescue false
+  end
+
   def ask_standard_art_side_effects
     get_global_property_value("art_visit.standard_art_side_effects").to_s == "true" rescue false
   end  
@@ -250,8 +254,18 @@ module ApplicationHelper
   end
 
   def create_from_dde_server                                                    
-    CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
-  end 
+    #CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+    dde_status = GlobalProperty.find_by_property('dde.status').property_value.to_s.squish rescue 'NO'#New DDE API
+    if (dde_status.upcase == 'ON')
+      return true
+    else
+      return false
+    end
+  end
+
+  def military_site?
+    return false
+  end
 
   def current_user_roles                                                        
     user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role}

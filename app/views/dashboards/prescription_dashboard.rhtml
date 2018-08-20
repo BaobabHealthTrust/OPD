@@ -1,0 +1,83 @@
+<html>
+  <head>
+    <title>Patient Treatment Dashboard</title>
+    <script type="text/javascript" language="javascript"
+            src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer  >
+    </script>
+    <%= javascript_include_tag "jquery" %>
+
+    <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
+
+    <script type="text/javascript">
+      tstUsername = "";
+      tstCurrentDate = "<%= @date %>";
+      tt_cancel_destination = '/patients/show/<%= @patient.id %>';
+      tt_cancel_show = '/patients/show/<%= @patient.id %>'
+    </script>
+
+    <style type="text/css">
+
+      #btnCancel{
+        display: none;
+      }
+
+    </style>
+
+    
+    <style type="text/cs">
+      .my_button {
+        -moz-user-select: none;
+        background-image: none;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 16px;
+        font-weight: bolder;
+        line-height: 1.82857;
+        margin-bottom: 0;
+        padding: 6px 56px;
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+        background-color: #8B0000;
+        border-color: #2e6da4;
+        color: #fff;
+        float: right;
+        width: 42.2%;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id='content'>
+      <form id = 'dashboard' action='/clinic'>
+        <div id='project_name'>
+					OPD
+        </div>
+        <span id='patient_name'><%= @patient_bean.name rescue "" %></span>
+        <span id='patient_id'><%= @patient_bean.national_id_with_dashes rescue "" %></span>
+        <span id='patient_residence'><%= @patient_bean.current_residence rescue "" %></span>
+        <span id='patient_age'><%= @patient_bean.age rescue "" %></span>
+        <span id='patient_gender'><%= @patient_bean.sex rescue "" %></span>
+
+        <select id="tabs">
+          <option value='/patients/precription_data?patient_id=<%= @patient.id %>&dispensed_order_id=<%=@dispensed_order_id%>'>Prescriptions</option>
+        </select>
+
+        <select id="links">
+          <% if advanced_prescription_interface %>
+            <option value='/prescriptions/generic_advanced_prescription?patient_id=<%= @patient.id -%>'>Prescribe</option>
+          <% else %>
+            <option value='/prescriptions/auto?patient_id=<%= @patient.id -%>'>Prescribe</option>
+          <% end %>
+
+        </select>
+        <input type='submit' value='Finish' />
+      </form>
+    </div>
+
+    
+  </body>
+</html>

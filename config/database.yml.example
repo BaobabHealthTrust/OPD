@@ -1,27 +1,51 @@
 production:
-  adapter: mysql2
-  database: opd_database
+  adapter: mysql
+  database: database
   username: username
   password: password
   host: localhost
   pool: 500
 
 development:
-  adapter: mysql2
-  database: opd_database
+  adapter: mysql
+  database: database
   username: username
   password: password
   host: localhost
   pool: 500
 
 test: &TEST
-  adapter: mysql2
-  database: opd_database
+  adapter: mysql
+  database: database
   username: username
   password: password
   host: localhost
   pool: 500
-
+###################################################################################
+## This section connects to the second database used for storing temperature data##
+##                                                                               ##
+###################################################################################
+temperature_production:
+  adapter: mysql
+  database: database
+  username: username
+  password: password
+  host:  localhost
+  pool: 500
+temperature_development:
+  adapter: mysql
+  database: database
+  username: username
+  password: password
+  host:  localhost
+  pool: 500
+temperature_test:
+  adapter: mysql
+  database: database
+  username: username
+  password: password
+  host:  localhost
+  pool: 500
+#################################################################################
 cucumber:
   <<: *TEST
-

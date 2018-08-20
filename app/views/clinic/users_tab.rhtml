@@ -3,6 +3,7 @@
 @reports << ['Change password',"/user/change_password/#{current_user.id}"]
 @reports << ['Edit name',"/user/edit/#{current_user.id}"]
 @reports << ['Preferred keyboard',"/user/properties/#{current_user.id}"]
+@reports << ['Print login barcode',"/user/print_login_password/#{current_user.id}"]
 
 if not Location.current_location.name.match(/Outpatient/i)
   @reports << ['Activities',"/user/activities/#{current_user.id}"]
@@ -11,6 +12,7 @@ if current_user.admin?
   @reports << ['Create user',"/user/new"]
   @reports << ['Edit user',"/user/select_user"]
   @reports << ['Set user roles',"/user/users"]
+  @reports << ['Print User Barcode',"/user/barcodes"]
   @reports << ['Set related roles',"/user/set_role_role/#{current_user.id}"]
   if current_user.program_manager?
     @reports << ['View users',"/user/view_users"]

@@ -192,14 +192,21 @@ class GenericPrescriptionsController < ApplicationController
 	def generic_advanced_prescription
 		@use_col_interface = CoreService.get_global_property_value("use.column.interface").to_s
 		@patient = Patient.find(params[:patient_id] || session[:patient_id]) rescue nil
-		@generics = MedicationService.generic
+    la_concept_id = Concept.find_by_name("LA(Lumefantrine + arthemether)").concept_id
+		#@generics = MedicationService.generic.delete_if{|g| g if g[1] == la_concept_id} #Remove LA drug from list. Dosage + frequency + duration already known
+    @generics = JSON.parse(File.read("#{Rails.root.to_s}/public/json/generics.json")).delete_if{|g| g if g[1] == la_concept_id}
+    @preferred_drugs = Drug.preferred_drugs.delete_if{|p| p if p[1] == la_concept_id} #Remove LA drug from list. Dosage + frequency + duration already known
+    
 		@frequencies = MedicationService.fully_specified_frequencies
 		@formulations = {}
     generic_concept_ids = @generics.collect{|generic| generic[1]}
+    preferred_drugs_concept_ids = @preferred_drugs.collect{|preferred_drug| preferred_drug[1]}
+    @preferred_drugs_concept_ids = preferred_drugs_concept_ids
+    
     drug_formulations = {}
     
     Drug.all(:select => ["name, concept_id, dose_strength, units"],
-      :conditions => ["concept_id IN (?)", generic_concept_ids]
+      :conditions => ["concept_id IN (?)", (preferred_drugs_concept_ids + generic_concept_ids).uniq]
     ).each do |record|
       
       if drug_formulations[record.concept_id].blank?
@@ -210,7 +217,7 @@ class GenericPrescriptionsController < ApplicationController
       
     end
    
-    @generics.each do | name, concept_id |
+    (@preferred_drugs + @generics).uniq.each do | name, concept_id |
 
       #skip non-drug concepts      
       next if drug_formulations[concept_id].blank? 
@@ -223,7 +230,7 @@ class GenericPrescriptionsController < ApplicationController
       
     end
    
-    @generics.each { | generic |
+    (@preferred_drugs + @generics).uniq.each { | generic |
 			drugs = Drug.find(:all,	:conditions => ["concept_id = ?", generic[1]])
 			drug_formulations = {}			
 			drugs.each { | drug |
@@ -231,8 +238,53 @@ class GenericPrescriptionsController < ApplicationController
 			}
 			@formulations[generic[1]] = drug_formulations			
 		}
+    
     session[:formulations] = @formulations
-		@diagnosis = @patient.current_diagnoses["DIAGNOSIS"] rescue []
+		@diagnosis = []#@patient.current_diagnoses["DIAGNOSIS"] rescue []
+
+    antimalaria_drugs = CoreService.get_global_property_value("anti_malaria_drugs")
+    @antimalarial_drugs_hash = {}
+    unless antimalaria_drugs.blank? # execute code only when malaria drugs available
+    antimalaria_drugs.each do |key, values|
+      drug_id = Drug.find_by_name(key).drug_id rescue nil
+      next if drug_id.blank?
+      @antimalarial_drugs_hash[drug_id] = {}
+      @antimalarial_drugs_hash[drug_id]["duration"] = values["duration"]
+      @antimalarial_drugs_hash[drug_id]["frequency"] = values["frequency"]
+      @antimalarial_drugs_hash[drug_id]["strength"] = values["strength"]
+      @antimalarial_drugs_hash[drug_id]["units"] = values["units"]
+      @antimalarial_drugs_hash[drug_id]["drug_name"] = values["drug_name"]
+      @antimalarial_drugs_hash[drug_id]["tabs"] = values["tabs"]
+    end
+   end
+    lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+    malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+    today =  session[:datetime].to_date rescue Date.today
+
+    malaria_test_result_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+            ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id} AND e.patient_id=#{@patient.id}
+            AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0
+            AND DATE(e.encounter_datetime) = '#{today}'
+            ORDER BY e.encounter_datetime DESC LIMIT 1").last
+
+    @malaria_test_result = malaria_test_result_obs.answer_string.squish rescue ""
+
+    if @malaria_test_result.blank?
+      malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
+      outpatient_encounter_type_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+
+      diagnosis_concept_ids = ["PRIMARY DIAGNOSIS", "SECONDARY DIAGNOSIS", "ADDITIONAL DIAGNOSIS"].collect do |concept_name|
+        Concept.find_by_name(concept_name).concept_id
+      end
+
+      malaria_observation = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{outpatient_encounter_type_id} AND e.patient_id=#{@patient.id}
+        AND o.concept_id IN (#{diagnosis_concept_ids.join(', ')}) AND o.value_coded = #{malaria_concept_id}
+        AND e.voided=0 AND DATE(e.encounter_datetime) = '#{today}'").last
+      
+      @malaria_test_result = 'Positive' unless malaria_observation.blank?
+    end
+
 		render :layout => 'application'
 	end
   
@@ -248,7 +300,11 @@ class GenericPrescriptionsController < ApplicationController
 
 	def create_advanced_prescription
 		@patient    = Patient.find(params[:encounter][:patient_id]  || session[:patient_id]) rescue nil
-		encounter  = MedicationService.current_treatment_encounter(@patient)
+    session_date = session[:datetime].to_date rescue Date.today
+		#encounter  = MedicationService.current_treatment_encounter(@patient)
+    user_person_id = current_user.person_id
+    encounter = PatientService.current_treatment_encounter(@patient, session_date, user_person_id)
+
     if !(params[:prescriptions].blank?)
 
       (params[:prescriptions] || []).each{ | prescription |
@@ -277,9 +333,12 @@ class GenericPrescriptionsController < ApplicationController
 			}
 
       if(@patient)
-        redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
+        #redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
+        flash[:notice] = "Your prescription is successful"
+        redirect_to "/patients/show/#{@patient.id}" and return
       else
-        redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
+        #redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
+        redirect_to "/patients/show/#{@patient.id}" and return
       end
 
     end
@@ -344,9 +403,12 @@ class GenericPrescriptionsController < ApplicationController
 		end
 
 		if(@patient)
-			redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
+			#redirect_to "/patients/treatment_dashboard/#{@patient.id}" and return
+      flash[:notice] = "Your prescription is successful"
+      redirect_to "/patients/show/#{@patient.id}" and return
 		else
-			redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
+			#redirect_to "/patients/treatment_dashboard/#{params[:patient_id]}" and return
+      redirect_to "/patients/show/#{@patient.id}" and return
 		end
 
 	end

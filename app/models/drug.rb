@@ -47,4 +47,17 @@ class Drug < ActiveRecord::Base
   end
 =end
 
+  def self.preferred_drugs
+    property_name = 'preferred.drugs.concept_id'
+    preferred_drugs_concept_ids = GlobalProperty.find(:last,
+      :conditions => ["property =?", property_name]).property_value.split(', ') rescue []
+
+    drugs = []
+    preferred_drugs_concept_ids.each do |concept_id|
+      drug_name = Concept.find(concept_id).fullname
+      drugs << [drug_name, concept_id.to_i]
+    end
+
+    return drugs.sort_by{|name, concept|name}
+  end
 end

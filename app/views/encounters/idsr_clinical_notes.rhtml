@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <%= javascript_include_tag "jquery" %>
+    <%= javascript_include_tag 'utils' %>
+
+    <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
+    <script language="javascript">
+      tt_cancel_destination = '/patients/show/<%= @patient.patient_id %>';
+      tt_cancel_show =  '/patients/show/<%= @patient.patient_id %>';
+      var hash_str = "|";
+
+
+      function getSelected(){
+        var choices = "";
+
+        for(var o = 0; o < __$('choice').options.length; o++){
+          if(__$('choice').options[o].selected == true){
+            choices += __$('choice').options[o].innerHTML + " ";
+          }
+        }
+
+        return choices;
+      }
+
+
+    </script>
+
+    <style>
+      #tt_page_select_ .options { height: 506px; }
+
+      #tt_page_life_threatening_condition .inputFrameClass {
+        height: 450px;
+      }
+
+      #tt_page_life_threatening_condition .options {
+        height: 16em;
+      }
+
+    </style>
+
+
+  </head>
+  <body>
+
+    <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
+      <form  action="/encounters/create_complaints" method="post">
+        <%= hidden_field_tag "encounter[encounter_type_name]", "NOTES" %>
+        <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+        <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+        <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+
+        <%= touch_text_area_tag "CLINICAL NOTES CONSTRUCT", @patient, nil,
+          {	:id => "clinical_notes",
+          :helpText => "Clinical notes"
+        }%>
+
+
+        <% if @retrospective %>
+          <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+            <%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+        <% else %>
+          <%= hidden_field_tag "filter[provider]", nil %>
+        <% end %>
+      </form>
+    </center>
+  </body>
+</html>

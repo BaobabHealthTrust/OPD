@@ -11,20 +11,20 @@ class GenericReportController < ApplicationController
       return
     end
     @diagnoses = ConceptName.find(:all,
-                                  :joins =>
-                                        "INNER JOIN obs ON
+      :joins =>
+        "INNER JOIN obs ON
                                          concept_name.concept_id = obs.value_coded AND obs.voided = 0",
-                                  :conditions => ["date_format(obs_datetime, '%Y-%m-%d') >= ? AND date_format(obs_datetime, '%Y-%m-%d') <= ?",
-                                            @start_date, @end_date],
-                                  :group =>   "name",
-                                  :select => "concept_name.concept_id,concept_name.name,obs.value_coded,obs.obs_datetime,obs.voided")
+      :conditions => ["date_format(obs_datetime, '%Y-%m-%d') >= ? AND date_format(obs_datetime, '%Y-%m-%d') <= ?",
+        @start_date, @end_date],
+      :group =>   "name",
+      :select => "concept_name.concept_id,concept_name.name,obs.value_coded,obs.obs_datetime,obs.voided")
     @patient = Person.find(:all,
-                           :joins => 
-                                "INNER JOIN obs ON 
+      :joins =>
+        "INNER JOIN obs ON
                                  person.person_id = obs.person_id AND obs.voided = 0",
-                           :conditions => ["date_format(obs_datetime, '%Y-%m-%d') >= ? AND date_format(obs_datetime, '%Y-%m-%d') <= ?",
-                                            @start_date, @end_date],
-                           :select => "person.voided,obs.value_coded,obs.obs_datetime,obs.voided ")
+      :conditions => ["date_format(obs_datetime, '%Y-%m-%d') >= ? AND date_format(obs_datetime, '%Y-%m-%d') <= ?",
+        @start_date, @end_date],
+      :select => "person.voided,obs.value_coded,obs.obs_datetime,obs.voided ")
   
     @times = []                         
     @data_hash = Hash.new
@@ -72,100 +72,100 @@ class GenericReportController < ApplicationController
         @data_hash.each{|time,data|
           if t.to_date == time.to_date 
             data.each{|k,v|
-            if k == d.name
-              sum = sum + v 
-            end
-          }
+              if k == d.name
+                sum = sum + v
+              end
+            }
           end
+        }
+
+
       }
-
-
-    }
-    sort_hash[d.name] = sum
+      sort_hash[d.name] = sum
 
     }
 
-  sort_hash = sort_hash.sort{|a,b| -1*( a[1]<=>b[1])}
-   sort_hash.each{|x| @sort_array << x[0]}
+    sort_hash = sort_hash.sort{|a,b| -1*( a[1]<=>b[1])}
+    sort_hash.each{|x| @sort_array << x[0]}
 
-  # make_and_send_pdf('/report/weekly_report', 'weekly_report.pdf')
+    # make_and_send_pdf('/report/weekly_report', 'weekly_report.pdf')
 
   end
 
   def disaggregated_diagnosis
 
-  @start_date = Date.new(params[:start_year].to_i,params[:start_month].to_i,params[:start_day].to_i) rescue nil
-  @end_date = Date.new(params[:end_year].to_i,params[:end_month].to_i,params[:end_day].to_i) rescue nil
-   if @start_date > @end_date
+    @start_date = Date.new(params[:start_year].to_i,params[:start_month].to_i,params[:start_day].to_i) rescue nil
+    @end_date = Date.new(params[:end_year].to_i,params[:end_month].to_i,params[:end_day].to_i) rescue nil
+    if @start_date > @end_date
       flash[:notice] = 'Start date is greater that end date'
       redirect_to :action => 'select'
       return
     end
 
-  #getting an array of all diagnoses recorded within the chosen period - to avoid including existent but non recorded diagnoses
-  diagnoses = ConceptName.find(:all,
-                                  :joins =>
-                                        "INNER JOIN obs ON
+    #getting an array of all diagnoses recorded within the chosen period - to avoid including existent but non recorded diagnoses
+    diagnoses = ConceptName.find(:all,
+      :joins =>
+        "INNER JOIN obs ON
                                          concept_name.concept_id = obs.value_coded AND obs.voided = 0",
-                                  :conditions => ["date_format(obs_datetime, '%Y-%m-%d') >= ? AND date_format(obs_datetime, '%Y-%m-%d') <= ?",
-                                            @start_date, @end_date],
-                                  :group =>   "name",
-                                  :select => "concept_name.concept_id,concept_name.name,obs.value_coded,obs.obs_datetime,obs.voided")
-  #getting list of all patients who were diagnosed within the set period-to avoid getting all patients                          
-  @patient = Person.find(:all,
-                           :joins => 
-                                "INNER JOIN obs ON 
+      :conditions => ["date_format(obs_datetime, '%Y-%m-%d') >= ? AND date_format(obs_datetime, '%Y-%m-%d') <= ?",
+        @start_date, @end_date],
+      :group =>   "name",
+      :select => "concept_name.concept_id,concept_name.name,obs.value_coded,obs.obs_datetime,obs.voided")
+    #getting list of all patients who were diagnosed within the set period-to avoid getting all patients
+    @patient = Person.find(:all,
+      :joins =>
+        "INNER JOIN obs ON
                                  person.person_id = obs.person_id AND obs.voided = 0",
-                           :conditions => ["date_format(obs_datetime, '%Y-%m-%d') >= ? AND date_format(obs_datetime, '%Y-%m-%d') <= ?",
-                                            @start_date, @end_date],
-                           :select => "person.gender,person.birthdate,person.birthdate_estimated,person.date_created,
+      :conditions => ["date_format(obs_datetime, '%Y-%m-%d') >= ? AND date_format(obs_datetime, '%Y-%m-%d') <= ?",
+        @start_date, @end_date],
+      :select => "person.gender,person.birthdate,person.birthdate_estimated,person.date_created,
                                       person.voided,obs.value_coded,obs.obs_datetime,obs.voided ")
   
-  sort_hash = Hash.new
+    sort_hash = Hash.new
 
-  #sorting the diagnoses using frequency with the highest first
-  diagnoses.each{|diagnosis|
-    count = 0
-    @patient.each{|patient|
-      if patient.value_coded == diagnosis.value_coded
-        count += 1
-      end
-    }
-    sort_hash[diagnosis.name] = count
+    #sorting the diagnoses using frequency with the highest first
+    diagnoses.each{|diagnosis|
+      count = 0
+      @patient.each{|patient|
+        if patient.value_coded == diagnosis.value_coded
+          count += 1
+        end
+      }
+      sort_hash[diagnosis.name] = count
   
-  }
-  #A sorted array of diagnoses to be sent to be sent to form
-  @diagnoses = Array.new
+    }
+    #A sorted array of diagnoses to be sent to be sent to form
+    @diagnoses = Array.new
 
-   sort_hash = sort_hash.sort{|a,b| -1*( a[1]<=>b[1])}
-   diagnosis_names = []
-   sort_hash.each{|x| diagnosis_names << x[0]}
-   diagnosis_names.each{|d|
-     diagnoses.each{|diag|
-       @diagnoses << diag if d == diag.name     
-     }
-   }
+    sort_hash = sort_hash.sort{|a,b| -1*( a[1]<=>b[1])}
+    diagnosis_names = []
+    sort_hash.each{|x| diagnosis_names << x[0]}
+    diagnosis_names.each{|d|
+      diagnoses.each{|diag|
+        @diagnoses << diag if d == diag.name
+      }
+    }
    
-   @patient_record = []
-   @patient.each do |patient|
-   patient_bean = PatientService.get_patient(patient.person)
-   @patient_record << {
-   					   'age' => patient_bean.age, 
-   					   'sex' => patient_bean.sex,
-					   'value_coded' => patient.value_coded
-					  }
-   end
+    @patient_record = []
+    @patient.each do |patient|
+      patient_bean = PatientService.get_patient(patient.person)
+      @patient_record << {
+        'age' => patient_bean.age,
+        'sex' => patient_bean.sex,
+        'value_coded' => patient.value_coded
+      }
+    end
    
   end
 
   def referral
-     @start_date = Date.new(params[:start_year].to_i,params[:start_month].to_i,params[:start_day].to_i) rescue nil
+    @start_date = Date.new(params[:start_year].to_i,params[:start_month].to_i,params[:start_day].to_i) rescue nil
     @end_date = Date.new(params[:end_year].to_i,params[:end_month].to_i,params[:end_day].to_i) rescue nil
-      if @start_date > @end_date
-        flash[:notice] = 'Start date is greater that end date'
-        redirect_to :action => 'select'
-        return
-      end
+    if @start_date > @end_date
+      flash[:notice] = 'Start date is greater that end date'
+      redirect_to :action => 'select'
+      return
+    end
 
     @referrals = Observation.find(:all, :conditions => ["concept_id = ? AND date_format(obs_datetime, '%Y-%m-%d') >= ? AND 
                                   date_format(obs_datetime, '%Y-%m-%d') <= ?", 2227, @start_date, @end_date])
@@ -210,13 +210,13 @@ class GenericReportController < ApplicationController
 
   def data_cleaning
 
-      @reports = {
-                    'Missing Prescriptions'=>'dispensations_without_prescriptions',
-                    'Missing Dispensations'=>'prescriptions_without_dispensations',
-                    'Multiple Start Reasons at Different times'=>'patients_with_multiple_start_reasons',
-                    'Out of range ARV number'=>'out_of_range_arv_number',
-                    'Data Consistency Check'=>'data_consistency_check'
-                 }
+    @reports = {
+      'Missing Prescriptions'=>'dispensations_without_prescriptions',
+      'Missing Dispensations'=>'prescriptions_without_dispensations',
+      'Multiple Start Reasons at Different times'=>'patients_with_multiple_start_reasons',
+      'Out of range ARV number'=>'out_of_range_arv_number',
+      'Data Consistency Check'=>'data_consistency_check'
+    }
     @landing_dashboard = params[:dashboard]
     render :template => 'report/data_cleaning', :layout => 'clinic'
   end
@@ -240,33 +240,33 @@ class GenericReportController < ApplicationController
     @patients.each do |patient|
     	patient_bean = PatientService.get_patient(patient.person)
     	
-        last_appointment_date = last_appointment_date(patient.id, @date)
-        drugs_given_to_patient = patient_present?(patient.id, last_appointment_date)
-        drugs_given_to_guardian = guardian_present?(patient.id, last_appointment_date)
-        drugs_given_to_both_patient_and_guardian = patient_and_guardian_present?(patient.id, last_appointment_date)
+      last_appointment_date = last_appointment_date(patient.id, @date)
+      drugs_given_to_patient = patient_present?(patient.id, last_appointment_date)
+      drugs_given_to_guardian = guardian_present?(patient.id, last_appointment_date)
+      drugs_given_to_both_patient_and_guardian = patient_and_guardian_present?(patient.id, last_appointment_date)
 
-        visit_by = "Guardian visit" if drugs_given_to_guardian
-        visit_by = "Patient visit" if drugs_given_to_patient
-        visit_by = "PG visit" if drugs_given_to_both_patient_and_guardian
+      visit_by = "Guardian visit" if drugs_given_to_guardian
+      visit_by = "Patient visit" if drugs_given_to_patient
+      visit_by = "PG visit" if drugs_given_to_both_patient_and_guardian
 
-        phone_number = nil
+      phone_number = nil
         
-        PatientService.phone_numbers(patient.person).each do |type,number|
-            case type
-                when "Cell phone number"
-                    phone_number = number if number.match(/\d+/)
-                when "Home phone number"
-                    phone_number = number if number.match(/\d+/)
-                when "Office phone number"
-                    phone_number = number if number.match(/\d+/)
-            end
-        end rescue nil
+      PatientService.phone_numbers(patient.person).each do |type,number|
+        case type
+        when "Cell phone number"
+          phone_number = number if number.match(/\d+/)
+        when "Home phone number"
+          phone_number = number if number.match(/\d+/)
+        when "Office phone number"
+          phone_number = number if number.match(/\d+/)
+        end
+      end rescue nil
         
-        last_visit = last_appointment_date.strftime('%Y-%m-%d') rescue ""
-        outcome = outcome(patient.id, @date)
-        @report << {'arv_number'=> patient_bean.arv_number, 'name'=> patient_bean.name,
-                   'birthdate'=> patient_bean.birth_date, 'last_visit'=> last_visit,
-                   'visit_by'=> visit_by, 'phone_number'=>phone_number, 'outcome'=>outcome, 'patient_id'=>patient.id}
+      last_visit = last_appointment_date.strftime('%Y-%m-%d') rescue ""
+      outcome = outcome(patient.id, @date)
+      @report << {'arv_number'=> patient_bean.arv_number, 'name'=> patient_bean.name,
+        'birthdate'=> patient_bean.birth_date, 'last_visit'=> last_visit,
+        'visit_by'=> visit_by, 'phone_number'=>phone_number, 'outcome'=>outcome, 'patient_id'=>patient.id}
 
     end
     
@@ -281,20 +281,20 @@ class GenericReportController < ApplicationController
     
     @patients.each do |patient_data_row|
 
-        next if (Encounter.find_by_sql("SELECT encounter_id
+      next if (Encounter.find_by_sql("SELECT encounter_id
                                          FROM encounter
                                          WHERE patient_id=#{patient_data_row.patient_id}
                                                AND DATE(date_created)=DATE('#{params[:date]}')
                                                AND voided = 0").map{|e|e.encounter_id}.count > 0)    
         
-        patient        = Person.find(patient_data_row[:patient_id].to_i)
+      patient        = Person.find(patient_data_row[:patient_id].to_i)
     	patient_bean   = PatientService.get_patient(patient.person)
-        last_visit = last_appointment_date(patient.id, params[:date]).strftime('%Y-%m-%d') rescue ""
+      last_visit = last_appointment_date(patient.id, params[:date]).strftime('%Y-%m-%d') rescue ""
         
-        @report << {'patient_id' => patient_data_row[:patient_id], 'arv_number' => patient_bean.arv_number, 'name' => patient_bean.name,
-                   'birthdate' => patient_bean.birth_date, 'national_id' => patient_bean.national_id, 'gender' => patient_bean.sex,
-                   'age'=> patient_bean.age, 'phone_numbers' => PatientService.phone_numbers(patient), 'last_visit'=> last_visit,
-                   'date_started'=>patient_data_row[:date_started]}
+      @report << {'patient_id' => patient_data_row[:patient_id], 'arv_number' => patient_bean.arv_number, 'name' => patient_bean.name,
+        'birthdate' => patient_bean.birth_date, 'national_id' => patient_bean.national_id, 'gender' => patient_bean.sex,
+        'age'=> patient_bean.age, 'phone_numbers' => PatientService.phone_numbers(patient), 'last_visit'=> last_visit,
+        'date_started'=>patient_data_row[:date_started]}
     end
     @report
   end
@@ -318,30 +318,30 @@ class GenericReportController < ApplicationController
         GROUP BY patient_id")
     
     patient_with_dispensations.each do |patient_data_row|
-        person = Person.find(patient_data_row[:patient_id].to_i)
+      person = Person.find(patient_data_row[:patient_id].to_i)
         
-        next if !PatientService.reason_for_art_eligibility(Patient.find(patient_data_row[:patient_id].to_i)).blank?
+      next if !PatientService.reason_for_art_eligibility(Patient.find(patient_data_row[:patient_id].to_i)).blank?
         
-        outcome = outcome(person.id, patient_data_row[:encounter_datetime])
-        art_date = art_start_date(person.id)
-        @report << {'patient_id'=> patient_data_row[:patient_id], 'arv_number'=> PatientService.get_patient_identifier(person, 'ARV Number'), 'name'=> person.name,
-                   'birthdate'=> person.birthdate, 'national_id' => PatientService.get_national_id(person.patient) , 'gender' => person.gender,
-                   'age'=> person.age, 'phone_numbers'=> PatientService.phone_numbers(person),
-                   'art_start_date'=>art_start_date(person.id), "date_registered_at_clinic" => person.patient.date_created.strftime('%d-%b-%Y'),
-                   'art_start_age' => age_at(art_date, person.birthdate), 'start_reason' => PatientService.reason_for_art_eligibility(person.patient), 'outcome' => outcome(person.id, end_date)}
+      outcome = outcome(person.id, patient_data_row[:encounter_datetime])
+      art_date = art_start_date(person.id)
+      @report << {'patient_id'=> patient_data_row[:patient_id], 'arv_number'=> PatientService.get_patient_identifier(person, 'ARV Number'), 'name'=> person.name,
+        'birthdate'=> person.birthdate, 'national_id' => PatientService.get_national_id(person.patient) , 'gender' => person.gender,
+        'age'=> person.age, 'phone_numbers'=> PatientService.phone_numbers(person),
+        'art_start_date'=>art_start_date(person.id), "date_registered_at_clinic" => person.patient.date_created.strftime('%d-%b-%Y'),
+        'art_start_age' => age_at(art_date, person.birthdate), 'start_reason' => PatientService.reason_for_art_eligibility(person.patient), 'outcome' => outcome(person.id, end_date)}
     end
     
-     @report
+    @report
   end
 
   def data_cleaning_tab
-      @reports = {
-                    'Missing Prescriptions'=>'dispensations_without_prescriptions',
-                    'Missing Dispensations'=>'prescriptions_without_dispensations',
-                    'Multiple Start Reasons at Different times'=>'patients_with_multiple_start_reasons',
-                    'Out of range ARV number'=>'out_of_range_arv_number',
-                    'Data Consistency Check'=>'data_consistency_check'
-                 }
+    @reports = {
+      'Missing Prescriptions'=>'dispensations_without_prescriptions',
+      'Missing Dispensations'=>'prescriptions_without_dispensations',
+      'Multiple Start Reasons at Different times'=>'patients_with_multiple_start_reasons',
+      'Out of range ARV number'=>'out_of_range_arv_number',
+      'Data Consistency Check'=>'data_consistency_check'
+    }
     @landing_dashboard = params[:dashboard]
     
     render :layout => false
@@ -349,11 +349,11 @@ class GenericReportController < ApplicationController
 
   def age_group_select
     @options = ["","< 6 months",
-                "6 months to < 1 yr",
-                "1 to < 5","5 to 14",
-                "> 14 to < 20","20 to < 30",
-                "30 to < 40","40 to < 50",
-                "50 and above","none"]
+      "6 months to < 1 yr",
+      "1 to < 5","5 to 14",
+      "> 14 to < 20","20 to < 30",
+      "30 to < 40","40 to < 50",
+      "50 and above","none"]
                 
     @start_date = params[:start_date]
     @end_date = params[:end_date]
@@ -385,9 +385,9 @@ class GenericReportController < ApplicationController
   def recorded_diagnosis
     concept_id = ConceptName.find_by_name("DIAGNOSIS").concept_id
     @names = Observation.find(:all,:joins => "INNER JOIN concept_name c ON obs.value_coded_name_id = c.concept_name_id",
-                              :select => "name",
-                              :conditions => ["obs.concept_id = ? AND name LIKE (?)",
-                              concept_id,"%#{params[:search_string]}%"],:group =>'name').map{|c|c.name}
+      :select => "name",
+      :conditions => ["obs.concept_id = ? AND name LIKE (?)",
+        concept_id,"%#{params[:search_string]}%"],:group =>'name').map{|c|c.name}
     render :text => "<li>" + @names.map{|n| n } .join("</li><li>") + "</li>"
   end
   
@@ -399,64 +399,64 @@ class GenericReportController < ApplicationController
   end
   
   def patient_present?(patient_id, date=Date.today)
-      encounter_type_id = EncounterType.find_by_name("HIV Reception").id
-      concept_id  = ConceptName.find_by_name("Patient present").concept_id
-      encounter = Encounter.find_by_sql("SELECT *
+    encounter_type_id = EncounterType.find_by_name("HIV Reception").id
+    concept_id  = ConceptName.find_by_name("Patient present").concept_id
+    encounter = Encounter.find_by_sql("SELECT *
                                         FROM encounter
                                         WHERE patient_id = #{patient_id} AND DATE(date_created) = DATE('#{date.strftime("%Y-%m-%d")}') AND encounter_type = #{encounter_type_id}
                                         ORDER BY date_created DESC").last rescue nil
                                         
-      patient_present = encounter.observations.find_last_by_concept_id(concept_id).to_s unless encounter.nil?
+    patient_present = encounter.observations.find_last_by_concept_id(concept_id).to_s unless encounter.nil?
 
-      return false if patient_present.blank?
-      return false if patient_present.match(/No/)
-      return true
+    return false if patient_present.blank?
+    return false if patient_present.match(/No/)
+    return true
   end
 
   def guardian_present?(patient_id, date=Date.today)
-      encounter_type_id = EncounterType.find_by_name("HIV Reception").id
-      concept_id  = ConceptName.find_by_name("Guardian present").concept_id
-      encounter = Encounter.find_by_sql("SELECT *
+    encounter_type_id = EncounterType.find_by_name("HIV Reception").id
+    concept_id  = ConceptName.find_by_name("Guardian present").concept_id
+    encounter = Encounter.find_by_sql("SELECT *
                                         FROM encounter
                                         WHERE patient_id = #{patient_id} AND DATE(date_created) = DATE('#{date.strftime("%Y-%m-%d")}') AND encounter_type = #{encounter_type_id}
                                         ORDER BY date_created DESC").last rescue nil
 
-      guardian_present=encounter.observations.find_last_by_concept_id(concept_id).to_s unless encounter.nil?
+    guardian_present=encounter.observations.find_last_by_concept_id(concept_id).to_s unless encounter.nil?
 
-      return false if guardian_present.blank?
-      return false if guardian_present.match(/No/)
-      return true
+    return false if guardian_present.blank?
+    return false if guardian_present.match(/No/)
+    return true
   end
 
   def patient_and_guardian_present?(patient_id, date=Date.today)
-      patient_present = self.patient_present?(patient_id, date)
-      guardian_present = self.guardian_present?(patient_id, date)
+    patient_present = self.patient_present?(patient_id, date)
+    guardian_present = self.guardian_present?(patient_id, date)
 
-      return false if !patient_present || !guardian_present
-      return true
+    return false if !patient_present || !guardian_present
+    return true
   end
 
   def outcome(patient_id, on_date=Date.today)
     state = PatientState.find(:first,
-                              :joins => "INNER JOIN patient_program p ON p.patient_program_id = patient_state.patient_program_id",
-                              :conditions =>["patient_state.voided = 0 AND p.voided = 0 AND p.patient_id = #{patient_id} AND DATE(start_date) <= DATE('#{on_date}')"],:order => "start_date DESC")
+      :joins => "INNER JOIN patient_program p ON p.patient_program_id = patient_state.patient_program_id",
+      :conditions =>["patient_state.voided = 0 AND p.voided = 0 AND p.patient_id = #{patient_id} AND DATE(start_date) <= DATE('#{on_date}')"],:order => "start_date DESC")
                               
-   state.program_workflow_state.concept.shortname rescue state.program_workflow_state.concept.fullname rescue 'Unknown state'     
+    state.program_workflow_state.concept.shortname rescue state.program_workflow_state.concept.fullname rescue 'Unknown state'
   end
   
   def art_start_date(patient_id)
     selected_state = nil
     
     Patient.find(patient_id).patient_programs.in_programs("HIV PROGRAM").each do |program|
-        program.patient_states.each do |state|
-            if !state.to_s.match(/On ARVs/).nil?
-                if selected_state.nil?
-                    selected_state = state
-                elsif selected_state.date_created.to_date < state.date_created.to_date
-                    selected_state = state
-                end
-            end
+      program.patient_states.each do |state|
+        if !state.to_s.match(/On ARVs/).nil?
+          if selected_state.nil?
+            selected_state = state
+          elsif selected_state.date_created.to_date < state.date_created.to_date
+            selected_state = state
+          end
         end
+      end
     end
     
     selected_state.date_created.to_date rescue nil
@@ -464,15 +464,15 @@ class GenericReportController < ApplicationController
   
   def age_at(date, dob)
         
-      year = nil
+    year = nil
       
-      if !date.blank? && !dob.blank?
-       day_diff = date.day - dob.day
-       month_diff = date.month - dob.month - (day_diff < 0 ? 1 : 0)
-       year = date.year - dob.year - (month_diff < 0 ? 1 : 0)
-      end 
+    if !date.blank? && !dob.blank?
+      day_diff = date.day - dob.day
+      month_diff = date.month - dob.month - (day_diff < 0 ? 1 : 0)
+      year = date.year - dob.year - (month_diff < 0 ? 1 : 0)
+    end
       
-      year  
+    year
   end
 
   def all_appointment_dates(start_date, end_date = nil)
@@ -499,10 +499,453 @@ class GenericReportController < ApplicationController
     render :layout => 'menu'
   end
   
-  
+  def malaria_report_menu
+    render :layout => "application"
+  end
+  def la_report_menu
+    render :layout => "application"
+  end
+  def print_la_raport_label
+    label = ZebraPrinter::StandardLabel.new
+    label.draw_line(30,85,740,3,0)
+    label.draw_text("Prescribed", 220, 55, 0, 1, 2, 2, false)
+    label.draw_text("Dispensed", 540, 55, 0, 1, 2, 2, false)
+    label.draw_text("AL1", 50, 100, 0, 1, 2, 2, false)
+    label.draw_text("#{params['1'][:prescription]}", 250,100, 0, 4, 1, 1, false)
+    label.draw_text("#{params['1'][:dispensed]}", 580, 100, 0, 4, 1, 1, false)
+    label.draw_text("AL2", 50, 140, 0, 1, 2, 2,false)
+    label.draw_text("#{params['2'][:prescription]}", 250,140, 0, 4, 1, 1, false)
+    label.draw_text("#{params['2'][:dispensed]}", 580, 140, 0, 4, 1, 1, false)
+    label.draw_text("AL3", 50, 170, 0, 1, 2, 2,false)
+    label.draw_text("#{params['3'][:prescription]}", 250,170, 0, 4, 1, 1, false)
+    label.draw_text("#{params['3'][:dispensed]}", 580, 170, 0, 4, 1, 1, false)
+    label.draw_text("AL4", 50, 200, 0, 1, 2, 2,false)
+    label.draw_text("#{params['4'][:prescription]}", 250,200, 0, 4, 1, 1, false)
+    label.draw_text("#{params['4'][:dispensed]}", 580, 200, 0, 4, 1, 1, false)
+    label.draw_line(30,245,740,3,0)
+    time = DateTime.now
+    label.draw_text("Date: #{params['date'][:start]} to #{params['date'][:end]}", 30, 20, 0, 2, 1, 1,false)
+    label.draw_text("Time: #{time.strftime("%Y-%m-%d %H:%M:%S")}", 500, 20, 0, 2, 1, 1,false)
+    label.print(1)
+    #label.draw_barcode(40, 130, 0, 1, 5, 15, 120,true, "#{drug_barcode}")
+    send_data(label.print(1),:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{Time.now.to_i}la.lbl", :disposition => "inline")
+  end
+  def process_malaria_report
+    @report_name = "Malaria Report"
+    @logo = CoreService.get_global_property_value('logo').to_s
+    @current_location_name =Location.current_health_center.name
+
+    @start_date = (params[:start_year] + "-" + params[:start_month] + "-" + params[:start_day]).to_date
+    @end_date = (params[:end_year] + "-" + params[:end_month] + "-" + params[:end_day]).to_date
+
+    @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+    @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
+
+    if @start_date > @end_date
+      flash[:notice] = 'Start date is greater that end date'
+      redirect_to :action => 'malaria_report_menu' and return
+    end
+
+    outpatient_encounter_type_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+    lab_orders_encounter_type_id = EncounterType.find_by_name("LAB ORDERS").encounter_type_id
+    lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+
+    tests_ordered_concept_id = Concept.find_by_name("BLOOD").concept_id
+    malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
+    malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+    unknown_concept_id = Concept.find_by_name("UNKNOWN").concept_id
+    diagnosis_concept_ids = ["PRIMARY DIAGNOSIS", "SECONDARY DIAGNOSIS", "ADDITIONAL DIAGNOSIS"].collect do |concept_name|
+      Concept.find_by_name(concept_name).concept_id
+    end
+
+    malaria_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{outpatient_encounter_type_id}
+        AND o.concept_id IN (#{diagnosis_concept_ids.join(', ')}) AND o.value_coded = #{malaria_concept_id}
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @malaria_cases_count = malaria_observations.count
+
+    microscopy_order_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_orders_encounter_type_id}
+        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MALARIA (MICROSCOPY)'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>MICROSCOPY QUERIES START>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    @microscopy_total_orders = microscopy_order_observations.count
+    microscopy_order_accession_numbers = microscopy_order_observations.map(&:accession_number).compact
+    microscopy_order_accession_numbers = [0] if microscopy_order_accession_numbers.blank?
+
+    microscopy_positive_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
+        AND UPPER(o.value_text) = 'THICK SMEAR POSITIVE'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @microscopy_positive_results_count = microscopy_positive_results_observations.count
+
+    microscopy_negative_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
+        AND UPPER(o.value_text) = 'THICK SMEAR NEGATIVE'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @microscopy_negative_results_count = microscopy_negative_results_observations.count
+
+    microscopy_uknown_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{microscopy_order_accession_numbers.join(', ')})
+        AND o.value_coded = #{unknown_concept_id}
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @microscopy_uknown_results_count = microscopy_uknown_results_observations.count
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>mRDT QUERIES>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+    mrdt_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_orders_encounter_type_id}
+        AND o.concept_id = #{tests_ordered_concept_id} AND UPPER(o.value_text) = 'MALARIA (MRDT)'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @mrdt_total_orders = mrdt_observations.count
+    mrdt_order_accession_numbers = mrdt_observations.map(&:accession_number).compact
+    mrdt_order_accession_numbers = [0] if mrdt_order_accession_numbers.blank?
+
+    mrdt_positive_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{mrdt_order_accession_numbers.join(', ')})
+        AND UPPER(o.value_text) = 'MALARIA RDT POSITIVE'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @mrdt_positive_results_count = mrdt_positive_results_observations.count
+
+    mrdt_negative_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{mrdt_order_accession_numbers.join(', ')})
+        AND UPPER(o.value_text) = 'MALARIA RDT NEGATIVE'
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @mrdt_negative_results_count = mrdt_negative_results_observations.count
+
+    mrdt_unknown_results_observations = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id}
+        AND o.concept_id = #{malaria_test_result_concept_id} AND o.accession_number IN (#{mrdt_order_accession_numbers.join(', ')})
+        AND o.value_coded = #{unknown_concept_id}
+        AND e.voided=0 AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        GROUP BY o.person_id, DATE(o.obs_datetime)")
+
+    @mrdt_unknown_results_count = mrdt_unknown_results_observations.count
+
+    #>>>>>>>>>>>>>>>>DRUG PRESCRIPTION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    treatment_encounter_type_id = EncounterType.find_by_name("TREATMENT").encounter_type_id
+    dispensing_encounter_type_id = EncounterType.find_by_name("DISPENSING").encounter_type_id
+    amount_dispensed_concept = Concept.find_by_name('Amount dispensed').id
+    drug_order_type_id = OrderType.find_by_name("Drug Order").order_type_id
+
+    la_one_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 1 x 6").drug_id rescue 0 #Add this drug to meta-data
+    la_two_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 2 x 6").drug_id
+    la_three_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 3 x 6").drug_id
+    la_four_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 4 x 6").drug_id
+
+    #as total_prescribed_drugs
+    @total_la_one_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND do.drug_inventory_id = #{la_one_drug_id} AND
+        o.order_type_id = #{drug_order_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_one_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_one_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    @total_la_two_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_two_drug_id} AND
+        o.order_type_id = #{drug_order_type_id} AND e.encounter_datetime <= \"#{Date.today} 23:59:59\"
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_two_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} 
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND o.order_type_id = #{drug_order_type_id}
+        AND do.drug_inventory_id = #{la_two_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    @total_la_three_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_three_drug_id} AND
+        o.order_type_id = #{drug_order_type_id} AND e.encounter_datetime <= \"#{Date.today} 23:59:59\"
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_three_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_three_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    @total_la_four_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_four_drug_id} AND
+        o.order_type_id = #{drug_order_type_id} AND e.encounter_datetime <= \"#{Date.today} 23:59:59\"
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_four_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND DATE(e.encounter_datetime) >= '#{@start_date}' AND DATE(e.encounter_datetime) <= '#{@end_date}'
+        AND do.drug_inventory_id = #{la_four_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    render :layout => "report"
+  end
+
+  def process_la_report
+    @report_name = "Lumefantrine + Arthemether Report"
+    @logo = CoreService.get_global_property_value('logo').to_s
+    @current_location_name =Location.current_health_center.name
+
+    @start_date = (params[:start_year] + "-" + params[:start_month] + "-" + params[:start_day]).to_date
+    @end_date = (params[:end_year] + "-" + params[:end_month] + "-" + params[:end_day]).to_date
+
+    @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+    @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
+
+    if @start_date > @end_date
+      flash[:notice] = 'Start date is greater that end date'
+      redirect_to :action => 'la_report_menu' and return
+    end
+
+    #>>>>>>>>>>>>>>>>DRUG PRESCRIPTION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    treatment_encounter_type_id = EncounterType.find_by_name("TREATMENT").encounter_type_id
+    dispensing_encounter_type_id = EncounterType.find_by_name("DISPENSING").encounter_type_id
+    amount_dispensed_concept = Concept.find_by_name('Amount dispensed').id
+    drug_order_type_id = OrderType.find_by_name("Drug Order").order_type_id
+
+    la_one_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 1 x 6").drug_id rescue 0 #Add this drug to meta-data
+    la_two_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 2 x 6").drug_id
+    la_three_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 3 x 6").drug_id
+    la_four_drug_id = Drug.find_by_name("Lumefantrine + Arthemether 4 x 6").drug_id
+
+    #as total_prescribed_drugs
+    start_date = @start_date.strftime("%Y-%m-%d").to_s
+    end_date = @end_date.strftime("%Y-%m-%d").to_s
+    @total_la_one_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND do.drug_inventory_id = #{la_one_drug_id} AND
+        o.order_type_id = #{drug_order_type_id} AND DATE(e.encounter_datetime) >= \"#{start_date}\"
+        AND DATE(e.encounter_datetime) <= \"#{end_date}\" 
+        AND e.voided=0 GROUP BY do.drug_inventory_id" 
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_one_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e 
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND do.drug_inventory_id = #{la_one_drug_id}
+        AND DATE(e.encounter_datetime) >= \"#{start_date}\"
+        AND DATE(e.encounter_datetime) <= \"#{end_date}\"
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    @total_la_two_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND do.drug_inventory_id = #{la_two_drug_id} AND
+        o.order_type_id = #{drug_order_type_id} 
+        AND DATE(e.encounter_datetime) >= \"#{start_date}\"
+        AND DATE(e.encounter_datetime) <= \"#{end_date}\"
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_two_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND do.drug_inventory_id = #{la_two_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept} 
+        AND DATE(e.encounter_datetime) >= \"#{start_date}\"
+        AND DATE(e.encounter_datetime) <= \"#{end_date}\"
+        AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    @total_la_three_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND do.drug_inventory_id = #{la_three_drug_id} AND
+        o.order_type_id = #{drug_order_type_id} 
+        AND DATE(e.encounter_datetime) >= \"#{start_date}\"
+        AND DATE(e.encounter_datetime) <= \"#{end_date}\"
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_three_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND do.drug_inventory_id = #{la_three_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept}
+        AND DATE(e.encounter_datetime) >= \"#{start_date}\"
+        AND DATE(e.encounter_datetime) <= \"#{end_date}\"
+        AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+    
+    @total_la_four_prescribed_drugs = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND do.drug_inventory_id = #{la_four_drug_id} AND
+        o.order_type_id = #{drug_order_type_id} 
+        AND DATE(e.encounter_datetime) >= \"#{start_date}\"
+        AND DATE(e.encounter_datetime) <= \"#{end_date}\"
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_la_four_dispensed_drugs = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND do.drug_inventory_id = #{la_four_drug_id}
+        AND obs.concept_id = #{amount_dispensed_concept} 
+        AND DATE(e.encounter_datetime) >= \"#{start_date}\"
+        AND DATE(e.encounter_datetime) <= \"#{end_date}\"
+        AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    render :layout => "report"
+  end
+
+  def drug_report
+    @drugs = Drug.find(:all,:conditions =>["name IS NOT NULL"]).collect{|d|[d.name, d.drug_id]}.sort_by{|k, v|k}
+    render :layout => "application"
+  end
+
+  def process_drug_report
+    @logo = CoreService.get_global_property_value('logo').to_s
+    @current_location_name = Location.current_health_center.name
+    @drug_name = Drug.find(params[:drug_id]).name
+    @report_name = "#{@drug_name} Report"
+
+    @start_date = (params[:start_year] + "-" + params[:start_month] + "-" + params[:start_day]).to_date
+    start_date = @start_date
+    @end_date = (params[:end_year] + "-" + params[:end_month] + "-" + params[:end_day]).to_date
+    end_date = @end_date
+
+    @formated_start_date = @start_date.strftime('%A, %d, %b, %Y')
+    @formated_end_date = @end_date.strftime('%A, %d, %b, %Y')
+
+    if @start_date > @end_date
+      flash[:notice] = 'Start date is greater that end date'
+      redirect_to :action => 'drug_report' and return
+    end
+
+    treatment_encounter_type_id = EncounterType.find_by_name("TREATMENT").encounter_type_id
+    dispensing_encounter_type_id = EncounterType.find_by_name("DISPENSING").encounter_type_id
+    amount_dispensed_concept = Concept.find_by_name('Amount dispensed').id
+    drug_order_type_id = OrderType.find_by_name("Drug Order").order_type_id
+
+    @total_tabs_prescribed = Order.find_by_sql("
+        SELECT SUM((ABS(DATEDIFF(o.auto_expire_date, o.start_date)) * do.equivalent_daily_dose)) as total_prescribed_drugs
+        FROM encounter e INNER JOIN encounter_type et
+        ON e.encounter_type = et.encounter_type_id INNER JOIN orders o
+        ON e.encounter_id = o.encounter_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{treatment_encounter_type_id}
+        AND do.drug_inventory_id = #{params[:drug_id]} AND
+        o.order_type_id = #{drug_order_type_id} AND DATE(e.encounter_datetime) >= \"#{start_date}\"
+        AND DATE(e.encounter_datetime) <= \"#{end_date}\"
+        AND e.voided=0 GROUP BY do.drug_inventory_id"
+    ).last.total_prescribed_drugs rescue 0
+
+    @total_tabs_dispensed = Order.find_by_sql("SELECT SUM(obs.value_numeric) as total_dispensed_drugs FROM encounter e
+        INNER JOIN encounter_type et ON e.encounter_type = et.encounter_type_id INNER JOIN obs ON e.encounter_id=obs.encounter_id
+        INNER JOIN orders o ON obs.order_id = o.order_id INNER JOIN drug_order do ON o.order_id = do.order_id
+        INNER JOIN drug d ON do.drug_inventory_id = d.drug_id
+        WHERE e.encounter_type = #{dispensing_encounter_type_id} AND o.order_type_id = #{drug_order_type_id}
+        AND do.drug_inventory_id = #{params[:drug_id]}
+        AND DATE(e.encounter_datetime) >= \"#{start_date}\"
+        AND DATE(e.encounter_datetime) <= \"#{end_date}\"
+        AND obs.concept_id = #{amount_dispensed_concept} AND e.voided=0 GROUP BY d.drug_id"
+    ).last.total_dispensed_drugs rescue 0
+
+    render :layout => "report"
+  end
+
   def update_dhis
   	@dhis_reports = ["ANC Monthly Facility Report", "HMIS-15", "IDSR Monthly"]
-	render :layout => "application"
+    render :layout => "application"
   end
   
   def generate_dhis_report
@@ -513,493 +956,493 @@ class GenericReportController < ApplicationController
   	if @report == "IDSR Monthly"
   		@report_name = @report
   		
-		coc_death = "urZWwWW5FU9"
-		coc_out_patient_cases = "qqg5qsADtHX"
-		coc_inpatient_deaths = "dAObMfCg8zn"
-		coc_inpatient_cases = "q4r3uBRqJaf"
-		coc_in_patient_cases = "RxoQpVgSQq6"
-		coc_in_patient_deaths = "OFdC9ug92YH"
-		coc_default = "fiC1VMp5zq6"
+      coc_death = "urZWwWW5FU9"
+      coc_out_patient_cases = "qqg5qsADtHX"
+      coc_inpatient_deaths = "dAObMfCg8zn"
+      coc_inpatient_cases = "q4r3uBRqJaf"
+      coc_in_patient_cases = "RxoQpVgSQq6"
+      coc_in_patient_deaths = "OFdC9ug92YH"
+      coc_default = "fiC1VMp5zq6"
 		
 		
   		@idsr_mothly = {
-			"IDSR Male Urethral Discharge".upcase=>
-			{ 
+        "IDSR Male Urethral Discharge".upcase=>
+          {
 					"Out-patient cases"=>
-					{
+            {
 						:dataElement=>"DTZU9thFC85",
 						:value=>0,
 						:categoryOptionCombo=>coc_out_patient_cases
-					 }
-			},
+          }
+        },
 			
-			"IDSR Viral Hemorrhagic Fever".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"Pj67s6ApYb2",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"Pj67s6ApYb2",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"Pj67s6ApYb2",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Viral Hemorrhagic Fever".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"Pj67s6ApYb2",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"Pj67s6ApYb2",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"Pj67s6ApYb2",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Meningitis".upcase=> 
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"CRArwtJppcy",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"CRArwtJppcy",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"CRArwtJppcy",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Meningitis".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"CRArwtJppcy",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"CRArwtJppcy",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"CRArwtJppcy",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Pneumonia <5 Years".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"jPH2HL1zlTU",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				}
-			},
+        "IDSR Pneumonia <5 Years".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"jPH2HL1zlTU",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          }
+        },
 			
-			"IDSR Schistosomiasis Intestinal".upcase=> 
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"p494BDUSEUz",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"p494BDUSEUz",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"p494BDUSEUz",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Schistosomiasis Intestinal".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"p494BDUSEUz",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"p494BDUSEUz",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"p494BDUSEUz",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Uncomplicated Malaria <5y, Lab-Confirmed".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"WDQ9DoNW1gI",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
+        "IDSR Uncomplicated Malaria <5y, Lab-Confirmed".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"WDQ9DoNW1gI",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
 		  	},
 			
-			"IDSR Male Non-Vesicular Genital Ulcer".upcase => 
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"gMQn2Hgv3ud",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-			},
+        "IDSR Male Non-Vesicular Genital Ulcer".upcase =>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"gMQn2Hgv3ud",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+        },
 			
-			"IDSR Malaria < 5 Years Severe".upcase=>
-			{									
-				"In-patient cases"=>
-				{
-					:dataElement=>"wsOnpRZtp3t",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"wsOnpRZtp3t",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Malaria < 5 Years Severe".upcase=>
+          {
+          "In-patient cases"=>
+            {
+            :dataElement=>"wsOnpRZtp3t",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"wsOnpRZtp3t",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR New AIDS Cases".upcase=> 
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"fYpGGzLiVbe",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"fYpGGzLiVbe",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"fYpGGzLiVbe",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR New AIDS Cases".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"fYpGGzLiVbe",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"fYpGGzLiVbe",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"fYpGGzLiVbe",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Measles".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"BnbLe0vUHIM",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"BnbLe0vUHIM",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"BnbLe0vUHIM",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Measles".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"BnbLe0vUHIM",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"BnbLe0vUHIM",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"BnbLe0vUHIM",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Neonatal Tetanus".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"YXnx3FepHlE",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"YXnx3FepHlE",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"YXnx3FepHlE",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Neonatal Tetanus".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"YXnx3FepHlE",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"YXnx3FepHlE",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"YXnx3FepHlE",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Diarrhoea With Dehydration".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"GERSeo2EiaP",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"GERSeo2EiaP",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"GERSeo2EiaP",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Diarrhoea With Dehydration".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"GERSeo2EiaP",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"GERSeo2EiaP",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"GERSeo2EiaP",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Malaria >= 5 Years Uncomplicated".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"sUmQaUBzNy3",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				}
-			},
+        "IDSR Malaria >= 5 Years Uncomplicated".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"sUmQaUBzNy3",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          }
+        },
 			
-			"IDSR Malaria With Severe Anemia <5years".upcase=>
-			{
-				"In-patient cases"=>
-				{
-					:dataElement=>"spfnMEG1wl0",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"spfnMEG1wl0",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Malaria With Severe Anemia <5years".upcase=>
+          {
+          "In-patient cases"=>
+            {
+            :dataElement=>"spfnMEG1wl0",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"spfnMEG1wl0",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Female Non-Vesicular Genital Ulcer".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"TxPvgF64DZB",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				}
+        "IDSR Female Non-Vesicular Genital Ulcer".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"TxPvgF64DZB",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          }
 		    },
 			
-			"IDSR AFP".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"aZmJTJpj4Xa",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"aZmJTJpj4Xa",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"aZmJTJpj4Xa",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR AFP".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"aZmJTJpj4Xa",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"aZmJTJpj4Xa",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"aZmJTJpj4Xa",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Malaria In Pregnant Women Uncomplicated".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"cLEvPveMGfq",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-			},
+        "IDSR Malaria In Pregnant Women Uncomplicated".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"cLEvPveMGfq",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+        },
 			
-			"IDSR Schistosomiasis Urinary".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"wA7sDe6Jshb",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"wA7sDe6Jshb",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"wA7sDe6Jshb",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Schistosomiasis Urinary".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"wA7sDe6Jshb",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"wA7sDe6Jshb",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"wA7sDe6Jshb",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Cholera".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"xRmq6560gDJ",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"xRmq6560gDJ",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"xRmq6560gDJ",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Cholera".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"xRmq6560gDJ",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"xRmq6560gDJ",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"xRmq6560gDJ",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Uncomplicated Malaria 5+Y, Lab-Confirmed".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"tvp6Blay8Yc",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				}
+        "IDSR Uncomplicated Malaria 5+Y, Lab-Confirmed".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"tvp6Blay8Yc",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          }
 		  	},
 			
-			"IDSR Malaria >= 5 Years Severe".upcase=>
-			{
-				"In-patient cases"=>
-				{
-					:dataElement=>"hHXHbQQVm4O",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"hHXHbQQVm4O",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
+        "IDSR Malaria >= 5 Years Severe".upcase=>
+          {
+          "In-patient cases"=>
+            {
+            :dataElement=>"hHXHbQQVm4O",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"hHXHbQQVm4O",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
 		   	},
 			
-			"IDSR Malaria < 5 Years Uncomplicated".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"DpRXVfxBy1m",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				}
-			},
+        "IDSR Malaria < 5 Years Uncomplicated".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"DpRXVfxBy1m",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          }
+        },
 			
-			"IDSR Plague".upcase=>
-			{					
-				"Out-patient cases"=>
-				{
-					:dataElement=>"Zs6Bjgfyrct",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"Zs6Bjgfyrct",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"Zs6Bjgfyrct",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Plague".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"Zs6Bjgfyrct",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"Zs6Bjgfyrct",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"Zs6Bjgfyrct",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Malaria In Pregnant Women Severe".upcase=>
-			{
-				"In-patient cases"=>
-				{
-					:dataElement=>"HiFlLTvDG0l",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"HiFlLTvDG0l",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
+        "IDSR Malaria In Pregnant Women Severe".upcase=>
+          {
+          "In-patient cases"=>
+            {
+            :dataElement=>"HiFlLTvDG0l",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"HiFlLTvDG0l",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
 		  	},
 			
-			"IDSR Diarrhoea With Blood".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"XVNCLVde2Eu",
-					:value=>0,
-					:categoryOptionCombo=>coc_out_patient_cases
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"XVNCLVde2Eu",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"XVNCLVde2Eu",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
+        "IDSR Diarrhoea With Blood".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"XVNCLVde2Eu",
+            :value=>0,
+            :categoryOptionCombo=>coc_out_patient_cases
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"XVNCLVde2Eu",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"XVNCLVde2Eu",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
 		  	},
 			
-			"IDSR Severe Pneumonia <5 Years".upcase=>
-			{
-				"In-patient cases"=>
-				{
-					:dataElement=>"tLk5ymzkutq",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"tLk5ymzkutq",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Severe Pneumonia <5 Years".upcase=>
+          {
+          "In-patient cases"=>
+            {
+            :dataElement=>"tLk5ymzkutq",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"tLk5ymzkutq",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 			
-			"IDSR Diarrhoea With Bloody".upcase=>
-			{
-				"Out-patient cases"=>
-				{
-					:dataElement=>"wDCBO0oRE18",
-					:value=>0,
-					:categoryOptionCombo=>coc_default
-				},
-				"In-patient cases"=>
-				{
-					:dataElement=>"XVNCLVde2Eu",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"XVNCLVde2Eu",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			},
+        "IDSR Diarrhoea With Bloody".upcase=>
+          {
+          "Out-patient cases"=>
+            {
+            :dataElement=>"wDCBO0oRE18",
+            :value=>0,
+            :categoryOptionCombo=>coc_default
+          },
+          "In-patient cases"=>
+            {
+            :dataElement=>"XVNCLVde2Eu",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"XVNCLVde2Eu",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        },
 
 			
-			"IDSR Very Severe Pneumonia <5 Years".upcase=>
-			{
+        "IDSR Very Severe Pneumonia <5 Years".upcase=>
+          {
 
-				"In-patient cases"=>
-				{
-					:dataElement=>"kLWOyuVuvoW",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_cases
-				},
-				"In-patient deaths"=>
-				{
-					:dataElement=>"kLWOyuVuvoW",
-					:value=>0,
-					:categoryOptionCombo=>coc_in_patient_deaths
-				}
-			 }																		
+          "In-patient cases"=>
+            {
+            :dataElement=>"kLWOyuVuvoW",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_cases
+          },
+          "In-patient deaths"=>
+            {
+            :dataElement=>"kLWOyuVuvoW",
+            :value=>0,
+            :categoryOptionCombo=>coc_in_patient_deaths
+          }
+        }
   		}
 
-		header="<dataValueSet dataSet=\"wmO5qvufx5b\" completeDate=\"2014-03-25\" period=\"201403\" orgUnit=\"rERxz2TtA3i\">\n"
-		c = header
+      header="<dataValueSet dataSet=\"wmO5qvufx5b\" completeDate=\"2014-03-25\" period=\"201403\" orgUnit=\"rERxz2TtA3i\">\n"
+      c = header
   		@idsr_mothly.each do |key, data|
   			data.each do |k,d|
   				c += "	<dataValue dataElement=\""+d[:dataElement].to_s + "\" categoryOptionCombo=\""+d[:categoryOptionCombo].to_s + "\" value=\""+d[:value].to_s + "\" />\n"

@@ -46,7 +46,7 @@ class DrugOrder < ActiveRecord::Base
 
   # Eventually it would be good for this to not be hard coded, and the data available in the concept table
   def self.doses_per_day(frequency)
-	frequency = frequency.squish
+    frequency = frequency.squish
     return 1 if frequency.upcase == "ONCE A DAY" || frequency.upcase == "OD"
     return 2 if frequency.upcase == "TWICE A DAY" || frequency.upcase == "BD"
     return 3 if frequency.upcase == "THREE A DAY" || frequency.upcase == "TDS"
@@ -125,18 +125,18 @@ class DrugOrder < ActiveRecord::Base
     if encounter.blank?  
       type = EncounterType.find_by_name("DISPENSING")
       encounter = encounters.find(:first,:conditions =>["encounter_datetime BETWEEN ? AND ? AND encounter_type = ?",
-                                  session_date.to_date.strftime('%Y-%m-%d 00:00:00'),
-                                  session_date.to_date.strftime('%Y-%m-%d 23:59:59'),
-                                  type.id])
+          session_date.to_date.strftime('%Y-%m-%d 00:00:00'),
+          session_date.to_date.strftime('%Y-%m-%d 23:59:59'),
+          type.id])
     end
     
     return [] if encounter.blank?
    
     amounts_brought = Observation.all(:conditions => 
-      ['obs.concept_id = ? AND ' +
-       'obs.person_id = ? AND ' +
-       "encounter_datetime BETWEEN ? AND ? AND " +
-       'drug_order.drug_inventory_id = ?',
+        ['obs.concept_id = ? AND ' +
+          'obs.person_id = ? AND ' +
+          "encounter_datetime BETWEEN ? AND ? AND " +
+          'drug_order.drug_inventory_id = ?',
         ConceptName.find_by_name("AMOUNT OF DRUG BROUGHT TO CLINIC").concept_id,
         patient.person.person_id,
         session_date.to_date.strftime('%Y-%m-%d 00:00:00'),
@@ -164,7 +164,7 @@ class DrugOrder < ActiveRecord::Base
     all = Encounter.find(:all,                                                  
       :conditions =>["patient_id = ? AND encounter_datetime BETWEEN ? AND ?           
       AND encounter_type = ?",patient.id , date.to_date.strftime('%Y-%m-%d 00:00:00'),                     
-                      date.to_date.strftime('%Y-%m-%d 23:59:59')  , type])                        
+        date.to_date.strftime('%Y-%m-%d 23:59:59')  , type])
                                                                                 
     start_date = nil ; end_date = nil                                        
     (all || []).each do |encounter|                                             
@@ -177,6 +177,24 @@ class DrugOrder < ActiveRecord::Base
       end                                                                       
     end                                                                         
     return [start_date,end_date]
+  end
+
+  def self.stock_status(order_id, session_date = Date.today)
+    concept_id = Concept.find_by_name("DRUG OUT OF STOCK").concept_id
+    drug_stock_out_obs = Observation.find(:last, :conditions => ["concept_id =?
+      AND order_id =? AND DATE(obs_datetime) =?", concept_id, order_id, session_date])
+
+    unless drug_stock_out_obs.blank?
+      amount_dispensed_concept = Concept.find_by_name("AMOUNT DISPENSED").concept_id
+      amount_dispensed_obs = Observation.find(:last, :conditions => ["concept_id =? AND order_id =?
+        AND DATE(obs_datetime) =?", amount_dispensed_concept , order_id, session_date  ])
+      return "Stocked Out" if amount_dispensed_obs.blank?
+      drug_stock_out_obs_datetime = drug_stock_out_obs.obs_datetime.to_time
+      amount_dispensed_obs_datetime = amount_dispensed_obs.obs_datetime.to_time
+      return "Stocked Out" if drug_stock_out_obs_datetime > amount_dispensed_obs_datetime
+    end
+    
+    return ""
   end
 
 end

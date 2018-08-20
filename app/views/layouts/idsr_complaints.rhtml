@@ -1,0 +1,219 @@
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <%= @title = "#{controller.controller_name.humanize} #{controller.action_name.humanize}" rescue ""  %>
+    <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer="true"></script>
+    <script language="javascript">
+      tstUsername = "<%= current_user.username unless current_user.nil? %>";
+      tstCurrentDate = "<%= Time.now.strftime("%Y-%m-%d") %>";
+      var tstUserKeyboardPref = "<%=preferred_user_keyboard%>";
+      var tt_cancel_destination = null;
+
+      var total  = <%="#{session[:mastercard_ids].length.to_i}" rescue 0%>;
+      var current = <%="#{session[:mastercard_counter].to_i + 1}" rescue 0%>;
+
+      function next()
+      {
+        current = current + 1 ;
+
+        if (current >= total)
+        {
+           current = total;
+        }
+        document.location = "/patients/mastercard?current=" + current;
+      }
+
+      function prev()
+      {
+        current = current - 1 ;
+
+        if (current <= 0)
+        {
+           current = 1;
+        }
+        document.location = "/patients/mastercard?current=" + current;
+      }
+
+    </script>
+    #footer{position: absolute; bottom: 0}
+    <style media="screen">
+
+    </style>
+
+    <%= stylesheet_link_tag "mateme" %>
+    <%= stylesheet_link_tag fancy_or_high_contrast_touch %>
+    <%= javascript_include_tag "preload" %>
+
+  </head>
+  <body id="mateme">
+    <div id="container" >
+      <div id="content" style = "position : relative; width : 96%; margin-left : -48%;">
+
+
+        <%= yield %>
+        <div id="footer">
+          <div id="buttons" style="top:0px">
+            <button id="finishButton" class="button navButton green"><span>Finish</span></button>
+
+            <button id="clear" class="button blue navButton" onclick="clear function"><span>Clear</span></button>
+
+            <button id="cancel" class="button navButton red left" onclick="cancel function()"><span>Cancel</span></button>
+             </div>
+           </div>
+        </div>
+
+        </div>
+      </div>
+    </div>
+    <script>
+
+      try {
+        document.getElementById('navigation_value').innerHTML = current + " of " + total;
+      } catch(e) { }
+
+       var pageCount = 0;
+        init();
+
+        buttonNext.onclick = function(){
+          //get the items
+           if (pageCount < elements.length)
+              {
+                  goToPage("next");
+                  //hide all first
+                  for ( var  c = 0;c < elements.length;c++) {
+                          elements[c].style.display = "none";
+                   }
+
+
+                  if (pageCount == elements.length-1){
+                      buttonNext.style.display = "none";
+                      buttonFinish.style.display = "block";
+                  }
+                 elements[pageCount].style.display = "block";
+                  noteElement.innerHTML = "Presenting Complaints("+count+"/"+totalElements+")";
+              }
+
+          }
+
+       buttonBack.onclick = function () {
+           if (pageCount != 0)
+            {
+               goToPage("back");
+               //hide all first
+               for ( var  c = 0;c < elements.length;c++) {
+                   elements[c].style.display = "none";
+               }
+               //hide the finish button
+                //buttonFinish.style.display = "none";
+                buttonNext.style.display = "block";
+               if (pageCount == 0){
+                   buttonBack.style.display = "none"
+                   buttonNext.style.display = "block";
+                  // buttonFinish.style.display = "none";
+               }
+               elements[pageCount].style.display = "block";
+               //text to show page count
+               noteElement.innerHTML = "Presenting Complaints("+count+"/"+totalElements+")";
+           }
+         }
+      //send the form for saving
+      buttonFinish.onclick = function(){
+          if (anyCheckBoxChecked()) {
+              document.forms[0].submit();
+          }else{
+              alert("You must atleast select one symptom \nfor you to save the form");
+          }
+
+         }
+
+      buttonClear.onclick = function(){
+         // alert("I am working");
+          var checkBox = document.forms[0].elements["complaints[]"];
+          for(i in checkBox){
+              checkBox[i].checked = false;
+          }
+        }
+      buttonCancel.onclick = function(){
+          window.location = "/patients/show/<%= @patient_id%>";
+           }
+      container.onscroll = function(){
+          if(container.scrollTop > 50){
+              document.getElementById("top-space").style.borderBottom = "1px solid lightgrey";
+          }else{
+              document.getElementById("top-space").style.borderBottom = "none";
+          }
+
+      }
+      function init(){
+            count = 1;
+            buttonNext =  document.getElementById("next");
+            buttonBack =  document.getElementById("back");
+            buttonFinish =  document.getElementById("finishButton");
+            buttonClear = document.getElementById("clear");
+            buttonCancel = document.getElementById("cancel");
+            noteElement = document.getElementById("label-text");
+            elements = document.getElementsByClassName("syndrome");
+            container = document.getElementById("cont");
+
+            totalElements = elements.length;
+             if (elements.length == 1)
+              {
+               buttonNext.style.display = "none";
+               buttonBack.style.display = "none";
+               buttonFinish.style.display = "block";
+              }
+              if (pageCount == 0){
+                 buttonBack.style.display = "none";
+              }
+              if (elements.length > 1)
+                  {
+                   // buttonFinish.style.display = "none";
+
+                  }
+            for ( var  c = 0;c < elements.length;c++) {
+                if (c == 0){
+                    elements[c].style.display = "block";
+                     noteElement.innerHTML = "Presenting Complaints("+count+"/"+totalElements+")";
+                }
+                else {
+                    elements[c].style.display = "none";
+                }
+            }
+
+        }
+      function goToPage(where) {
+          if (where == "next") {
+              pageCount += 1;
+              count += 1
+          }else{
+              pageCount -= 1;
+              count -= 1;
+          }
+
+          if(pageCount > 0)
+          {
+              buttonBack.style.display = "block";
+          }else
+              buttonBack.style.display = "none";
+       }
+
+     function anyCheckBoxChecked(){
+         //get all checkbox elemnts
+         var checkBox = document.forms[0].elements["complaints[]"];
+         var checked = false;
+         //iterate through the check boxes and see if checked or not
+         for (i in checkBox){
+             if (checkBox[i].checked){
+                 checked = true;
+                 //break the loop if found
+                 break;
+             }
+         }
+       return checked
+     }
+     var con
+    </script>
+  </body>
+</html>

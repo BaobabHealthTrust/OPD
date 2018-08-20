@@ -1,0 +1,182 @@
+<%= javascript_include_tag "jquery" %>
+<%= javascript_include_tag 'utils' %>
+
+<script>
+  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>";
+  var checkForBarcodeTimeout = 1500;
+  var requiredAccessionNumber = '<%= @required_accession_number %>'
+
+  function formatBarcodeSpace(){
+
+    __$('inputFrame' + tstCurrentPage).style.background = "white";
+    __$('inputFrame' + tstCurrentPage).style.marginTop = "6%";
+    __$('page' + tstCurrentPage).style.marginTop = "2.5%";
+    __$('inputFrame' + tstCurrentPage).style.border = "hidden";
+
+    var barcode = document.getElementById("touchscreenInput0");
+    var helptext = __$("helpText" + tstCurrentPage);
+
+    barcode.style.width = "400px"
+    barcode.style.fontSize = "50px"
+    barcode.style.marginLeft = "33%";
+    barcode.style.height = "80px";
+
+    helptext.style.marginLeft = "32.5%";
+    helptext.style.paddingTop = "50px";
+  }
+
+  function focusForBarcodeInput() {
+    var barcode = document.getElementById("touchscreenInput0");
+    if (barcode) {
+      barcode.focus();
+      //window.setTimeout("focusForBarcodeInput()", setFocusTimeout);
+    }
+    //window.setTimeout("focusForBarcodeInput()", setFocusTimeout);
+  }
+
+  jQuery(document).ready(function ($) {
+
+    $("#barcode").keydown(function (event) {
+      alert("here")
+      if ($.inArray(event.keyCode, [46, 8, 9, 27, 13, 190]) !== -1 ||
+        (event.keyCode == 65 && event.ctrlKey === true) ||
+        (event.keyCode >= 35 && event.keyCode <= 39)) {
+        return;
+      }
+      else {
+        if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
+          event.preventDefault();
+        }
+      }
+    });
+  });
+
+  function loadBarcodePage() {
+    focusForBarcodeInput();
+    moveNext();
+  }
+    
+  function moveNext() {
+    usertext = document.getElementById("touchscreenInput0");
+    if (usertext && usertext.value.match(/.+\$$/i) != null) {
+      usertext.value = usertext.value.substring(0, usertext.value.length - 1);
+      scannedAccessionNumber = usertext.value
+
+      if (parseInt(requiredAccessionNumber) == parseInt(scannedAccessionNumber)){
+        gotoNextPage();
+      } else{
+        if (requiredAccessionNumber.match(/RESULTS DETECTED/i))
+        {
+          showMessage("Results already captured")
+        }
+        else{
+          showMessage("Invalid Accession Number. Accession Number:  <b>" + requiredAccessionNumber + " </b> is expected")
+        }
+      }
+
+    }
+    //window.setTimeout("moveNext()", checkForBarcodeTimeout);
+  }
+  
+  //window.addEventListener("load", loadBarcodePage, false);
+
+  function updateAccessionNumber(id){
+    accesionNumber = $("barcode").value.split(":")[1];
+    console.log($("barcode"));
+    $(id).value = accesionNumber;
+  }
+
+  function changeDefultSettings(){
+    $('nextButton').onmousedown = function(){
+      scannedAccessionNumber = document.getElementById("touchscreenInput0").value;
+      if (parseInt(requiredAccessionNumber) == parseInt(scannedAccessionNumber)){
+        gotoNextPage();
+      } else{
+        showMessage("Invalid Accession Number. Accession Number:  <b>" + requiredAccessionNumber + " </b> is expected")
+      }
+    }
+  }
+
+  function resetDefaultSettings(){
+    $('nextButton').onmousedown = function(){
+      gotoNextPage();
+    }
+  }
+  
+</script>
+<style type="text/css">
+  /*.barcode{
+    position: absolute;
+    left: 26%;
+    width: 5%;
+    top: 24%;
+    width: 100px;
+  }
+
+  #tt_page_scan_accession_number .touchscreenTextInput {
+    position: absolute;
+    top: 80px;
+  }
+
+  #page0 .helpTextClass{
+    margin-left: 26.5% !Important;
+  }
+
+  .messageBar {
+    width: 500px !Important;
+    left: 500px !Important;
+  }*/
+</style>
+
+<form action="/encounters/create" method='post'>
+
+  <%= hidden_field_tag "encounter[encounter_type_name]", "LAB RESULTS" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+
+<%#= text_field_tag :accession_number, '', {
+:tt_onLoad => "formatBarcodeSpace(); changeDefultSettings();",
+:id => 'barcode',
+:class => 'touchscreenTextInput',
+:field_type => 'number',
+:tt_pageStyleClass => "Numeric NumbersOnly",
+:helpText => "Scan Accession Number (#{@required_accession_number}) for #{@malaria_test_name}",
+:style => 'position:absolute'
+} %>
+
+  <%= select_tag "accession_number", options_for_select(@available_accesion_number_options),
+    {
+    :id => "barcode",
+    :tt_pageStyleclass => "LongListSelect",
+    :helpText => "Select Recent Tests Below"
+  } %>
+
+  <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@microscopy_options),
+    {
+    :id => "microscopy",
+    :tt_onLoad => "updateAccessionNumber('microscopy_');",
+    :accession_number => '',
+    :condition => "$('barcode').value.split(':')[0].match(/MICROSCOPY/i)",
+    :helpText => "Select Microscopy Results Below"
+  } %>
+
+
+  <%= touch_select_tag "MALARIA TEST RESULT", @patient, options_for_select(@malaria_rdt_options),
+    {
+    :id => "mRDT",
+    :tt_onLoad => "updateAccessionNumber('mRDT_');",
+    :accession_number => '',
+    :condition => "$('barcode').value.split(':')[0].match(/MRDT/i)",
+    :helpText => "Select mRDT Results Below"
+  } %>
+
+  <%  if @retrospective %>
+    <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+      <%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+  <% else %>
+    <%= hidden_field_tag "filter[provider]", nil %>
+  <% end %>
+
+</form
+

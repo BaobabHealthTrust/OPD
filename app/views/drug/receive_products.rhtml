@@ -1,0 +1,587 @@
+<style>
+  .tt_controls_scan_delivery_barcode .keyboard {
+    display: none;
+  }
+
+  #tt_page_scan_delivery_barcode .touchscreenTextInput {
+    position: absolute;
+    top: 80px;
+  }
+
+  #Unknown {
+    display: none;
+  }
+
+  #cover {
+    position: absolute;
+    background-color: black;
+    width: 100%;
+    height: 100%;
+    left: 0%;
+    top: 0%;
+    z-index: 500;
+    opacity: 0.5;
+    align: center;
+    display: none;
+  }
+
+  #newText {
+    top: 40%;
+    left: 40%;
+    margin-top: -200px;
+    margin-left: -250px;
+    position: absolute;
+    margin-right: auto;
+    width: 800px;
+    height: 38px;
+    padding-bottom: 10px;
+    font-size: 2em;
+    text-align: left;
+    background-color: white;
+    padding: 10px;
+    z-index: 999;
+    border: 5px outset tomato;
+    border-radius: 15px;
+    z-index: 900;
+    display: none;
+  }
+
+  #alertPage {
+    top: 50%;
+    left: 40%;
+    margin-top: -200px;
+    margin-left: -250px;
+    position: absolute;
+    margin-right: auto;
+    width: 800px;
+    height: 400px;
+    padding-bottom: 10px;
+    font-size: 1em;
+    text-align: center;
+    background-color: white;
+    padding: 10px;
+    z-index: 999;
+    border: 5px outset tomato;
+    border-radius: 15px;
+    z-index: 900;
+  }
+
+  .custom-message {
+    position: absolute;
+    top: 250px;
+    font-size: 32px;
+    padding-left: 32%;
+    font-style: italic;
+  }
+
+  #summary {
+    top: 60px;
+    overflow: auto;
+    height: 450px ! important;
+  }
+
+  .remove {
+    margin-left: 58px;
+    padding: 6px;
+  }
+
+  .img-holder {
+    background: white;
+  }
+
+  .scell {
+    height: 35px;
+    font-size: 20px;
+    border-bottom: 0.4px solid gray;
+    border-right: 0.4px solid gray;
+    border-radius: 4px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .drug-label {
+    min-width: 25%;
+    text-align: left;
+    padding-left: 2%;
+    overflow-X: hidden;
+  }
+
+  .drug-value {
+    min-width: 25%;
+    cursor: pointer;
+  }
+
+  .hvalue {
+    border: hidden;
+    background: white;
+    font-size: 22px;
+    font-family: sans-serif;
+    font-weight: bold;
+    cursor: auto;
+    color: gray;
+    text-align: left;
+    padding-left: 9px;
+    text-shadow: 1px 1px black;
+    vertical-align: middle;
+  }
+
+  #small {
+    font-size: 19px;
+    margin-left: 15px;
+  }
+
+  .bar {
+    left: 31%;
+    width: 450px;
+    position: absolute;
+    top: 23%;
+    font-size: 1.9em;
+    text-align: center;
+    background-color: tomato;
+    padding: 10px;
+    z-index: 999;
+    border: 5px outset tomato;
+    display: none;
+    border-radius: 15px;
+  }
+
+  .bar button {
+    font-size: 0.7em;
+    margin: 5px;
+  }
+  .barcode{
+    position: absolute;
+    left: 26%;
+    width: 5%;
+    top: 24%;
+    width: 100px;
+  }
+
+</style>
+<%= javascript_include_tag 'jquery' %>
+<script type="text/javascript">
+  jQuery(document).ready(function ($) {
+
+    $("#barcode").keydown(function (event) {
+      // alert("here")
+      if ($.inArray(event.keyCode, [46, 8, 9, 27, 13, 190]) !== -1 ||
+        (event.keyCode == 65 && event.ctrlKey === true) ||
+        (event.keyCode >= 35 && event.keyCode <= 39)) {
+        return;
+      }
+      else {
+        if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
+          event.preventDefault();
+        }
+      }
+    });
+  });
+  var returning = false;
+
+  var tt_cancel_destination = '/clinic';  // /management';
+
+  var response;
+  var setFocusTimeout = 1000;
+  var checkForBarcodeTimeout = 1500;
+  var xPosition = 0;
+  var drugLength = 1;
+  var specialDrugs = [];
+
+  var imgCancel = 'data:image/png;base64,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'
+  var imgBarcode = 'data:image/png;base64,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'
+  function selectedDrugs() {
+    return
+    drugs = document.getElementById("select_drugs")
+    drugs = getSelectedOptions(drugs)
+    drugLength = drugs.length
+    //var drugArray = [];
+    var myForm = document.getElementById("create_stoke");
+    for (i = 0; i < drugLength; i++) {
+      //drugArray.push(drugs[i].value)
+      var newOption = document.createElement("input");
+
+      newOption.type = "hidden"
+      newOption.name = 'observations[][concept_name]';
+      newOption.value = drugs[i].value;
+      myForm.appendChild(newOption);
+
+      var newOption = document.createElement("input");
+      newOption.type = "hidden"
+      newOption.id = "observations__obs_value_numeric"
+      newOption.name = "observations[][value_numeric]";
+      newOption.value = drugs[i].value;
+      myForm.appendChild(newOption);
+    }
+
+  }
+
+  function getSelectedOptions(select) {
+    var result = [];
+    var options = select.getElementsByTagName('option');
+    for (var i = 0; i < options.length; i++) {
+      if (options[i].selected)
+        result.push(options[i]);
+    }
+    ;
+    return result;
+  }
+
+  function loadBarcodePage() {
+    focusForBarcodeInput();
+    moveNext();
+  }
+
+  function formatBarcodeSpace(){
+
+    __$('inputFrame' + tstCurrentPage).style.background = "white";
+    __$('inputFrame' + tstCurrentPage).style.marginTop = "6%";
+    __$('page' + tstCurrentPage).style.marginTop = "2.5%";
+    __$('inputFrame' + tstCurrentPage).style.border = "hidden";
+
+    var barcode = document.getElementById("touchscreenInput0");
+    var helptext = __$("helpText" + tstCurrentPage);
+
+    barcode.style.width = "400px"
+    barcode.style.fontSize = "50px"
+    barcode.style.marginLeft = "33%";
+    barcode.style.height = "80px";
+
+    helptext.style.marginLeft = "32.5%";
+    helptext.style.paddingTop = "50px";
+  }
+
+  function focusForBarcodeInput() {
+    var barcode = document.getElementById("touchscreenInput0");
+    if (barcode) {
+      barcode.focus();
+      //window.setTimeout("focusForBarcodeInput()", setFocusTimeout);
+    }
+    window.setTimeout("focusForBarcodeInput()", setFocusTimeout);
+  }
+
+
+  function moveNext() {
+    usertext = document.getElementById("touchscreenInput0");
+    if (usertext && usertext.value.match(/.+\$$/i) != null) {
+      usertext.value = usertext.value.substring(0, usertext.value.length - 1);
+      gotoNextPage();
+    }
+    window.setTimeout("moveNext()", checkForBarcodeTimeout);
+  }
+  window.addEventListener("load", loadBarcodePage, false);
+
+  function currentExpected(td) {
+    var aUrl = "/drug/current_stock?drug=" + td;
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = function () {
+      set_number(httpRequest);
+    };
+
+    httpRequest.open('GET', aUrl, false);
+    httpRequest.send(null);
+    return response;
+  }
+
+  function set_number(req) {
+    if (req.readyState == 4 && req.status == 200) {
+      response = JSON.parse(req.responseText);
+    }
+  }
+
+  function loadDrugs(data) {
+
+    var drugs = Object.keys(data);
+    specialDrugs = drugs;
+    jQuery("#inputFrame" + tstCurrentPage).empty();
+    __$("inputFrame" + tstCurrentPage).style.background = "rgba(235, 240, 240, 0.3)";
+
+    var header = document.createElement("div");
+    header.id = 'heada'
+    header.style.display = "table";
+    header.style.width = "100%";
+
+    var r = document.createElement("div")
+    r.style.display = "table-row";
+    header.appendChild(r);
+
+    var label = document.createElement("div");
+    label.className = "drug-label scell hvalue";
+    label.style.display = "table-cell";
+    label.style.paddingLeft = "35px";
+    label.style.minWidth = "40%";
+    label.innerHTML = "Drug";
+    r.appendChild(label);
+
+    var label = document.createElement("div");
+    label.className = "drug-value scell hvalue";
+    label.style.display = "table-cell";
+    label.style.textAlign = "center";
+    label.innerHTML = "Pack size";
+    r.appendChild(label);
+
+    var label = document.createElement("div");
+    label.className = "drug-value scell hvalue";
+    label.style.display = "table-cell";
+    label.style.textAlign = "center";
+    label.innerHTML = "Total tins";
+    r.appendChild(label);
+
+    var label = document.createElement("div");
+    label.className = "drug-value scell hvalue";
+    label.style.display = "table-cell";
+    label.innerHTML = "&nbsp";
+    r.appendChild(label);
+
+    __$("inputFrame" + tstCurrentPage).appendChild(header);
+
+    var table = document.createElement("div");
+    table.id = "summarie";
+    table.style.display = "table";
+    table.style.width = "100%";
+
+    var div = document.createElement("div");
+    div.style.height = "530px";
+    div.style.paddingTOp = "10px";
+    div.style.marginTop = "10px";
+    div.style.overflowY = "auto";
+    div.style.width = "100%";
+    div.appendChild(table);
+
+    __$("inputFrame" + tstCurrentPage).appendChild(div);
+
+    var ii = 0;
+    for (var i in drugs) {
+
+      var pack_sizes = Object.keys(data[drugs[i]])
+
+      for (var j = 0; j < pack_sizes.length; j++) {
+        var row = document.createElement("div");
+        row.style.display = "table-row";
+        row.id = drugs[i];
+        console.log("Success - row with id: " + row.id);
+        row.style.background = (ii % 2 == 0) ? "rgb(240, 240, 250)" : "white";
+        table.appendChild(row);
+
+        var label = document.createElement("div");
+        label.className = "drug-label scell";
+        label.style.display = "table-cell";
+        label.style.minWidth = "40%";
+        label.setAttribute("drug-name", drugs[i]);
+        label.innerHTML = drugs[i];
+        label.style.borderLeft = "0.4px solid gray";
+        if (i == 0)
+          label.style.borderTop = "0.4px solid gray";
+
+        row.appendChild(label);
+
+        var label2 = document.createElement("div");
+        label2.className = "drug-label scell";
+        label2.style.display = "table-cell";
+        label2.style.textAlign = "center";
+        label2.innerHTML = pack_sizes[j];
+        if (i == 0)
+          label2.style.borderTop = "0.4px solid gray";
+        row.appendChild(label2);
+
+        var label2 = document.createElement("div");
+        label2.className = "drug-label scell";
+        label2.style.display = "table-cell";
+        label2.style.textAlign = "center";
+        label2.innerHTML = data[drugs[i]][pack_sizes[j]]["tins"];
+        if (i == 0)
+          label2.style.borderTop = "0.4px solid gray";
+        row.appendChild(label2);
+
+        var label2 = document.createElement("div");
+        label2.className = "img-holder";
+        label2.style.display = "table-cell";
+        var img = document.createElement("img");
+        img.className = "remove";
+        img.src = imgCancel;
+        img.height = "42";
+        img.width = img.height;
+        img.setAttribute("drug_name", drugs[i]);
+        img.setAttribute("ob_id", data[drugs[i]][pack_sizes[j]]["id"])
+        img.onmousedown = function () {
+
+          confirmDeletion('Do you really want to delete this delivery?', this.getAttribute("drug_name"), this.getAttribute("ob_id"));
+        }
+
+        label2.appendChild(img);
+        row.appendChild(label2);
+
+        table.appendChild(row);
+      }
+    }
+  }
+
+  function confirmDeletion(message, id, ob_id) {
+
+    if (__$("bar")){
+      jQuery("#bar").remove();
+    }
+    var bar = document.createElement("div");
+    bar.id = "bar";
+    bar.className = "bar";
+    bar.setAttribute("idd", ob_id);
+    bar.setAttribute("iddd", id);
+
+    bar.innerHTML = message + "<br/>" +
+      "<button id = 'no'><span>No</span></button><button id = 'yes'><span>Yes</span></button>";
+
+    bar.style.display = "block";
+    __$("content").appendChild(bar);
+
+    __$('no').onmousedown = function () {
+      clearMessage();
+    }
+
+    __$('yes').onmousedown = function () {
+
+      var id = __$("bar").getAttribute("idd");
+      var idd = __$("bar").getAttribute("iddd");
+      clearMessage();
+      runCmd(idd, id);
+    }
+  }
+
+  function clearMessage() {
+
+    __$("bar").style.display = "none";
+    jQuery("#bar").remove();
+    console.log("removed message bar");
+  }
+
+  function runCmd(node_id, id) {
+
+    if (specialDrugs.indexOf(node_id) >= 0)
+      specialDrugs.splice(specialDrugs.indexOf(node_id), 1);
+
+    ajaxCustomRequest('/drug/void?id=' + id + "&barcode=" + __$("barcode").value);
+
+    try {
+      var node = __$(node_id);
+      jQuery(node).remove();
+    } catch (x) {
+    }
+
+    if (specialDrugs.length == 0){
+
+      barcode = __$("barcode").value;
+      __$("inputFrame" + tstCurrentPage).innerHTML = "<span class = 'custom-message'>No drug deliveries found for barcode" +
+        barcode + "<br />Proceed to enter new delivery</span>";
+    }
+  }
+
+  function ajaxCustomRequest(aUrl) {
+
+    var httpRequest = new XMLHttpRequest();
+
+    if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+      console.log("Done");
+    }
+
+    try {
+      httpRequest.open('POST', aUrl, true);
+      httpRequest.send(null);
+    } catch (e) {
+    }
+  }
+
+  function checkPreselectedDrugs() {
+
+    var barcode = __$("barcode").value;
+    __$("helpText" + tstCurrentPage).innerHTML += (" " + barcode);
+    __$("touchscreenInput" + tstCurrentPage).style.display = "none";
+    __$("page" + tstCurrentPage).style.display = "none";
+    __$("nextButton").innerHTML = "<span>Continue</span>";
+
+    var aUrl = "/drug/pull_receipt_drugs?barcode=" + barcode;
+    var httpRequest = new XMLHttpRequest();
+
+    httpRequest.onreadystatechange = function () {
+      if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+        response = JSON.parse(httpRequest.responseText);
+
+        var keys = Object.keys(response);
+        if (keys.length > 0) {
+          __$("page" + tstCurrentPage).style.display = "block";
+          loadDrugs(response);
+        } else {
+
+          if(returning == false){
+            returning = true;
+            gotoPage(tstCurrentPage + 1);
+          }else{
+            returning = true;
+            gotoPage(tstCurrentPage - 1);
+          }
+
+          //__$("inputFrame" + tstCurrentPage).innerHTML = "<span class = 'custom-message'>No drug deliveries found for barcode " +
+          //        barcode + "<br />Proceed to enter new delivery</span>";
+        }
+      }
+
+    };
+
+    httpRequest.open('GET', aUrl, false);
+    httpRequest.send(null);
+  }
+
+  function hidePreviousDrugs() {
+    return;
+    for (var i = 0; i < specialDrugs.length; i++) {
+      jQuery("[tstValue=" + specialDrugs[i] + "]").remove();
+    }
+  }
+
+</script>
+
+<style>
+  #tt_page_select_products_received #viewport{
+    height: 520px;
+  }
+  #tt_page_select_products_to_verify #viewport{
+    height: 520px;
+  }
+  #tt_page_select_products #viewport{
+    height: 520px;
+  }
+</style>
+
+<form id="create_stoke" name="create_stoke" action="/drug/receive_products_main">
+  <%= text_field_tag :identifier, '', {
+    :tt_onLoad => "returning = false; $('keyboard').style.display = 'none'; formatBarcodeSpace()",
+    :id => 'barcode',
+    :class => 'touchscreenTextInput',
+    :helpText => 'Scan barcode on  delivery note',
+    :style => 'position:absolute'} %>
+
+  <%= select_tag "identifier_summary", nil,
+    {
+    :id => "selected_drugs",
+    :multiple => true,
+    :optional => true,
+    :tt_onLoad => 'checkPreselectedDrugs()',
+    :helpText => "Previous drug deliveries for barcode",
+    :tt_pageStyleClass => "NoKeyboard NoInput small"} %>
+
+  <%= select_tag "drug_name", options_for_select(@drugs),
+    {
+    :id => "select_drugs",
+    :field_type => 'alpha',
+    :multiple => true,
+    :optional => true,
+    :tt_onUnLoad => 'selectedDrugs()',
+    :helpText => "Select products received",
+    #:selectAll => true,
+    :tt_onLoad => "returning = true; hidePreviousDrugs();",
+    :tt_pageStyleClass => "longSelectList"} %>
+
+  <%= touch_date_tag "delivery_date", 'delivery_date', nil,
+    {
+    :id => "delivery_date",
+    :helpText => "Delivery Date",
+    :maxDate => (Date.today + 30.year)} %>
+
+</form>

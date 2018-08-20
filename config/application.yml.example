@@ -17,8 +17,41 @@ production:
  logo: mw.gif
  application.name: OPD
  create.from.dde.server: false
+ zone: zone_c_west
+ malaria_ip_addresses: localhost:4000, localhost:5000
+ simple_application_dashboard: true
+ anti_malaria_drugs:
+   Lumefantrine + Arthemether 1 x 6:
+    duration: "3"
+    frequency: "BD"
+    strength: "1.0"
+    units: tabs
+    drug_name: Lumefantrine + Arthemether 1 x 6
+    tabs: "6"
+   Lumefantrine + Arthemether 2 x 6:
+    duration: "3"
+    frequency: BD
+    strength: "2.0"
+    units: tabs
+    drug_name: Lumefantrine + Arthemether 2 x 6
+    tabs: "12"
+   Lumefantrine + Arthemether 3 x 6:
+    duration: "3"
+    frequency: BD
+    strength: "3.0"
+    units: tabs
+    drug_name: Lumefantrine + Arthemether 3 x 6
+    tabs: "18"
+   Lumefantrine + Arthemether 4 x 6:
+    duration: "3"
+    frequency: BD
+    strength: "4.0"
+    units: tabs
+    drug_name: Lumefantrine + Arthemether 4 x 6
+    tabs: "24"
+
  blood:
-  Full blood count, Malaria parasite, Group and Cross match, Urea and electrolytes, CD4(cluster of differentiation 4) count,
+  Full blood count, Malaria (mRDT), Malaria (Microscopy),  Group and Cross match, Urea and electrolytes, CD4(cluster of differentiation 4) count,
   Viral load, Cryptococcal Antigen, Lactate, Fasting blood sugar, Random blood sugar,
   Liver function test, Hepatitis test, sickling test,ESR(erythrocyte sedimentation rate),
   Culture and sensitivity, Widal test,ELISA(enzyme-linked immunosorbent assay),
@@ -57,9 +90,40 @@ development:
  logo: mw.gif
  application.name: OPD
  create.from.dde.server: false
-#zones = ['zone_northern', 'zone_c_east', 'zone_c_west', 'zone_s_east', 'zone_s_west']
+ zone: zone_c_west
+ malaria_ip_addresses: localhost:4000, localhost:5000
+ simple_application_dashboard: true
+ anti_malaria_drugs:
+   Lumefantrine + Arthemether 1 x 6:
+    duration: "3"
+    frequency: "BD"
+    strength: "1.0"
+    units: tabs
+    drug_name: Lumefantrine + Arthemether 1 x 6
+    tabs: "6"
+   Lumefantrine + Arthemether 2 x 6:
+    duration: "3"
+    frequency: BD
+    strength: "2.0"
+    units: tabs
+    drug_name: Lumefantrine + Arthemether 2 x 6
+    tabs: "12"
+   Lumefantrine + Arthemether 3 x 6:
+    duration: "3"
+    frequency: BD
+    strength: "3.0"
+    units: tabs
+    drug_name: Lumefantrine + Arthemether 3 x 6
+    tabs: "18"
+   Lumefantrine + Arthemether 4 x 6:
+    duration: "3"
+    frequency: BD
+    strength: "4.0"
+    units: tabs
+    drug_name: Lumefantrine + Arthemether 4 x 6
+    tabs: "24"
  blood:
-  Full blood count, Malaria parasite, Group and Cross match, Urea and electrolytes, CD4(cluster of differentiation 4) count,
+  Full blood count, Malaria (mRDT), Malaria (Microscopy),  Group and Cross match, Urea and electrolytes, CD4(cluster of differentiation 4) count,
   Viral load, Cryptococcal Antigen, Lactate, Fasting blood sugar, Random blood sugar,
   Liver function test, Hepatitis test, sickling test,ESR(erythrocyte sedimentation rate),
   Culture and sensitivity, Widal test,ELISA(enzyme-linked immunosorbent assay),

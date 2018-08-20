@@ -1,0 +1,602 @@
+<html>
+  <head>
+    <%= javascript_include_tag "prototype" %>
+<%#= javascript_include_tag 'jquery-1.3.2.min' %>
+    <!--<link rel="stylesheet" type="text/css" href="/touchscreentoolkit/lib/stylesheets/touch-fancy.css"></link>-->
+    <script src="/touchscreentoolkit/lib/javascripts/standard.js" type="text/javascript"></script>
+<%#= javascript_include_tag 'jquery.selectric.js' %>
+    <link rel="stylesheet" type="text/css" href="/selectric/public/selectric.css"></link>
+
+    <style>
+      .messageBar {
+        left: 250px;
+        width: 450px;
+        position: absolute;
+        top: 100px;
+        font-size: 2em;
+        text-align: center;
+        background-color: tomato;
+        padding: 10px;
+        z-index: 999;
+        border: 5px outset tomato;
+        display: none;
+        border-radius: 15px;
+      }
+
+      #second_patient_div {
+        width:49%;
+        float: right;
+        padding-right: 20px;
+        position: relative;
+      }
+
+      #primary_patient_div {
+        float:left;
+        width:45%;
+        margin-left:1%;
+        position: relative;
+      }
+
+      .find_buttons {
+        height:30px;
+        width: 100px;
+        font-size:10px;
+      }
+
+      table{
+        font-size:20px;
+        /*padding-left:10px;*/
+      }
+
+      #left_div {
+        float: left;
+        width: 44%;
+        border-style:solid;
+        border-width:1px;
+        height: 53%;
+        overflow: auto;
+        position: fixed;
+        left: 40px;
+        top: 31%;
+      }
+
+      #right_div {
+        width: 47%;
+        border-style:solid;
+        border-width:1px;
+        height: 53%;
+        overflow: auto;
+        float: right;
+        position: fixed;
+        right: 45px;
+        top: 31%;
+      }
+
+      #center_div {
+        float: left;
+        width: 8%;
+        height: 77%;
+        overflow: auto;
+      }
+
+      #popUpBox{
+        position: absolute;
+        top: 84px;
+        left: 420px;
+        border: solid 1px #000000;
+        background-color:MediumTurquoise;
+        visibility: hidden;
+        font-size: 25;
+        z-index: 600;
+        width:413px;
+        -moz-user-select:none
+      }
+
+      .find_buttons{
+        border-radius: 7px;
+        background-color: #6495ED;
+        border-bottom: 1px outset black;
+        border-top: 1px outset black;
+        color: white;
+        padding: 9px 16px 16px 19px;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        bottom: 0px;
+        font-weight: bold;
+        font-size: 14pt;
+      }
+
+      #merge{
+        border-radius: 7px;
+        background-color: #6495ED;
+        border-bottom: 1px outset black;
+        color: white;
+        padding: 10px 10px 10px 10px;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 14pt;
+        margin-top: 12%;
+        position: absolute;
+        left: 45.9%;
+        width: 300px;
+      }
+
+      input{
+        color:#00f;
+        padding: 7px;
+        border: 2px solid #DDDDDD;
+        width: 200px;
+      }
+
+      #disabled_button_left, #disabled_button_right{
+        border-radius: 7px;
+        background-color: #BEBEBE;
+        border-bottom: 1px outset black;
+        border-top: 1px outset black;
+        color: white;
+        padding: 9px 16px 16px 19px;
+        text-align: center;
+        text-decoration: none;
+        cursor:no-drop;
+        bottom: 0px;
+        font-weight: bold;
+        font-size: 14pt;
+        margin-left: 4%;
+      }
+      div{
+        -moz-user-select: none;
+      }
+      #primary_button{
+        margin-left: 4%;
+      }
+      #secondary_button{
+        margin-left: 4%;
+      }
+
+
+
+      input, select {
+        font-family:Arial, Helvetica, sans-serif;/* need to set for IE6/7 or it won't inhereit properly*/
+      }
+      input,span,select{
+        display:inine-block;
+        vertical-align:middle;
+        font-size:13px;
+      }
+
+      input,select{
+        color:#999;
+        border:1px solid #999;
+      }
+      /* for inputs don't use line-height as chrome will do something weird with the text highlighting.
+      Firefox chrome and IE9+ will vertically align the text in the height of the input anyway.
+      For IE8 and under you have to use line-height so use CCs.
+      */
+      input{
+        padding:0 10px;
+        height:30px;/* uses normal box model */
+      }
+      select{/* height,line-height and padding can't be changed at all in IE6 and 7*/
+             padding:7px 2px 5px 10px;
+             height:32px;/* uses border box model (so padding and borders are included inside the width and height)*/
+             width:160px;
+             line-height:26px;/* webkit mac doesn't use height but fiddle with line-height until it looks right*/
+             background:transparent;/* if you change the background then safari and chrome mac will use height !!!!*/
+      }
+
+      .serach-button{
+        cursor: pointer;
+        display: inline-block;
+        outline: 0 none;
+        overflow: hidden;
+        padding: 8px 67px;
+        text-align: center;
+        text-decoration: none;
+        vertical-align: middle;
+        white-space: nowrap;
+        background-color: #2196f3;
+        float: right;
+        font-size: 12pt;
+      }
+
+      .color_blue{
+        border-style:solid;
+      }
+      .color_white{
+        border-style:solid;
+      }
+
+      th{
+        border-style:solid;
+      }
+    </style>
+  </head>
+
+  <br/>
+
+  <div id='primary_patient_div'>
+
+    <form id="form1" method="post" action="">
+      <fieldset>
+        <legend><b>Remote primary patient</b></legend>
+        <input  type="text" placeholder="First Name" id="pfname" style="width: 45%;" onmousedown="showKeyPad('pfname', 'left')"/>
+        <input  type="text" style="width: 47%;" id="plname" placeholder="Last Name" onmousedown="showKeyPad('plname', 'left')"/><br /><br />
+        <select name="gender" class="gender" id="pgender">
+          <option value="">Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select><br />
+        <span class="serach-button" onclick="searchPatient('left')">Search</span>
+      </fieldset>
+    </form>
+    <!--<a id = "primary_button" onmousedown="showKeyPad('primary_patient')" class ='find_buttons'>Find patients</a>
+    <span style="display:none" id = "disabled_button_left">Find patients</span>-->
+  </div>
+
+  <div id='second_patient_div'>
+    <!--Find DDE secondary patient <%=  "&nbsp;" * 2 %> <input id="secondary_patient" name="secondary_patient" type="text" />
+    <a id = "secondary_button" onmousedown="showKeyPad('secondary_patient')" class ='find_buttons'>Find patients</a>
+    <span style="display:none" id = "disabled_button_right">Find patients</span>-->
+
+    <form id="form1" method="post" action="">
+      <fieldset>
+        <legend><b>Remote secondary patient</b></legend>
+        <input  type="text" placeholder="First Name" id="sfname" style="width: 47%;" onmousedown="showKeyPad('sfname', 'right')" />
+        <input  type="text" style="width: 44%;" id="slname" placeholder="Last Name" onmousedown="showKeyPad('slname', 'right')" /><br /><br />
+        <select name="gender" class="gender" id="sgender">
+          <option value="">Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select><br />
+        <span class="serach-button" onclick="searchPatient('right')">Search</span>
+      </fieldset>
+    </form>
+    <!--<a id = "primary_button" onmousedown="showKeyPad('primary_patient')" class ='find_buttons'>Find patients</a>
+    <span style="display:none" id = "disabled_button_left">Find patients</span>-->
+  </div>
+
+
+
+  <%if flash[:notice]%>
+    <p id="flash" style="color: green"><%= flash[:notice] %></p>
+  <%elsif flash[:error]%>
+    <p id="flash" style="color: tomato"><%= flash[:error] %></p>
+  <%end%>
+
+  <div id='left_div'>
+  </div>
+
+  <!--<div id='center_div'>-->
+  <!--<a id='merge' style = 'width: 40px;' onmousedown='mergePatients()'>&nbsp;<span><<</span></a>-->
+  <!--</div>-->
+
+  <div id='right_div'>
+  </div>
+
+
+
+  <div id='popUpBox'>
+  </div>
+
+
+  <div id="keypad">
+    <span class="keypad">
+    </span>
+  </div>
+
+  <script>
+
+    keyboard = document.getElementsByClassName("keypad")[0]
+    var search = null
+    var patients_to_merge = [null,null]
+    var current_div = null
+    function getButtonString(id,string){
+      return "<button \
+      onMouseDown='press(this.id);' \
+      class='keyboardButton' \
+      id='"+id+"'>"+
+        string +
+        "</button>";
+    }
+
+    function getCharButtonSetID(character,id){
+      return '<button onMouseDown="press(\''+character+'\');" class="keyboardButton" id="'+id+'">' + "<span style='width:32px'>"+ character +"</span>"+ "</button>";
+    }
+
+    function getButtons(chars){
+      var buttonLine = "";
+      for(var i=0; i<chars.length; i++){
+        character = chars.substring(i,i+1)
+        buttonLine += getCharButtonSetID(character,character)
+      }
+      return buttonLine;
+    }
+
+    showAlphaKeypad();
+
+    function showAlphaKeypad(){
+      document.getElementById("keypad").style.height = "280";
+      keyboard.innerHTML= getButtons("0123456789") + "</br>"
+      keyboard.innerHTML+= getButtons("QWERTYUIOP") + "</br>"
+      keyboard.innerHTML+= getButtons("ASDFGHJKL:") + "</br>"
+      keyboard.innerHTML+= getButtons("ZXCVBNM,.?")
+      keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
+      keyboard.innerHTML+= getButtonString('Space','<span>Space</span>')
+      keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
+    }
+
+    function showNumericKeypad(){
+      document.getElementById("keypad").style.height = "145";
+      keyboard.innerHTML = getButtons("123")
+      keyboard.innerHTML+= getButtons("456")
+      keyboard.innerHTML+= getButtons("7890")
+      keyboard.innerHTML+= getButtonString('space','<span>Space</span>')
+      keyboard.innerHTML+= getButtonString('clear','<span>Clear</span>')
+      keyboard.innerHTML+= getButtonString('backspace','<span>Bksp</span>')
+      keyboard.innerHTML+= getButtonString('abc','<span>abc</span>')
+      keyboard.innerHTML+= getButtonString('dash','<span>-</span>')
+      keyboard.innerHTML+= getButtonString('slash','<span>/</span>')
+    }
+
+
+    function showKeyboard(){
+      key = document.getElementById("keypad")
+      if(key.style.display == 'none' || key.style.display == ""){
+        key.style.display = "inline";
+        return
+      }
+
+      key.style.display = "none";
+    }
+
+    var currentInput = "";
+    function showKeyPad(inputID, side) {
+      currentInput = document.getElementById(inputID);
+      console.log(currentInput)
+      key = document.getElementById("keypad")
+      current_div = side
+      if (side == 'left') {
+        document.getElementById('keypad').style.left = '20px'
+        document.getElementById('keypad').style.right =  null;
+      } else {
+        document.getElementById('keypad').style.right =  '20px'
+        document.getElementById('keypad').style.left = null;
+      }
+      search = currentInput;
+      showKeyboard();
+    }
+
+    function press(pressedChar){
+      switch (pressedChar) {
+        case 'backspace':
+          search.value = search.value.substring(0,search.value.length-1);
+          searchPatient(search.value)
+          return;
+        case 'Space':
+          search.value+= " "
+          searchPatient(search.value)
+          return
+        case 'clear':
+          search.value = ""
+          searchPatient(search.value)
+          return
+        case 'num':
+          showNumericKeypad();
+          return
+        case 'slash':
+          search.value+= "/"
+          searchPatient(search.value)
+          return
+        case 'dash':
+          search.value+= "-"
+          searchPatient(search.value)
+          return
+        case 'abc':
+          showAlphaKeypad();
+          return
+      }
+      search.value+= pressedChar
+      //searchPatient(search.value)
+    }
+
+    function searchPatient(side){
+      if (side == 'left'){
+        fname = document.getElementById('pfname').value;
+        lname = document.getElementById('plname').value;
+        gender = document.getElementById('pgender').value;
+      }else{
+        fname = document.getElementById('sfname').value;
+        lname = document.getElementById('slname').value;
+        gender = document.getElementById('sgender').value;
+      }
+      var url = "/patients/search_local_by_name_and_gender?fname=" + fname +  " &lname=" + lname + "&gender=" + gender + "&side=" + side;
+      response = new Ajax.Request(url,{method:'get',onSuccess: function(transport){
+          text = transport.responseText || "";
+          updateDiv(text);
+        }});
+    }
+
+    function updateDiv(text) {
+      keypad = document.getElementById('keypad')
+      if (current_div == 'right') {
+        div = document.getElementById('right_div');
+        patients_to_merge[1] = null
+      } else { div = document.getElementById('left_div'); patients_to_merge[0] = null }
+      div.innerHTML = text
+    }
+
+    function setPatient(patient_id,current_color,side) {
+      left_div = document.getElementById('left_div');
+      right_div = document.getElementById('right_div');
+      row = document.getElementsByClassName("patient_" + patient_id)
+      name = row[0].innerHTML ; arv_number = row[3].innerHTML
+      age = row[1].innerHTML ; national_id = row[4].innerHTML
+      guardian = row[2].innerHTML ; ta = row[5].innerHTML;
+      total_encounters = row[6].innerHTML; latest_visit = row[7].innerHTML;
+
+      table_name = "data_table_" + patient_id
+
+      current_color = '#008B8B'
+
+      new_table = "<style>." + table_name + " td { border-style:solid;border-width:1px;background-color:" + current_color + ";}</style>"
+
+      new_table+= "<table width='100%' class='"+ table_name + "'><tr>" +
+        "<td>" + name + "</td>" +
+        "<td>" + age + "</td></tr>" +
+        "<tr><td>" + guardian + "</td>" +
+        "<td>" + arv_number + "</td></tr>" +
+        "<tr><td>" + national_id + "</td>" +
+        "<td>" + ta + "</td></tr>" +
+        "<tr><td>" + total_encounters + "</td>" +
+        "<td>" + latest_visit + "</td>" +
+        "</tr></table>"
+
+      if (side == 'right') {
+        div = right_div ; patients_to_merge[1] = patient_id
+      } else { div = left_div ; patients_to_merge[0] = patient_id }
+      div.innerHTML = new_table
+    }
+
+    function mergePatients() {
+      if (patients_to_merge[0] == patients_to_merge[1]) {
+        showMessage("Merging not done. Check for the errors and try again");
+      }
+
+      if (patients_to_merge[0] != null && patients_to_merge[1] != null) {
+        form = document.createElement("form")
+        form.method =  'post';
+        form.action = '/patients/dde_merge_similar_patients';
+        input = document.createElement('input');
+        input.name = 'patient_ids';
+        input.value = patients_to_merge[0] + "," + patients_to_merge[1];
+        input.type = 'hidden';
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      }
+      else{
+        showMessage("Merging not done. Check for the errors and try again");
+      }
+      return true;
+    }
+
+
+    window.onload = function(){
+      jQuery(".gender").selectric();
+    }
+    
+  </script>
+  <style>
+    #backspace{
+      position:absolute;
+      left:100px;
+      bottom:2px;
+    }
+
+    #Space{
+      position:absolute;
+      left:220px;
+      bottom:2px;
+      width:200px;
+    }
+
+    #clear{
+      position:absolute;
+      left:470px;
+      bottom:2px;
+    }
+
+    #num{
+      position:absolute;
+      left:470px;
+      bottom:2px;
+      width:200px;
+    }
+    #keypad{
+      background-color: #FFFFFF;
+      border: 2px solid #9999FF;
+      border-radius: 15px 15px 15px 15px;
+      display: none;
+      height: 304px;
+      padding: 5px;
+      position: absolute;
+      right: 13px;
+      top: 208px;
+      width: 672px;
+    }
+
+    #press{
+      font-size:75px;
+      height:80px;
+      position:absolute;
+      right:13px;
+      top:35px;
+      width:300px;
+    }
+
+
+    .patient_link{
+      height:50px;
+      width:150px;
+    }
+
+    .color_blue {
+      background-color:lightgrey;
+    }
+
+    td {
+      border-width:1px;
+    }
+
+    .merge-btn{
+      font-size: 16pt !important;
+    }
+  </style>
+
+  <div id="keypad">
+    <span class="keypad">
+    </span>
+  </div>
+  <script src="/selectric/public/lib/jquery.min.js"></script>
+  <script src="/selectric/public/lib/jquery-ui.min.js"></script>
+  <script src="/selectric/public/lib/prism.js"></script>
+  <script src="/selectric/public/lib/jquery.minicolors.min.js"></script>
+  <script src="/selectric/public/jquery.selectric.js"></script>
+
+  <script type="text/javascript">
+                  
+    jQuery( document ).ready(function() {
+      finishButton = jQuery('#finishButton')[0];
+      finishButton.parentNode.removeChild(finishButton);
+      
+      buttonsDiv = document.getElementById('buttons')
+      mergeButtonHtml = '<button id="mergeBtn" onclick="mergePatients();" class="green left merge-btn" style="position :relative; float:right; width: 181px;"><span><< Merge Patients</span></button>';
+      buttonsDiv.innerHTML += mergeButtonHtml;
+
+      cancelButtonHtml = '<button id="cancelBtn" onclick="goHome();" class="red" style="position :relative; float:left;"><span>Cancel</span></button>';
+      buttonsDiv.innerHTML += cancelButtonHtml;
+
+      //cancelBtn = jQuery('#cancelBtn')[0];
+      //cancelBtn.onmousedown = function(){
+      //window.location = "/";
+      //}
+
+<% if flash[:merge_notice] %>
+      showMessage('<%=  flash[:merge_notice] %>');
+<%end%>
+
+<% if flash[:merge_error] %>
+      showMessage('<%=  flash[:merge_error] %>');
+<% end %>
+  });
+
+  function goHome(){
+    window.location = "/";
+  }
+  
+  </script>
+
+</html>

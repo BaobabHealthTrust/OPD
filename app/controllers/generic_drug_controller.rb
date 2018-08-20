@@ -161,4 +161,110 @@ class GenericDrugController < ApplicationController
     render :text => "<li>" + @names.map{|n| n } .join("</li><li>") + "</li>"
   end
 
+  def receive_products
+    @drugs = [""]
+
+    drugs = opd_drugs
+    drugs.each do |drug|
+      @drugs << drug.name.squish
+    end
+    @drugs = [""] + opd_drugs.collect{|d|d.name}.sort
+    #@drugs = ["", "Triomune-40", "d4T (Stavudine 30mg tablet)", "d4T (Stavudine 40mg tablet)", "DDI (Didanosine 125mg tablet)"]
+  end
+
+  def receive_products_main
+    #raise params.inspect
+    @delivery_date = params[:observations].first["value_datetime"]
+    @drugs = params[:drug_name]
+    drugs = opd_drugs
+    @formatted = drugs.map(&:name)
+    @drug_short_names = {} #regimen_name_map
+    @drug_cms_names = {}
+    @drug_cms_packsizes = {}
+
+    drugs.each do |drug|
+      drug_name = drug.name
+      @drug_cms_names[drug_name] = drug.name
+      @drug_cms_packsizes[drug_name] = ""#drug.pack_size
+      @drug_short_names[drug_name] = "#{drug_name} #{drug.dose_strength} #{drug.units}"
+    end
+
+    @list = []
+    @expiring = {}
+    @formatted.each { |drug|
+      @drugs.each { |received|
+        if drug == received
+          @list << drug
+          @expiring["#{drug}"] = calculate_dispensed("#{drug}", @delivery_date)
+        end
+      }
+    }
+  end
+
+  def relocate_products
+
+  end
+
+  def mark_loss_damage_of_products
+    
+  end
+
+  def pull_receipt_drugs
+
+    data = {}
+
+    Pharmacy.active.find_all_by_value_text(params[:barcode]).each { |entry|
+
+      drug = Drug.find(entry.drug_id).name
+      qty_size = entry.pack_size.blank? ? 60 : entry.pack_size.to_i
+
+      data[drug] = {} if data[drug].blank?
+      data[drug][qty_size] = {} if data[drug][qty_size].blank?
+      data[drug][qty_size]["tins"] = (entry.value_numeric.to_i/qty_size).round
+      data[drug][qty_size]["pack_size"] = qty_size
+      data[drug][qty_size]["id"] = entry.id
+    }
+
+    render :text => data.to_json
+  end
+
+  def void
+
+    user_id = current_user.user_id
+    delivery = Pharmacy.find(params[:id])
+    delivery.voided = 1
+    delivery.void_reason = params[:reason]
+    delivery.date_voided = (session[:datetime].to_date rescue Date.today)
+    delivery.changed_by = user_id
+    delivery.save
+    render :text => "Done".to_json
+  end
+
+  def opd_drugs
+    arv_concept_ids = MedicationService.arv_drugs.map(&:concept_id)
+    non_art_drugs = Drug.find(:all, :conditions => ["concept_id NOT IN (?)", arv_concept_ids], :limit => 20)
+    return non_art_drugs
+  end
+
+  def calculate_dispensed(drug_name, delivery_date)
+
+    drug_id = Drug.find_by_name(drug_name).id
+    current_stock = Pharmacy.current_stock_as_from(drug_id, Pharmacy.first_delivery_date(drug_id), delivery_date.to_date)
+
+    expiry = 0
+    Pharmacy.currently_expiring_drugs(delivery_date.to_date, drug_id).each { |stock|
+      #raise stock[1].to_yaml
+      expiry += stock[1]["delivered_stock"]
+
+    }
+    if current_stock > 0 and current_stock <= expiry
+      expiry = current_stock
+    elsif current_stock > expiry
+      expiry = expiry
+    else
+      expiry = 0
+    end
+
+    return expiry
+  end
 end

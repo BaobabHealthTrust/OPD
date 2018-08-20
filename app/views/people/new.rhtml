@@ -200,7 +200,8 @@ function validateDate() {
       :tt_onLoad => "validateDay(); getDayOfMonthPicker($('person_birth_year').value, $('person_birth_month').value);$('nextButton').style.display = 'block';" ,
       :validationJS => "validateDOB()",
       :validationMessage => 'Please enter a valid date'%>
-
+   <% ask_ancestral_details = get_global_property_value("ask_ancestral_details") rescue false %>
+   <% if ask_ancestral_details %>
   <p><label for="region_region_name">Region of Origin</label></br>
   <%= text_field "region" , 'region_name', 
       :xhelpText => 'Region',
@@ -254,14 +255,14 @@ function validateDate() {
     :ajaxURL => '/people/village?search_string=',
     :allowFreeText => false ,
     :tt_onLoad => "set_ajaxURL_for_suggestions('/people/village/Village?filter_value=' ,document.getElementById('person_addresses_county_district').value);$('nextButton').style.display = 'none';"}%>
-
+ <% end %>
 
 <p><label for="filter_region">Current Region</label></br>
 <%= text_field "filter" , 'region', 
       :xhelpText => 'Region',
       :tt_requireNextClick => false,
-      :ajaxURL => '',
-      :tt_onLoad => "set_ajaxURL_for_suggestions('/people/region/Region?filter_value=' ,document.getElementById('person_addresses_county_district').value);$('nextButton').style.display = 'none';" %></p>
+      :ajaxURL => '/people/region/Region?field=role&value=',
+      :tt_onLoad => "$('nextButton').style.display = 'none';" %></p>
 
 <%= text_field_tag "person[addresses][state_province]", params[:state_province], {
     :id => 'state_province',
@@ -355,7 +356,8 @@ function validateDate() {
     }
   %>
   <%else%>
-    <%= text_field_tag "person[home_phone_number]",  params[:home_phone_number], {:field_type => 'number', :helpText => 'Ground Phone Number', :allowFreeText => true, :tt_pageStyleClass => "nota", :validationRule => "^0\\d{7,9}$|Unknown|Not Available|N\/A", :validationMessage => "Not a valid phone number" } if ask_ground_phone%>
+    <%= text_field_tag "person[home_phone_number]",  params[:home_phone_number], {:field_type => 'number', :helpText => 'Ground Phone Number', :allowFreeText => true, :tt_pageStyleClass => "nota", :validationRule => "^0\\d{7,9}$|Unknown|Not Available|N\/A", :validationMessage => "Not a valid phone number",
+                                                                                  :condition => "$('cellphone').value == ' '" } if ask_ground_phone%>
   <%end%>
 
   <%#= select_tag("person[agrees_phone_text_for_TB_therapy]", options_for_select([" ", "Yes", "No", "Unknown"] ,params[:agrees_phone_text_for_TB_therapy]),:helpText =>"Can we send you an SMS for follow-up?", :condition => "$('cellphone').value !='Unknown' && $('cellphone').value !='N/A'", :tt_onLoad => 'seen(tstCurrentPage);') if ask_sms_for_TB_therapy%>

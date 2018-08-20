@@ -1,0 +1,48 @@
+<script type="text/javascript">
+  tt_cancel_destination = "/clinic";
+</script>
+
+<form action="/properties/create_dde_properties" method="POST">
+  <%= select_tag "dde_status", options_for_select([" ", "Yes", "No"], @dde_status),
+    {
+    :id => "dde_status",
+    :helpText  => "Enable DDE?"
+  } %>
+
+  <%= text_field_tag "dde_address", @dde_address,
+    {
+    :field_type => "number",
+    :condition => "__$('dde_status').value.toUpperCase() == 'YES'",
+    :validationRule => "([0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\})",
+    :validationMessage => "You must enter a valid IP address e.g 192.168.100.200</b>)",
+    :tt_pageStyleClass => "Keyboard Numeric NumbersOnlyWithDecimal",
+    :helpText => "IP address"
+
+  } %>
+
+  <%= text_field_tag "dde_port", @dde_port,
+    {
+    :field_type => "number",
+    :condition => "__$('dde_status').value.toUpperCase() == 'YES'",
+    :tt_pageStyleClass => "Keyboard Numeric NumbersOnly",
+    :helpText => "Port"
+
+  } %>
+
+  <%= text_field_tag "dde_username", @dde_username,
+    {
+    :textCase => "lower",
+    :condition => "__$('dde_status').value.toUpperCase() == 'YES'",
+    :field_type => "password",
+    :helpText => 'DDE username'
+  }  %>
+
+  <%= text_field_tag "dde_password", @dde_password,
+    {
+    :textCase => "lower",
+    :condition => "__$('dde_status').value.toUpperCase() == 'YES'",
+    :field_type => "password",
+    :helpText => 'DDE password'
+  }  %>
+
+</form>

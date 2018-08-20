@@ -1,0 +1,108 @@
+<html>
+  <head>
+    <%= stylesheet_link_tag 'idsr_monthly_summary' %>
+    <%= javascript_include_tag 'jquery' %>
+    <%= stylesheet_link_tag 'jquery-ui' %>
+    <%= javascript_include_tag 'jquery-3.1.1.min' %>
+    <%= javascript_include_tag 'jquery.mtz.monthpicker' %>
+    <!--script type="text/javascript" charset="utf8" src="/javascripts/jquery.dataTables.min.js"></script-->
+    <script>
+    jQuery(document).ready(function($) {
+       $('#table_id').dataTable({
+         "bAutoWidth": true,
+         "bPaginate": false,
+         "bProcessing": true,
+         "sScrollY": "400px",
+         "bInfo": true,
+         "bPaginate": false
+       });
+     })
+    </script>
+  </head>
+  <body>
+    <%= image_tag(@logo, :class => "logo")%>
+    <br /><b style="margin-left:75px"><%= @current_location_name %></b><br />
+
+    <b style="position:relative; top:0px;margin-left:75px"><%= @report_name.humanize.split.map{|w| w.capitalize}.join(' ') %></b><br />
+
+    <!-- <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"> Dates : <--%= "#{@formated_start_date} to #{@formated_end_date}"%> <--%= "<br> Total Registered: #{@total_registered.length}" if (@report_name.upcase == "TOTAL_REGISTERED") %></b> -->
+    <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px">
+      Reporting Year and Month:<input type="text" id="year_month"></b>
+ <br /><b style="position: relative; display:block; font-weight:bold; top:-15px; padding-left:30px;margin-left:200px"></b>
+
+    <div>
+      <table  id="table_id" class="display" >
+        <thead>
+          <tr>
+            <th id="thth">
+              Notifiable Deseases and Events <p />
+            </th>
+
+            <th id="ththth">
+              <span><u>Out-Patient Cases</u></span> <br />
+              <span class="basic_span"><5 yrs</span>
+              <span class="basic_span">=> 5yrs</span>
+              <span class="basic_span">Total</span>
+            </th>
+
+            <th id="ththth">
+              <span><u>In-Patient Cases</u></span> <br />
+              <span class="basic_span"><5yrs</span>
+              <span class="basic_span">=>5yrs</span>
+              <span class="basic_span">Total</span>
+            </th>
+
+            <th id="ththth">
+              <span><u>In-Patient Deaths</u></span> <br />
+              <span class="basic_span"><5yrs</span>
+              <span class="basic_span">=>5yrs</span>
+              <span class="basic_span">Total</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="table_content">
+
+        </tbody>
+      </table>
+    </div>
+
+    <div class="horizontal_line">
+      <hr width="100%" color="gray"/>
+    </div>
+
+    <div id="keypad">
+      <span class="keypad">
+      </span>
+    </center>
+  </div>
+  <script>
+  $('#year_month').monthpicker({pattern: 'yyyy-mm',
+      selectedYear: new Date().getFullYear(),
+      startYear: <%= @obs_start_year%>,
+      finalYear: new Date().getFullYear()});
+  	var options = {
+      selectedYear: 2015,
+      startYear: 2008,
+      finalYear: 2018,
+      openOnFocus: false // Let's now use a button to show the widget
+  };
+  </script>
+  <script>
+jQuery("#year_month").change(function(e){
+    var year_month =  document.getElementById("year_month").value;
+    jQuery("#table_id tbody").empty(); // Clear the form
+    jQuery.ajax({url: "/cohort_tool/idsr_monthly_report_summary?year_month="+year_month,
+            success: function(response){
+              jQuery.each(response,function(index, value){
+                jQuery("#table_id tbody")
+                .append('<tr><td><span style="display:block; width:90%;">'
+                +value[0]+'</span></td><td><span class="basic_span bspan">'
+                +value[1]['=<4']+'</span><span class="basic_span bspan">'
+                +value[1]['=>5']+'</span><span class="basic_span bspan">'
+                + eval(value[1]['=<4'] + value[1]['=>5'])+'</span></td></tr>');
+              })
+            }});
+  });
+  </script>
+</body>
+</html>

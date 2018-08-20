@@ -1,15 +1,15 @@
 class ApplicationController < GenericApplicationController
-COMMON_YEAR_DAYS_IN_MONTH = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-helper_method :allowed_hiv_viewer
+  COMMON_YEAR_DAYS_IN_MONTH = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  helper_method :allowed_hiv_viewer
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
 
     task = main_next_task(Location.current_location, patient, session_date)
     begin
       return task.url if task.present? && task.url.present?
-      return "/patients/show/#{patient.id}" 
+      return "/patients/show/#{patient.id}"
     rescue
-      return "/patients/show/#{patient.id}" 
+      return "/patients/show/#{patient.id}"
     end
   end
 
@@ -18,9 +18,48 @@ helper_method :allowed_hiv_viewer
 		encounter_available = nil
 		task = Task.first rescue nil
     task = Task.new() if task.blank?
-		
+
 		task.encounter_type = 'NONE'
 		task.url = "/patients/show/#{patient.id}"
+
+    referral_facility = CoreService.get_global_property_value("referral.facility").to_s == "true"
+
+    if (CoreService.get_global_property_value("malaria.enabled.facility").to_s == "true")
+      unless session[:datetime].blank? #Back Data Entry
+
+        malaria_test_result_concept_id = Concept.find_by_name("MALARIA TEST RESULT").concept_id
+
+        lab_result_encounter_type_id = EncounterType.find_by_name("LAB RESULTS").encounter_type_id
+        outpatient_diagnosis_encounter_type_id = EncounterType.find_by_name("OUTPATIENT DIAGNOSIS").encounter_type_id
+        malaria_concept_id = Concept.find_by_name("MALARIA").concept_id
+
+        diagnosis_concept_ids = ["PRIMARY DIAGNOSIS", "SECONDARY DIAGNOSIS", "ADDITIONAL DIAGNOSIS"].collect do |concept_name|
+          Concept.find_by_name(concept_name).concept_id
+        end
+
+        todays_malaria_diagnosis_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+        ON e.encounter_id = o.encounter_id AND e.encounter_type = #{outpatient_diagnosis_encounter_type_id}
+        AND e.patient_id=#{patient.id} AND o.concept_id IN (#{diagnosis_concept_ids.join(', ')})
+        AND o.value_coded = #{malaria_concept_id} AND e.voided=0
+        AND DATE(e.encounter_datetime) = '#{session[:datetime].to_date}'").last
+
+        unless todays_malaria_diagnosis_obs.blank?
+
+          malaria_test_result_obs = Observation.find_by_sql("SELECT o.* FROM encounter e INNER JOIN obs o
+            ON e.encounter_id = o.encounter_id AND e.encounter_type = #{lab_result_encounter_type_id} AND e.patient_id=#{patient.id}
+            AND o.concept_id = #{malaria_test_result_concept_id} AND e.voided=0
+            AND DATE(e.encounter_datetime) = '#{session[:datetime].to_date}'
+            ORDER BY e.encounter_datetime DESC LIMIT 1").last
+
+          if malaria_test_result_obs.blank?
+            task.encounter_type = 'LAB RESULTS'
+            task.url = "/encounters/new/malaria_lab_results_back_data_entry?patient_id=#{patient.id}"
+          end
+
+        end
+
+      end
+    end
 
 		if is_encounter_available(patient, 'DISCHARGE PATIENT', session_date)
 			if !is_encounter_available(patient, 'DISCHARGE DIAGNOSIS', session_date)
@@ -34,7 +73,7 @@ helper_method :allowed_hiv_viewer
 				task.encounter_type = 'ADMISSION DIAGNOSIS'
 				task.url = "/encounters/new/admission_diagnosis?patient_id=#{patient.id}"
 			end
-		end
+		end #OUTPATIENT DIAGNOSIS
 
 		patient_bean = PatientService.get_patient((Patient.find(patient.patient_id)).person)
     ask_complaints_questions_before_diagnosis = CoreService.get_global_property_value('ask.complaints.before_diagnosis').to_s == "true" rescue false
@@ -53,20 +92,24 @@ helper_method :allowed_hiv_viewer
     ask_social_history_questions = CoreService.get_global_property_value('ask.social.history.questions').to_s == "true" rescue false
     ask_social_determinants_questions = CoreService.get_global_property_value('ask.social.determinants.questions').to_s == "true" rescue false
 
-		if !encounter_available_ever(patient, 'SOCIAL HISTORY') && patient_bean.age > 14 
+		if !encounter_available_ever(patient, 'SOCIAL HISTORY') && patient_bean.age > 14
 			task.encounter_type = 'SOCIAL HISTORY'
 			task.url = "/encounters/new/social_history?patient_id=#{patient.id}"
 		end if ask_social_history_questions
 
-		if !encounter_available_ever(patient, 'SOCIAL DETERMINANTS') && patient_bean.age <= 14 
+		if !encounter_available_ever(patient, 'SOCIAL DETERMINANTS') && patient_bean.age <= 14
 			task.encounter_type = 'SOCIAL DETERMINANTS'
 			task.url = "/encounters/new/social_determinants?patient_id=#{patient.id}"
 		end if ask_social_determinants_questions
 
-		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true') 
+		if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true')
 			task.encounter_type = 'OUTPATIENT RECEPTION'
 			task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
-		end
+		end if referral_facility #Only do this if it is a referral facility
+
+    if (location.name.match(/PHARMACY/i))
+      task.url = "/patients/treatment_dashboard/#{patient.id}"
+    end
 
 		if task.encounter_type == session[:original_encounter]
 			session[:original_encounter] = nil
@@ -74,13 +117,13 @@ helper_method :allowed_hiv_viewer
 
 		return task
 	end
-  
+
 	def is_encounter_available(patient, encounter_type, session_date)
 		is_available = false
 
 		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
-						                           patient.id, EncounterType.find_by_name(encounter_type).id, session_date],
-						                           :order =>'encounter_datetime DESC', :limit => 1)
+        patient.id, EncounterType.find_by_name(encounter_type).id, session_date],
+      :order =>'encounter_datetime DESC', :limit => 1)
 		if encounter_available.blank?
 			is_available = false
 		else
@@ -88,55 +131,55 @@ helper_method :allowed_hiv_viewer
 		end
 
 
-		return is_available	
+		return is_available
 	end
 
 	def encounter_available_ever(patient, encounter_type)
 		is_available = false
 		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ?",
-						                           patient.id, EncounterType.find_by_name(encounter_type).id],
-						                           :order =>'encounter_datetime DESC', :limit => 1)
- 
+        patient.id, EncounterType.find_by_name(encounter_type).id],
+      :order =>'encounter_datetime DESC', :limit => 1)
+
 		if encounter_available.blank?
 			is_available = false
 		else
 			is_available = true
 		end
 
-		return is_available	
+		return is_available
 	end
 
 	def allowed_hiv_viewer
-				allowed = false
-				user_roles = current_user_roles.collect{|role| role.to_s.upcase}
-				if user_roles.include?("DOCTOR") || user_roles.include?("NURSE") || user_roles.include?("SUPERUSER")
-						allowed = true
-				end
-  end 	
-  
-  def hiv_program
-  	program = PatientProgram.first(:conditions => {:patient_id => @patient.id,
-      :program_id => Program.find_by_name('HIV PROGRAM').id}) rescue nil
-    unless program.nil?
-  	   return program.program_id
-    else
-       return false
+    allowed = false
+    user_roles = current_user_roles.collect{|role| role.to_s.upcase}
+    if user_roles.include?("DOCTOR") || user_roles.include?("NURSE") || user_roles.include?("SUPERUSER")
+      allowed = true
     end
   end
-  
+
+  def hiv_program
+  	program = PatientProgram.first(:conditions => {:patient_id => @patient.id,
+        :program_id => Program.find_by_name('HIV PROGRAM').id}) rescue nil
+    unless program.nil?
+      return program.program_id
+    else
+      return false
+    end
+  end
+
   def remove_art_encounters(all_encounters, type)
     non_art_encounters = []
-    hiv_encounters_list = [ "HIV STAGING", "HIV CLINIC REGISTRATION", 
-                            "HIV RECEPTION","HIV CLINIC CONSULTATION",
-                            "EXIT FROM HIV CARE","ART ADHERENCE",
-                            "ART_FOLLOWUP","ART ENROLLMENT",
-                            "UPDATE HIV STATUS","APPOINTMENT"
-                          ]
+    hiv_encounters_list = [ "HIV STAGING", "HIV CLINIC REGISTRATION",
+      "HIV RECEPTION","HIV CLINIC CONSULTATION",
+      "EXIT FROM HIV CARE","ART ADHERENCE",
+      "ART_FOLLOWUP","ART ENROLLMENT",
+      "UPDATE HIV STATUS","APPOINTMENT"
+    ]
     if type.to_s.downcase == 'encounter'
       all_encounters.each{|encounter|
         if ! hiv_encounters_list.include? EncounterType.find(encounter.encounter_type).name.to_s.upcase
           if encounter.encounter_type == EncounterType.find_by_name("Treatment").id || encounter.encounter_type == EncounterType.find_by_name("dispensing").id
-            non_art_encounters << encounter if check_for_arvs_presence(encounter) != true       
+            non_art_encounters << encounter if check_for_arvs_presence(encounter) != true
           else
             non_art_encounters<< encounter
           end
@@ -145,7 +188,7 @@ helper_method :allowed_hiv_viewer
     elsif type.to_s.downcase == 'prescription'
       arv_drugs = []
       concept_set("antiretroviral drugs").each{|concept| arv_drugs << concept.uniq.to_s}
-      
+
       all_encounters.each{|prescription|
         if ! arv_drugs.include? Concept.find(prescription.concept_id).fullname
           non_art_encounters << prescription
@@ -159,28 +202,28 @@ helper_method :allowed_hiv_viewer
         end
       }
     end
-    
+
     return non_art_encounters
-    
+
   end
-  
+
   def days_in_month(month, year = Time.now.year)
    	return 29 if month == 2 && Date.gregorian_leap?(year)
    	COMMON_YEAR_DAYS_IN_MONTH[month]
   end
-  
+
   def check_for_arvs_presence(encounter)
     arv_drugs = []
     concept_set("antiretroviral drugs").each{|concept| arv_drugs << concept.uniq.to_s}
     dispensed_id = Concept.find_by_name('Amount dispensed').concept_id
     arv_regimen_concept_id = Concept.find_by_name('Regimen Category').concept_id
-    
+
     encounter.orders.each{|order|
       if ! arv_drugs.include? Concept.find(order.concept_id).fullname
         return true
-      end  
+      end
     }
-       
+
     encounter.observations.each {|obs|
       if obs.concept_id == dispensed_id
         return true if arv_drugs.include? Concept.find(Drug.find(obs.value_drug).concept_id).fullname
@@ -191,10 +234,12 @@ helper_method :allowed_hiv_viewer
 
     return false
   end
- 
-  def confirm_before_creating                                                   
-    property = GlobalProperty.find_by_property("confirm.before.creating")       
-    property.property_value == 'true' rescue false                              
-  end                                                                           
-     
+
+  def confirm_before_creating
+    property = GlobalProperty.find_by_property("confirm.before.creating")
+    property.property_value == 'true' rescue false
+  end
+
+
+
 end

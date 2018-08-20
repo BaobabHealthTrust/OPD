@@ -1,0 +1,177 @@
+<style type="text/css">
+
+  table {
+    vertical-align:center;
+    width: 97%;
+    height: auto;
+    -moz-user-select:none;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 10px;
+  }
+
+  .title {
+    font-size: 25px;
+    text-align: left;
+    border-style: solid;
+    border-width: 1px 1px 0px 0px;
+  }
+  .title-top {
+    font-size: 25px;
+    text-align: left;
+    border-style: solid;
+    border-width: 0px 1px 0px 0px;
+  }
+  .data {
+    font-size: 25px;
+    text-align: left;
+    border-style: solid;
+    border-width: 1px 1px 0px 0px;
+
+  }
+  .data-top {
+    font-size: 25px;
+    text-align: left;
+    border-style: solid;
+    border-width: 0px 1px 0px 0px;
+
+  }
+  a {
+    background: url('/images/btn_blue.png');
+    background-repeat: repeat-x;
+    color: white;
+    display: block;
+    padding: 0px;
+    min-height: 50px;
+    min-width: 90px;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    font-size: 25px;
+    border-radius: 10px;
+  }
+
+  .container {
+    height: 92%;
+    background-color: white;
+    margin: 20px 20px 20px 20px;
+    overflow: auto;
+    -moz-border-radius: 10px;
+  }
+
+</style>
+
+<script type="text/javascript">
+  tt_cancel_destination = "/patients/show?patient_id=<%= @patient_obj[:patient_id]%>";
+</script>
+
+<div class="container">
+  <div id="details" style="max-height:650px;overflow:auto;display:block">
+    <!--form>
+    <%= hidden_field_tag("observations[][patient_id]", @patient_obj[:patient_id]) %>
+    <%= hidden_field_tag("patient_id", @patient_obj[:patient_id]) %>
+    <%= hidden_field_tag("cat", params[:cat]) %>
+    </form-->
+
+    <div>
+
+      <table>
+        <tr>
+          <td class='title-top'>
+            First Name
+          </td>
+          <td class='data-top'><%= @patient_obj[:given_name] %></td>
+          <td><a href="edit_names?patient_id=<%=@patient_obj[:patient_id]%>&field=first_name&doc_id=<%=
+                 @patient_obj[:doc_id] %>&given_name=<%= @patient_obj[:given_name] %>">Edit</a></td>
+        </tr>
+        <tr>
+          <td class='title'>Last Name</td>
+          <td class='data'><%=@patient_obj[:family_name]%></td>
+          <td><a href="edit_names?patient_id=<%=@patient_obj[:patient_id]%>&field=last_name&doc_id=<%=
+                 @patient_obj[:doc_id] %>&family_name=<%= @patient_obj[:family_name] %>">Edit</a></td>
+        </tr>
+
+        <tr>
+          <td class='title'>Birthdate</td>
+          <td class='data'><%=@patient_obj[:birthdate]%></td>
+          <td><a href="edit_birthdate?patient_id=<%=@patient_obj[:patient_id]%>&
+                 field=birthdate&doc_id=<%=@patient_obj[:doc_id] %>">Edit</a></td>
+        </tr>
+
+        <tr>
+          <td class='title'>Home District</td>
+          <td class='data'> <%= @patient_obj[:home_district] %></td>
+          <td><a href="edit_address?patient_id=<%=@patient_obj[:patient_id]%>&doc_id=<%=
+                 @patient_obj[:doc_id] %>&field=home_district">Edit</a></td>
+        </tr>
+        <tr>
+          <td class='title'>Home Traditional Authority</td>
+          <td class='data'><%= @patient_obj[:home_ta] %></td>
+          <td><a href="edit_address?patient_id=<%=@patient_obj[:patient_id]%>&doc_id=<%=
+                 @patient_obj[:doc_id] %>&field=home_district">Edit</a></td>
+        </tr>
+        <tr>
+          <td class='title'>Home Village</td>
+          <td class='data'> <%= @patient_obj[:home_village] %></td>
+          <td><a href="edit_address?patient_id=<%=@patient_obj[:patient_id]%>&doc_id=<%=
+                 @patient_obj[:doc_id] %>&field=home_village">Edit</a></td>
+        </tr>
+
+        <tr>
+          <td class='title'>Current District</td>
+          <td class='data'> <%= @patient_obj[:current_district] %></td>
+          <td><a href="edit_address?patient_id=<%=@patient_obj[:patient_id]%>&doc_id=<%=
+                 @patient_obj[:doc_id] %>&field=current_district"> Edit</a></td>
+        </tr>
+
+        <tr>
+          <td class='title'>Current TA</td>
+          <td class='data'> <%= @patient_obj[:current_ta] %></td>
+          <td><a href="edit_address?patient_id=<%=@patient_obj[:patient_id]%>&doc_id=<%=
+                 @patient_obj[:doc_id] %>&field=current_ta"> Edit</a></td>
+        </tr>
+
+        <tr>
+          <td class='title'>Current Village</td>
+          <td class='data'> <%= @patient_obj[:current_village] %></td>
+          <td><a href="edit_address?patient_id=<%=@patient_obj[:patient_id]%>&doc_id=<%=
+                 @patient_obj[:doc_id] %>&field=city_village"> Edit</a></td>
+        </tr>
+
+        <tr>
+          <td class='title'>Primary phone</td>
+          <td class='data'> <%= @patient_obj[:cell_phone] %></td>
+          <td><a href="edit_attribute?patient_id=<%=@patient_obj[:patient_id]%>&doc_id=<%=
+                 @patient_obj[:doc_id] %>&field=cell_phone&cell_phone_number=<%= @patient_obj[:cell_phone] %>"> Edit</a></td>
+        </tr>
+
+        <tr>
+          <td class='title'>Occupation</td>
+          <td class='data'> <%= @patient_obj[:occupation] %></td>
+          <td><a href="edit_attribute?patient_id=<%=@patient_obj[:patient_id]%>&doc_id=<%=
+                 @patient_obj[:doc_id] %>&field=occupation&occupation=<%= @patient_obj[:occupation] %>"> Edit</a></td>
+        </tr>
+
+      </table>
+
+    </div>
+  </div>
+</div>
+
+<div id="footer">
+
+  <div id="buttons" class="buttonsDiv">
+    <button id="finishButton" class="button navButton green"
+            onclick="if (tt_cancel_destination) window.location = tt_cancel_destination;">
+      <span>Finish</span>
+    </button>
+
+    <button onclick="window.location = '/patients/national_id_label?patient_id=<%= @patient_obj[:patient_id] %>'"
+            style="float: right;">
+      <span>Print Barcode</span>
+    </button>
+
+  </div>
+  <div id="tt_extraButtons"/>
+</div>
+

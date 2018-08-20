@@ -1,0 +1,173 @@
+<script language="javascript" type="text/javascript" src="/javascripts/jquery.js"></script>
+<style>
+  .tt_controls_new_state_start_date #num , #Unknown {
+    display:none;
+  }
+
+  .tt_controls_new_outcome .keyboard { display: none !important; }
+</style>
+
+<script>
+  var tt_cancel_destination = "/patients/show/<%= @patient.id%>"
+  </script>
+
+  <script>
+  var program_date_completed = "<%= @program_date_completed %>"
+
+  var current_state_input_box = null
+  function set_workflow_for_states() {
+    var workflow_id = <%= @program_workflow_id %>
+    var current_state = '<%=@current_state%>'
+    $('touchscreenInput'+tstCurrentPage).setAttribute('ajaxURL', "/programs/states?workflow=" + workflow_id + "&original_state=" + current_state + "&current_state=" + current_state);
+    current_state_input_box = $('touchscreenInput'+tstCurrentPage)
+    listSuggestions(tstCurrentPage);
+  }
+
+  function validProgram(){
+    selected_state = ($('tt_page_new_state').getElementsByTagName("input")[0].value)
+    if(program_date_completed != ""){return false}
+    return true
+  }
+
+  function validStartDate(){
+    closed_states = '<%= @invalid_date_ranges %>'
+    set_start_date = dateCreate($('tt_page_new_state_start_date').getElementsByTagName("input")[0].value)
+
+    if (closed_states == '')
+      return true
+
+    dates = closed_states.split(',')
+    return_str = true
+    for (i = 0 ; i < dates.length ; i++) {
+      start_date = dateCreate(dates[i].split(':')[0])
+      end_date = dateCreate(dates[i].split(':')[1])
+      if (set_start_date >= start_date && set_start_date < end_date)
+        return_str = false
+
+    }
+    return return_str
+  }
+
+  function dateCreate(date_str){
+    intyear = 0 ; intmonth = 0 ; intday = 0;
+    intyear = parseInt(date_str.substring(0,4))
+    intmonth = (parseInt(date_str.substring(5,7)) - 1)
+    intday = (parseInt(date_str.substring(8,10)))
+
+    if (intmonth == -1)
+      intmonth = (parseInt(date_str.substring(5,7).substring(1,2)) - 1)
+
+    if (intday == 0)
+      intday = parseInt(date_str.substring(8,10).substring(1,2))
+
+    return new Date(intyear,intmonth,intday)
+  }
+
+
+	function generateExitFromCareForm() {
+    submitForm = document.createElement("FORM");
+    submitForm.setAttribute("type","hidden");
+    submitForm.setAttribute("id","exit_from_care");
+    submitForm.method = "POST";
+    document.body.appendChild(submitForm);
+
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","encounter[patient_id]")
+    newElement.setAttribute("id","encounter_patient_id");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "<%=@patient.id %>";
+    submitForm.appendChild(newElement);
+
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","encounter[encounter_type_name]")
+    newElement.setAttribute("id","encounter_encounter_type_name");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "EXIT FROM CARE";
+    submitForm.appendChild(newElement);
+
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","observations[][concept_name]")
+    newElement.setAttribute("id","observations__concept_name");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "Reason for exiting care";
+    submitForm.appendChild(newElement);
+
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","observations[][patient_id]")
+    newElement.setAttribute("id","observations__patient_id");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "<%=@patient.id %>";
+    submitForm.appendChild(newElement);
+
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","observations[][obs_datetime]")
+    newElement.setAttribute("id","observations__obs_datetime");
+    newElement.setAttribute("type","hidden");
+    newElement.value =  "<%= DateTime.now()%>";
+    submitForm.appendChild(newElement);
+
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","observations[][value_coded_or_text]")
+    newElement.setAttribute("id","observations__value_coded_or_text");
+    newElement.setAttribute("type","hidden");
+    newElement.value = document.getElementById('place_of_death').value;
+    submitForm.appendChild(newElement);
+
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","encounter[provider_id]")
+    newElement.setAttribute("id","encounter_provider_id");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "<%=current_user.person_id%>";
+    submitForm.appendChild(newElement)
+
+    newElement = document.createElement("input")
+    newElement.setAttribute("name","encounter[encounter_datetime]")
+    newElement.setAttribute("id","encounter_encounter_datetime");
+    newElement.setAttribute("type","hidden");
+    newElement.value = "<%= DateTime.now()%>";
+    submitForm.appendChild(newElement);
+
+    submitForm.appendChild(newElement);
+    submitForm.action= "/encounters/create";
+	}
+
+  function prepareExitFromCareForm() {
+  (function($) {
+		//	$(document).ready( function() {
+				generateExitFromCareForm();
+				var form = $('#exit_from_care');
+					$.ajax( {
+						type: "POST",
+						url: form.attr( 'action' ),
+						data: form.serialize(),
+						success: function( response ) {
+						  //console.log( response );
+						}
+					} );
+	//		} );
+		})(jQuery);
+  }
+</script>
+
+
+<form id='outcome' action="/encounters/create" method='post'>
+  <%= hidden_field_tag :patient_id, @patient.id %>
+  <%= hidden_field_tag :patient_program_id, @patient_program_id %>
+  <%= hidden_field_tag :location_id, Location.current_health_center.id %>
+
+  <%= touch_select_tag "REFER OUT", @patient, options_for_select(@facilities),
+      {:id => 'initial_state',
+       :field_type => 'alpha',
+       :helpText => "Refer out to",
+       :tt_onLoad => "resetNextButtonCaption();set_workflow_for_states();",
+       :validationJS =>"validProgram()",
+       :tt_pageStyleClass => "NoKeyboard",
+       :allowFreeText => true } %>
+
+  <% initial_date = "#{session[:datetime].strftime('%Y-%m-%d')}" rescue "#{(Date.today).strftime('%Y-%m-%d')}"%>
+
+  <%= hidden_field_tag "encounter[encounter_type_name]", "TRANSFER OUT" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
+</form>

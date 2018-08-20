@@ -1,28 +1,93 @@
   <%= javascript_include_tag "barcode" %>
   <script>
     var tt_cancel_destination = "/logout"
-    //barcodeFocusOnce = true;
-    //barcodeScanAction = gotoNextPage;
+    
 
-    function inform() {
+  function setupBarcode(){
+
+    if(tstCurrentPage > 0){
+      return;
+    }
+
+    var value = __$("touchscreenInput" + tstCurrentPage).value;
+
+    if(value && value.match(/\$$/)){
+      gotoNextPage();
+    }else{
+      setTimeout("setupBarcode()", 200);
+    }
+  }
+
+  function inform() {
       $('infoBar'+tstCurrentPage).innerHTML = "<%= welcome_message %>";  
     }           
+
+  doListSuggestions = false; //speeds up keyboard response
+
+  var setFocusTimeout = 1000;
+  var checkForBarcodeTimeout = 1500;
+ 
+  function loadBarcodePage() {
+     focusForBarcodeInput();
+     moveNext();
+  }
+
+  function focusForBarcodeInput(){
+    var barcode = document.getElementById("touchscreenInput0");
+    if (barcode) {
+       barcode.focus();
+       window.setTimeout("focusForBarcodeInput()", setFocusTimeout);
+    }
+  }
+  
+ 
+  function moveNext(){
+    usertext = document.getElementById("touchscreenInput0");
+    try {
+      if (usertext.value.match(/.+\$$/i) != null){
+        usertext.value=usertext.value.substring(0,usertext.value.length -1);
+        document.getElementById('passwordless').value = usertext.value;
+        document.getElementById('passwordless-form').submit();
+      }
+       window.setTimeout("moveNext()", checkForBarcodeTimeout);
+      }catch(e) {
+    }
+
+  }    
+
+
   </script>
 
   <%= error_messages_for 'user' %>
   
 <form id='sessions' action="/sessions/create" method='post'>
 
+ <label for="login">Barcode</label>
+    <%= text_field_tag(:login_barcode, nil, :helpText => "Scan your login barcode",
+        :optional => true, :textCase => "lower",
+        :tt_onLoad => "$('keyboard').style.display = 'none'; inform(); setTimeout('setupBarcode()', 200);") %><br>
+
     <label for="login">Username</label>
     <%= text_field_tag(:login, nil, :helpText => "Enter user name", 
+
+        :textCase => "lower", :tt_onLoad => "inform(); barcodeId = 'touchscreenInput1';", :condition => "$('login_barcode').value == ''") %><br>
+
         :textCase => "lower", :field_type => "password", 
-        :tt_onLoad => "inform(); barcodeId = 'touchscreenInput0';") %><br>
+        :tt_onLoad => "inform(); barcodeId = 'touchscreenInput0'; moveNext(); focusForBarcodeInput();") %><br>
+
 
     <label for="password">Password</label>
     <%= password_field_tag(:password, nil, :helpText => "Enter password", 
-        :textCase => "lower", :field_type => "password",
-        :tt_onLoad => "inform(); barcodeId = 'touchscreenInput1';") %><br>
+        :textCase => "lower", :tt_onLoad => "inform(); barcodeId = 'touchscreenInput2';", :condition => "$('login_barcode').value == ''") %><br>
 
     <%= submit_tag value="Submit"%>
 </form>
 
+<script>
+  window.addEventListener("load", loadBarcodePage, false);
+</script>
+
+
+<form id='passwordless-form' action="/sessions/create" method='post'>
+  <input type="hidden" name="passwordless" id="passwordless" />
+</form>

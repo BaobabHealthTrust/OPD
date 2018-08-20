@@ -1,0 +1,21 @@
+development: &development
+  protocol: 'http'
+  host: localhost
+  port: 5984 
+  database: malaria_dash
+  username: root
+  password: password
+  site_code: MC DHO
+  site_name: Mchinji District Hospital
+  district_code: MC
+  district_name: Mchinji
+  sync_url: http://0.0.0.0:5984/central_dashboard
+   
+test:
+  <<: *development
+  suffix: test
+
+production:
+  <<: *development
+  protocol: 'http'
+  suffix:

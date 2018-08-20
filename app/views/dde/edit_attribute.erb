@@ -1,0 +1,35 @@
+<script>
+
+  var tt_cancel_destination = "/dde/edit_demographics?patient_id=<%= params[:patient_id]%>"
+
+</script>
+
+<% form_for :person, @person, :url => { :action => "update_attribute" } do |f| %>
+
+  <% if params[:field] == "cell_phone" %>
+    <%= text_field_tag "person[cell_phone_number]",  params[:cell_phone_number],
+      {
+        :field_type => 'number',
+        :helpText => 'Cell Phone Number',
+        :validationRule => "^0\\d{7}$|Unknown|Not Available|N\/A|^0\\d{9}$",
+        :validationMessage => "Not a valid phone number",
+        :tt_pageStyleClass => "nota",
+        :id => 'cellphone'
+      }
+    %>
+  <%end%>
+
+  <% if params[:field] == "occupation" %>
+    <%= select_tag("person[occupation]",
+      options_for_select([" ", "Housewife", "Farmer", "Police", "Soldier",
+          "Business", "Teacher", "Student", "Healthcare Worker"].sort.concat(["Other"]),
+        params[:occupation]),
+      :helpText =>"Occupation",
+      :allowFreeText => true)
+  %>
+
+  <%end%>
+
+  <input type="hidden" name="document_id" value="<%= params[:doc_id]%>" />
+  <input type="hidden" name="patient_id" value="<%=params[:patient_id]%>" />
+<%end%>

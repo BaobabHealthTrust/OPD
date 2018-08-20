@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--
+        ===
+        This comment should NOT be removed.
+
+        Charisma v2.0.0
+
+        Copyright 2012-2014 Muhammad Usman
+        Licensed under the Apache License v2.0
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        http://usman.it
+        http://twitter.com/halalit_usman
+        ===
+    -->
+    <meta charset="utf-8">
+    <title>Malaria Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Charisma, a fully featured, responsive, HTML5, Bootstrap admin template.">
+    <meta name="author" content="Muhammad Usman">
+
+    <!-- The styles -->
+    <%= stylesheet_link_tag("bootstrap-cerulean.min") %>
+    <%= stylesheet_link_tag("charisma-app") %>
+    <%= stylesheet_link_tag("chosen.min") %>
+    <%= stylesheet_link_tag("colorbox") %>
+    <%= stylesheet_link_tag("responsive-tables") %>
+    <%= stylesheet_link_tag("jquery.noty") %>
+    <%= stylesheet_link_tag("noty_theme_default") %>
+    <%= stylesheet_link_tag("elfinder.min") %>
+    <%= stylesheet_link_tag("elfinder.theme") %>
+    <%= stylesheet_link_tag("animate.min") %>
+
+    <!-- jQuery -->
+    <%= javascript_include_tag("jquery.min") %>
+
+    <script type="text/javascript">
+      function refreshDashboard(){
+        window.location.reload();
+      }
+      window.setInterval("refreshDashboard();", 60000);//1 minute
+    </script>
+
+    <style type="text/css">
+      .navbar-brand {
+        font-size: 26px;
+        letter-spacing: 2px;
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+        font-family: Courier, monospace;
+        font-weight: 800;
+      }
+
+      .navbar-inner {
+        height: 52px;
+        padding-bottom: 0;
+        padding-top: 0;
+      }
+
+      .badge{
+        font-size: 20pt;
+      }
+
+      .test-label{
+        font-size: 20pt;
+        font-family: Courier, monospace;
+        font-weight: bold;
+        color: black;
+      }
+
+      .badge{
+        /*font-family: Courier, monospace;
+        font-weight: 800;
+        background-color: #388E8E;*/
+      }
+
+      .facility-name{
+        font-size: 16pt;
+        font-family: Courier, monospace;
+      }
+
+      .glyphicon{
+        font-size: 12pt;
+      }
+
+      .btn {
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+        width: 100%;
+      }
+
+      .count{
+        font-size: 30pt;
+        font-weight: bold;
+      }
+      .box-content {
+        padding: 0;
+      }
+
+      .theader{
+        font-weight: 900;
+        font-size: 18pt;
+        font-family: Baskerville, "Baskerville Old Face", "Goudy Old Style", Garamond, "Times New Roman", serif;
+        color: #473C8B;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <!-- topbar starts -->
+    <div class="navbar navbar-default" role="navigation">
+
+      <div class="navbar-inner">
+        <a href="#" class="navbar-brand">
+          <span style="width:500px;" id="facility-name">Kamuzu Central Hospital</span>
+        </a>
+
+      </div>
+    </div>
+    <!-- topbar ends -->
+    <div class="ch-container">
+
+
+      <div class="row">
+        <div class="box col-md-12">
+
+          <table class="table table-striped table-bordered responsive">
+
+            <tbody>
+
+              <tr>
+                <td class="test-label">Malaria Cases</td>
+                <td class="center">
+                  <a class="btn btn-primary" href="#"><span class="count"><%= @malaria_cases_count %></span></a>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+
+        </div>
+        <!--/span-->
+
+      </div>
+
+
+      <div class="row">
+        <div id="content">
+          <div class="row">
+            <div class="box col-md-12">
+              <div class="box-inner">
+
+                <div class="box-content">
+                  <table class="table table-striped table-bordered responsive">
+                    <thead>
+                      <tr>
+                        <th style="width: 300px;">&nbsp;</th>
+                        <th class="theader">Total Orders</th>
+                        <th class="theader">Positives</th>
+                        <th class="theader">Negatives</th>
+                        <th class="theader">Unknown</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+
+                      <tr>
+                        <td class="test-label">mRDT</td>
+                        <td class="center">
+                          <a class="btn btn-primary" href="#"><span class="count" id="mrdt_total_orders"><%= @mrdt_total_orders %></span></a>
+                        </td>
+                        <td class="center">
+                          <a class="btn btn-danger" href="#"><span class="count" id="mrdt_positive_results_count"><%= @mrdt_positive_results_count %></span></a>
+                        </td>
+                        <td class="center">
+                          <a class="btn btn-success" href="#"><span class="count" id="mrdt_negative_results_count"><%= @mrdt_negative_results_count %></span></a>
+                        </td>
+                        <td class="center">
+                          <a class="btn btn-warning" href="#"><span class="count" id="mrdt_unknown_results_count"><%= @mrdt_unknown_results_count %></span></a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="test-label">Microscopy</td>
+                        <td class="center">
+                          <a class="btn btn-primary" href="#"><span class="count" id="microscopy_total_orders"><%= @microscopy_total_orders %></span></a>
+                        </td>
+                        <td class="center">
+                          <a class="btn btn-danger" href="#"><span class="count" id="microscopy_positive_results_count"><%= @microscopy_positive_results_count %></span></a>
+                        </td>
+                        <td class="center">
+                          <a class="btn btn-success" href="#"><span class="count" id="microscopy_negative_results_count"><%= @microscopy_negative_results_count %></span></a>
+                        </td>
+                        <td class="center">
+                          <a class="btn btn-warning" href="#"><span class="count" id="microscopy_uknown_results_count"><%= @microscopy_uknown_results_count %></span></a>
+                        </td>
+                      </tr>
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!----------  -->
+
+          <div class="box col-md-6">
+            <div class="box-inner">
+              <table class="table table-striped table-bordered responsive">
+                <thead>
+                  <tr>
+                    <th class="theader">Drug Name</th>
+                    <th class="theader">Prescribed Tabs</th>
+                    <th class="theader">Dispensed Tabs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="test-label">AL 1</td>
+                    <td >
+                      <a class="btn btn-primary" href="#"><span class="count" id="total_la_one_prescribed_drugs"><%= @total_la_one_prescribed_drugs %></span></a>
+                    </td>
+                    <td >
+                      <a class="btn btn-primary" href="#"><span class="count" id="total_la_one_dispensed_drugs"><%= @total_la_one_dispensed_drugs %></span></a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="test-label">AL 2</td>
+                    <td class="center">
+                      <a class="btn btn-primary" href="#"><span class="count" id="total_la_two_prescribed_drugs"><%= @total_la_two_prescribed_drugs %></span></a>
+                    </td>
+                    <td >
+                      <a class="btn btn-primary" href="#"><span class="count" id="total_la_two_dispensed_drugs"><%= @total_la_two_dispensed_drugs %></span></a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!--/span-->
+
+          <div class="box col-md-6">
+            <div class="box-inner">
+              <table class="table table-striped table-bordered responsive">
+                <thead>
+                  <tr>
+                    <th class="theader">Drug Name</th>
+                    <th class="theader">Prescribed Tabs</th>
+                    <th class="theader">Dispensed Tabs</th>
+                  </tr>
+                </thead>
+                <tr>
+                  <td class="test-label">AL 3</td>
+                  <td >
+                    <a class="btn btn-primary" href="#"><span class="count" id="total_la_three_prescribed_drugs"><%= @total_la_three_prescribed_drugs %></span></a>
+                  </td>
+                  <td >
+                    <a class="btn btn-primary" href="#"><span class="count" id="total_la_three_dispensed_drugs"><%= @total_la_three_dispensed_drugs %></span></a>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="test-label">AL 4</td>
+                  <td class="center">
+                    <a class="btn btn-primary" href="#"><span class="count" id="total_la_four_prescribed_drugs"><%= @total_la_four_prescribed_drugs %></span></a>
+                  </td>
+                  <td >
+                    <a class="btn btn-primary" href="#"><span class="count" id="total_la_four_dispensed_drugs"><%= @total_la_four_dispensed_drugs %></span></a>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <!--/span-->
+
+          <!-----  -->
+
+        </div>
+
+        <hr>
+
+        <footer class="row">
+          <p class="col-md-3 col-sm-3 col-xs-12 powered-by">Powered by: <a
+              href="http://www.baobabhealth.org/">Baobab Health Trust</a></p>
+        </footer>
+
+      </div><!--/.fluid-container-->
+    </div>
+    <!-- external javascript -->
+
+    <%= javascript_include_tag("bootstrap.min") %>
+    <!-- data table plugin -->
+    <%= javascript_include_tag("jquery.dataTables.min") %>
+    <!-- select or dropdown enhancer -->
+    <%= javascript_include_tag("chosen.jquery.min") %>
+    <!-- library for making tables responsive -->
+    <%= javascript_include_tag("responsive-tables") %>
+
+  </body>
+</html>

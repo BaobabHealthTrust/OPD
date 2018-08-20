@@ -17,22 +17,22 @@
     var current_state = '<%=@current_state%>'
     $('touchscreenInput'+tstCurrentPage).setAttribute('ajaxURL', "/programs/states?workflow=" + workflow_id + "&original_state=" + current_state + "&current_state=" + current_state);
     current_state_input_box = $('touchscreenInput'+tstCurrentPage)
-    listSuggestions(tstCurrentPage); 
+    listSuggestions(tstCurrentPage);
   }
 
   function validProgram(){
     selected_state = ($('tt_page_new_state').getElementsByTagName("input")[0].value)
     if(program_date_completed != ""){return false}
     return true
-  } 
+  }
 
   function validStartDate(){
     closed_states = '<%= @invalid_date_ranges %>'
     set_start_date = dateCreate($('tt_page_new_state_start_date').getElementsByTagName("input")[0].value)
-    
+
     if (closed_states == '')
       return true
-    
+
     dates = closed_states.split(',')
     return_str = true
     for (i = 0 ; i < dates.length ; i++) {
@@ -40,10 +40,10 @@
       end_date = dateCreate(dates[i].split(':')[1])
       if (set_start_date >= start_date && set_start_date < end_date)
         return_str = false
-      
+
     }
     return return_str
-  } 
+  }
 
   function dateCreate(date_str){
     intyear = 0 ; intmonth = 0 ; intday = 0;
@@ -59,22 +59,22 @@
 
     return new Date(intyear,intmonth,intday)
   }
-  
-  
+
+
 	function generateExitFromCareForm() {
     submitForm = document.createElement("FORM");
     submitForm.setAttribute("type","hidden");
     submitForm.setAttribute("id","exit_from_care");
     submitForm.method = "POST";
     document.body.appendChild(submitForm);
-       
+
     newElement = document.createElement("input")
     newElement.setAttribute("name","encounter[patient_id]")
     newElement.setAttribute("id","encounter_patient_id");
     newElement.setAttribute("type","hidden");
     newElement.value = "<%=@patient.id %>";
     submitForm.appendChild(newElement);
-    
+
     newElement = document.createElement("input")
     newElement.setAttribute("name","encounter[encounter_type_name]")
     newElement.setAttribute("id","encounter_encounter_type_name");
@@ -102,14 +102,14 @@
     newElement.setAttribute("type","hidden");
     newElement.value =  "<%= DateTime.now()%>";
     submitForm.appendChild(newElement);
-    
+
     newElement = document.createElement("input")
     newElement.setAttribute("name","observations[][value_coded_or_text]")
     newElement.setAttribute("id","observations__value_coded_or_text");
     newElement.setAttribute("type","hidden");
     newElement.value = document.getElementById('place_of_death').value;
     submitForm.appendChild(newElement);
-    
+
     newElement = document.createElement("input")
     newElement.setAttribute("name","encounter[provider_id]")
     newElement.setAttribute("id","encounter_provider_id");
@@ -123,11 +123,11 @@
     newElement.setAttribute("type","hidden");
     newElement.value = "<%= DateTime.now()%>";
     submitForm.appendChild(newElement);
-    
+
     submitForm.appendChild(newElement);
     submitForm.action= "/encounters/create";
 	}
-  
+
   function prepareExitFromCareForm() {
   (function($) {
 		//	$(document).ready( function() {
@@ -141,17 +141,17 @@
 						  //console.log( response );
 						}
 					} );
-	//		} ); 
+	//		} );
 		})(jQuery);
   }
-	
+
 	function submitExitFromCareForm(){
 		if (selectedValue('initial_state').toUpperCase() == "PATIENT DIED") {
 			prepareExitFromCareForm();
 		}
 		document.getElementById('program').submit();
 	}
-	
+
 	function setFinishButtonToSubmitExitFromCareForm() {
 		if(selectedValue('initial_state').toUpperCase() == 'PATIENT DIED') {
 			document.getElementById('nextButton').setAttribute("onmousedown","submitExitFromCareForm()");
@@ -167,7 +167,7 @@
       {:id => 'initial_state',
        :field_type => 'alpha',
        :helpText => "New outcome",
-       :tt_onLoad => "resetNextButtonCaption();set_workflow_for_states();", 
+       :tt_onLoad => "resetNextButtonCaption();set_workflow_for_states();",
        :ajaxURL => "",
        :validationJS =>"validProgram()",
        :validationMessage => "#{@program_name}<br/>is closed<br/>Closed on: #{@program_date_completed}",
@@ -196,7 +196,7 @@
         $('nextButton').innerHTML = "<span>Finish</span>";
       }
     }
-    
+
     function resetNextButtonCaption(){
       $('nextButton').innerHTML = "<span>Next</span>";
     }
@@ -233,7 +233,7 @@
        :ajaxURL => '/programs/locations?q=',
        :condition => "current_state_input_box.value.toUpperCase() == 'PATIENT TRANSFERRED OUT'",
        :allowFreeText => true } %>
-       
+
   <%= touch_yes_no_unknown_tag "TRANSFER WITHIN RESPONSIBILITY", @patient, nil,
       {:id => "transfer_within_responsibility",
        :optional => false,
@@ -246,4 +246,3 @@
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
   <%= hidden_field_tag "encounter[provider_id]", current_user.person_id %>
 </form>
-
