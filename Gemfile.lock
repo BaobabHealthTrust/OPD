@@ -16,10 +16,10 @@ GEM
     daemon_controller (1.2.0)
     devise (1.0.11)
       warden (~> 0.10.3)
-    domain_name (0.5.20160310)
+    domain_name (0.5.20170404)
       unf (>= 0.0.5, < 1.0.0)
     fastercsv (1.5.5)
-    http-cookie (1.0.2)
+    http-cookie (1.0.3)
       domain_name (~> 0.5)
     json (1.5.0)
     mechanize (2.7.0)
@@ -33,8 +33,8 @@ GEM
       webrobots (>= 0.0.9, < 0.2)
     mime-types (1.25.1)
     mysql (2.9.1)
-    mysql2 (0.2.18)
-    net-http-digest_auth (1.4)
+    mysql2 (0.4.8)
+    net-http-digest_auth (1.4.1)
     net-http-persistent (2.9.4)
     nokogiri (1.5.0)
     ntlm-http (0.1.1)
@@ -52,15 +52,15 @@ GEM
       activesupport (= 2.3.5)
       rake (>= 0.8.3)
     rake (0.8.7)
-    rest-client (1.6.7)
-      mime-types (>= 1.16)
+    rest-client (1.6.9)
+      mime-types (~> 1.16)
     settingslogic (2.0.9)
     unf (0.1.4)
       unf_ext
-    unf_ext (0.0.7.2)
+    unf_ext (0.0.7.4)
     warden (0.10.7)
       rack (>= 1.0.0)
-    webrobots (0.1.1)
+    webrobots (0.1.2)
     will_paginate (2.3.16)
 
 PLATFORMS
@@ -83,3 +83,6 @@ DEPENDENCIES
   settingslogic
   warden (= 0.10.7)
   will_paginate (= 2.3.16)
+
+BUNDLED WITH
+   1.15.3
