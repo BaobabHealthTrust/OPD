@@ -126,7 +126,7 @@ class ClinicController < GenericClinicController
       ["Do you print specimen labels?", "/properties/creation?value=specimen_label_print?"],
       ["Auto Session?", "/properties/creation?value=auto_session"],
       ["Is this a Referral Facility?", "/properties/creation?value=referral_facility"],
-      ["DDE Properties", "/dde/dde_login"]
+      ["DDE Properties", "/dde/dde_login"],
       ["Enable Portal", "/properties/portal_properties_menu"]
     ]
     render :layout => false
