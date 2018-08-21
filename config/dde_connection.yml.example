@@ -1,0 +1,13 @@
+program: &default
+  program_id: 14
+  name: OPD Program
+  dde_protocol: http
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default
