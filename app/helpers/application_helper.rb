@@ -254,11 +254,14 @@ module ApplicationHelper
   end
 
   def create_from_dde_server
-    config = YAML.load_file("#{Rails.root}/config/application.yml")["#{Rails.env}"]
-    dde_config = config["create_from_dde"]                                                 
+    program_id  = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env]["program_id"]
     #CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
     dde_status = GlobalProperty.find_by_property('dde.status').property_value.to_s.squish rescue 'NO'#New DDE API
-    if (dde_status.upcase == 'ON' && dde_config == true)
+    if (dde_status.upcase == 'ON')
+      dde_user = DdeApplicationUsers.find_by_program_id(program_id)
+      if dde_user.blank?
+        return false
+      end
       return true
     else
       return false
