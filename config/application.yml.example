@@ -7,6 +7,7 @@ production:
  filing.number.limit: 300
  show.patient.confirmation: false
  create_from_remote: false
+ create_from_dde: false
  use.user.selected.activities: false
  advanced.prescription.interface: true
  auto_set_appointment: false
