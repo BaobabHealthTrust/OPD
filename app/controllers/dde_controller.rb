@@ -81,7 +81,7 @@ class DdeController < ApplicationController
 
   def confirm
     if request.post?
-      raise params.inspect
+      # raise params.inspect
     end
 
     dde_url = DDEService.dde_settings['dde_address'] + "/v1/search_by_doc_id"
@@ -350,7 +350,7 @@ class DdeController < ApplicationController
 
     end
 
-    render :layout => 'report'
+    #render :layout => 'report'
   end
   
   def select
@@ -1022,8 +1022,7 @@ class DdeController < ApplicationController
 		(identifiers || []).each do |i|
 			i.update_attributes(:identifier_type => 2)
 		end
-   
-    raise dde_results.inspect 
+    
     begin
   		PatientIdentifier.create(:identifier => dde_results['npid'], 
   			:patient_id => patient_id, :identifier_type => PatientIdentifierType.find_by_name('National id').id)
