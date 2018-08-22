@@ -164,6 +164,9 @@ class DdeController < ApplicationController
       elsif local_search_results.length > 1 
         redirect_to :controller => 'dde',
           :action => 'dde_duplicates', :npid => params[:identifier] and return
+      elsif local_search_results.blank? && dde_search_results.blank?
+        redirect_to :controller => "clinic", :action => "index", 
+        :message => "Patient not found!"  and return
       end
       ############################xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -1019,13 +1022,16 @@ class DdeController < ApplicationController
 		(identifiers || []).each do |i|
 			i.update_attributes(:identifier_type => 2)
 		end
+   
+    raise dde_results.inspect 
+    begin
+  		PatientIdentifier.create(:identifier => dde_results['npid'], 
+  			:patient_id => patient_id, :identifier_type => PatientIdentifierType.find_by_name('National id').id)
 
-		PatientIdentifier.create(:identifier => dde_results['npid'], 
-			:patient_id => patient_id, :identifier_type => PatientIdentifierType.find_by_name('National id').id)
-
-		PatientIdentifier.create(:identifier => dde_results['doc_id'], 
-			:patient_id => patient_id, :identifier_type => PatientIdentifierType.find_by_name('DDE person document ID').id)
-
+		  PatientIdentifier.create(:identifier => dde_results['doc_id'], 
+        :patient_id => patient_id, :identifier_type => PatientIdentifierType.find_by_name('DDE person document ID').id)
+      rescue
+    end
 
   end
 

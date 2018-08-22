@@ -114,6 +114,9 @@ on the rest of the stations %>
                 <%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
               <!--option link='regimen.html'>Regimen</option-->
             </select>
+			<% if params[:message] %>
+				<script> showMessage("<%= params[:message] %>"); </script>
+			<% end %>
 
 			<% if params[:dhis_status] == "SUCCESS" %>
 				<script> showDHISupdate('DHIS2 update <%="#{params[:dhis_status].downcase}"%>'); </script>
