@@ -154,8 +154,9 @@ class DdeController < ApplicationController
 				message = local_client_to_dde(person_id)
 		
 				unless message.blank? 
-					redirect_to :controller => "clinic", 
-						:action => "index", :message => message  and return
+          redirect_to :controller => "dde", 
+            :action => "edit_demographics", 
+              :patient_id => person_id, :message => message  and return
 				end
 
 
