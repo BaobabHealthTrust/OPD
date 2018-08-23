@@ -301,6 +301,17 @@ class DdeController < ApplicationController
     redirect_to :action => 'search_by_name_and_gender', :identifier => result['npid']
   end
 
+  def reassign_dde_npid(doc_id)
+    dde_url = DDEService.dde_settings['dde_address'] + "/v1/assign_npid"
+    search_params = {:doc_id => doc_id} 
+    
+    output = RestClient::Request.execute( { :method => :post, :url => dde_url,
+        :payload => search_params, :headers => {:Authorization => session[:dde_token]} } )
+    result  = JSON.parse(output)
+  
+    redirect_to :action => 'search_by_name_and_gender', :identifier => result['npid']
+  end
+
   def dde_duplicates
     dde_url = DDEService.dde_settings['dde_address'] + "/v1/search_by_npid"
     search_params = {:npid => params[:npid]} 
@@ -384,6 +395,9 @@ class DdeController < ApplicationController
       redirect_to :action => :search_by_name_and_gender, :identifier => params[:identifier]
     elsif params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
       redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
+    elsif params[:identifier].blank? && params[:person][:id] == '0' # DDE Patient without ID.
+      doc_id = params[:dde_document_id]
+      reassign_dde_npid(doc_id) and return
     else
       if params[:person][:id] != '0'
         person = Person.find(params[:person][:id])
