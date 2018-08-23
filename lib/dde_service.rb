@@ -3,7 +3,8 @@ module DDEService
   
   def self.dde_settings
     data = {}
-    program_id  = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env]["program_id"]
+    program_id    = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env]["program_id"]
+    dde_protocol  = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env]["dde_protocol"]
     dde_user = DdeApplicationUsers.find_by_program_id(program_id)
     
     dde_ip = dde_user.ipaddress
@@ -16,7 +17,7 @@ module DDEService
     data["dde_port"] = dde_port
     data["dde_username"] = dde_username
     data["dde_password"] = dde_password
-    data["dde_address"] = "http://#{dde_ip}:#{dde_port}"
+    data["dde_address"] = "#{dde_protocol}://#{dde_ip}:#{dde_port}"
 
     return data
   end
@@ -89,6 +90,14 @@ module DDEService
     received_params = RestClient.post(dde_address, passed_params, headers = headers){|response, request, result|response}
     dde_status = JSON.parse(received_params)["status"]
     return dde_status
+  end
+
+  def self.get_dde_location(url, doc_id,token)
+    dde_location_uri = "#{url}/v1/find_location"
+    passed_params = {:location_id => doc_id}
+    headers = {:content_type => "json", :Authorization => token}
+    dde_response = RestClient.post(dde_location_uri, passed_params, headers = headers)
+    return JSON.parse(dde_response)
   end
 
   def self.verify_dde_token_authenticity(dde_token)
