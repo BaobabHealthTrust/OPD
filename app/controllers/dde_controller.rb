@@ -396,7 +396,7 @@ class DdeController < ApplicationController
       redirect_to :action => :search_by_name_and_gender, :identifier => params[:identifier]
     elsif params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
       redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
-    elsif params[:identifier].blank? && params[:person][:id] == '0' # DDE Patient without ID.
+    elsif params[:identifier].blank? && params[:person][:id] == '0' && !params[:dde_document_id].blank? # DDE Patient without ID.
       doc_id = params[:dde_document_id]
       reassign_dde_npid(doc_id) and return
     else
