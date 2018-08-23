@@ -65,6 +65,8 @@
   tt_cancel_destination = "/patients/show?patient_id=<%= @patient_obj[:patient_id]%>";
 </script>
 
+<body onload="showAlerts();">
+
 <div class="container">
   <div id="details" style="max-height:650px;overflow:auto;display:block">
     <!--form>
@@ -166,12 +168,21 @@
       <span>Finish</span>
     </button>
 
-    <button onclick="window.location = '/patients/national_id_label?patient_id=<%= @patient_obj[:patient_id] %>'"
-            style="float: right;">
-      <span>Print Barcode</span>
-    </button>
+    <button onclick="window.location = '/dde/npid_label?person_id=<%= @patient_obj[:patient_id] %>'"
+      style="float: right;" id="print-barcode"><span>Print Barcode</span></button>
 
   </div>
   <div id="tt_extraButtons"/>
 </div>
 
+</body>
+
+<script>
+  function showAlerts() {
+    <%if params[:message] %>
+      showMessage("<%= params[:message].gsub('_', ' ')%>");
+      barcode = document.getElementById('print-barcode');
+      barcode.setAttribute('onclick',"window.location='/dde/reassign_local_client_npid?person_id=<%= @patient_obj[:patient_id] %>'");
+    <%end%>
+  }
+</script>

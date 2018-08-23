@@ -32,6 +32,14 @@
   width: 47%;
 }
 
+#cancelButton {
+  display: none;
+}
+
+#clearButton {
+  display: none;
+}
+
 </style>
 
 <script>
@@ -46,12 +54,12 @@ function buildView() {
   
   maindivcell = document.createElement('div');
   maindivcell.setAttribute('class','maindivcell leftdiv');
-  setupParams(maindivcell);
+  setupParams(maindivcell, "local");
   maindivrow.appendChild(maindivcell);
-  
+ 
   maindivcell = document.createElement('div');
   maindivcell.setAttribute('class','maindivcell rightdiv');
-  setupParams(maindivcell);
+  setupParams(maindivcell, "remote");
   maindivrow.appendChild(maindivcell);
   
   var inputFrame = document.getElementById('inputFrame' + tstCurrentPage);
@@ -93,9 +101,22 @@ function setData(eID){
 
 }
 
-function setupParams(e) {
+function setupParams(e, client_location) {
   var t = document.createElement('table');
   t.setAttribute('style','width: 100%;');
+
+  var r = document.createElement('tr');
+  var d = document.createElement('td');
+  if(client_location == 'remote'){
+    d.innerHTML = "<b style='font-weight: bold; font-size: 20px;'>Remote record</b>"
+  }else{
+    d.innerHTML = "<b style='font-weight: bold; font-size: 20px;'>Local record</b>"
+  }
+
+  d.setAttribute("colspan", "2");
+  d.setAttribute("style", "border-style: solid; border-width: 0px 0px 1px 0px;");
+  r.appendChild(d);
+  t.appendChild(r);
 
   attributes = [
     "Name", "Gender", "Birthdate","Home District","Home TA","Home Village",
@@ -114,8 +135,26 @@ function setupParams(e) {
     t.appendChild(r);
   }    
   
+  var r = document.createElement('tr');
+  var d = document.createElement('td');
+  d.setAttribute('colspan', "2");
 
+  var btn = document.createElement('button');
+  btn.setAttribute("onmousedown", "reassignID('" + client_location + "');");
+  btn.innerHTML = "<span>Reassign ID</span>";
+  d.appendChild(btn);
+  r.appendChild(d);
+  t.appendChild(r);
+   
   e.appendChild(t);
+}
+
+function reassignID(client_location) {
+  if(client_location == 'remote') {
+    document.location="/dde/reassign_npid?doc_id=<%= params[:doc_id]%>";
+  }else{
+    document.location="/dde/reassign_local_client_npid?person_id=<%= params[:person_id]%>";
+  }
 }
 
 function setLocalData(eID){
@@ -166,7 +205,7 @@ function setAttributes() {
 }
 
 function differentClient() {
-  document.location = "/people/confirm?found_person_id=<%= params[:person_id]%>";
+  document.location = "/";
 }
 
 function sameClient() {

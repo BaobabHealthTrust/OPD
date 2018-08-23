@@ -81,7 +81,11 @@ class DdeController < ApplicationController
 
   def confirm
     if request.post?
-      # raise params.inspect
+      PatientIdentifier.create(:patient_id => params[:person_id],
+        :identifier => params[:doc_id], 
+        :identifier_type => PatientIdentifierType.find_by_name('DDE person document ID').id)
+
+      redirect_to "/people/confirm?found_person_id=#{params[:person_id]}" and return
     end
 
     dde_url = DDEService.dde_settings['dde_address'] + "/v1/search_by_doc_id"
@@ -141,7 +145,20 @@ class DdeController < ApplicationController
           redirect_to "/people/confirm?found_person_id=#{person_id}" and return
         end
 
-				local_client_to_dde(person_id)
+        patient_has_dde_id = patient_has_dde_identifier_already?(person_id)
+        unless patient_has_dde_id.blank?
+					next_url = "/people/confirm?found_person_id=#{person_id}"
+					print_and_redirect("/patients/national_id_label?patient_id=#{person_id}", next_url) and return
+        end
+
+				message = local_client_to_dde(person_id)
+		
+				unless message.blank? 
+					redirect_to :controller => "clinic", 
+						:action => "index", :message => message  and return
+				end
+
+
         next_url = "/people/confirm?found_person_id=#{local_search_results[0].person_id}"
 				print_and_redirect("/patients/national_id_label?patient_id=#{person_id}", next_url) and return
       elsif local_search_results.length == 1 && dde_search_results.length == 1
@@ -162,11 +179,11 @@ class DdeController < ApplicationController
         redirect_to :controller => 'dde',
           :action => 'dde_duplicates', :npid => params[:identifier] and return
       elsif local_search_results.length > 1 
-        redirect_to :controller => 'dde',
+        redirect_to :controller => 'dde', 
           :action => 'dde_duplicates', :npid => params[:identifier] and return
       elsif local_search_results.blank? && dde_search_results.blank?
-        redirect_to :controller => "clinic", :action => "index", 
-        :message => "Patient not found!"  and return
+        redirect_to :controller => "clinic", 
+          :action => "index", :message => "Identifier: #{params[:identifier]} not found"  and return
       end
       ############################xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -344,9 +361,9 @@ class DdeController < ApplicationController
         break if same_record
       end
 
-      if !same_record
+      #if !same_record
         @results << local_person
-      end
+      #end
 
     end
 
@@ -582,6 +599,17 @@ class DdeController < ApplicationController
 
       dde_protocol = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env]["dde_protocol"]
       dde_url = "#{dde_protocol}://#{params[:dde_ipaddress]}:#{params[:dde_port]}"
+      
+      # Get location name from dde to compare with the current site.
+      location = DDEService.get_dde_location(dde_url, params[:location], params[:dde_token])
+      app_location = Location.current_health_center.name rescue ""
+
+      unless app_location == location["name"]
+        redirect_to :controller => "dde", :action => "dde_add_user",
+          :dde_token => params[:dde_token], :dde_username => params[:username],
+          :dde_port => params[:dde_port], :dde_ipaddress => params[:dde_ipaddress],
+          :message => "Please enter the collect location (i.e #{app_location})" and return
+      end
 
       dde_status = DDEService.add_dde_user(dde_url, data, params[:dde_token])
       unless dde_status.to_i == 200
@@ -894,6 +922,38 @@ class DdeController < ApplicationController
     render :text => output and return
   end
 
+  def npid_label
+        
+    patient_has_dde_id = patient_has_dde_identifier_already?(params[:person_id])
+  
+    if patient_has_dde_id.blank?
+      message = local_client_to_dde(params[:person_id])
+		
+      unless message.blank? 
+        redirect_to :controller => "dde", 
+          :action => "edit_demographics", 
+            :patient_id =>params[:person_id], :message => message  and return
+      end
+    end
+     
+    next_url = "/patients/show/#{params[:person_id]}"
+    print_and_redirect("/patients/national_id_label?patient_id=#{params[:person_id]}", next_url) and return
+  end
+
+  def reassign_local_client_npid
+    
+		message = local_client_to_dde(params[:person_id])
+		
+		unless message.blank? 
+			redirect_to :controller => "dde", 
+				:action => "edit_demographics", 
+          :patient_id =>params[:person_id], :message => message  and return
+		end
+    
+    next_url = "/people/confirm?found_person_id=#{params[:person_id]}"
+    print_and_redirect("/patients/national_id_label?patient_id=#{params[:person_id]}", next_url) and return
+  end
+
   private
 
   def birthdate_formatted(birthdate, birthdate_estimated)
@@ -912,7 +972,7 @@ class DdeController < ApplicationController
 
   def compare_dde_and_local_demographics(dde_person, local_person)
 
-    if (dde_person[:doc_id].to_s.downcase == local_person[:doc_id].to_s.downcase)
+    if (dde_person[:doc_id].to_s.downcase == local_person[:doc_id].to_s.downcase && !local_person[:doc_id].blank?)
       return true
     elsif (dde_person[:given_name].to_s.downcase != local_person[:given_name].to_s.downcase)
       return false
@@ -1010,28 +1070,56 @@ class DdeController < ApplicationController
       :identifiers => {}
     }
 
-
     dde_url = DDEService.dde_settings['dde_address'] + "/v1/add_person"
     output = RestClient::Request.execute( { :method => :post, :url => dde_url,
       :payload => person_params, :headers => {:Authorization => session[:dde_token]} } )
+        
+    identifier_type = PatientIdentifierType.find_by_name('National id').id
 
     dde_results  = JSON.parse(output)
-		identifiers = PatientIdentifier.find(:all, 
-			:conditions => ["patient_id = ? AND identifier_type = 3", patient_id])		
-	
-		(identifiers || []).each do |i|
-			i.update_attributes(:identifier_type => 2)
-		end
-    
-    begin
-  		PatientIdentifier.create(:identifier => dde_results['npid'], 
-  			:patient_id => patient_id, :identifier_type => PatientIdentifierType.find_by_name('National id').id)
 
-		  PatientIdentifier.create(:identifier => dde_results['doc_id'], 
+		ActiveRecord::Base.transaction do
+			if dde_results['message'].match(/missing/i)
+				return dde_results['message'] + " <span style='color: white;'>Search by name and update patient address info<span>"
+			end if dde_results['message']
+
+      PatientIdentifier.create(:identifier => dde_results['npid'], 
+        :patient_id => patient_id, :identifier_type => identifier_type)
+
+      PatientIdentifier.create(:identifier => dde_results['doc_id'], 
         :patient_id => patient_id, :identifier_type => PatientIdentifierType.find_by_name('DDE person document ID').id)
-      rescue
-    end
 
+		
+      identifiers = PatientIdentifier.find(:all, 
+        :conditions => ["patient_id = ? AND identifier_type = ?
+        AND LENGTH(identifier) <> 6", patient_id, identifier_type])		
+    
+      (identifiers || []).each do |i|
+        i.update_attributes(:voided => 1, :void_reason => "Reassigned new ID: #{dde_results['npid']}")
+      end
+		end
   end
 
-end
+  def patient_has_dde_identifier_already?(patient_id)
+
+    identifier_type = PatientIdentifierType.find_by_name('National id').id
+
+		identifiers = PatientIdentifier.find(:all, 
+			:conditions => ["patient_id = ? AND identifier_type = ?
+      AND LENGTH(identifier) = 6", patient_id, identifier_type])		
+
+    unless identifiers.blank?	
+      old_identifiers = PatientIdentifier.find(:all, 
+        :conditions => ["patient_id = ? AND identifier_type = ?
+        AND LENGTH(identifier) <> 6", patient_id, identifier_type])		
+    
+      (old_identifiers || []).each do |i|
+        i.update_attributes(:voided => 1, :void_reason => "Reassigned new ID")
+      end
+    end
+
+      return identifiers.first rescue nil 
+    end
+
+
+  end

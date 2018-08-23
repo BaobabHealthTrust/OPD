@@ -1,4 +1,6 @@
-
+<script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer ></script>
+<script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/standard.js" defer ></script>
+<body onload="showAlerts();">
 <form action="/dde/dde_add_user" method="POST">
   <% dde_location = "#{params[:dde_ipaddress]}:#{params[:dde_port]}" %>
   <%= text_field_tag "location", "", {
@@ -34,3 +36,11 @@
   <input type="hidden" name="dde_port" value="<%= params[:dde_port] %>" />
   <input type="hidden" name="dde_token" value="<%= params[:dde_token] %>" />
 </form>
+</body>
+<script>
+  function showAlerts() {
+    <% if params[:message]%>
+      setInterval(showMessage("<%= params[:message] %>"), 200)
+    <%end%>
+  }
+</script>

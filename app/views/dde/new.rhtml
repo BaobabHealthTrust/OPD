@@ -225,7 +225,7 @@
    try{
     client +=  "&person[names][middle_name]="  +__$('middle_name').value;
    }catch(e){}
-
+    
    client +=  "&person[gender]=" +  __$('gender').value;
    client +=  "&person[birthdate]=" + culBirthdate()[0];
    client +=  "&person[birthdate_estimated]=" + culBirthdate()[1];
@@ -289,9 +289,8 @@
   /* ....................................... */
 	function disablebutton() {
 		var nextbtn = document.getElementById("nextButton");
-		nextbtn.setAttribute("onmousedown","");
-		nextbtn.setAttribute("class","button navButton red");
-		nextbtn.innerHTML = "<span>Duplicate</span>";
+		nextbtn.setAttribute("onmousedown","showMessage('Select client to continue');");
+		nextbtn.setAttribute("class","button navButton blue");
 		
 		addButton();
 	}
