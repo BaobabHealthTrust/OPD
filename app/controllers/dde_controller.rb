@@ -42,9 +42,9 @@ class DdeController < ApplicationController
     local_people = DDEService.create_local_person(dde_results)
 
 		if params[:guardian_present] == "YES"
-			redirect_to "/relationships/search?patient_id=#{person.id}&return_to=/people/redirections?person_id=#{person.id}" and return
+			redirect_to "/relationships/search?patient_id=#{local_people.first.id}&return_to=/people/redirections?person_id=#{local_people.first.id}" and return
     else
-    	redirect_to "/people/redirections?person_id=#{local_people.first.id}" and return
+      print_and_redirect("/patients/national_id_label?patient_id=#{local_people.first.id}", next_task(local_people.first.patient)) and return
     end
 
   end
