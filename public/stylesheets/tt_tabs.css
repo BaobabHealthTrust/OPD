@@ -6,8 +6,8 @@
 }
 
 #ttp-tabs-select-pane {
-    border-right: 1px solid #777;
-    min-width: 25%;
+    border-right: 0px solid #777;
+    min-width: 45%;
     float: left;
     overflow-y: scroll;
 }

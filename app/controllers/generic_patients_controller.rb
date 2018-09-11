@@ -189,7 +189,11 @@ class GenericPatientsController < ApplicationController
     @links << ["Demographics (Print)","/patients/print_demographics/#{patient.id}"]
     @links << ["Visit Summary (Print)","/patients/dashboard_print_visit/#{patient.id}"]
     @links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
-    @links << ["Demographics (Edit)","/people/demographics/#{patient.id}"]
+    if create_from_dde_server
+      @links << ["Demographics (Edit)","/dde/demographics/#{patient.id}"]
+    else
+      @links << ["Demographics (Edit)","/people/demographics/#{patient.id}"]
+    end
 
     if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
       @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]

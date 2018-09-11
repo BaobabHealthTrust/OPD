@@ -20,13 +20,12 @@ pos = 1
     people[<%= pos %>]["Patient National ID"] = '<%= person["npid"] %>';
     people[<%= pos %>]["Name"] = '<%= person["name"] %>';
     people[<%= pos %>]["Gender"] = "<%= person["gender"] %>";
-    people[<%= pos %>]["Birthdate"] = "<%= person["birthdate"]%>";
+    people[<%= pos %>]["Birthdate"] = "<%= (person["birthdate"].to_date.strftime('%d/%b/%Y') rescue nil)%>";
     people[<%= pos %>]["Age"] = "<%= person["age"] %>";
     people[<%= pos %>]["Home District"] = "<%= person["home_district"] -%>";
     people[<%= pos %>]["Ancestral Traditional Authority(T/A)"] = "<%= person["home_ta"] -%>";
-    people[<%= pos %>]["Current Residence"] = "Area 23";
+    people[<%= pos %>]["Current Residence"] = "<%= person["current_residence"] -%>";
   <%
-
   pos = pos + 1
 end -%>
 
@@ -118,7 +117,9 @@ end -%>
         $('identifier').value = people[pos]['Patient National ID'];
       }catch(e){
         if(!pos && text.match(/New Patient/)){
-          $('identifier').value = "<%=params[:identifier]%>";
+          //$('identifier').value = "<%=params[:identifier]%>";
+          $('identifier').value = null;
+          document.forms[0].action = "new";
         }else{
           $('identifier').value = null;
         }
@@ -237,7 +238,7 @@ end -%>
 
       people[pos]["Ancestral Traditional Authority(T/A)"] = "<%=data["home_ta"]%>"
 
-      people[pos]["Current Residence"] = "Area 23";
+      people[pos]["Current Residence"] = "<%=data['current_residence']%>";
 
       people[pos]["Patient National ID"] = "<%=data["npid"]%>";
 
@@ -304,16 +305,16 @@ end -%>
 
       <% if @relation.blank? %>
         <% if params[:identifier] %>
-          <option value="0" onmousedown="changeNextButtonText('New Patient')">Create a new person with the identifier <%=h params[:identifier] -%></option>
+          <option value="0" onmousedown="changeNextButtonText('New Patient');">Create a new person with the identifier <%=h params[:identifier] -%></option>
         <% else %>
-          <option value="0" onmousedown="changeNextButtonText('New Patient')">Create a new person with the name <%= params["person"]["names"]["given_name"] -%> <%= params["person"]["names"]["family_name"] -%></option>
+          <option value="0" onmousedown="changeNextButtonText('New Patient');">Create a new person with the name <%= params["person"]["names"]["given_name"] -%> <%= params["person"]["names"]["family_name"] -%></option>
         <% end %>
 
       <% else %>
         <% if params[:identifier] %>
-          <option value="0" onmousedown="changeNextButtonText('New Guardian')">Create a new person with the identifier <%=h params[:identifier] -%></option>
+          <option value="0" onmousedown="changeNextButtonText('New Guardian');">Create a new person with the identifier <%=h params[:identifier] -%></option>
         <% else %>
-          <option value="0" onmousedown="changeNextButtonText('New Guardian')">Create a new person with the name <%= params["person"]["names"]["given_name"] -%> <%= params["person"]["names"]["family_name"] -%></option>
+          <option value="0" onmousedown="changeNextButtonText('New Guardian');">Create a new person with the name <%= params["person"]["names"]["given_name"] -%> <%= params["person"]["names"]["family_name"] -%></option>
         <% end %>
       <% end %>
 

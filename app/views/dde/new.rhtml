@@ -291,7 +291,10 @@
 		var nextbtn = document.getElementById("nextButton");
 		nextbtn.setAttribute("onmousedown","showMessage('Select client to continue');");
 		nextbtn.setAttribute("class","button navButton blue");
-		
+	  
+    var frame = document.getElementById("inputFrame" + tstCurrentPage);
+    frame.setAttribute('style',"height: 87%;");
+	
 		addButton();
 	}
 	
@@ -491,12 +494,19 @@
       :condition => "__$('occupation').value.match(/MDF/i)")%>
   <% end %>
 
-  <% if params[:relation].blank? %>
+  <% if params[:relation].blank? 
+    property = GlobalProperty.find_by_property('Ask.for.guardian')
+    ask_for_guardian = (property.property_value.upcase == "YES" ? true : false) rescue false
+    if ask_for_guardian
+  %>  
     <%= select_tag("guardian_present", options_for_select([['Yes','YES'],['No','NO']]),
       :id => "guardian_present",
       :helpText => "Guardian Present",
       :allowFreeText => false,
       :ttMatchFromBeginning => "true")%>
+    <%else%>
+      <%= hidden_field_tag "guardian_present", "NO" %>
+    <%end%>
   <% end %>
   <!-- Make sure patient is created -->
 
