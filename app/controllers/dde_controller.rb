@@ -619,7 +619,7 @@ class DdeController < ApplicationController
       location = DDEService.get_dde_location(dde_url, params[:location], params[:dde_token])
       app_location = Location.current_health_center.name rescue ""
 
-      unless app_location == location["name"]
+      unless app_location == location.first["name"]
         redirect_to :controller => "dde", :action => "dde_add_user",
           :dde_token => params[:dde_token], :dde_username => params[:username],
           :dde_port => params[:dde_port], :dde_ipaddress => params[:dde_ipaddress],
