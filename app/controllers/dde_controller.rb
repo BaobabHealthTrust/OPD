@@ -565,7 +565,10 @@ class DdeController < ApplicationController
     # Update dde token session
     property = GlobalProperty.find_by_property('dde.status')
     if property.blank?
-      GlobalProperty.create(:property => 'dde.status', :property_value => 'ON')
+      g = GlobalProperty.new
+      g.property = "dde.status"
+      g.property_value = "ON"
+      g.save
     else
       property.update_attributes(:property_value => 'ON')
     end
