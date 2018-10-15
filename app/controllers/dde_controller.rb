@@ -568,7 +568,10 @@ class DdeController < ApplicationController
     # Update dde token session
     property = GlobalProperty.find_by_property('dde.status')
     if property.blank?
-      GlobalProperty.create(:property => 'dde.status', :property_value => 'ON')
+      g = GlobalProperty.new
+      g.property = "dde.status"
+      g.property_value = "ON"
+      g.save
     else
       property.update_attributes(:property_value => 'ON')
     end
@@ -622,7 +625,7 @@ class DdeController < ApplicationController
       location = DDEService.get_dde_location(dde_url, params[:location], params[:dde_token])
       app_location = Location.current_health_center.name rescue ""
 
-      unless app_location == location["name"]
+      unless app_location == location.first["name"]
         redirect_to :controller => "dde", :action => "dde_add_user",
           :dde_token => params[:dde_token], :dde_username => params[:username],
           :dde_port => params[:dde_port], :dde_ipaddress => params[:dde_ipaddress],

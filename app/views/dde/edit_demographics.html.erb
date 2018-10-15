@@ -180,7 +180,7 @@
 <script>
   function showAlerts() {
     <%if params[:message] %>
-      showMessage("<%= params[:message].gsub('_', ' ')%>");
+      showMessage("<%= params[:message].gsub('_', ' ') rescue nil %>");
       barcode = document.getElementById('print-barcode');
       barcode.setAttribute('onclick',"window.location='/dde/reassign_local_client_npid?person_id=<%= @patient_obj[:patient_id] %>'");
     <%end%>
