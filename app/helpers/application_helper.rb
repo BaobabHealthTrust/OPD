@@ -272,6 +272,10 @@ module ApplicationHelper
     return false
   end
 
+  def ask_for_guardian?
+    return false
+  end
+
   def current_user_roles                                                        
     user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role}
     RoleRole.find(:all,:conditions => ["child_role IN (?)", user_roles]).collect{|r|user_roles << r.parent_role}
