@@ -157,7 +157,7 @@ class DdeController < ApplicationController
           if message.match(/Search by name and update patient address info/i)
             redirect_to :controller => "dde", 
               :action => "edit_demographics", 
-              :patient_id => person_id, :message => message  and return
+                :patient_id => person_id, :message => message  and return
           end rescue nil
 				end
 
@@ -370,12 +370,12 @@ class DdeController < ApplicationController
       addresses = person.addresses.last
       #raise addresses.inspect
       local_person = {
-        :given_name             =>  names.last.given_name,
-        :family_name            =>  names.last.family_name,
-        :name                   =>  names.last.given_name.to_s + " " + names.last.family_name,
-        :gender                 =>  person.gender.first,
-        :birthdate              =>  person.birthdate.to_date,
-        :birth_date             =>  (birthdate_formatted(person.birthdate.to_date, birthdate_estimated) rescue nil),
+        :given_name             =>  (names.last.given_name rescue nil),
+        :family_name            =>  (names.last.family_name rescue nil),
+        :name                   =>  ((names.last.given_name.to_s + " " + names.last.family_name) rescue nil),
+        :gender                 =>  (person.gender.first rescue nil),
+        :birthdate              =>  (person.birthdate.to_date rescue nil),
+        :birth_date             =>  (birthdate_formatted(person.birthdate.to_date, birthdate_estimated) rescue ni),
         :birthdate_estimated    =>  birthdate_estimated,
         :home_district          =>  (addresses.address2 rescue nil),
         :home_ta                =>  (addresses.county_district rescue nil),
@@ -391,12 +391,12 @@ class DdeController < ApplicationController
         break if same_record
       end
 
-      #if !same_record
+      if !same_record
         @results << local_person
-      #end
+      end
 
     end
-
+    #raise @results.inspect
     #render :layout => 'report'
   end
   
@@ -1024,7 +1024,7 @@ class DdeController < ApplicationController
     primary_client_id = nil
     secondary_clients_ids = []
 
-    (params[:client_ids].split(',') || []).each_with_index do |id, i|
+    (params[:client_ids].split(',').uniq || []).each_with_index do |id, i|
       if i == 0
         primary_client_id = id
       else
