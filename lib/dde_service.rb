@@ -83,7 +83,7 @@ module DDEService
     passed_params = {
       :username => data["username"],
       :password => data["password"],
-      :email => "test@gmail.com",
+      :email => "#{data["username"]}@bht.org",
       :location => data["location"],
     }
     headers = {:content_type => "json", :Authorization => token }
