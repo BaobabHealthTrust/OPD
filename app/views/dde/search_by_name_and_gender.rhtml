@@ -73,7 +73,7 @@ end -%>
     if(pos && (person_id == 0) && !text.match(/New Patient/)){
       document.forms[0].action = "select";
       __$('nextButton').onmousedown = function(){
-        document.forms[0].submit();
+      document.forms[0].submit();
       }
 
       clearFields();
@@ -213,17 +213,17 @@ end -%>
 
       people[pos]["Birthdate"] = "<%=data["birthdate"]%>"
 
-      people[pos]["Year"] = "<%=data["birthdate"].to_date.year %>";
+      people[pos]["Year"] = "<%=data["birthdate"].to_date.year rescue "1900"%>";
       if(people[pos]["Year"] == " " ){
         people[pos]["Year"] =  people[pos]["Birthdate"].split('/')[2].replace("??","");
       }
 
-      people[pos]["Month"] = "<%=data["birthdate"].to_date.strftime("%b") %>";
+      people[pos]["Month"] = "<%=data["birthdate"].to_date.strftime("%b") rescue "01"%>";
       if(people[pos]["Month"] == "" ){
         people[pos]["Month"] =  people[pos]["Birthdate"].split('/')[1].replace("??","");
       }
 
-      people[pos]["Day"] = "<%=data["birthdate"].to_date.day %>";
+      people[pos]["Day"] = "<%=data["birthdate"].to_date.day rescue "01"%>";
       if(people[pos]["Day"] == " " ){
         people[pos]["Day"] =  people[pos]["Birthdate"].split('/')[0].replace("??","");
       }

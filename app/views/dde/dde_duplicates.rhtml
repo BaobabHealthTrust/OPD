@@ -15,15 +15,89 @@
   padding: 5px;
 }
 
-.left {
-  width: 60%;
+.middle {
+  width: 55%;
 }
 
 .right {
   text-align: center;
 }
 
+.left {
+  text-align: middle !important;
+  width: 10%;
+}
+
+.checkboxes {
+  transform: scale(3.5);
+  margin-left: 45%;
+}
+
 #nextButton { display: none; }
+
+#newBtn {
+  float: right;
+}
+
+/* .................................... */
+#cover{
+	display: none;
+	position: absolute;
+	background-color: black;
+	width: 100%;
+	height: 102%;
+	left: 0%;
+	top: 0%;
+	z-index: 1000;
+	opacity: 0.5;
+
+}
+/*
+#popup_box {
+	display:none;
+	z-index:1001;
+	left:489px;
+	top:100px;
+	text-align:center;
+	font-size:28;
+	color: #FFFFFF;
+	border: 2px solid #9999FF;
+	border-radius: 15px 15px 15px 15px;
+	height: 154px;
+	padding: 5px;
+	position: absolute;
+	top: 199px;
+	width: 421px;
+	-moz-user-select:none;
+}
+
+#popup_box span{
+	font-size:40px;
+}
+*/
+#confirmPage{
+	background: tomato;
+	border: 1px solid tomato;
+	left: 514.5px;
+	position: absolute;
+	top: 50%;
+	left: 45%;
+	margin-top: -295px;
+	margin-left: -100px;
+	opacity: 0.9999899999999999;
+	KHTMLOpacity: 0;
+	filter: alpha(opacity=0);
+	-moz-opacity: 0;
+	z-index: 1000;
+	-moz-user-select:none;
+	height: 200px;
+	width: 400px;
+
+	text-align:center;
+	font-size: 28px;
+	color: #FFFFFF;
+}
+
 </style>
 
 <script>
@@ -32,21 +106,35 @@ function loadData() {
   t.setAttribute('class','main-table');
 
   <%(@results || []).each do |r|%>
+  <%unless r[:doc_id].blank? %>
+    reassign_link = "/dde/reassign_npid?doc_id=<%= r[:doc_id]%>";
+    checkbox_id = "<%= r[:doc_id]%>";
+  <%else%>
+    reassign_link = "/dde/reassign_local_client_npid?person_id=<%= r[:person_id] %>";
+    checkbox_id = "<%= r[:person_id]%>";
+  <%end%>
+
   var tr = document.createElement('div');
   tr.setAttribute('class','main-table-row');
   t.appendChild(tr);
 
+  /* .................................................. */
   var td = document.createElement('div');
   td.setAttribute('class','main-table-cell left');
+  var checkbox = document.createElement('input');
+  checkbox.setAttribute('type','checkbox');
+  checkbox.setAttribute('class','checkboxes');
+  checkbox.setAttribute('id', checkbox_id);
+  checkbox.setAttribute('onclick', "activateMerge();");
+  td.appendChild(checkbox);
+  tr.appendChild(td);
+  /* .................................................. */
+
+  var td = document.createElement('div');
+  td.setAttribute('class','main-table-cell middle');
   td.innerHTML = "<b>Name:</b> <%= r[:given_name]%> <%= r[:middle_name]%> <%= r[:family_name]%> (<%= r[:gender]%>) <%= r[:birthdate]%>";
   td.innerHTML += "<br /><b>Home district:</b> <%= r[:home_district]%> <b>Home TA:</b> <%= r[:home_ta]%> <b>Home village:</b> <%= r[:home_village]%>";
   tr.appendChild(td);
-
-  <%if r[:person_id].blank? %>
-    reassign_link = "/dde/reassign_npid?doc_id=<%= r[:doc_id]%>";
-  <%else%>
-    reassign_link = "/dde/reassign_local_client_npid?person_id=<%= r[:person_id] %>";
-  <%end%>
 
   var td = document.createElement('div');
   td.setAttribute('class','main-table-cell right');
@@ -68,6 +156,79 @@ function reassignID(link){
   document.location = link;
 }
 
+function activateMerge() {
+  var checkboxes = document.getElementsByClassName('checkboxes');
+  var counter = 0;
+  hideMergeBtn();
+
+  for(var i = 0; i < checkboxes.length; i++){
+    if(checkboxes[i].checked == true) {
+      counter++;
+    }
+  }
+
+  if(counter > 1){
+    displayMergeBtn();
+  }else{
+    hideMergeBtn();
+  }  
+
+}
+
+function displayMergeBtn() {
+  var footer = document.getElementById('buttons');
+  var newbutton = document.createElement('button');
+  newbutton.setAttribute('id', 'newBtn');
+  newbutton.setAttribute('class', 'green');
+  newbutton.setAttribute('onmousedown', 'confirmMerge();');
+  newbutton.innerHTML="<span>Merge selected records</span>";
+  footer.appendChild(newbutton);
+}
+
+function hideMergeBtn(){
+  try {
+    var footer = document.getElementById('buttons');
+    footer.removeChild(document.getElementById('newBtn')); 
+  }catch(e){
+  }
+}
+
+function confirmMerge() {
+  document.getElementById('confirmPage').style.display='inline'
+  document.getElementById('cover').style.display='inline'
+
+	mergeClients();
+}
+
+function mergeClients(){
+  var checkboxes = document.getElementsByClassName('checkboxes');
+  var client_ids = [];
+
+  for(var i = 0; i < checkboxes.length; i++){
+    if(checkboxes[i].checked == true) {
+      client_ids.push(checkboxes[i].id);
+    }
+  }
+	
+	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari  
+		xmlhttp=new XMLHttpRequest();
+	}else{// code for IE6, IE5
+		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	xmlhttp.onreadystatechange=function() {
+		if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+			var results = xmlhttp.responseText;
+			if(results) {
+				//location.reload(); 
+				window.location = '/';
+			}
+		}
+	}
+	xmlhttp.open("POST","/dde/merge_clients?client_ids=" + client_ids, true);
+	xmlhttp.send();
+
+}
+
 </script>
 
 <form action="/dde/dde_duplicate" method="post">
@@ -79,3 +240,26 @@ function reassignID(link){
       :tt_pageStyleClass => "NoControls" } %>
 
 </form>
+
+<div id="cover"></div>
+
+<div id="confirmPage" style="display:none">
+  <p>Merging clients</p>
+  <p>Please wait <span class="blinking">...</span></p>
+</div>
+
+<style>
+.blinking{
+	animation:blinkingText 0.8s infinite;
+	font-size: 38px;
+}
+
+@keyframes blinkingText{
+    0%{     color: white;    }
+    49%{    color: transparent; }
+    50%{    color: transparent; }
+    99%{    color:transparent;  }
+    100%{   color: white;    }
+}
+
+</style>
