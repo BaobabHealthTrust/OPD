@@ -42,9 +42,10 @@ class DdeController < ApplicationController
     local_people = DDEService.create_local_person(dde_results)
 
 		if params[:guardian_present] == "YES"
-			redirect_to "/relationships/search?patient_id=#{local_people.first.id}&return_to=/people/redirections?person_id=#{local_people.first.id}" and return
+			redirect_to "/relationships/search?patient_id=#{local_people.id}&return_to=/people/redirections?person_id=#{local_people.id}" and return
     else
-      print_and_redirect("/patients/national_id_label?patient_id=#{local_people.first.id}", next_task(local_people.first.patient)) and return
+     next_url = "/people/confirm?found_person_id=#{local_people.first.id}" 
+     print_and_redirect("/patients/national_id_label?patient_id=#{local_people.first.id}", next_url) and return
     end
 
   end
@@ -263,10 +264,10 @@ class DdeController < ApplicationController
         :birthdate              =>  person.birthdate.to_date,
         :birth_date             =>  (birthdate_formatted(person.birthdate.to_date, birthdate_estimated) rescue nil),
         :birthdate_estimated    =>  birthdate_estimated,
-        :home_district          =>  addresses.address2,
-        :home_ta                =>  addresses.county_district,
-        :home_village           =>  addresses.neighborhood_cell,
-        :current_residence      =>  addresses.city_village,
+        :home_district          =>  (addresses.address2 rescue nil),
+        :home_ta                =>  (addresses.county_district rescue nil),
+        :home_village           =>  (addresses.neighborhood_cell rescue nil),
+        :current_residence      =>  (addresses.city_village rescue nil),
         :npid                   =>  PatientService.get_patient_identifier(person.patient, "National ID"),
         :doc_id                 =>  PatientService.get_patient_identifier(person.patient, "DDE person document ID"),
         :person_id              =>  person.person_id,
@@ -309,9 +310,9 @@ class DdeController < ApplicationController
   end
 
   def reassign_npid
-    dde_url = DDEService.dde_settings['dde_address'] + "/v1/assign_npid"
+    dde_url = DDEService.dde_settings['dde_address'] + "/v1/reassign_npid"
     search_params = {:doc_id => params[:doc_id]} 
-
+    
     output = RestClient::Request.execute( { :method => :post, :url => dde_url,
         :payload => search_params, :headers => {:Authorization => session[:dde_token]} } )
     result  = JSON.parse(output)
@@ -1011,13 +1012,14 @@ class DdeController < ApplicationController
 		message = local_client_to_dde(params[:person_id])
 		
 		unless message.blank? 
-			redirect_to :controller => "dde", 
-				:action => "edit_demographics", 
-          :patient_id =>params[:person_id], :message => message  and return
+      if message.match(/Search by name and update patient address info/i)
+			  redirect_to :controller => "dde", 
+				  :action => "edit_demographics", 
+            :patient_id =>params[:person_id], :message => message  and return
+      end rescue nil
 		end
     
-    next_url = "/people/confirm?found_person_id=#{params[:person_id]}"
-    print_and_redirect("/patients/national_id_label?patient_id=#{params[:person_id]}", next_url) and return
+    print_and_redirect("/patients/national_id_label?patient_id=#{params[:person_id]}", "/") and return
   end
 
   def merge_clients

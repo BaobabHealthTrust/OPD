@@ -291,7 +291,10 @@
 		var nextbtn = document.getElementById("nextButton");
 		nextbtn.setAttribute("onmousedown","showMessage('Select client to continue');");
 		nextbtn.setAttribute("class","button navButton blue");
-		
+	  
+    var frame = document.getElementById("inputFrame" + tstCurrentPage);
+    frame.setAttribute('style',"height: 87%;");
+	
 		addButton();
 	}
 	
