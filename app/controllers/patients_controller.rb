@@ -1,4 +1,8 @@
 class PatientsController < GenericPatientsController
+  def simple_complaints
+    @idsr_complaints = JSON.parse(File.read("#{Rails.root.to_s}/public/json/idsr_complaints.json"))
+    render :layout => "menu"
+  end
 
 	def tab_social_history
 		@alcohol = nil
@@ -49,7 +53,7 @@ class PatientsController < GenericPatientsController
 		@programs = @patient.patient_programs.all
 		@alerts = alerts(@patient, session_date) rescue nil
     @use_col_interface = CoreService.get_global_property_value("use.column.interface").to_s
-
+    @point_of_care = CoreService.get_global_property_value("point_of_care").to_s
 		if !session[:location].blank?
 			session["category"] = (session[:location] == "Paeds A and E" ? "paeds" : "adults")
 		end

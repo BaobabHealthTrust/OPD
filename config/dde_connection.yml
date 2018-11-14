@@ -1,7 +1,10 @@
-program: &default
-  program_id: 14
-  name: OPD Program
-  dde_protocol: http
+default: &default
+  application_name: opd
+  dde_server: 192.168.100.205:80
+  dde_username: admin
+  dde_password: password
+  site_code: LIK
+  secure_connection: false
 
 development:
   <<: *default

@@ -79,7 +79,7 @@ function generateGenerics(patient_id){
     var parent_container = document.createElement("div");
     parent_container.id = "parent_container";
     parent_container.style.position = "absolute";
-    parent_container.style.marginLeft = "0px";
+    parent_container.style.marginLeft = "-500px";
     parent_container.style.marginTop = "-358px";
     parent_container.style.top = "50%";
     parent_container.style.left = "50%";
@@ -131,7 +131,7 @@ function generateGenerics(patient_id){
     var inputTxt = document.createElement("input");
     inputTxt.type = "text";
     inputTxt.id = "inputTxt";
-    inputTxt.style.width = "154%";
+    inputTxt.style.width = "100%";
     inputTxt.style.fontSize = "1.8em";
     inputTxt.style.padding = "5px";
     inputTxt.style.backgroundColor = "#eee";
@@ -140,7 +140,6 @@ function generateGenerics(patient_id){
     mainDiv.appendChild(inputTxt);
 
     var detailsDiv = document.createElement("div");
-    detailsDiv.id = "detailsDiv";
     detailsDiv.style.width = "100%";
     detailsDiv.style.height = "84%";
     detailsDiv.style.marginLeft = "4px";
