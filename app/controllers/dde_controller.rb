@@ -513,8 +513,10 @@ class DdeController < ApplicationController
             dde_app_user.update_attributes(:port => params[:dde_port], 
               :ipaddress => params[:dde_address], 
               :creator => User.current.id)
-
-            global_property_dde_status = GlobalProperty.find_by_property('dde.status')
+	    
+	    global_property_dde_status = GlobalProperty.find_by_property('dde.status')
+            global_property_dde_status = GlobalProperty.new if global_property_dde_status.blank?
+            global_property_dde_status.property = 'dde.status'
             global_property_dde_status.property_value = dde_status
             global_property_dde_status.save
 
